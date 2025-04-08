@@ -18,13 +18,17 @@ int MT[6];
 
 
 extern int socket_kernel_memoria;
-extern char* archivo_config;
+
+//CONFIG
 extern char* ip_memoria;
 extern char* algoritmo_planificacion;
 extern int puerto_memoria;
 extern int tiempo_suspension;
 extern char* log_level;
 extern t_log* logger_kernel;
-extern t_config* config_kernel;
+extern int puerto_escucha_dispatch;
+extern int puerto_escucha_interrupt;
+extern int puerto_escucha_IO;
+
 
 #endif
