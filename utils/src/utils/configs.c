@@ -12,12 +12,12 @@ t_config* iniciar_config(char* archivo_config)
 	return nuevo_config;
 }
 
-t_log* iniciar_logger(char* nombre_logger, char* nombre_proceso)
+t_log* iniciar_logger(char* pathLogger, char* nombreLogger,t_log_level logLevel)
 {
 	t_log* nuevo_logger;
-    nuevo_logger = log_create(nombre_logger, nombre_proceso, 1, LOG_LEVEL_INFO);
+    nuevo_logger = log_create(pathLogger, nombreLogger, 1,logLevel);
 	
-    log_info(nuevo_logger, "%s iniciado", nombre_proceso);
+    log_info(nuevo_logger, "%s iniciado", nombreLogger);
     
     if(nuevo_logger == NULL)
     {

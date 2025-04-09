@@ -14,7 +14,7 @@
 
 t_config* iniciar_config(char* archivo_config);
 
-t_log *iniciar_logger(char *nombreDelModulo, char* nombre_proceso);
+t_log *iniciar_logger(char* pathLogger, char* nombreLogger,t_log_level logLevel);
 
 
 #endif

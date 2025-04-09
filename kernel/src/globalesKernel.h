@@ -13,22 +13,37 @@ int PID;
 int PC;
 int ME[6];
 int MT[6];
+char* archivoPseudocodigo;
+unsigned int tam;
+} PCB;
 
-}PCB ;
+typedef enum{
+    NEW,
+    READY,
+    BLOCKED,
+    SUSPENDIDO_BLOCKED,
+    SUSPENDIDO,
+    EXECUTE,
+    EXIT
+} ESTADO;
 
 
 extern int socket_kernel_memoria;
 
-//CONFIG
+//CONFIG Y LOGGER
 extern char* ip_memoria;
 extern char* algoritmo_planificacion;
 extern int puerto_memoria;
 extern int tiempo_suspension;
-extern char* log_level;
+extern t_log_level log_level;
 extern t_log* logger_kernel;
 extern int puerto_escucha_dispatch;
 extern int puerto_escucha_interrupt;
 extern int puerto_escucha_IO;
+
+//PROCESOS
+
+
 
 
 #endif

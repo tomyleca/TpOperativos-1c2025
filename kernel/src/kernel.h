@@ -10,7 +10,8 @@
 #include "globalesKernel.h" 
 #include "../../utils/src/utils/configs.h"
 
-void leer_config_kernel(t_config* config_kernel);
+void leerConfigKernel(t_config* config_kernel);
+
 
 
 
