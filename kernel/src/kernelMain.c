@@ -8,7 +8,13 @@ int main(int argc, char* argv[]) {
     leerConfigKernel(config_kernel);
     
     //INICIO LOGGER
-    logger_kernel=iniciar_logger("kernelLogger","kernelLogger",log_level);
+    logger_kernel=iniciar_logger("kernelLogger.log","kernelLogger",log_level);
+
+    //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
+    crearEstructuras();
+
+    INIT_PROC("afsfas",4);
+
 
 
     return 0;
@@ -22,6 +28,8 @@ void leerConfigKernel(t_config* config_kernel) {
     puerto_escucha_interrupt = config_get_int_value(config_kernel, "PUERTO_ESCUCHA_INTERRUPT");
     puerto_escucha_IO = config_get_int_value(config_kernel, "PUERTO_ESCUCHA_IO");
     algoritmo_planificacion = config_get_string_value(config_kernel, "ALGORITMO_PLANIFICACION");
+    algoritmo_cola_new = config_get_string_value(config_kernel, "ALGORITMO_COLA_NEW");
+    alfa = config_get_int_value(config_kernel, "ALFA");
     tiempo_suspension = config_get_int_value(config_kernel, "TIEMPO_SUSPENSION");
     log_level = log_level_from_string(config_get_string_value(config_kernel, "LOG_LEVEL"));
     
@@ -29,3 +37,37 @@ void leerConfigKernel(t_config* config_kernel) {
 }
 
 
+void crearEstructuras()
+{
+ 
+    
+    
+    listaProcesosNew = list_create();
+    listaProcesosReady = list_create();
+
+    iniciarSemaforosKernel();
+}
+
+void setearAlgoritmosDePlanificacion(){
+    
+    if(strcmp(algoritmo_cola_new,"FIFO")==0)
+        algoritmoColaNewEnFIFO=true;
+    else if(strcmp(algoritmo_cola_new,"PCMP")==0)
+        algoritmoColaNewEnFIFO=false;
+    else
+        log_error(logger_kernel,"ALGORITMO DE PLANIFICACION DESCONOCIDO");
+    
+
+    
+    
+    if(strcmp(algoritmo_planificacion,"FIFO")==0)
+        algoritmoDePlanificacionInt=FIFO;
+    else if(strcmp(algoritmo_planificacion,"SJF")==0)
+        algoritmoDePlanificacionInt=SJF;
+    else if(strcmp(algoritmo_planificacion,"SRT")==0)
+        algoritmoDePlanificacionInt=SRT;
+    else
+        log_error(logger_kernel,"ALGORITMO DE PLANIFICACION DESCONOCIDO");
+       
+
+}
