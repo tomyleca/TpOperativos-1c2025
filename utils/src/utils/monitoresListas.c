@@ -40,3 +40,9 @@ void agregarAListaOrdenada(sem_t* semaforo,t_list* lista,void* elemento,bool (*f
     sem_post(semaforo);
 }
 
+
+void ordenarLista(sem_t* semaforo,t_list* lista,bool (*funcionParaComparar) (void*,void*)){
+    sem_wait(semaforo);
+    list_sort(lista,funcionParaComparar);
+    sem_post(semaforo);
+}

@@ -8,7 +8,9 @@
 #include<commons/string.h>
 #include<commons/config.h>
 #include<readline/readline.h>
+#include <commons/temporal.h>
 #include "../../utils/src/utils/monitoresListas.h"
+
 
 
 typedef struct {
@@ -18,6 +20,11 @@ int ME[6];
 int MT[6];
 char* archivoPseudocodigo;
 uint32_t tam;
+
+int64_t estimadoRafagaAnterior; 
+int64_t duracionRafagaAnterior;
+int64_t estimadoRafagaActual;
+
 } PCB;
 
 typedef enum{
@@ -56,8 +63,12 @@ extern t_log* logger_kernel;
 
 //PROCESOS
 extern void INIT_PROC(char* archivoPseudocodigo,unsigned int tam);
-void inicializarProceso();
-bool menorTam(PCB* PCB1,PCB* PCB2);
+extern void inicializarProceso();
+
+extern bool menorTam(PCB* PCB1,PCB* PCB2);
+extern bool menorEstimadoRafagaActual(PCB* PCB1,PCB* PCB2);
+
+extern void estimarRafagaActual(PCB* proceso);
 
 extern uint32_t pidDisponible;
 

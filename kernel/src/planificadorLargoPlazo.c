@@ -19,6 +19,10 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
 
     nuevoProceso->ME[NEW]++;
 
+    nuevoProceso->estimadoRafagaAnterior=0;
+    nuevoProceso->duracionRafagaAnterior=0;
+    nuevoProceso->estimadoRafagaActual=0;
+   
     if(algoritmoColaNewEnFIFO)
         agregarALista(semaforoListaNew,listaProcesosNew,nuevoProceso);
     else
@@ -38,6 +42,8 @@ void inicializarProceso(){
     //TODO
     //LE PREGUNTO A MEMORIA
     agregarALista(semaforoListaReady,listaProcesosReady,procesoAInicializar);
+    procesoAInicializar->ME[READY]++;
+   
     
 
 
@@ -45,5 +51,5 @@ void inicializarProceso(){
 
 bool menorTam(PCB* PCB1,PCB* PCB2)
 {
-    return PCB1->tam < PCB2->tam;
+    return PCB1->tam <= PCB2->tam;
 }

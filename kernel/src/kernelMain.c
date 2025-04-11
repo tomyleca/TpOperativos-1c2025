@@ -39,20 +39,21 @@ void leerConfigKernel(t_config* config_kernel) {
 
 void crearEstructuras()
 {
- 
-    
-    
+    setearAlgoritmosDePlanificacion();
+
     listaProcesosNew = list_create();
     listaProcesosReady = list_create();
 
     iniciarSemaforosKernel();
+
+    
 }
 
 void setearAlgoritmosDePlanificacion(){
     
     if(strcmp(algoritmo_cola_new,"FIFO")==0)
         algoritmoColaNewEnFIFO=true;
-    else if(strcmp(algoritmo_cola_new,"PCMP")==0)
+    else if(strcmp(algoritmo_cola_new,"PMCP")==0)
         algoritmoColaNewEnFIFO=false;
     else
         log_error(logger_kernel,"ALGORITMO DE PLANIFICACION DESCONOCIDO");
