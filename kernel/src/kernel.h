@@ -9,6 +9,7 @@
 #include<readline/readline.h>
 #include "globalesKernel.h" 
 #include "../../utils/src/utils/configs.h"
+#include "../../utils/src/utils/shared.h"
 
 void leerConfigKernel(t_config* config_kernel);
 

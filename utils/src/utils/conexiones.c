@@ -1,7 +1,10 @@
 #include "conexiones.h"
 
 //-----------------------------------------------CLIENTE----------------------------------------------
-int crear_conexion(t_log* server_name, char* ip, char* puerto) {
+int crear_conexion(t_log* server_name, char* ip, int puerto) {
+
+    char puerto_str[10];
+    sprintf(puerto_str, "%d", puerto);
 
     struct addrinfo hints, *servinfo;
 
@@ -13,7 +16,7 @@ int crear_conexion(t_log* server_name, char* ip, char* puerto) {
 
 
     // Recibe addrinfo
-    getaddrinfo(ip, puerto, &hints, &servinfo);
+    getaddrinfo(ip, puerto_str, &hints, &servinfo);
 
     // Crea un socket con la informacion recibida (del primero, suficiente)
     int socket_cliente = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
@@ -60,9 +63,10 @@ void generar_handshake(int socket, char *server_name, char *ip, char *puerto) {
 
 }
 //----------------------------------------SERVIDOR------------------------------------------------------------------
-int iniciar_servidor(t_log* logger, char *puerto)
+int iniciar_servidor(t_log* logger, int puerto)
 {
-	// Quitar esta línea cuando hayamos terminado de implementar la funcion
+    char puerto_str[10];
+    sprintf(puerto_str, "%d", puerto);
 
 	int fd_servidor;
     struct addrinfo hints, *servinfo;
@@ -73,7 +77,7 @@ int iniciar_servidor(t_log* logger, char *puerto)
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
 
-	fd_servidor = getaddrinfo(NULL, puerto, &hints, &servinfo);
+	fd_servidor = getaddrinfo(NULL, puerto_str, &hints, &servinfo);
 	fd_servidor = socket(servinfo->ai_family,
                         	servinfo->ai_socktype,
                         	servinfo->ai_protocol);
