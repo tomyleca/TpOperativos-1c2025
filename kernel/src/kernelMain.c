@@ -28,4 +28,3 @@ void leerConfigKernel(t_config* config_kernel) {
 
 }
 
-

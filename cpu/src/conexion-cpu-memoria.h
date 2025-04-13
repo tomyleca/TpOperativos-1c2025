@@ -1,5 +1,5 @@
-#ifndef CPU_H_
-#define CPU_H_
+#ifndef CONEXION_CPU_MEMORIA_H_
+#define CONEXION_CPU_MEMORIA_H_
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -8,13 +8,10 @@
 #include<commons/config.h>
 #include<readline/readline.h>
 #include "utils/shared.h"
+#include "instruccion.h"
 
-int socket_cpu_memoria;
-char* ip;
-char* puerto;
-char* valor;
 
-t_log* logger_cpu;
-t_config* config_cpu;
+
+void atender_memoria();
 
 #endif
