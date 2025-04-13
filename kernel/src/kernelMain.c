@@ -43,6 +43,10 @@ void crearEstructuras()
 
     listaProcesosNew = list_create();
     listaProcesosReady = list_create();
+    listaProcesosBlocked = list_create();
+
+    diccionarioProcesosSwapBloqueados = dictionary_create();
+    diccionarioIODeProcesosBloqueados = dictionary_create();
 
     iniciarSemaforosKernel();
 
@@ -70,5 +74,30 @@ void setearAlgoritmosDePlanificacion(){
     else
         log_error(logger_kernel,"ALGORITMO DE PLANIFICACION DESCONOCIDO");
        
+
+}
+
+void iniciarSemaforosKernel()
+{
+    semaforoListaNew= malloc(sizeof(sem_t));
+    semaforoListaReady = malloc(sizeof(sem_t));
+    semaforoListaBlocked = malloc(sizeof(sem_t));
+    semaforoListaSwapBlocked = malloc(sizeof(sem_t));
+    semaforoListaSwapReady = malloc(sizeof(sem_t));
+
+    semaforoDiccionarioIOBlocked = malloc(sizeof(sem_t));
+    semaforoDiccionarioBlocked = malloc(sizeof(sem_t));
+    semaforoDiccionarioBlockedSwap = malloc(sizeof(sem_t));
+
+
+    sem_init(semaforoListaNew,1,1);
+    sem_init(semaforoListaReady,1,1);
+    sem_init(semaforoListaSwapReady,1,1);
+
+    sem_init(semaforoDiccionarioIOBlocked,1,1); 
+    sem_init(semaforoDiccionarioBlocked,1,1); 
+    sem_init(semaforoDiccionarioBlockedSwap,1,1); 
+
+
 
 }

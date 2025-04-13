@@ -6,6 +6,9 @@
 
 extern sem_t* semaforoListaNew;
 extern sem_t* semaforoListaReady;
+extern sem_t* semaforoListaBlocked;
+
+
 
 extern void iniciarSemaforosKernel();
 

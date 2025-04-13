@@ -9,8 +9,10 @@
 #include<commons/config.h>
 #include<readline/readline.h>
 #include <commons/temporal.h>
+#include <pthread.h>
+#include <commons/collections/dictionary.h>
 #include "../../utils/src/utils/monitoresListas.h"
-
+#include "../../utils/src/utils/monitoresDiccionarios.h"
 
 
 typedef struct {
@@ -70,10 +72,27 @@ extern bool menorEstimadoRafagaActual(PCB* PCB1,PCB* PCB2);
 
 extern void estimarRafagaActual(PCB* proceso);
 
+extern void pasarAReady(PCB* proceso);
+extern void pasarABLoqueadoEIniciarContador(PCB* proceso);
+extern void pasarASwapBlocked(PCB* proceso);
+ 
+
+
+
+extern bool IOTerminado(char* PIDComoChar);
+
+
+extern t_dictionary* diccionarioProcesosSwapBloqueados;
+/**
+*@brief Un diccionario que asocia un pid de un proceso bloqueado al estado de la IO que solicito, si la IO no se completo el valor esta en 0, en cambio si se completo esta en 1;
+*/
+extern t_dictionary* diccionarioIODeProcesosBloqueados;
+
 extern uint32_t pidDisponible;
 
 extern t_list* listaProcesosNew;
 extern t_list* listaProcesosReady;
+extern t_list* listaProcesosBlocked;
 
 
 extern int algoritmoDePlanificacionInt;

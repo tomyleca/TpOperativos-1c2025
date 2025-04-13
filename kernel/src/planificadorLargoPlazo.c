@@ -41,9 +41,7 @@ void inicializarProceso(){
     
     //TODO
     //LE PREGUNTO A MEMORIA
-    agregarALista(semaforoListaReady,listaProcesosReady,procesoAInicializar);
-    procesoAInicializar->ME[READY]++;
-   
+    pasarAReady(procesoAInicializar);
     
 
 
@@ -52,4 +50,9 @@ void inicializarProceso(){
 bool menorTam(PCB* PCB1,PCB* PCB2)
 {
     return PCB1->tam <= PCB2->tam;
+}
+
+void pasarAReady(PCB* proceso){
+    agregarALista(semaforoListaReady,listaProcesosReady,proceso);
+    proceso->ME[READY]++;
 }

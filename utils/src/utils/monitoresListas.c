@@ -2,21 +2,10 @@
 
 sem_t* semaforoListaNew;
 sem_t* semaforoListaReady;
-
-
-void iniciarSemaforosKernel()
-{
-    semaforoListaNew= malloc(sizeof(sem_t));
-    semaforoListaReady = malloc(sizeof(sem_t));
-  
-
-
-   sem_init(semaforoListaNew,1,1);
-   sem_init(semaforoListaReady,1,1);
+sem_t* semaforoListaSwapReady;
 
 
 
-}
 
 void agregarALista(sem_t* semaforo,t_list* lista,void* elemento)
 {
@@ -28,7 +17,8 @@ void agregarALista(sem_t* semaforo,t_list* lista,void* elemento)
 void* sacarDeLista(sem_t* semaforo,t_list* lista,unsigned int posicion)
 {
     sem_wait(semaforo);
-    void* elem = list_remove(lista,posicion);
+    if(!list_is_empty(lista))
+        void* elem = list_remove(lista,posicion);
     sem_post(semaforo);
 
     return elem;
