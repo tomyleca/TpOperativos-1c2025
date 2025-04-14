@@ -43,9 +43,9 @@ void crearEstructuras()
 
     listaProcesosNew = list_create();
     listaProcesosReady = list_create();
-    listaProcesosBlocked = list_create();
+    listaProcesosSwapReady = list_create();
 
-    diccionarioProcesosSwapBloqueados = dictionary_create();
+    
     diccionarioIODeProcesosBloqueados = dictionary_create();
 
     iniciarSemaforosKernel();
@@ -81,13 +81,13 @@ void iniciarSemaforosKernel()
 {
     semaforoListaNew= malloc(sizeof(sem_t));
     semaforoListaReady = malloc(sizeof(sem_t));
+    semaforoListaSwapReady = malloc(sizeof(sem_t));
     
    
 
 
     semaforoDiccionarioIOBlocked = malloc(sizeof(sem_t));
-    semaforoDiccionarioBlocked = malloc(sizeof(sem_t));
-    semaforoDiccionarioBlockedSwap = malloc(sizeof(sem_t));
+    
 
 
     sem_init(semaforoListaNew,1,1);
@@ -97,6 +97,7 @@ void iniciarSemaforosKernel()
     sem_init(semaforoDiccionarioIOBlocked,1,1); 
     sem_init(semaforoDiccionarioBlocked,1,1); 
     sem_init(semaforoDiccionarioBlockedSwap,1,1); 
+    sem_init(semaforoListaSwapReady,1,1);
 
 
 

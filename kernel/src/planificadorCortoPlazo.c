@@ -35,6 +35,8 @@ void planificadorCortoPlazo()
     procesoDespuesDeEjecucion->duracionRafagaAnterior=tiempoEnEjecucion;
     procesoDespuesDeEjecucion->estimadoRafagaAnterior=procesoDespuesDeEjecucion->estimadoRafagaActual;
     estimarRafagaActual(procesoDespuesDeEjecucion);
+
+    free(cronometroTiempoEnEjecucion);
     
     }
 }

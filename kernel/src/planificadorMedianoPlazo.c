@@ -36,11 +36,13 @@ void contadorParaSwap(PCB* proceso){
             //Creo que no hace falta proceso = sacarDeDiccionario(semaforoDiccionarioBlocked,PIDComoChar);
             
             pasarAReady(proceso);
+            
             break;
         }
     }
 
     temporal_destroy(contadorEsperaSwap);
+    free(PIDComoChar);
 }
 
 bool IOTerminado(char* PIDComoChar){
@@ -58,6 +60,8 @@ void pasarASwapBlocked(PCB* proceso,char* PIDComoChar)
     //Este while se podría mejorar con un semaforo, pero tendría que cambiar la forma en la que los dispositivos IO le avisan a los procesos que ya terminaron. Enrealidad tendría que tener dos implementaciones de la misma.
     while(!IOTerminado(PIDComoChar));
 
+    pasarASwapReady(proceso);
+
     //Aca lo agrego a la cola de new con mas prioridad
 }
 
@@ -67,4 +71,9 @@ char* pasarUnsignedAChar(uint32_t unsigned_)
     char* buffer=malloc(sizeof(12));
     snprintf(buffer,12,"%u",unsigned_);
     return buffer;
+}
+
+void pasarASwapReady(PCB* proceso)
+{
+    agregarALista(semaforoListaSwapReady,listaProcesosSwapReady,proceso);
 }

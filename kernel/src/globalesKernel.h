@@ -82,6 +82,14 @@ extern void pasarABLoqueadoEIniciarContador(PCB* proceso);
 extern void contadorParaSwap(PCB* proceso);
 extern bool IOTerminado(char* PIDComoChar);
 extern void pasarASwapBlocked(PCB* proceso, char* PIDComoChar);
+extern void pasarASwapReady(PCB* proceso);
+
+//Semaforos
+
+extern sem_t* semaforoListaNew;
+extern sem_t* semaforoListaReady;
+extern sem_t* semaforoListaBlocked;
+extern sem_t* semaforoListaSwapReady;
 
 //OTRAS
 extern char* pasarUnsignedAChar(uint32_t unsigned_);
@@ -102,7 +110,7 @@ extern uint32_t pidDisponible;
 
 extern t_list* listaProcesosNew;
 extern t_list* listaProcesosReady;
-extern t_list* listaProcesosBlocked;
+extern t_list* listaProcesosSwapReady;
 
 
 extern int algoritmoDePlanificacionInt;

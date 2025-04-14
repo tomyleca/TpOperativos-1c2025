@@ -19,7 +19,7 @@ t_log* logger_kernel;
 //PROCESOS
 t_list* listaProcesosNew;
 t_list* listaProcesosReady;
-t_list* listaProcesosBlocked;
+t_list* listaProcesosSwapReady;
 
 t_dictionary* diccionarioIODeProcesosBloqueados;
 t_dictionary* diccionarioProcesosSwapBloqueados;
