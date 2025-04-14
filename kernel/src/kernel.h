@@ -13,6 +13,9 @@
 #include "utils/conexiones.h"
 
 void leerConfigKernel(t_config* config_kernel);
+void crearEstructuras();
+void setearAlgoritmosDePlanificacion();
+
 
 
 
