@@ -8,14 +8,17 @@
 #include<commons/config.h>
 #include<readline/readline.h>
 #include "utils/shared.h"
-#include "utils/config.h"
+#include "utils/configs.h"
 
 int socket_io_kernel;
-char* ip;
-char* puerto;
+char* ip_kernel;
+int puerto_kernel;
 char* valor;
 
 t_log* logger_io;
 t_config* config_io;
+t_log_level log_level;
+
+void leerConfigIO(t_config* config_io);
 
 #endif
