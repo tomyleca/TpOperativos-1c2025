@@ -97,6 +97,11 @@ extern sem_t* semaforoListaReady;
 extern sem_t* semaforoListaBlocked;
 extern sem_t* semaforoListaSwapReady;
 
+//CONEXIONES
+extern void iniciarConexiones();
+extern void cerrarConexiones();
+
+
 //OTRAS
 extern char* pasarUnsignedAChar(uint32_t unsigned_);
  
