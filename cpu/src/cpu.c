@@ -4,33 +4,26 @@ int main(int argc, char* argv[]) {
     saludar("cpu");
 
     //INICIO Y LEO CONFIG
-    t_config* config_cpu = iniciar_config("cpu.config");
+    config_cpu = iniciar_config("cpu.config");
     leerConfigCpu(config_cpu);
     
     //INICIO LOGGER
     logger_cpu = iniciar_logger("cpuLogger.log","cpuLogger",log_level);
 
-    //INICIO CONEXION CON KERNEL
-    int socket_cpu_kernel_dispatch = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_dispatch);
+    //SERVIDOR CON KERNEL
+    fd_cpu_kernel_dispatch = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_dispatch);
 
-    if(socket_cpu_kernel_dispatch == -1) {
-        log_error(logger_cpu, "No se pudo conectar con Kernel en DISPATCH");
-        exit(1);
-    }
-    log_info(logger_cpu, "Conexión establecida con el Kernel en DISPATCH");
+    fd_cpu_kernel_interrupt = crear_conexion(logger_cpu,ip_kernel, puerto_kernel_interrupt);    //DSP LOS CAMBIO POR PTHREADS, los hice a parte 
+    
+    // INICIO CONEXION CON MEMORIA 
+    socket_cpu_memoria = crear_conexion(logger_cpu, ip_memoria, puerto_memoria);
 
-    int socket_cpu_kernel_interrupt = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_interrupt);
-
-    if(socket_cpu_kernel_interrupt == -1) {
-        log_error(logger_cpu, "No se pudo conectar con Kernel en INTERRUPT");
-        exit(1);
-    }
-    log_info(logger_cpu, "Conexión establecida con el Kernel en INTERRUPT");
 
     //CIERRO
-    log_info(logger_cpu, "cerrando conexión");
+    log_info(logger_cpu, "Cerrando conexión");
     liberar_conexion(socket_cpu_kernel_dispatch);
     liberar_conexion(socket_cpu_kernel_interrupt);
+    liberar_conexion(socket_cpu_memoria);
 
     return 0;
 }

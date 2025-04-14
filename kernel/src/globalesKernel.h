@@ -29,6 +29,12 @@ typedef enum{
 
 
 extern int socket_kernel_memoria;
+extern int socket_kernel_io;
+extern int cliente_kernel;
+extern int socket_kernel_cpu_dispatch;
+extern int socket_kernel_cpu_interrupt;
+extern int cliente_kernel_dispatch;
+extern int cliente_kernel_interrupt;
 
 //CONFIG Y LOGGER
 extern char* ip_memoria;

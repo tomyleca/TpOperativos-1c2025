@@ -12,16 +12,10 @@ int main(int argc, char* argv[]) {
     /****************CONEXION KERNEL CON IO*********************/
 
     //INICIO SERVIDOR KERNEL-IO
-    int socket_kernel_io = iniciar_servidor(logger_kernel, puerto_escucha_IO); 
-
-    if(socket_kernel_io == -1) {
-        log_error(logger_kernel, "Error al iniciar el servidor para IO");
-        exit(1);
-    }
-
+    socket_kernel_io = iniciar_servidor(logger_kernel, puerto_escucha_IO);
     log_info(logger_kernel, "Servidor  iniciado para IO");
-
-    int cliente_kernel = esperar_cliente(socket_kernel_io);
+    
+    cliente_kernel = esperar_cliente(socket_kernel_io);
     log_info(logger_kernel, "Se conectó IO");
 
     //CIERRO
@@ -33,33 +27,29 @@ int main(int argc, char* argv[]) {
 
     //INICIO SERVIDOR KERNEL-CPU
 
-    int socket_kernel_cpu_dispatch = iniciar_servidor(logger_kernel, puerto_escucha_dispatch); 
-
-    if(socket_kernel_cpu_dispatch == -1) {
-        log_error(logger_kernel, "Error al iniciar el servidor DISPATCH");
-        exit(1);
-    }
+    socket_kernel_cpu_dispatch = iniciar_servidor(logger_kernel, puerto_escucha_dispatch); 
     log_info(logger_kernel, "Servidor DISPATCH iniciado");
 
-    int socket_kernel_cpu_interrupt = iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
-
-    if(socket_kernel_cpu_interrupt == -1) {
-        log_error(logger_kernel, "Error al iniciar el servidor INTERRUPT");
-        exit(1);
-    }
+    socket_kernel_cpu_interrupt = iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
     log_info(logger_kernel, "Servidor INTERRUPT iniciado");
+    
+    cliente_kernel_dispatch = esperar_cliente(socket_kernel_cpu_dispatch);
+    
+    cliente_kernel_interrupt = esperar_cliente(socket_kernel_cpu_interrupt);
 
-    int cliente_kernel_dispatch = esperar_cliente(socket_kernel_cpu_dispatch);
-    log_info(logger_kernel, "Se conectó cpu a dispatch");
 
-    int cliente_kernel_interrupt = esperar_cliente(socket_kernel_cpu_interrupt);
-    log_info(logger_kernel, "Se conectó cpu a interrupt");
+     /****************CONEXION KERNEL CON MEMORIA*********************/
+
+    socket_kernel_memoria = crear_conexion(logger_kernel,ip_memoria,puerto_memoria);
+
+
 
     //CIERRO
     log_info(logger_kernel, "Finalizando conexión");
     liberar_conexion(socket_kernel_cpu_dispatch);
     liberar_conexion(socket_kernel_cpu_interrupt);
-
+    liberar_conexion(socket_kernel_io);
+    liberar_conexion(socket_kernel_memoria);
     return 0;
 }
 

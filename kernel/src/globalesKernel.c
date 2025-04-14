@@ -1,6 +1,12 @@
 #include "globalesKernel.h"
 
 //CONFIG Y LOGGER
+int socket_kernel_io;
+int cliente_kernel;
+int socket_kernel_cpu_dispatch;
+int socket_kernel_cpu_interrupt;
+int cliente_kernel_dispatch;
+int cliente_kernel_interrupt;
 int socket_kernel_memoria;
 char* ip_memoria;
 char* algoritmo_planificacion;

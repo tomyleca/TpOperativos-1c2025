@@ -1,6 +1,6 @@
 #include "conexion-cpu-memoria.h"
 
-void atender_memoria()
+/*void atender_memoria()
 { 
     t_buffer* buffer;
     int cod_op;
@@ -61,7 +61,7 @@ void atender_memoria()
                 break;
         }
     }
-}
+}*/
 
 
 

@@ -9,7 +9,7 @@
 #include<readline/readline.h>
 #include "utils/shared.h"
 #include "instruccion.h"
-
+#include "GlobalesCPU.h"
 
 
 void atender_memoria();

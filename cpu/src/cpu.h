@@ -7,28 +7,12 @@
 #include<commons/string.h>
 #include<commons/config.h>
 #include<readline/readline.h>
-#include "../../utils/src/utils/configs.h"
-#include "../../utils/src/utils/shared.h"
+#include "utils/configs.h"
+#include "utils/shared.h"
+#include "utils/conexiones.h"
+#include "GlobalesCPU.h"
 
-int socket_cpu_memoria;
-char* ip;
-char* puerto;
-char* valor;
-
-t_log* logger_cpu;
-t_config* config_cpu;
-
-char* ip_memoria;
-int puerto_memoria;
-char* ip_kernel;
-int puerto_kernel_dispatch;
-int puerto_kernel_interrupt;
-int entradas_tlb;
-char* reemplazo_tlb;
-int entradas_cache;
-char* reemplazo_cache;
-int retardo_cache;
-t_log_level log_level;
+void leerConfigCpu(t_config* config_cpu);
 
 
 #endif

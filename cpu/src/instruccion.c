@@ -1,6 +1,6 @@
 #include "instruccion.h"
 
-void instruccion_escribir_memoria(char** parte)
+/*void instruccion_escribir_memoria(char** parte)
 {  
     // WRITE_MEM (Registro Dirección, Registro Datos): 
     // Lee el valor del Registro Datos y lo escribe en la dirección física de memoria obtenida a partir de la Dirección Lógica almacenada en el Registro Dirección
@@ -341,4 +341,4 @@ int obtener_valor_registro_segun_nombre(char* nombre_registro)
         return contexto->registros.LIMITE;
     } 
     return -1;
-}
+}*/

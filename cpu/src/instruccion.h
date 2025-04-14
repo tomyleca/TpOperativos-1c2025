@@ -8,6 +8,7 @@
 #include<commons/config.h>
 #include<readline/readline.h>
 #include "utils/shared.h"
+#include "GlobalesCPU.h"
 
 typedef enum
 {
