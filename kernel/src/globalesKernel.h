@@ -63,23 +63,33 @@ extern bool algoritmoColaNewEnFIFO;
 extern t_log_level log_level;
 extern t_log* logger_kernel;
 
+
 //PROCESOS
+
 extern void INIT_PROC(char* archivoPseudocodigo,unsigned int tam);
 extern void inicializarProceso();
 
+//Ordenar listas
 extern bool menorTam(PCB* PCB1,PCB* PCB2);
 extern bool menorEstimadoRafagaActual(PCB* PCB1,PCB* PCB2);
 
+//Planificador
 extern void estimarRafagaActual(PCB* proceso);
 
+//Cambiar de estado
 extern void pasarAReady(PCB* proceso);
 extern void pasarABLoqueadoEIniciarContador(PCB* proceso);
-extern void pasarASwapBlocked(PCB* proceso);
+extern void contadorParaSwap(PCB* proceso);
+extern bool IOTerminado(char* PIDComoChar);
+extern void pasarASwapBlocked(PCB* proceso, char* PIDComoChar);
+
+//OTRAS
+extern char* pasarUnsignedAChar(uint32_t unsigned_);
  
 
 
 
-extern bool IOTerminado(char* PIDComoChar);
+
 
 
 extern t_dictionary* diccionarioProcesosSwapBloqueados;

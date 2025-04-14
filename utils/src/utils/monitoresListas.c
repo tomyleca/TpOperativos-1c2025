@@ -16,9 +16,10 @@ void agregarALista(sem_t* semaforo,t_list* lista,void* elemento)
 
 void* sacarDeLista(sem_t* semaforo,t_list* lista,unsigned int posicion)
 {
+    void* elem;
     sem_wait(semaforo);
     if(!list_is_empty(lista))
-        void* elem = list_remove(lista,posicion);
+        elem = list_remove(lista,posicion);
     sem_post(semaforo);
 
     return elem;

@@ -81,9 +81,9 @@ void iniciarSemaforosKernel()
 {
     semaforoListaNew= malloc(sizeof(sem_t));
     semaforoListaReady = malloc(sizeof(sem_t));
-    semaforoListaBlocked = malloc(sizeof(sem_t));
-    semaforoListaSwapBlocked = malloc(sizeof(sem_t));
-    semaforoListaSwapReady = malloc(sizeof(sem_t));
+    
+   
+
 
     semaforoDiccionarioIOBlocked = malloc(sizeof(sem_t));
     semaforoDiccionarioBlocked = malloc(sizeof(sem_t));
@@ -92,7 +92,7 @@ void iniciarSemaforosKernel()
 
     sem_init(semaforoListaNew,1,1);
     sem_init(semaforoListaReady,1,1);
-    sem_init(semaforoListaSwapReady,1,1);
+
 
     sem_init(semaforoDiccionarioIOBlocked,1,1); 
     sem_init(semaforoDiccionarioBlocked,1,1); 

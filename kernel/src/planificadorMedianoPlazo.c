@@ -18,10 +18,11 @@ void pasarABLoqueadoEIniciarContador(PCB* proceso){
 
 void contadorParaSwap(PCB* proceso){
 
-    t_temporal* contadorEsperaSwap = malloc(sizeof(t_temporal));
-    temporal_create(contadorEsperaSwap);
     
-    char* PIDComoChar = itoa(PCB->PID);
+    t_temporal* contadorEsperaSwap = temporal_create();
+    
+    
+    char* PIDComoChar = pasarUnsignedAChar(proceso->PID);
 
     while(1){
         int tiempoTranscurrido = (int) temporal_gettime(contadorEsperaSwap);
@@ -58,4 +59,12 @@ void pasarASwapBlocked(PCB* proceso,char* PIDComoChar)
     while(!IOTerminado(PIDComoChar));
 
     //Aca lo agrego a la cola de new con mas prioridad
+}
+
+char* pasarUnsignedAChar(uint32_t unsigned_)
+{
+    //El buffer es de 11 bytes porque para guardar el maximo número representable por un unsigned de 32 bits(4294967295) como caracteres en un char* es de 10 bytes + el '\0'
+    char* buffer=malloc(sizeof(12));
+    snprintf(buffer,12,"%u",unsigned_);
+    return buffer;
 }
