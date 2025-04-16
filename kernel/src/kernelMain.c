@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
     liberar_conexion(socket_kernel_cpu_dispatch);
     liberar_conexion(socket_kernel_cpu_interrupt);
 
+    cerrarConexiones();
     return 0;
 }
 
@@ -85,6 +86,10 @@ void crearEstructuras()
 
     listaProcesosNew = list_create();
     listaProcesosReady = list_create();
+    listaProcesosSwapReady = list_create();
+
+    
+    diccionarioIODeProcesosBloqueados = dictionary_create();
 
     iniciarSemaforosKernel();
 
@@ -114,3 +119,24 @@ void setearAlgoritmosDePlanificacion(){
        
 
 }
+
+void iniciarSemaforosKernel()
+{
+    semaforoListaNew= malloc(sizeof(sem_t));
+    semaforoListaReady = malloc(sizeof(sem_t));
+    semaforoListaSwapReady = malloc(sizeof(sem_t));
+    
+    semaforoDiccionarioIOBlocked = malloc(sizeof(sem_t));
+    
+    sem_init(semaforoListaNew,1,1);
+    sem_init(semaforoListaReady,1,1);
+
+
+    sem_init(semaforoDiccionarioIOBlocked,1,1); 
+    sem_init(semaforoDiccionarioBlocked,1,1); 
+    sem_init(semaforoListaSwapReady,1,1);
+
+
+
+}
+

@@ -1,6 +1,12 @@
 #include "globalesKernel.h"
 
 //CONFIG Y LOGGER
+int socket_kernel_io;
+int cliente_kernel;
+int socket_kernel_cpu_dispatch;
+int socket_kernel_cpu_interrupt;
+int cliente_kernel_dispatch;
+int cliente_kernel_interrupt;
 int socket_kernel_memoria;
 char* ip_memoria;
 char* algoritmo_planificacion;
@@ -19,6 +25,10 @@ t_log* logger_kernel;
 //PROCESOS
 t_list* listaProcesosNew;
 t_list* listaProcesosReady;
+t_list* listaProcesosSwapReady;
+
+t_dictionary* diccionarioIODeProcesosBloqueados;
+t_dictionary* diccionarioProcesosSwapBloqueados;
 
 uint32_t pidDisponible = 0;
 

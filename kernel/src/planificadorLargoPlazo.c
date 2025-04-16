@@ -37,13 +37,14 @@ void inicializarProceso(){
     
     //TODO
     //ACA VA ALGO PARA ESPERAR EL ENTER
-    procesoAInicializar = sacarDeLista(semaforoListaNew,listaProcesosNew,0);
+    if (listaProcesosSwapReady!=NULL)
+        procesoAInicializar= sacarDeLista(semaforoListaSwapReady,listaProcesosSwapReady,0);
+    else
+        procesoAInicializar = sacarDeLista(semaforoListaNew,listaProcesosNew,0);
     
     //TODO
     //LE PREGUNTO A MEMORIA
-    agregarALista(semaforoListaReady,listaProcesosReady,procesoAInicializar);
-    procesoAInicializar->ME[READY]++;
-   
+    pasarAReady(procesoAInicializar);
     
 
 
@@ -52,4 +53,9 @@ void inicializarProceso(){
 bool menorTam(PCB* PCB1,PCB* PCB2)
 {
     return PCB1->tam <= PCB2->tam;
+}
+
+void pasarAReady(PCB* proceso){
+    agregarALista(semaforoListaReady,listaProcesosReady,proceso);
+    proceso->ME[READY]++;
 }

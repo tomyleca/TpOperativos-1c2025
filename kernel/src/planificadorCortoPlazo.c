@@ -18,9 +18,9 @@ void planificadorCortoPlazo()
 
         
         
-    t_temporal* cronometroTiempoEnEjecucion = malloc(sizeof(t_temporal));
     
-    cronometroTiempoEnEjecucion=temporal_create();
+    
+    t_temporal* cronometroTiempoEnEjecucion=temporal_create();
     procesoAEjecutar->ME[EXECUTE]++;
 
     //Espero que se me avise de la finalización del proceso 
@@ -35,6 +35,8 @@ void planificadorCortoPlazo()
     procesoDespuesDeEjecucion->duracionRafagaAnterior=tiempoEnEjecucion;
     procesoDespuesDeEjecucion->estimadoRafagaAnterior=procesoDespuesDeEjecucion->estimadoRafagaActual;
     estimarRafagaActual(procesoDespuesDeEjecucion);
+
+    free(cronometroTiempoEnEjecucion);
     
     }
 }

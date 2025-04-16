@@ -4,8 +4,9 @@
 
 
 
-extern sem_t* semaforoListaNew;
-extern sem_t* semaforoListaReady;
+
+
+
 
 extern void iniciarSemaforosKernel();
 

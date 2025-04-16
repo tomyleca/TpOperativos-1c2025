@@ -4,20 +4,14 @@ int main(int argc, char* argv[]) {
     saludar("io");
 
     //INICIO Y LEO CONFIG
-    t_config* config_io = iniciar_config("io.config");
+    config_io = iniciar_config("io.config");
     leerConfigIO(config_io);
     
     //INICIO LOGGER
     logger_io = iniciar_logger("ioLogger.log","ioLogger",log_level);
 
     //INICIO CONEXION CON KERNEL
-    int socket_io_kernel = crear_conexion(logger_io, ip_kernel, puerto_kernel);
-
-    if(socket_io_kernel == -1) {
-        log_error(logger_io, "No se pudo conectar con Kernel");
-        exit(1);
-    }
-    log_info(logger_io, "Conexión establecida con el Kernel");
+    socket_io_kernel = crear_conexion(logger_io, ip_kernel, puerto_kernel);
 
     //CIERRO
     log_info(logger_io, "cerrando conexión");

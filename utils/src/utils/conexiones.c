@@ -2,43 +2,41 @@
 
 //-----------------------------------------------CLIENTE----------------------------------------------
 int crear_conexion(t_log* server_name, char* ip, int puerto) {
-
-    char puerto_str[10];
-    sprintf(puerto_str, "%d", puerto);
-
     struct addrinfo hints, *servinfo;
 
-    // Init de hints
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
 
+    char* puerto_str = NULL;
+    asprintf(&puerto_str, "%d", puerto);
 
-    // Recibe addrinfo
-    getaddrinfo(ip, puerto_str, &hints, &servinfo);
-
-    // Crea un socket con la informacion recibida (del primero, suficiente)
-    int socket_cliente = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
-
-   // printf("Socket cliente: %d\n", socket_cliente);
-
-    // Fallo en crear el socket
-    if(socket_cliente == -1) {
-        // log_error(logger, "Error creando el socket para %s:%s", ip, puerto);
+    int resultado = getaddrinfo(ip, puerto_str, &hints, &servinfo);
+    if (resultado != 0) {
+        log_error(server_name, "getaddrinfo fallo: %s", gai_strerror(resultado));
+        free(puerto_str);
         return -1;
     }
 
-    // Error conectando
-    if(connect(socket_cliente, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
-        // log_error(logger, "Error al conectar (a %s)\n", server_name);
+    int socket_cliente = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+    if (socket_cliente == -1) {
+        log_error(server_name, "Error creando socket");
         freeaddrinfo(servinfo);
+        free(puerto_str);
         return -1;
-    } else
-        // log_info(logger, "Cliente conectado en %s:%s (a %s)\n", ip, puerto, server_name);
+    }
+
+    if (connect(socket_cliente, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+        log_error(server_name, "Error al conectar con %s:%s", ip, puerto_str);
+        freeaddrinfo(servinfo);
+        free(puerto_str);
+        return -1;
+    }
+
+    log_info(server_name, "Conexion exitosa con %s:%s", ip, puerto_str);
 
     freeaddrinfo(servinfo);
-
+    free(puerto_str);
     return socket_cliente;
 }
 
@@ -110,6 +108,7 @@ int esperar_cliente(int socket_servidor) {
     socklen_t tam_direccion = sizeof(struct sockaddr_in);
 
     int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
+
 
     return socket_cliente;
 }
