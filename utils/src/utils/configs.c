@@ -1,5 +1,6 @@
 #include "configs.h"
 
+
 t_config* iniciar_config(char* archivo_config)
 {
 	t_config* nuevo_config = config_create(archivo_config);
@@ -15,9 +16,9 @@ t_config* iniciar_config(char* archivo_config)
 t_log* iniciar_logger(char* pathLogger, char* nombreLogger,t_log_level logLevel)
 {
 	t_log* nuevo_logger;
-    nuevo_logger = log_create(pathLogger, nombreLogger, 1,logLevel);
+    nuevo_logger = log_create(pathLogger, nombreLogger, 0,logLevel);
 	
-    log_info(nuevo_logger, "%s iniciado", nombreLogger);
+    log_info(nuevo_logger,"%s iniciado",nombreLogger);
     
     if(nuevo_logger == NULL)
     {

@@ -14,6 +14,9 @@
 #include "conexiones_kernel.h"
 
 void leerConfigKernel(t_config* config_kernel);
+void crearEstructuras();
+void setearAlgoritmosDePlanificacion();
+
 
 void inicializar_hilos(t_config* config_kernel);
 

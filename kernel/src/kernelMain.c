@@ -9,14 +9,10 @@ int main(int argc, char* argv[]) {
     //INICIO LOGGER
     logger_kernel = iniciar_logger("kernelLogger.log","kernelLogger",log_level);
 
-    /****************CONEXION KERNEL CON IO*********************/
+    iniciarConexiones();
 
-    //INICIO SERVIDOR KERNEL-IO
-    socket_kernel_io = iniciar_servidor(logger_kernel, puerto_escucha_IO);
-    log_info(logger_kernel, "Servidor  iniciado para IO");
-    
-    cliente_kernel = esperar_cliente(socket_kernel_io);
-    log_info(logger_kernel, "Se conectó IO");
+    //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
+    crearEstructuras();
 
     inicializar_hilos(config_kernel);
 
@@ -26,6 +22,10 @@ int main(int argc, char* argv[]) {
     pthread_join(hilo_escuchar_kernel_interrupcion, NULL);
     pthread_detach(hilo_crear_kernel_memoria);
 
+    INIT_PROC("afsfas",4);
+
+
+    cerrarConexiones();
     return 0;
 }
 
@@ -37,6 +37,8 @@ void leerConfigKernel(t_config* config_kernel) {
     puerto_escucha_interrupt = config_get_int_value(config_kernel, "PUERTO_ESCUCHA_INTERRUPT");
     puerto_escucha_IO = config_get_int_value(config_kernel, "PUERTO_ESCUCHA_IO");
     algoritmo_planificacion = config_get_string_value(config_kernel, "ALGORITMO_PLANIFICACION");
+    algoritmo_cola_new = config_get_string_value(config_kernel, "ALGORITMO_COLA_NEW");
+    alfa = config_get_int_value(config_kernel, "ALFA");
     tiempo_suspension = config_get_int_value(config_kernel, "TIEMPO_SUSPENSION");
     log_level = log_level_from_string(config_get_string_value(config_kernel, "LOG_LEVEL"));
     
@@ -54,7 +56,67 @@ void inicializar_hilos(t_config* config_kernel)
     
     socket_kernel_cpu_interrupt= iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
     hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_cpu();
-    
+
   
     // El ultimo hilo es con join. Para que este se quede esperando, y no finalize el hilo.
 }
+
+void crearEstructuras()
+{
+    setearAlgoritmosDePlanificacion();
+
+    listaProcesosNew = list_create();
+    listaProcesosReady = list_create();
+    listaProcesosSwapReady = list_create();
+
+    
+    diccionarioIODeProcesosBloqueados = dictionary_create();
+
+    iniciarSemaforosKernel();
+
+}
+
+void setearAlgoritmosDePlanificacion(){
+    
+    if(strcmp(algoritmo_cola_new,"FIFO")==0)
+        algoritmoColaNewEnFIFO=true;
+    else if(strcmp(algoritmo_cola_new,"PMCP")==0)
+        algoritmoColaNewEnFIFO=false;
+    else
+        log_error(logger_kernel,"ALGORITMO DE PLANIFICACION DESCONOCIDO");
+    
+
+    
+    
+    if(strcmp(algoritmo_planificacion,"FIFO")==0)
+        algoritmoDePlanificacionInt=FIFO;
+    else if(strcmp(algoritmo_planificacion,"SJF")==0)
+        algoritmoDePlanificacionInt=SJF;
+    else if(strcmp(algoritmo_planificacion,"SRT")==0)
+        algoritmoDePlanificacionInt=SRT;
+    else
+        log_error(logger_kernel,"ALGORITMO DE PLANIFICACION DESCONOCIDO");
+       
+
+}
+
+void iniciarSemaforosKernel()
+{
+    semaforoListaNew= malloc(sizeof(sem_t));
+    semaforoListaReady = malloc(sizeof(sem_t));
+    semaforoListaSwapReady = malloc(sizeof(sem_t));
+    
+    semaforoDiccionarioIOBlocked = malloc(sizeof(sem_t));
+    
+    sem_init(semaforoListaNew,1,1);
+    sem_init(semaforoListaReady,1,1);
+
+
+    sem_init(semaforoDiccionarioIOBlocked,1,1); 
+    sem_init(semaforoDiccionarioBlocked,1,1); 
+    sem_init(semaforoListaSwapReady,1,1);
+
+
+
+}
+
