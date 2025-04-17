@@ -9,14 +9,9 @@ int main(int argc, char* argv[]) {
     
     //INICIO LOGGER
     logger_cpu = iniciar_logger("cpuLogger.log","cpuLogger",log_level);
-
-    //SERVIDOR CON KERNEL
-    fd_cpu_kernel_dispatch = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_dispatch);
-
-    fd_cpu_kernel_interrupt = crear_conexion(logger_cpu,ip_kernel, puerto_kernel_interrupt);    //DSP LOS CAMBIO POR PTHREADS, los hice a parte 
     
-    // INICIO CONEXION CON MEMORIA 
-    socket_cpu_memoria = crear_conexion(logger_cpu, ip_memoria, puerto_memoria);
+    // INICIO HILOS
+    inicializar_hilos(config_cpu);
 
 
     //CIERRO
@@ -42,3 +37,23 @@ void leerConfigCpu(t_config* config_cpu) {
     log_level = log_level_from_string(config_get_string_value(config_cpu, "LOG_LEVEL"));
     
 }
+
+void inicializar_hilos(t_config* config_cpu)
+{
+    socket_cpu_memoria = crear_conexion(logger_cpu, ip_memoria, puerto_memoria);
+    hilo_escuchar_memoria = escuchar_memoria();
+    pthread_detach(hilo_escuchar_memoria);
+
+    socket_cpu_kernel_dispatch = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_dispatch); // CPU SERVIDOR DE KERNEL DISPATCH -> fin de ejecucion
+    hilo_escuchar_kernel = escuchar_kernel();
+    pthread_detach(hilo_escuchar_kernel);
+    
+    socket_cpu_kernel_interrupt = crear_conexion(logger_cpu,ip_kernel, puerto_kernel_interrupt);  // CPU SERVIDOR DE KERNEL INTERRUPT -> envia a kernel el estado actual
+	hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_kernel();
+    pthread_detach(hilo_escuchar_kernel_interrupcion);
+
+    /*hilo_interpretar_instruccion = crear_hilo_interpretar_instruccion();
+    pthread_join(hilo_interpretar_instruccion, NULL);*/
+    //ESTE SI LO DESCOMENTO, TIRA SEG FAULT PORQUE INICIA EL HILO EN DECODE, HABRIA QUE PONER SEMAFORO SUPONGO!!
+}
+

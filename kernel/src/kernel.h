@@ -11,8 +11,11 @@
 #include "utils/configs.h"
 #include "utils/shared.h"
 #include "utils/conexiones.h"
+#include "conexiones_kernel.h"
 
 void leerConfigKernel(t_config* config_kernel);
+
+void inicializar_hilos(t_config* config_kernel);
 
 
 

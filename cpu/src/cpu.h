@@ -11,8 +11,11 @@
 #include "utils/shared.h"
 #include "utils/conexiones.h"
 #include "GlobalesCPU.h"
+#include "conexion-cpu-memoria.h"
 
 void leerConfigCpu(t_config* config_cpu);
+void inicializar_hilos(t_config* config_cpu);
+
 
 
 #endif

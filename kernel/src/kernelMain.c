@@ -18,38 +18,14 @@ int main(int argc, char* argv[]) {
     cliente_kernel = esperar_cliente(socket_kernel_io);
     log_info(logger_kernel, "Se conectó IO");
 
-    //CIERRO
-    log_info(logger_kernel, "Finalizando conexión");
-    liberar_conexion(socket_kernel_io);
-
-
-    /****************CONEXION KERNEL CON CPU*********************/
-
-    //INICIO SERVIDOR KERNEL-CPU
-
-    socket_kernel_cpu_dispatch = iniciar_servidor(logger_kernel, puerto_escucha_dispatch); 
-    log_info(logger_kernel, "Servidor DISPATCH iniciado");
-
-    socket_kernel_cpu_interrupt = iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
-    log_info(logger_kernel, "Servidor INTERRUPT iniciado");
-    
-    cliente_kernel_dispatch = esperar_cliente(socket_kernel_cpu_dispatch);
-    
-    cliente_kernel_interrupt = esperar_cliente(socket_kernel_cpu_interrupt);
-
-
-     /****************CONEXION KERNEL CON MEMORIA*********************/
-
-    socket_kernel_memoria = crear_conexion(logger_kernel,ip_memoria,puerto_memoria);
-
-
+    inicializar_hilos(config_kernel);
 
     //CIERRO
     log_info(logger_kernel, "Finalizando conexión");
-    liberar_conexion(socket_kernel_cpu_dispatch);
-    liberar_conexion(socket_kernel_cpu_interrupt);
-    liberar_conexion(socket_kernel_io);
-    liberar_conexion(socket_kernel_memoria);
+    pthread_join(hilo_escuchar_kernel, NULL);
+    pthread_join(hilo_escuchar_kernel_interrupcion, NULL);
+    pthread_detach(hilo_crear_kernel_memoria);
+
     return 0;
 }
 
@@ -66,3 +42,19 @@ void leerConfigKernel(t_config* config_kernel) {
     
 }
 
+void inicializar_hilos(t_config* config_kernel)
+{   
+    //TIENE MAS SENTIDO QUE PRIMERO CONECTE CON MEMORIA, Y DESPUES ESCUCHE PETICIONES DE CPU, NO? ENTONCES CAMBIE EL ORDEN!!
+    socket_kernel_memoria = crear_conexion(logger_kernel,ip_memoria,puerto_memoria);
+    hilo_crear_kernel_memoria = crear_hilo_memoria();//EN ESTA FUNCION DSP CAMBIALE LO QUE LE QUERES PASAR PARA CREAR EL PRIMER HILO/PROCESOS
+
+    //INICIO SERVIDOR KERNEL-CPU
+    socket_kernel_cpu_dispatch = iniciar_servidor(logger_kernel, puerto_escucha_dispatch); 
+    hilo_escuchar_kernel = escuchar_dispatch_cpu();
+    
+    socket_kernel_cpu_interrupt= iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
+    hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_cpu();
+    
+  
+    // El ultimo hilo es con join. Para que este se quede esperando, y no finalize el hilo.
+}

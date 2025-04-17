@@ -27,6 +27,12 @@ typedef enum{
     EXIT
 } ESTADO;
 
+//HILOS
+extern pthread_t hilo_escuchar_kernel;
+extern pthread_t hilo_escuchar_kernel_interrupcion;
+extern pthread_t hilo_conectar_kernel_memoria;
+extern pthread_t hilo_crear_kernel_memoria;
+
 
 extern int socket_kernel_memoria;
 extern int socket_kernel_io;

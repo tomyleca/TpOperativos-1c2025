@@ -11,6 +11,13 @@
 #include "utils/conexiones.h"
 #include "utils/configs.h"
 
+typedef struct 
+{
+    int pid;
+    t_registros registros;
+} t_contexto_cpu;
+
+
 extern int socket_cpu_memoria;
 extern int socket_cpu_kernel_dispatch;
 extern int socket_cpu_kernel_interrupt;
@@ -21,6 +28,21 @@ extern int fd_cpu_kernel_interrupt;
 extern char* ip;
 extern char* puerto;
 extern char* valor;
+extern char* instruccion_recibida;
+
+//HILOS
+extern pthread_t hilo_escuchar_kernel_interrupcion;
+extern pthread_t hilo_escuchar_kernel;
+extern pthread_t hilo_escuchar_memoria;
+extern pthread_t hilo_interpretar_instruccion;
+
+//DICTIONARYS
+
+extern t_dictionary* registros;
+extern t_dictionary* instrucciones;
+
+extern t_contexto_cpu* contexto;
+
 
 extern t_log* logger_cpu;
 extern t_config* config_cpu;
