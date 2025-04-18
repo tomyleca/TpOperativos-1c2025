@@ -13,6 +13,7 @@
 #include "GlobalesIO.h"
 
 
+extern void conectarseAKernel(char* nombre);
 void leerConfigIO(t_config* config_io);
 
 #endif

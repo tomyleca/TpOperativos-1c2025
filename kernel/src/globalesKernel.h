@@ -45,6 +45,12 @@ typedef enum{
     SRT
 } PLANIFICADOR;
 
+typedef struct
+{
+    char* nombre;
+    bool ocupado;
+} DispositivoIO;
+
 
 extern int socket_kernel_memoria;
 extern int socket_kernel_io;
@@ -85,7 +91,7 @@ extern void estimarRafagaActual(PCB* proceso);
 //Cambiar de estado
 extern void pasarAReady(PCB* proceso);
 extern void pasarABLoqueadoEIniciarContador(PCB* proceso);
-extern void contadorParaSwap(PCB* proceso);
+extern void* contadorParaSwap(PCB* proceso);
 extern bool IOTerminado(char* PIDComoChar);
 extern void pasarASwapBlocked(PCB* proceso, char* PIDComoChar);
 extern void pasarASwapReady(PCB* proceso);
@@ -100,6 +106,11 @@ extern sem_t* semaforoListaSwapReady;
 //CONEXIONES
 extern void iniciarConexiones();
 extern void cerrarConexiones();
+
+//IO
+extern t_list* listaDispositivosIO;
+
+extern sem_t* semaforoListaDispositivosIO;
 
 
 //OTRAS

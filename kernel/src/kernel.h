@@ -16,6 +16,10 @@ void leerConfigKernel(t_config* config_kernel);
 void crearEstructuras();
 void setearAlgoritmosDePlanificacion();
 
+//IO
+
+extern void* atenderIO(void* arg);
+
 
 
 

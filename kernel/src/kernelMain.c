@@ -14,10 +14,18 @@ int main(int argc, char* argv[]) {
     //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
     crearEstructuras();
 
+    pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
+    pthread_create(hiloAtenderIO,NULL,atenderIO,NULL);
+
+    
+
+    
+   
+
     INIT_PROC("afsfas",4);
 
 
-    cerrarConexiones();
+    pthread_join(*hiloAtenderIO,NULL);
     return 0;
 }
 
@@ -44,6 +52,8 @@ void crearEstructuras()
     listaProcesosNew = list_create();
     listaProcesosReady = list_create();
     listaProcesosSwapReady = list_create();
+
+    listaDispositivosIO = list_create();
 
     
     diccionarioIODeProcesosBloqueados = dictionary_create();
@@ -82,6 +92,8 @@ void iniciarSemaforosKernel()
     semaforoListaNew= malloc(sizeof(sem_t));
     semaforoListaReady = malloc(sizeof(sem_t));
     semaforoListaSwapReady = malloc(sizeof(sem_t));
+
+    semaforoListaDispositivosIO = malloc(sizeof(sem_t));
     
     semaforoDiccionarioIOBlocked = malloc(sizeof(sem_t));
     
@@ -90,8 +102,9 @@ void iniciarSemaforosKernel()
 
 
     sem_init(semaforoDiccionarioIOBlocked,1,1); 
-    sem_init(semaforoDiccionarioBlocked,1,1); 
+    //sem_init(semaforoDiccionarioBlocked,1,1); 
     sem_init(semaforoListaSwapReady,1,1);
+    sem_init(semaforoListaDispositivosIO,1,1);
 
 
 

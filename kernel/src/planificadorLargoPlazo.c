@@ -37,7 +37,7 @@ void inicializarProceso(){
     
     //TODO
     //ACA VA ALGO PARA ESPERAR EL ENTER
-    if (listaProcesosSwapReady!=NULL)
+    if (!list_is_empty(listaProcesosSwapReady))
         procesoAInicializar= sacarDeLista(semaforoListaSwapReady,listaProcesosSwapReady,0);
     else
         procesoAInicializar = sacarDeLista(semaforoListaNew,listaProcesosNew,0);

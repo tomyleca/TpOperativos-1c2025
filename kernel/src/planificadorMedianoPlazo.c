@@ -16,7 +16,7 @@ void pasarABLoqueadoEIniciarContador(PCB* proceso){
 
 }
 
-void contadorParaSwap(PCB* proceso){
+void* contadorParaSwap(PCB* proceso){
 
     
     t_temporal* contadorEsperaSwap = temporal_create();
@@ -43,6 +43,8 @@ void contadorParaSwap(PCB* proceso){
 
     temporal_destroy(contadorEsperaSwap);
     free(PIDComoChar);
+
+    return NULL;
 }
 
 bool IOTerminado(char* PIDComoChar){
@@ -75,5 +77,8 @@ char* pasarUnsignedAChar(uint32_t unsigned_)
 
 void pasarASwapReady(PCB* proceso)
 {
-    agregarALista(semaforoListaSwapReady,listaProcesosSwapReady,proceso);
+    if(algoritmoColaNewEnFIFO)
+        agregarALista(semaforoListaSwapReady,listaProcesosSwapReady,proceso);
+    else 
+        agregarAListaOrdenada(semaforoListaSwapReady,listaProcesosSwapReady,proceso,menorTam);
 }
