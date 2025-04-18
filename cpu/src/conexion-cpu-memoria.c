@@ -45,6 +45,7 @@ void atender_memoria()
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 contexto->pid = recibir_int_del_buffer(buffer);
                 instruccion_recibida = recibir_string_del_buffer(buffer); // instruccion_recibida se usa en instruccion.c
+                sem_post(&sem_hay_instruccion);
                 free(buffer);
                 break;
 
@@ -75,10 +76,6 @@ void atender_memoria()
             case CPU_RECIBE_OK_ACTUALIZAR_CONTEXTO: //MANDO PID CON LOS REGISTROS O PCB COMPLETO
                buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 contexto->pid = recibir_int_del_buffer(buffer);
-                /*if(algoritmo == 1)
-                {
-                    mandar_mensaje_kernel_cpu_ejecuta_quantum();
-                } */
                 printf("Antes de semaforo de contexto\n");  
                 free(buffer); 
                 break;

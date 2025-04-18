@@ -9,8 +9,6 @@ int main(int argc, char* argv[]) {
     //INICIO LOGGER
     logger_kernel = iniciar_logger("kernelLogger.log","kernelLogger",log_level);
 
-    iniciarConexiones();
-
     //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
     crearEstructuras();
 
@@ -24,8 +22,6 @@ int main(int argc, char* argv[]) {
 
     INIT_PROC("afsfas",4);
 
-
-    cerrarConexiones();
     return 0;
 }
 

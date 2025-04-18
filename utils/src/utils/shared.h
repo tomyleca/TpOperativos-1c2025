@@ -20,9 +20,11 @@ typedef enum
     HANDSHAKE,
     IO,
     DUMP_MEMORY,
+    INIT_PROC,
+    SEGMENTATION_FAULT,
     CPU_PIDE_INSTRUCCION_A_MEMORIA,
     ENVIAR_A_MEMORIA_UN_AVISO_DE_SYSCALL,
-    INTERRUPCION_TID,
+    INTERRUPCION_PID,
     CPU_RECIBE_INSTRUCCION_MEMORIA,
     CPU_RECIBE_CONTEXTO,
     CPU_RECIBE_OK_DE_LECTURA,
@@ -54,8 +56,6 @@ typedef struct {
     uint32_t GX;
     uint32_t HX;
     uint32_t PC;
-    uint32_t BASE;
-    uint32_t LIMITE;
 } t_registros;
 
 /**

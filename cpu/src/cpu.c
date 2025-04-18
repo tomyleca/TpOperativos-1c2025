@@ -13,6 +13,7 @@ int main(int argc, char* argv[]) {
     // INICIO HILOS
     inicializar_hilos(config_cpu);
 
+    inicializar_recursos();
 
     //CIERRO
     log_info(logger_cpu, "Cerrando conexión");
@@ -52,8 +53,13 @@ void inicializar_hilos(t_config* config_cpu)
 	hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_kernel();
     pthread_detach(hilo_escuchar_kernel_interrupcion);
 
-    /*hilo_interpretar_instruccion = crear_hilo_interpretar_instruccion();
-    pthread_join(hilo_interpretar_instruccion, NULL);*/
+    hilo_interpretar_instruccion = crear_hilo_interpretar_instruccion();
+    pthread_join(hilo_interpretar_instruccion, NULL);
     //ESTE SI LO DESCOMENTO, TIRA SEG FAULT PORQUE INICIA EL HILO EN DECODE, HABRIA QUE PONER SEMAFORO SUPONGO!!
 }
 
+void inicializar_recursos()
+{
+    // Inicializar semaforos
+    sem_init(&sem_hay_instruccion, 0, 0);
+}

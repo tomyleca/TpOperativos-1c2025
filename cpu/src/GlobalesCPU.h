@@ -7,6 +7,7 @@
 #include<commons/string.h>
 #include<commons/config.h>
 #include<readline/readline.h>
+#include <semaphore.h>
 #include "utils/shared.h"
 #include "utils/conexiones.h"
 #include "utils/configs.h"
@@ -29,6 +30,8 @@ extern char* ip;
 extern char* puerto;
 extern char* valor;
 extern char* instruccion_recibida;
+extern t_log* logger_cpu;
+extern t_config* config_cpu;
 
 //HILOS
 extern pthread_t hilo_escuchar_kernel_interrupcion;
@@ -43,9 +46,9 @@ extern t_dictionary* instrucciones;
 
 extern t_contexto_cpu* contexto;
 
+//SEMAFOROS
+extern sem_t sem_hay_instruccion;
 
-extern t_log* logger_cpu;
-extern t_config* config_cpu;
 
 // Conexiones a módulos
 extern char* ip_memoria;
@@ -53,6 +56,13 @@ extern int puerto_memoria;
 extern char* ip_kernel;
 extern int puerto_kernel_dispatch;
 extern int puerto_kernel_interrupt;
+
+//OTROS
+extern bool flag_interrupcion;
+extern op_code motivo_interrupcion;
+extern int valor_inicial;
+
+
 
 // TLB
 extern int entradas_tlb;
