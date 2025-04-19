@@ -78,6 +78,17 @@ void instruccion_leer_memoria(char** parte)
     check_interrupt();
 }
 
+void instruccion_goto(char** parte)
+{
+    if(parte[1] == NULL) {
+        log_error(logger_cpu, "Falta parametro para GOTO.");
+        return;
+    }
+
+    int nuevo_pc = atoi(parte[1]);
+    contexto->registros.PC = nuevo_pc;
+}
+
 void peticion_escritura_a_memoria(int direccion_fisica, char* valor_registro_dato)
 {
     t_paquete* paquete = crear_super_paquete(CPU_PIDE_ESCRIBIR_MEMORIA);
@@ -104,6 +115,9 @@ void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
     enviar_paquete(paquete, socket_cpu_memoria);
     free(paquete);
 }
+
+
+
 
 
 // --------------- ESTO ES FETCH --------------- //// EJEMPLO CPU_PIDE_INSTRUCCION_A_MEMORIA
@@ -150,6 +164,9 @@ void decode()
                 break;
             case I_NOOP:
                 instruccion_noop(parte);
+                break;
+            case I_GOTO:
+                instruccion_goto(parte);
                 break;
             case -1:
                 log_warning(logger_cpu, "Algo paso en el interpretar instruccion!!!");
@@ -259,6 +276,7 @@ void iniciar_diccionario_instrucciones()
 	dictionary_put(instrucciones, "WRITE", (void*)(intptr_t)I_WRITE_MEM);
     dictionary_put(instrucciones, "DUMP_MEMORY", (void*)(intptr_t)I_DUMP_MEMORY);
     dictionary_put(instrucciones, "IO", (void*)(intptr_t)I_IO);
+    dictionary_put(instrucciones, "GOTO", (void*)(intptr_t)I_GOTO);
 }
 
 

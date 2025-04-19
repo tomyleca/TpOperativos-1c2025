@@ -16,7 +16,8 @@ typedef enum
 	I_WRITE_MEM,
     I_DUMP_MEMORY,
     I_IO,
-    I_NOOP
+    I_NOOP,
+    I_GOTO
 }enum_instrucciones;
 
 
@@ -44,6 +45,12 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
 //--------------INSTRUCCIONES-----------------//
 
 void instruccion_noop();
+
+void instruccion_escribir_memoria();
+
+void instruccion_leer_memoria();
+
+void instruccion_goto();
 
 //-------------SYSCALLS MEMORIA FUNCIONES--------------//
 
