@@ -44,7 +44,9 @@ void inicializarProceso(){
     
     //TODO
     //LE PREGUNTO A MEMORIA
-    pasarAReady(procesoAInicializar);
+    //pasarAReady(procesoAInicializar);
+
+    //pasarABLoqueadoEIniciarContador(procesoAInicializar);
     
 
 

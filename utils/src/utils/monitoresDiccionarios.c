@@ -2,7 +2,7 @@
 
 
 sem_t* semaforoDiccionarioBlocked;
-sem_t* semaforoDiccionarioIOBlocked;
+sem_t* semaforoDiccionarioProcesosBloqueados;
 sem_t* semaforoDiccionarioBlockedSwap;
 
 
@@ -17,6 +17,15 @@ void* leerDeDiccionario(sem_t* semaforo,t_dictionary* diccionario,char* clave)
 {
     sem_wait(semaforo);
     void* valor = dictionary_get(diccionario,clave);
+    sem_post(semaforo);
+
+    return valor;
+}
+
+void* sacarDeDiccionario(sem_t* semaforo,t_dictionary* diccionario,char* clave)
+{
+    sem_wait(semaforo);
+    void* valor = dictionary_remove(diccionario,clave);
     sem_post(semaforo);
 
     return valor;

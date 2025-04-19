@@ -30,3 +30,8 @@ extern void agregarAListaOrdenada(sem_t* semaforo,t_list* lista,void* elemento,b
 *@brief Ordena una lista según un orden determinado(que se pasa como parámetro). Utiliza semáforos para evitar condiciones de carrera.
 */
 extern void ordenarLista(sem_t* semaforo,t_list* lista,bool (*funcionParaComparar) (void*,void*));
+
+/**
+*@brief Saca el primer elemento de una lista que coincida con la condicion dada. Utiliza semáforos para evitar condiciones de carrera.
+*/
+extern void* sacarDeListaSegunCondicion(sem_t* semaforo,t_list* lista,bool (*condicion) (void*));

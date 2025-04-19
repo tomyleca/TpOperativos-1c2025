@@ -13,6 +13,8 @@
 #include <commons/collections/dictionary.h>
 #include "../../utils/src/utils/monitoresListas.h"
 #include "../../utils/src/utils/monitoresDiccionarios.h"
+#include "../../utils/src/utils/conexionKernelIO.h"
+
 
 
 typedef struct {
@@ -45,11 +47,22 @@ typedef enum{
     SRT
 } PLANIFICADOR;
 
+
 typedef struct
 {
     char* nombre;
     bool ocupado;
+    int fdConexion;
 } DispositivoIO;
+
+typedef struct{
+    PCB* proceso;
+    bool IOFinalizada;
+    sem_t* semaforoIOFinalizada;
+    bool estaENSwap;
+} procesoEnEsperaIO;
+
+
 
 
 extern int socket_kernel_memoria;
@@ -77,6 +90,7 @@ extern t_log* logger_kernel;
 
 
 //PROCESOS
+extern uint32_t pidDisponible;
 
 extern void INIT_PROC(char* archivoPseudocodigo,unsigned int tam);
 extern void inicializarProceso();
@@ -90,31 +104,49 @@ extern void estimarRafagaActual(PCB* proceso);
 
 //Cambiar de estado
 extern void pasarAReady(PCB* proceso);
-extern void pasarABLoqueadoEIniciarContador(PCB* proceso);
-extern void* contadorParaSwap(PCB* proceso);
+extern void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO);
+extern void* contadorParaSwap(char* PID);
 extern bool IOTerminado(char* PIDComoChar);
-extern void pasarASwapBlocked(PCB* proceso, char* PIDComoChar);
+extern void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO);
 extern void pasarASwapReady(PCB* proceso);
+
+extern t_list* listaProcesosNew;
+extern t_list* listaProcesosReady;
+extern t_list* listaProcesosSwapReady;
+
+extern sem_t* semaforoDiccionarioProcesosBloqueados;
+
+
+
+
+extern int algoritmoDePlanificacionInt;
 
 //Semaforos
 
 extern sem_t* semaforoListaNew;
 extern sem_t* semaforoListaReady;
-extern sem_t* semaforoListaBlocked;
 extern sem_t* semaforoListaSwapReady;
+
+extern sem_t* semaforoListaDispositivosIO;
+
+
+extern t_dictionary* diccionarioProcesosBloqueados;
 
 //CONEXIONES
 extern void iniciarConexiones();
 extern void cerrarConexiones();
 
 //IO
+
+
 extern t_list* listaDispositivosIO;
 
-extern sem_t* semaforoListaDispositivosIO;
+
 
 
 //OTRAS
 extern char* pasarUnsignedAChar(uint32_t unsigned_);
+
  
 
 
@@ -122,20 +154,9 @@ extern char* pasarUnsignedAChar(uint32_t unsigned_);
 
 
 
-extern t_dictionary* diccionarioProcesosSwapBloqueados;
-/**
-*@brief Un diccionario que asocia un pid de un proceso bloqueado al estado de la IO que solicito, si la IO no se completo el valor esta en 0, en cambio si se completo esta en 1;
-*/
-extern t_dictionary* diccionarioIODeProcesosBloqueados;
-
-extern uint32_t pidDisponible;
-
-extern t_list* listaProcesosNew;
-extern t_list* listaProcesosReady;
-extern t_list* listaProcesosSwapReady;
 
 
-extern int algoritmoDePlanificacionInt;
+
 
 
 

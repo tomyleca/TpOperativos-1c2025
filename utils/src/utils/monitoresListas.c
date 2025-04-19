@@ -37,3 +37,14 @@ void ordenarLista(sem_t* semaforo,t_list* lista,bool (*funcionParaComparar) (voi
     list_sort(lista,funcionParaComparar);
     sem_post(semaforo);
 }
+
+void* sacarDeListaSegunCondicion(sem_t* semaforo,t_list* lista,bool (*condicion) (void*))
+{
+    void* elem;
+    sem_wait(semaforo);
+    if(!list_is_empty(lista))
+        elem = list_remove_by_condition(lista,condicion);
+    sem_post(semaforo);
+
+    return elem;
+}

@@ -1,70 +1,87 @@
 #include "kernel.h"
 
-void pasarABLoqueadoEIniciarContador(PCB* proceso){
+void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO){
     
-    //TODO
-    //falta sacarlo de la lista donde esta
+    //TODO falta sacarlo de la lista donde esta
 
-    //Si hace falta lo agrego a un diccionario, creo que no
+
+    avisarInicioIO(proceso->PID,nombreIO,tiempo);
+   
     
+    procesoEnEsperaIO* procesoEsperando=malloc(sizeof(procesoEnEsperaIO));
+    procesoEsperando->proceso=proceso;
+    procesoEsperando->estaENSwap=0;
+    procesoEsperando->IOFinalizada=0;
+    procesoEsperando->semaforoIOFinalizada=malloc(sizeof(sem_t));
+    sem_init(procesoEsperando->semaforoIOFinalizada,1,0);
+
+    char* PIDComoChar = pasarUnsignedAChar(proceso->PID);
+    agregarADiccionario(semaforoDiccionarioProcesosBloqueados,diccionarioProcesosBloqueados,PIDComoChar,procesoEsperando);
+
+
 
     pthread_t* hiloContador = malloc(sizeof(pthread_t));
     pthread_create(hiloContador,NULL,contadorParaSwap,proceso);
+
+    procesoEsperando = sacarDeDiccionario(semaforoDiccionarioProcesosBloqueados,diccionarioProcesosBloqueados,PIDComoChar);
+
+    free(PIDComoChar);
+    free(procesoEsperando->semaforoIOFinalizada);
+    free(procesoEsperando);
 
 
 
 
 }
 
-void* contadorParaSwap(PCB* proceso){
+
+void* contadorParaSwap(char* PID){
 
     
     t_temporal* contadorEsperaSwap = temporal_create();
     
     
-    char* PIDComoChar = pasarUnsignedAChar(proceso->PID);
+    
 
     while(1){
         int tiempoTranscurrido = (int) temporal_gettime(contadorEsperaSwap);
         if(tiempoTranscurrido>=4500)
         {
-            pasarASwapBlocked(proceso,PIDComoChar);
+            procesoEnEsperaIO* procesoEsperandoIO = leerDeDiccionario(semaforoDiccionarioProcesosBloqueados,diccionarioProcesosBloqueados,PID);
+            procesoEsperandoIO->estaENSwap=1;
+            pasarASwapBlocked(procesoEsperandoIO);
             
         }
-        if(IOTerminado(PIDComoChar))
+        if(IOTerminado(PID))
         {
             //Creo que no hace falta proceso = sacarDeDiccionario(semaforoDiccionarioBlocked,PIDComoChar);
-            
-            pasarAReady(proceso);
+            procesoEnEsperaIO* procesoIOFinalizado = leerDeDiccionario(semaforoDiccionarioProcesosBloqueados,diccionarioProcesosBloqueados,PID);
+            pasarAReady(procesoIOFinalizado->proceso);
             
             break;
         }
     }
 
     temporal_destroy(contadorEsperaSwap);
-    free(PIDComoChar);
+    
 
     return NULL;
 }
 
 bool IOTerminado(char* PIDComoChar){
     
-    bool estadoIO = leerDeDiccionario(semaforoDiccionarioIOBlocked, diccionarioIODeProcesosBloqueados, PIDComoChar);
-    return estadoIO;
+    procesoEnEsperaIO* procesoEsperando = leerDeDiccionario(semaforoDiccionarioProcesosBloqueados, diccionarioProcesosBloqueados, PIDComoChar);
+    return procesoEsperando->IOFinalizada;
 }
 
-void pasarASwapBlocked(PCB* proceso,char* PIDComoChar)
+void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO)
 {
-    //Creo que no hace falta agregarADiccionario(semaforoDiccionarioBlockedSwap,diccionarioProcesosSwapBloqueados,PIDComoChar,proceso);
-
     //Le aviso a la memoria que el proceso paso a disco.
 
-    //Este while se podría mejorar con un semaforo, pero tendría que cambiar la forma en la que los dispositivos IO le avisan a los procesos que ya terminaron. Enrealidad tendría que tener dos implementaciones de la misma.
-    while(!IOTerminado(PIDComoChar));
+    sem_wait(procesoEsperandoIO->semaforoIOFinalizada);
+    pasarASwapReady(procesoEsperandoIO->proceso);
 
-    pasarASwapReady(proceso);
-
-    //Aca lo agrego a la cola de new con mas prioridad
+    
 }
 
 char* pasarUnsignedAChar(uint32_t unsigned_)

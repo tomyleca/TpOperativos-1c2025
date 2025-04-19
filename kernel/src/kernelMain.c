@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
     crearEstructuras();
 
     pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
-    pthread_create(hiloAtenderIO,NULL,atenderIO,NULL);
+    pthread_create(hiloAtenderIO,NULL,esperarClientesIO,NULL);
 
     
 
@@ -23,6 +23,8 @@ int main(int argc, char* argv[]) {
    
 
     INIT_PROC("afsfas",4);
+
+    
 
 
     pthread_join(*hiloAtenderIO,NULL);
@@ -56,7 +58,7 @@ void crearEstructuras()
     listaDispositivosIO = list_create();
 
     
-    diccionarioIODeProcesosBloqueados = dictionary_create();
+    diccionarioProcesosBloqueados = dictionary_create();
 
     iniciarSemaforosKernel();
 
@@ -95,13 +97,13 @@ void iniciarSemaforosKernel()
 
     semaforoListaDispositivosIO = malloc(sizeof(sem_t));
     
-    semaforoDiccionarioIOBlocked = malloc(sizeof(sem_t));
+    semaforoDiccionarioProcesosBloqueados = malloc(sizeof(sem_t));
     
     sem_init(semaforoListaNew,1,1);
     sem_init(semaforoListaReady,1,1);
 
 
-    sem_init(semaforoDiccionarioIOBlocked,1,1); 
+    sem_init(semaforoDiccionarioProcesosBloqueados,1,1); 
     //sem_init(semaforoDiccionarioBlocked,1,1); 
     sem_init(semaforoListaSwapReady,1,1);
     sem_init(semaforoListaDispositivosIO,1,1);

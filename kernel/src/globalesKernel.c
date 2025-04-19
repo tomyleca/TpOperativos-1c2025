@@ -27,8 +27,8 @@ t_list* listaProcesosNew;
 t_list* listaProcesosReady;
 t_list* listaProcesosSwapReady;
 
-t_dictionary* diccionarioIODeProcesosBloqueados;
-t_dictionary* diccionarioProcesosSwapBloqueados;
+t_dictionary* diccionarioProcesosBloqueados;
+
 
 uint32_t pidDisponible = 0;
 

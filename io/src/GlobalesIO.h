@@ -12,9 +12,11 @@
 #include "utils/shared.h"
 #include "utils/conexiones.h"
 #include "utils/configs.h"
-#include "../../utils/src/utils/opCodesKernelIO.h"
+#include "../../utils/src/utils/conexionKernelIO.h"
 
-extern int socket_io_kernel;
+
+
+extern int fdConexion;
 extern char* ip_kernel;
 extern int puerto_kernel;
 extern char* valor;

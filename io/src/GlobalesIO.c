@@ -1,6 +1,6 @@
 #include "GlobalesIO.h"
 
-int socket_io_kernel;
+int fdConexion;
 char* ip_kernel;
 int puerto_kernel;
 char* valor;

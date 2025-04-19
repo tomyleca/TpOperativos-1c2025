@@ -4,8 +4,8 @@
 
 void agregarADiccionario(sem_t* semaforo,t_dictionary* diccionario,char* clave, void* valor);
 void* leerDeDiccionario(sem_t* semaforo,t_dictionary* dicionario,char* clave);
+void* sacarDeDiccionario(sem_t* semaforo,t_dictionary* diccionario,char* clave);
 
 
-extern sem_t* semaforoDiccionarioBlocked;
-extern sem_t* semaforoDiccionarioIOBlocked;
-extern sem_t* semaforoDiccionarioBlockedSwap;
+
+
