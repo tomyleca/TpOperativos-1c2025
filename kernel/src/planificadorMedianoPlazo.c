@@ -16,14 +16,14 @@ void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO
     sem_init(procesoEsperando->semaforoIOFinalizada,1,0);
 
     char* PIDComoChar = pasarUnsignedAChar(proceso->PID);
-    agregarADiccionario(semaforoDiccionarioProcesosBloqueados,diccionarioProcesosBloqueados,PIDComoChar,procesoEsperando);
+    agregarADiccionario(diccionarioProcesosBloqueados,PIDComoChar,procesoEsperando);
 
 
 
     pthread_t* hiloContador = malloc(sizeof(pthread_t));
     pthread_create(hiloContador,NULL,contadorParaSwap,proceso);
 
-    procesoEsperando = sacarDeDiccionario(semaforoDiccionarioProcesosBloqueados,diccionarioProcesosBloqueados,PIDComoChar);
+    procesoEsperando = sacarDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
 
     free(PIDComoChar);
     free(procesoEsperando->semaforoIOFinalizada);
@@ -47,7 +47,7 @@ void* contadorParaSwap(char* PID){
         int tiempoTranscurrido = (int) temporal_gettime(contadorEsperaSwap);
         if(tiempoTranscurrido>=4500)
         {
-            procesoEnEsperaIO* procesoEsperandoIO = leerDeDiccionario(semaforoDiccionarioProcesosBloqueados,diccionarioProcesosBloqueados,PID);
+            procesoEnEsperaIO* procesoEsperandoIO = leerDeDiccionario(diccionarioProcesosBloqueados,PID);
             procesoEsperandoIO->estaENSwap=1;
             pasarASwapBlocked(procesoEsperandoIO);
             
@@ -55,7 +55,7 @@ void* contadorParaSwap(char* PID){
         if(IOTerminado(PID))
         {
             //Creo que no hace falta proceso = sacarDeDiccionario(semaforoDiccionarioBlocked,PIDComoChar);
-            procesoEnEsperaIO* procesoIOFinalizado = leerDeDiccionario(semaforoDiccionarioProcesosBloqueados,diccionarioProcesosBloqueados,PID);
+            procesoEnEsperaIO* procesoIOFinalizado = leerDeDiccionario(diccionarioProcesosBloqueados,PID);
             pasarAReady(procesoIOFinalizado->proceso);
             
             break;
@@ -70,7 +70,7 @@ void* contadorParaSwap(char* PID){
 
 bool IOTerminado(char* PIDComoChar){
     
-    procesoEnEsperaIO* procesoEsperando = leerDeDiccionario(semaforoDiccionarioProcesosBloqueados, diccionarioProcesosBloqueados, PIDComoChar);
+    procesoEnEsperaIO* procesoEsperando = leerDeDiccionario( diccionarioProcesosBloqueados, PIDComoChar);
     return procesoEsperando->IOFinalizada;
 }
 
@@ -95,7 +95,7 @@ char* pasarUnsignedAChar(uint32_t unsigned_)
 void pasarASwapReady(PCB* proceso)
 {
     if(algoritmoColaNewEnFIFO)
-        agregarALista(semaforoListaSwapReady,listaProcesosSwapReady,proceso);
+        agregarALista(listaProcesosSwapReady,proceso);
     else 
-        agregarAListaOrdenada(semaforoListaSwapReady,listaProcesosSwapReady,proceso,menorTam);
+        agregarAListaOrdenada(listaProcesosSwapReady,proceso,menorTam);
 }

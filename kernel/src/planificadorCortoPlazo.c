@@ -7,12 +7,12 @@ void planificadorCortoPlazo()
         
 
         case FIFO:
-            procesoAEjecutar  = sacarDeLista(semaforoListaReady,listaProcesosReady,0);
+            procesoAEjecutar  = sacarDeLista(listaProcesosReady,0);
             break;
         case SJF:
         case SRT:
-            ordenarLista(semaforoListaReady, listaProcesosReady,menorEstimadoRafagaActual);
-            procesoAEjecutar = sacarDeLista(semaforoListaReady,listaProcesosReady,0);
+            ordenarLista( listaProcesosReady,menorEstimadoRafagaActual);
+            procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
             break;
         
 

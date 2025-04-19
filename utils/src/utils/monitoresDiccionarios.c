@@ -6,27 +6,37 @@ sem_t* semaforoDiccionarioProcesosBloqueados;
 sem_t* semaforoDiccionarioBlockedSwap;
 
 
-void agregarADiccionario(sem_t* semaforo,t_dictionary* diccionario,char* clave, void* valor)
-{
-    sem_wait(semaforo);
-    dictionary_put(diccionario,"0",valor);
-    sem_post(semaforo);
+t_diccionarioConSemaforos* crearDiccionarioConSemaforos(){
+    t_diccionarioConSemaforos* nuevoDiccionario = malloc(sizeof(t_diccionarioConSemaforos));
+    nuevoDiccionario->diccionario = dictionary_create();
+    nuevoDiccionario->semaforoMutex=malloc(sizeof(sem_t));
+    nuevoDiccionario->semaforoCantElementos=malloc(sizeof(sem_t));
+    sem_init(nuevoDiccionario->semaforoMutex,1,1);
+    sem_init(nuevoDiccionario->semaforoCantElementos,1,0);
+    return nuevoDiccionario;
 }
 
-void* leerDeDiccionario(sem_t* semaforo,t_dictionary* diccionario,char* clave)
+void agregarADiccionario(t_diccionarioConSemaforos* diccionarioConSemaforos,char* clave, void* valor)
 {
-    sem_wait(semaforo);
-    void* valor = dictionary_get(diccionario,clave);
-    sem_post(semaforo);
+    sem_wait(diccionarioConSemaforos->semaforoMutex);
+    dictionary_put(diccionarioConSemaforos->diccionario,"0",valor);
+    sem_post(diccionarioConSemaforos->semaforoMutex);
+}
+
+void* leerDeDiccionario(t_diccionarioConSemaforos* diccionarioConSemaforos,char* clave)
+{
+    sem_wait(diccionarioConSemaforos->semaforoMutex);
+    void* valor = dictionary_get(diccionarioConSemaforos->diccionario,clave);
+    sem_post(diccionarioConSemaforos->semaforoMutex);
 
     return valor;
 }
 
-void* sacarDeDiccionario(sem_t* semaforo,t_dictionary* diccionario,char* clave)
+void* sacarDeDiccionario(t_diccionarioConSemaforos* diccionarioConSemaforos,char* clave)
 {
-    sem_wait(semaforo);
-    void* valor = dictionary_remove(diccionario,clave);
-    sem_post(semaforo);
+    sem_wait(diccionarioConSemaforos->semaforoMutex);
+    void* valor = dictionary_remove(diccionarioConSemaforos->diccionario,clave);
+    sem_wait(diccionarioConSemaforos->semaforoMutex);
 
     return valor;
 }

@@ -23,11 +23,11 @@ t_log_level log_level;
 t_log* logger_kernel;
 
 //PROCESOS
-t_list* listaProcesosNew;
-t_list* listaProcesosReady;
-t_list* listaProcesosSwapReady;
+t_listaConSemaforos* listaProcesosNew;
+t_listaConSemaforos* listaProcesosReady;
+t_listaConSemaforos* listaProcesosSwapReady;
 
-t_dictionary* diccionarioProcesosBloqueados;
+t_diccionarioConSemaforos* diccionarioProcesosBloqueados;
 
 
 uint32_t pidDisponible = 0;
@@ -35,10 +35,11 @@ uint32_t pidDisponible = 0;
 
 int algoritmoDePlanificacionInt;
 
-//IO
-t_list* listaDispositivosIO;
 
-sem_t* semaforoListaDispositivosIO;
+
+//IO
+t_listaConSemaforos* listaDispositivosIO;
+
 
 
 

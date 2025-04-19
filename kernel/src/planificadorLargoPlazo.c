@@ -24,9 +24,9 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     nuevoProceso->estimadoRafagaActual=0;
    
     if(algoritmoColaNewEnFIFO)
-        agregarALista(semaforoListaNew,listaProcesosNew,nuevoProceso);
+        agregarALista(listaProcesosNew,nuevoProceso);
     else
-        agregarAListaOrdenada(semaforoListaNew,listaProcesosNew,nuevoProceso,menorTam);
+        agregarAListaOrdenada(listaProcesosNew,nuevoProceso,menorTam);
 
     
     inicializarProceso();
@@ -37,14 +37,14 @@ void inicializarProceso(){
     
     //TODO
     //ACA VA ALGO PARA ESPERAR EL ENTER
-    if (!list_is_empty(listaProcesosSwapReady))
-        procesoAInicializar= sacarDeLista(semaforoListaSwapReady,listaProcesosSwapReady,0);
+    if (!list_is_empty(listaProcesosSwapReady->lista))
+        procesoAInicializar= sacarDeLista(listaProcesosSwapReady,0);
     else
-        procesoAInicializar = sacarDeLista(semaforoListaNew,listaProcesosNew,0);
+        procesoAInicializar = sacarDeLista(listaProcesosNew,0);
     
     //TODO
     //LE PREGUNTO A MEMORIA
-    //pasarAReady(procesoAInicializar);
+    pasarAReady(procesoAInicializar);
 
     //pasarABLoqueadoEIniciarContador(procesoAInicializar);
     
@@ -58,6 +58,6 @@ bool menorTam(PCB* PCB1,PCB* PCB2)
 }
 
 void pasarAReady(PCB* proceso){
-    agregarALista(semaforoListaReady,listaProcesosReady,proceso);
+    agregarALista(listaProcesosReady,proceso);
     proceso->ME[READY]++;
 }

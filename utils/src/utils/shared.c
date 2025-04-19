@@ -249,7 +249,7 @@ uint32_t recibir_uint32_t_del_buffer(t_buffer *coso)
 	}
 	if (nuevo_size < 0)
 	{
-		printtf("\n[ERROR_uint32_t]: BUFFER CON TAMAÑO NEGATIVO\n\n");
+		printf("\n[ERROR_uint32_t]: BUFFER CON TAMAÑO NEGATIVO\n\n");
 		// free(valor_a_devolver);
 		// return 0;
 		exit(EXIT_FAILURE);

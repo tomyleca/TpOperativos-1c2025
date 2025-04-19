@@ -51,16 +51,16 @@ void crearEstructuras()
 {
     setearAlgoritmosDePlanificacion();
 
-    listaProcesosNew = list_create();
-    listaProcesosReady = list_create();
-    listaProcesosSwapReady = list_create();
+    listaProcesosNew = crearListaConSemaforos();
+    listaProcesosReady = crearListaConSemaforos();
+    listaProcesosSwapReady = crearListaConSemaforos();
 
-    listaDispositivosIO = list_create();
+    listaDispositivosIO = crearListaConSemaforos();
 
     
-    diccionarioProcesosBloqueados = dictionary_create();
+    diccionarioProcesosBloqueados = crearDiccionarioConSemaforos();
 
-    iniciarSemaforosKernel();
+    
 
     
 }
@@ -89,26 +89,4 @@ void setearAlgoritmosDePlanificacion(){
 
 }
 
-void iniciarSemaforosKernel()
-{
-    semaforoListaNew= malloc(sizeof(sem_t));
-    semaforoListaReady = malloc(sizeof(sem_t));
-    semaforoListaSwapReady = malloc(sizeof(sem_t));
-
-    semaforoListaDispositivosIO = malloc(sizeof(sem_t));
-    
-    semaforoDiccionarioProcesosBloqueados = malloc(sizeof(sem_t));
-    
-    sem_init(semaforoListaNew,1,1);
-    sem_init(semaforoListaReady,1,1);
-
-
-    sem_init(semaforoDiccionarioProcesosBloqueados,1,1); 
-    //sem_init(semaforoDiccionarioBlocked,1,1); 
-    sem_init(semaforoListaSwapReady,1,1);
-    sem_init(semaforoListaDispositivosIO,1,1);
-
-
-
-}
 

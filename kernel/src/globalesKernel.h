@@ -110,27 +110,17 @@ extern bool IOTerminado(char* PIDComoChar);
 extern void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO);
 extern void pasarASwapReady(PCB* proceso);
 
-extern t_list* listaProcesosNew;
-extern t_list* listaProcesosReady;
-extern t_list* listaProcesosSwapReady;
+extern t_listaConSemaforos* listaProcesosNew;
+extern t_listaConSemaforos* listaProcesosReady;
+extern t_listaConSemaforos* listaProcesosSwapReady;
 
-extern sem_t* semaforoDiccionarioProcesosBloqueados;
-
-
-
+extern t_diccionarioConSemaforos* diccionarioProcesosBloqueados;
 
 extern int algoritmoDePlanificacionInt;
 
-//Semaforos
-
-extern sem_t* semaforoListaNew;
-extern sem_t* semaforoListaReady;
-extern sem_t* semaforoListaSwapReady;
-
-extern sem_t* semaforoListaDispositivosIO;
 
 
-extern t_dictionary* diccionarioProcesosBloqueados;
+
 
 //CONEXIONES
 extern void iniciarConexiones();
@@ -139,7 +129,7 @@ extern void cerrarConexiones();
 //IO
 
 
-extern t_list* listaDispositivosIO;
+extern t_listaConSemaforos* listaDispositivosIO;
 
 
 

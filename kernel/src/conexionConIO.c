@@ -29,7 +29,7 @@ void* atenderIO(int* fdConexion)
                 nuevoDispositivoIO->nombre=nombreIO;
                 nuevoDispositivoIO->ocupado=false;
                 nuevoDispositivoIO->fdConexion= *fdConexion;
-                agregarALista(semaforoListaDispositivosIO,listaDispositivosIO,nuevoDispositivoIO);
+                agregarALista(listaDispositivosIO,nuevoDispositivoIO);
                 break;
             case TERMINO_IO:
                 uint32_t PID =recibir_uint32_t_del_buffer(buffer);
@@ -73,5 +73,5 @@ DispositivoIO* buscarIOSegunNombre(char* nombreIO)
         return (strcmp(dispositivo->nombre,nombreIO) == 0);
     };
 
-    return sacarDeListaSegunCondicion(semaforoListaDispositivosIO,listaDispositivosIO,_mismoNombre);
+    return sacarDeListaSegunCondicion(listaDispositivosIO,_mismoNombre);
 }
