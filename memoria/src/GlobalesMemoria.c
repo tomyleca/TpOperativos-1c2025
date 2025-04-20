@@ -1,5 +1,6 @@
 #include "GlobalesMemoria.h"
 
+
 int conexion;
 char* ip;
 char* puerto;
@@ -8,6 +9,8 @@ char* valor;
 t_log* logger_memoria;
 t_config* config_memoria;
 
+
+t_list* lista_contextos;
 int puerto_escucha;
 int tam_memoria;
 int tam_pagina;
