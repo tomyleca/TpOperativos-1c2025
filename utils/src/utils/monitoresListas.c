@@ -61,3 +61,15 @@ void* sacarDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,bool (*c
 
     return elem;
 }
+
+void* leerDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion)
+{
+    void* elem;
+    
+    sem_wait(listaConSemaforos->semaforoCantElementos);
+    sem_wait(listaConSemaforos->semaforoMutex);
+        elem = list_get(listaConSemaforos->lista,posicion);
+    sem_post(listaConSemaforos->semaforoMutex);
+    
+    return elem;
+}

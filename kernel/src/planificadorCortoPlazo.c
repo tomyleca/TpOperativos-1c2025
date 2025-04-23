@@ -2,6 +2,7 @@
 
 void planificadorCortoPlazo()
 {
+    sem_wait(semaforoCPUsLibres);
     switch(algoritmoDePlanificacionInt){
         PCB* procesoAEjecutar;
         

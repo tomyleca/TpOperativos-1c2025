@@ -41,3 +41,9 @@ extern void ordenarLista(t_listaConSemaforos* listaConSemaforos,bool (*funcionPa
 *@brief Saca el primer elemento de una lista que coincida con la condicion dada. Utiliza semáforos para evitar condiciones de carrera.
 */
 extern void* sacarDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,bool (*condicion) (void*));
+
+
+/**
+*@brief Devuelve el elemento que se encuentra en la posición dada de la lista. Utiliza semáforos para evitar condiciones de carrera.
+*/
+extern void* leerDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion);

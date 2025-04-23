@@ -63,6 +63,14 @@ typedef struct{
 } procesoEnEsperaIO;
 
 
+typedef struct{
+    char* identificador;
+    bool ejecutando;
+    PCB* procesoEnEjecucion;
+    int fdConexion;
+}
+nucleoCPU;
+
 
 
 extern int socket_kernel_memoria;
@@ -102,24 +110,17 @@ extern bool menorEstimadoRafagaActual(PCB* PCB1,PCB* PCB2);
 //Planificador
 extern void estimarRafagaActual(PCB* proceso);
 
-//Cambiar de estado
-extern void pasarAReady(PCB* proceso);
-extern void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO);
-extern void* contadorParaSwap(char* PID);
-extern bool IOTerminado(char* PIDComoChar);
-extern void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO);
-extern void pasarASwapReady(PCB* proceso);
+
 
 extern t_listaConSemaforos* listaProcesosNew;
 extern t_listaConSemaforos* listaProcesosReady;
 extern t_listaConSemaforos* listaProcesosSwapReady;
+extern t_listaConSemaforos* listaCPUsLibres;
+extern t_listaConSemaforos* listaCPUsEnUso;
 
 extern t_diccionarioConSemaforos* diccionarioProcesosBloqueados;
 
 extern int algoritmoDePlanificacionInt;
-
-
-
 
 
 //CONEXIONES
@@ -131,7 +132,8 @@ extern void cerrarConexiones();
 
 extern t_listaConSemaforos* listaDispositivosIO;
 
-
+//CPU
+extern sem_t* semaforoCPUsLibres;
 
 
 //OTRAS

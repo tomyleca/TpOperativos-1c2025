@@ -57,8 +57,14 @@ void crearEstructuras()
 
     listaDispositivosIO = crearListaConSemaforos();
 
+    listaCPUsLibres = crearListaConSemaforos();
+    listaCPUsEnUso = crearListaConSemaforos();
+
     
     diccionarioProcesosBloqueados = crearDiccionarioConSemaforos();
+
+    semaforoCPUsLibres = malloc(sizeof(sem_t));
+    sem_init(semaforoCPUsLibres,1,0);
 
     
 

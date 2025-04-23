@@ -26,6 +26,8 @@ t_log* logger_kernel;
 t_listaConSemaforos* listaProcesosNew;
 t_listaConSemaforos* listaProcesosReady;
 t_listaConSemaforos* listaProcesosSwapReady;
+t_listaConSemaforos* listaCPUsLibres;
+t_listaConSemaforos* listaCPUsEnUso;
 
 t_diccionarioConSemaforos* diccionarioProcesosBloqueados;
 
@@ -40,6 +42,8 @@ int algoritmoDePlanificacionInt;
 //IO
 t_listaConSemaforos* listaDispositivosIO;
 
+//CPU
+sem_t* semaforoCPUsLibres;
 
 
 

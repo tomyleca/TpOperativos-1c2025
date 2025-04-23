@@ -8,6 +8,7 @@
 #include<commons/config.h>
 #include<readline/readline.h>
 #include "globalesKernel.h" 
+#include "cambiarDeEstado.h"
 #include "utils/configs.h"
 #include "utils/shared.h"
 #include "utils/conexiones.h"
