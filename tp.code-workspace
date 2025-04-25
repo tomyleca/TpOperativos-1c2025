@@ -19,10 +19,6 @@
     {
       "name": "utils",
       "path": "utils"
-    },
-    {
-    "name": "tests",
-    "path": "tests"
     }
   ],
   "settings": {

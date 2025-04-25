@@ -1,4 +1,4 @@
-#include "globalesKernel.h"
+#include "kernel.h"
 
 void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     //Creo un nuevo proceso

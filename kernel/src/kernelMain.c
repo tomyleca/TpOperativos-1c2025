@@ -15,7 +15,10 @@ int main(int argc, char* argv[]) {
     crearEstructuras();
 
     pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
+    pthread_t* hiloPlanificadorCortoPlazo = malloc(sizeof(pthread_t));
     pthread_create(hiloAtenderIO,NULL,esperarClientesIO,NULL);
+    pthread_create(hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
+
 
     
 
@@ -23,11 +26,15 @@ int main(int argc, char* argv[]) {
    
 
     INIT_PROC("afsfas",4);
+    guardarDatosCPU("id",1);
+    
+    
 
     
 
 
     pthread_join(*hiloAtenderIO,NULL);
+    pthread_join(*hiloPlanificadorCortoPlazo,NULL);
     return 0;
 }
 
@@ -63,8 +70,8 @@ void crearEstructuras()
     
     diccionarioProcesosBloqueados = crearDiccionarioConSemaforos();
 
-    semaforoCPUsLibres = malloc(sizeof(sem_t));
-    sem_init(semaforoCPUsLibres,1,0);
+    semaforoIntentarPlanificar = malloc(sizeof(sem_t));
+    sem_init(semaforoIntentarPlanificar,1,0);
 
     
 

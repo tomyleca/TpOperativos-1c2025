@@ -43,7 +43,7 @@ int algoritmoDePlanificacionInt;
 t_listaConSemaforos* listaDispositivosIO;
 
 //CPU
-sem_t* semaforoCPUsLibres;
+sem_t* semaforoIntentarPlanificar;
 
 
 

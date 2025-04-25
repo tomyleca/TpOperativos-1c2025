@@ -14,8 +14,9 @@ void* esperarClientesIO(void* arg)
 }
 
 
-void* atenderIO(int* fdConexion)
+void* atenderIO(void* conexion)
 {
+    int* fdConexion = (int*)conexion;
     while(1)
     {
         opCodesKernelIO opCode = recibir_operacion(*fdConexion);
