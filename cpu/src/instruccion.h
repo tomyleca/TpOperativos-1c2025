@@ -36,8 +36,6 @@ void cargar_registros(t_buffer* buffer);
 
 void cargar_registros_a_paquete(t_paquete* buffer_memoria);
 
-void liberar_array_strings(char **array);
-
 void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_de_interrupcion);
 
 

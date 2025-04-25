@@ -18,13 +18,16 @@ typedef enum
     MENSAJE,
     PAQUETE,
     HANDSHAKE,
+    HANDSHAKE_CPU_KERNEL_I,
+    HANDSHAKE_CPU_KERNEL_D,
     IO,
     DUMP_MEMORY,
-    INIT_PROC,
+    INIT_PROCCESS,
     SEGMENTATION_FAULT,
     CPU_PIDE_INSTRUCCION_A_MEMORIA,
     ENVIAR_A_MEMORIA_UN_AVISO_DE_SYSCALL,
     INTERRUPCION_PID,
+    PID_KERNEL_A_CPU,
     CPU_RECIBE_INSTRUCCION_MEMORIA,
     CPU_RECIBE_CONTEXTO,
     CPU_RECIBE_OK_DE_LECTURA,
@@ -32,7 +35,9 @@ typedef enum
     CPU_RECIBE_OK_ACTUALIZAR_CONTEXTO,
     CPU_PIDE_ESCRIBIR_MEMORIA,
     CPU_PIDE_LEER_MEMORIA,
+    CPU_PIDE_CONTEXTO,
     RECIBIR_PID_KERNEL,
+    RESPUESTA_KERNEL_TPN,
     CREAR_PID_OK
 } op_code; 
 
@@ -82,6 +87,8 @@ void enviar_paquete(t_paquete* paquete, int socket_cliente);
 void eliminar_paquete(t_paquete* paquete);
 
 void liberar_conexion(int socket_cliente);
+
+void liberar_array_strings(char **array);
 
 void *serializar_paquete(t_paquete *paquete, int bytes);
 

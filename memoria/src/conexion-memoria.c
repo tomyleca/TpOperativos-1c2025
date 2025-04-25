@@ -37,39 +37,58 @@ void server_escucha(int fd_escucha_servidor,t_log* memoria_logger)
 
 int atender_cliente(int *fd_conexion)
 {    
-    /*lista_particiones = inicializar_lista_particiones(PARTICIONES);*/
-	t_buffer* unBuffer;
+    t_buffer* unBuffer;
     int cliente_fd = *fd_conexion;
-    t_contexto* contexto;
     t_paquete* paquete;
-
-
+    int pid;
     while (1) {
         int cod_op = recibir_operacion(cliente_fd); 
         switch (cod_op) {
             case MENSAJE:
                 //recibir_mensaje(cliente_fd);
                 break;
+        case CPU_PIDE_CONTEXTO: 
+                //usleep(retardo_memoria * 1000); // Convertir milisegundos a microsegundos
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                pid = recibir_int_del_buffer(unBuffer);
+                if(pid >= 0)
+                {
+                    nuevo_contexto_provisorio = buscar_contexto_por_pid(pid);                   
+                    enviar_contexto(nuevo_contexto_provisorio, cliente_fd); 
+                }
+                else
+                {
+                    log_error(logger_memoria, "PID invalido");                   
+                }
+                free(unBuffer);
+                free(nuevo_contexto_provisorio);
+                break;
             case RECIBIR_PID_KERNEL:
-            t_info_kernel* datos_kernel = malloc(sizeof(t_info_kernel)); 
-            datos_kernel->pid = 0;
-            datos_kernel->tamanio_proceso = 0;
+            t_info_kernel datos_kernel; 
+            datos_kernel.pid = 0;
+            datos_kernel.tamanio_proceso = 0;
             unBuffer = recibiendo_super_paquete(cliente_fd);
-            datos_kernel->pid = recibir_int_del_buffer(unBuffer);
-            datos_kernel->tamanio_proceso = recibir_int_del_buffer(unBuffer); 
-            datos_kernel->archivo_pseudocodigo = recibir_string_del_buffer(unBuffer);
+            datos_kernel.pid = recibir_int_del_buffer(unBuffer);
+            datos_kernel.tamanio_proceso = recibir_int_del_buffer(unBuffer); 
+            datos_kernel.archivo_pseudocodigo = recibir_string_del_buffer(unBuffer);
             printf("---------------------------------------------\n");
-            printf("PID LLEGADO DE KERNEL %d\n", datos_kernel->pid);
-            contexto = buscar_contexto_por_pid(datos_kernel->pid);
-            crear_pid(contexto, datos_kernel);
-            // Respuesta a KERNEL----- NOSE SI VA!!
-            paquete = crear_super_paquete(CREAR_PID_OK);  
-            cargar_int_al_super_paquete(paquete, datos_kernel->pid);
+            printf("PID LLEGADO DE KERNEL %d\n", datos_kernel.pid);
+            nuevo_contexto = malloc(sizeof(t_contexto)); //ESTE MALLOC LO HAGO PORQUE NECESITO GUARDAR PUNTEROS A MI LISTA
+            nuevo_contexto = buscar_contexto_por_pid(datos_kernel.pid);
+            crear_pid(nuevo_contexto, datos_kernel);
+            // Respuesta a KERNEL----- EL NUMERO DE TABLA DE PRIMER NIVEL !!
+            paquete = crear_super_paquete(RESPUESTA_KERNEL_TPN); //TPN TABLA DE PRIMER NIVEL --- a implementar todavia!! 
+            //cargar_int_al_super_paquete(paquete, tabla_primer_nivel);
             enviar_paquete(paquete, cliente_fd);
             free(unBuffer);
-            free(datos_kernel->archivo_pseudocodigo);
-            free(datos_kernel);
-            break;
+            free(datos_kernel.archivo_pseudocodigo);
+            break;       
+            case CPU_PIDE_INSTRUCCION_A_MEMORIA: //PARA INICIAR DECODE ESTO!!
+                usleep(retardo_memoria * 1000);
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                buscar_y_mandar_instruccion(unBuffer,cliente_fd);
+                free(unBuffer);
+                break;
             case -1:
                 //log_error(memoria_logger, "El cliente se desconectó. Terminando servidor.");
                 return 0;  // Terminar el ciclo y finalizar el hilo

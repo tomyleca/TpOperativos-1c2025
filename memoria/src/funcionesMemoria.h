@@ -16,9 +16,15 @@
 
 t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo);
 
-void crear_pid(t_contexto* nuevo_contexto, t_info_kernel* info_kernel);
+void crear_pid(t_contexto* nuevo_contexto, t_info_kernel info_kernel);
 
 t_contexto* buscar_contexto_por_pid(int pid);
+
+char* obtener_instruccion_por_indice(t_list* instrucciones, uint32_t indice_instruccion);
+
+void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu);
+
+void enviar_contexto(t_contexto* contexto_proceso, int socket_cpu);
 
 
 #endif

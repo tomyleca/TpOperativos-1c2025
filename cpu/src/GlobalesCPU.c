@@ -7,6 +7,8 @@ int socket_cpu_kernel_interrupt;
 char* ip;
 char* puerto;
 char* valor;
+int identificador_cpu;
+
 
 //Otros
 t_log* logger_cpu;
@@ -31,6 +33,8 @@ t_contexto_cpu* contexto;
 
 //SEMAFOROS
 sem_t sem_hay_instruccion;
+sem_t sem_pid;
+sem_t sem_contexto;
 
 
 char* ip_memoria;

@@ -24,6 +24,8 @@ extern int socket_cpu_kernel_dispatch;
 extern int socket_cpu_kernel_interrupt;
 extern int fd_cpu_kernel_dispatch;
 extern int fd_cpu_kernel_interrupt;
+extern int identificador_cpu;
+
 
 // Config
 extern char* ip;
@@ -48,6 +50,8 @@ extern t_contexto_cpu* contexto;
 
 //SEMAFOROS
 extern sem_t sem_hay_instruccion;
+extern sem_t sem_pid;
+extern sem_t sem_contexto;
 
 
 // Conexiones a módulos

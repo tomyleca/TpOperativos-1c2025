@@ -21,3 +21,5 @@ char* path_swapfile;
 int retardo_swap;
 t_log_level log_level;
 char* dump_path;
+t_contexto* nuevo_contexto_provisorio; 
+t_contexto* nuevo_contexto;

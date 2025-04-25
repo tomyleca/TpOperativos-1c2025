@@ -5,17 +5,11 @@ t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo)
 {
     // Abro el archivo en modo lectura
 
-    // EN CONFIG ME DICE DONDE ESTAN LOS PATH
-    // char* direccion = strcat(config_memoria->path_instrucciones, archivo_pseudocodigo);
-    // ANTES DE EJECUTAR AGREGARLE AL CONFIG DE MEMORIA->PATH_INSTRUCCIONES UNA BARRA
-
     // POR AHORA DEJO LA LINEA DE ABAJO
-    // para no hacer que todos tengan que crear una carpeta "sripts-pruebas"
 
     char* filepath = string_new(); // Creo un string para almacenar la ruta del archivo
 
-    string_append(&filepath, "../ruta del pseudocodigo xdxd");
-    // string_append(&filepath, "../../kernel/pruebas/"); // PARA VALGRIND DEJAR ESTAR Y COMENTAR LA DE ARRIBA :) 
+    string_append(&filepath, "../pseudocodigo.txt");
 
     string_append(&filepath, archivo_pseudocodigo);
 
@@ -32,7 +26,7 @@ t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo)
         return instrucciones;
     }
 
-    char* linea_instruccion = malloc(256 * sizeof(int));
+    char* linea_instruccion = malloc(256);
 
     while (fgets(linea_instruccion, 256, archivo)) 
     {
@@ -106,39 +100,29 @@ t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo)
     return instrucciones;
 }
 
-void crear_pid(t_contexto* nuevo_contexto, t_info_kernel* info_kernel)
-{
-    // Crear e inicializar el contexto del hilo (TCB)
-    t_pids* nuevo_pid = malloc(sizeof(t_pids));
-    if (nuevo_pid == NULL) {
-        log_error(logger_memoria, "Error al asignar memoria para el PID del proceso %d", info_kernel->pid);
-        free(nuevo_contexto); // Liberar memoria del contexto antes de salir
-        exit(1);
-    }
+void crear_pid(t_contexto* nuevo_contexto, t_info_kernel info_kernel)
+{  
 
-    nuevo_pid->pid = info_kernel->pid;
-    
-    // Inicializar registros del TID
-    nuevo_pid->ax = 0;
-    nuevo_pid->bx = 0;
-    nuevo_pid->cx = 0;
-    nuevo_pid->dx = 0;
-    nuevo_pid->ex = 0;
-    nuevo_pid->fx = 0;
-    nuevo_pid->gx = 0;
-    nuevo_pid->hx = 0;
-    nuevo_pid->pc = 0; 
+     // Inicializar el contexto principal del proceso
+    nuevo_contexto->pid = info_kernel.pid;
+    nuevo_contexto->tamanio_proceso = info_kernel.tamanio_proceso;
 
-    // Leer el archivo de pseudocódigo y cargar las instrucciones
-    nuevo_pid->pseudocodigo = strdup(info_kernel->archivo_pseudocodigo);
-    
-    nuevo_pid->instrucciones = leer_archivo_y_cargar_instrucciones(nuevo_pid->pseudocodigo);
-    
-    // Agregar el PID al contexto del proceso
-    list_add(nuevo_contexto->lista_pids, nuevo_pid);
-    
+    nuevo_contexto->datos_pid.ax = 0;
+    nuevo_contexto->datos_pid.bx = 0;
+    nuevo_contexto->datos_pid.cx = 0;
+    nuevo_contexto->datos_pid.dx = 0;
+    nuevo_contexto->datos_pid.ex = 0;
+    nuevo_contexto->datos_pid.fx = 0;
+    nuevo_contexto->datos_pid.gx = 0;
+    nuevo_contexto->datos_pid.hx = 0;
+    nuevo_contexto->datos_pid.pc = 0;
+
+    nuevo_contexto->datos_pid.pseudocodigo = strdup(info_kernel.archivo_pseudocodigo);
+    nuevo_contexto->datos_pid.instrucciones = leer_archivo_y_cargar_instrucciones(nuevo_contexto->datos_pid.pseudocodigo);
+    list_add(lista_contextos, nuevo_contexto);
+    // Crear la tabla de primer nivel y guardar el ID en el contexto
+    //nuevo_contexto->id_tabla_primer_nivel = crear_tabla_primer_nivel();
 }
-
 
 t_contexto* buscar_contexto_por_pid(int pid)
 {
@@ -158,4 +142,70 @@ t_contexto* buscar_contexto_por_pid(int pid)
     log_error(logger_memoria, "No se encontró el contexto para el PID %d", pid);
     exit(1); // Si no se encuentra, devolver NULL
     return 0;
+}
+
+void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
+{
+    int pid = recibir_int_del_buffer(buffer);
+    int pc = recibir_int_del_buffer(buffer);
+    
+    t_contexto* nuevo_context = buscar_contexto_por_pid(pid); 
+    char* instruccion = obtener_instruccion_por_indice(nuevo_context->datos_pid.instrucciones, pc++);
+    
+    printf("Indice: %d -- INSTRUCCION: %s \n", pc, instruccion);
+    
+    t_paquete* paquete_contexto = crear_super_paquete(CPU_RECIBE_INSTRUCCION_MEMORIA);
+    cargar_int_al_super_paquete(paquete_contexto, nuevo_context->pid);
+    cargar_string_al_super_paquete(paquete_contexto, instruccion);
+    
+    char** partes = string_split(instruccion, " ");
+    
+    enviar_paquete(paquete_contexto, socket_cpu);
+    free(paquete_contexto);  
+    
+    // Liberar memoria usada por el string_split
+    liberar_array_strings(partes);   
+}
+
+char* obtener_instruccion_por_indice(t_list* instrucciones, uint32_t indice_instruccion)
+{
+ 	char* instruccion_actual;
+ 	if(indice_instruccion >= 0 && indice_instruccion < list_size(instrucciones))
+    {
+ 		instruccion_actual = list_get(instrucciones, indice_instruccion);
+ 		return instruccion_actual;
+ 	}
+ 	else
+    {
+ 		log_error(logger_memoria, "Numero de Instruccion <%d> NO VALIDA", indice_instruccion);
+ 		return NULL;
+ 	}
+}
+
+void enviar_contexto(t_contexto* contexto_proceso, int socket_cpu)
+{   
+    // Verificar que ambos contextos no sean NULL
+    if (contexto_proceso == NULL || contexto_proceso->pid == NULL) 
+    {
+        log_error(logger_memoria, "Error al enviar contexto: Contexto o PID son NULL");
+        return;
+    }
+    
+    // Enviamos contexto de ejecucion a CPU
+    t_paquete* paquete_contexto = crear_super_paquete(CPU_RECIBE_CONTEXTO);
+    
+    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->pid);
+    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.ax);
+    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.bx);
+    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.cx);
+    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.dx);
+    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.ex);
+    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.fx);
+    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.gx);
+    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.hx);
+    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.pc);
+    
+    enviar_paquete(paquete_contexto, socket_cpu);
+
+    free(paquete_contexto);
 }

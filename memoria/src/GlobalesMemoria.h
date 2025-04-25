@@ -14,7 +14,6 @@
 #include "utils/configs.h"
 
 typedef struct {
-    int pid;                // Identificador del Proceso
     uint32_t ax;            // Registro AX
     uint32_t bx;            // Registro BX
     uint32_t cx;            // Registro CX
@@ -28,11 +27,11 @@ typedef struct {
     t_list* instrucciones;  // lista de instrucciones 
 } t_pids;
 
-typedef struct {        // Esta es nuestra exructura de memoria
-    int pid;            // Identificador del proceso
+typedef struct {
+    int pid; // Identificador del proceso
     int tamanio_proceso;
     t_pids datos_pid;
-    t_list* lista_pids;
+    int id_tabla_primer_nivel; // Identificador de la tabla de primer nivel
 } t_contexto;
 
 
@@ -50,6 +49,9 @@ typedef struct{
     char* segundo_parametro;
     char* tercero_parametro;
 } t_instruccion_codigo;
+
+extern t_contexto* nuevo_contexto_provisorio;
+extern t_contexto* nuevo_contexto;
 
 extern int conexion;
 extern char* ip;
