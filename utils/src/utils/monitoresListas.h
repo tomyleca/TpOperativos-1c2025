@@ -47,3 +47,20 @@ extern void* sacarDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,b
 *@brief Devuelve el elemento que se encuentra en la posición dada de la lista. Utiliza semáforos para evitar condiciones de carrera.
 */
 extern void* leerDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion);
+
+/**
+*@brief Chequea si la lista esta vacia. Utiliza semáforos para evitar condiciones de carrera.
+*/
+extern bool chequearListaVacia(t_listaConSemaforos* listaConSemaforos);
+
+
+/**
+*@brief Remueve un elemento dado de la lista. Retorna true si lo encontró, false en otro caso. Utiliza semáforos para evitar condiciones de carrera.
+*/
+extern bool sacarElementoDeLista(t_listaConSemaforos* listaConSemaforos,void* elem);
+
+
+/**
+*@brief Hace clean de una lista con semaforos y borra sus semaforos, sin borrar los elementos referenciados en la lista. 
+*/
+extern void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos);

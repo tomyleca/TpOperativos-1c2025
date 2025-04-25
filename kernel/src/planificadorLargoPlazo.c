@@ -15,7 +15,10 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     {
         nuevoProceso->ME[i]=0;
         nuevoProceso->MT[i]=0;
+        nuevoProceso->cronometros[i]=temporal_create();
+        temporal_stop(nuevoProceso->cronometros[i]);
     }
+
 
     nuevoProceso->ME[NEW]++;
 
@@ -44,7 +47,9 @@ void inicializarProceso(){
     
     //TODO
     //LE PREGUNTO A MEMORIA
+    temporal_stop(procesoAInicializar->cronometros[NEW]);
     pasarAReady(procesoAInicializar);
+ 
 
     
     
@@ -60,5 +65,6 @@ bool menorTam(PCB* PCB1,PCB* PCB2)
 
 void pasarAReady(PCB* proceso){
     agregarALista(listaProcesosReady,proceso);
+    temporal_resume(proceso->cronometros[READY]);
     proceso->ME[READY]++;
 }

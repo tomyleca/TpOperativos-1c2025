@@ -20,8 +20,7 @@
 typedef struct {
 uint32_t PID;
 uint32_t PC;
-int ME[6];
-int MT[6];
+
 char* archivoPseudocodigo;
 uint32_t tam;
 
@@ -29,14 +28,22 @@ int64_t estimadoRafagaAnterior;
 int64_t duracionRafagaAnterior;
 int64_t estimadoRafagaActual;
 
+t_temporal* cronometros[6];
+t_temporal* cronometroEjecucionActual;
+
+
+int ME[6];
+int MT[6];
+
+
 } PCB;
 
 typedef enum{
     NEW,
     READY,
     BLOCKED,
-    SUSPENDIDO_BLOCKED,
-    SUSPENDIDO,
+    SWAP_BLOCKED,
+    SWAP_READY,
     EXECUTE,
     EXIT
 } ESTADO;
@@ -68,7 +75,8 @@ typedef struct{
     bool ejecutando;
     PCB* procesoEnEjecucion;
     int fdConexion;
-    int64_t estimadoRafagaRestante;
+    
+    
 }
 nucleoCPU;
 
@@ -111,13 +119,16 @@ extern bool menorEstimadoRafagaActual(PCB* PCB1,PCB* PCB2);
 //Planificador
 extern void estimarRafagaActual(PCB* proceso);
 extern void* planificadorCortoPlazo(void* arg);
-extern void* ejecutar(PCB* proceso);
+extern void ejecutar(PCB* proceso);
 
 /**
  * @brief Chequea si en alguno de los CPUs en ejecución hay un proceso con una rafaga estimada restante menor a la rafaga estimada más baja de los procesos en ready. De ser así, libera el CPU y retorna true, de otra forma retorna false.
 */
 extern bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera);
 extern bool menorEstimadoRafagaRestante(nucleoCPU* CPU1,nucleoCPU* CPU2);
+
+extern PCB* terminarEjecucionNucleoCPU(nucleoCPU* nucleoCPU);
+extern void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion);
 
 extern t_listaConSemaforos* listaProcesosNew;
 extern t_listaConSemaforos* listaProcesosReady;

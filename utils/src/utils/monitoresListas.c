@@ -73,3 +73,37 @@ void* leerDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion)
     
     return elem;
 }
+
+bool chequearListaVacia(t_listaConSemaforos* listaConSemaforos)
+{
+    bool vacia = false;
+    
+    sem_wait(listaConSemaforos->semaforoMutex);
+    vacia = list_is_empty(listaConSemaforos->lista);
+    sem_post(listaConSemaforos->semaforoMutex);
+    
+    return vacia;
+}
+
+bool sacarElementoDeLista(t_listaConSemaforos* listaConSemaforos,void* elem)
+{
+    bool elementoEncontrado;
+
+    sem_wait(listaConSemaforos->semaforoCantElementos);
+    sem_wait(listaConSemaforos->semaforoMutex);
+        elementoEncontrado = list_remove_element(listaConSemaforos->lista,elem);
+    sem_post(listaConSemaforos->semaforoMutex);
+    if(!elementoEncontrado) //Para que no descuente un elemento si quiere sacarlo y no esta.
+        sem_post(listaConSemaforos->semaforoCantElementos);
+
+
+    return elementoEncontrado;
+}
+
+void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos)
+{
+    list_clean(listaConSemaforos->lista);
+    free(listaConSemaforos->lista);
+    free(listaConSemaforos->semaforoCantElementos);
+    free(listaConSemaforos->semaforoMutex);
+}

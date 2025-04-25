@@ -25,9 +25,10 @@ int main(int argc, char* argv[]) {
     
    
 
-    INIT_PROC("afsfas",4);
+    INIT_PROC("1",4);
+    INIT_PROC("2",2);
     guardarDatosCPU("id",1);
-    
+
     
 
     

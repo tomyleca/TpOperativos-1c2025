@@ -11,6 +11,9 @@ void guardarDatosCPU(char* identificador,int fdConexion)
     nuevoNucleoCPU->procesoEnEjecucion=NULL;
     nuevoNucleoCPU->fdConexion = fdConexion;
 
+   
+   
+
     agregarALista(listaCPUsLibres,nuevoNucleoCPU);
     sem_post(semaforoIntentarPlanificar);
 
