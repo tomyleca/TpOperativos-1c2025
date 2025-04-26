@@ -38,7 +38,7 @@ void* sacarDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion)
 
 void agregarAListaOrdenada(t_listaConSemaforos* listaConSemaforos,void* elemento,bool (*funcionParaComparar) (void*,void*)){
     sem_wait(listaConSemaforos->semaforoMutex);
-    list_add_sorted(listaConSemaforos->lista,elemento,funcionParaComparar);
+        list_add_sorted(listaConSemaforos->lista,elemento,funcionParaComparar);
     sem_post(listaConSemaforos->semaforoMutex);
     sem_post(listaConSemaforos->semaforoCantElementos);
 }
@@ -46,7 +46,7 @@ void agregarAListaOrdenada(t_listaConSemaforos* listaConSemaforos,void* elemento
 
 void ordenarLista(t_listaConSemaforos* listaConSemaforos,bool (*funcionParaComparar) (void*,void*)){
     sem_wait(listaConSemaforos->semaforoMutex);
-    list_sort(listaConSemaforos->lista,funcionParaComparar);
+        list_sort(listaConSemaforos->lista,funcionParaComparar);
     sem_post(listaConSemaforos->semaforoMutex);
 }
 

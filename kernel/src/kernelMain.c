@@ -106,10 +106,7 @@ void setearAlgoritmosDePlanificacion(){
 
 void cargarCronometro(PCB* proceso,ESTADO estado)
 {
-    semaforoListaNew= malloc(sizeof(sem_t));
-    semaforoListaReady = malloc(sizeof(sem_t));
-    semaforoListaSwapReady = malloc(sizeof(sem_t));
-    
+    usleep(10000);
     temporal_stop(proceso->cronometros[estado]);
     proceso->MT[estado]=temporal_gettime(proceso->cronometros[estado]);
 }
