@@ -31,7 +31,7 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     else
         agregarAListaOrdenada(listaProcesosNew,nuevoProceso,menorTam);
 
-    
+    temporal_resume(nuevoProceso->cronometros[NEW]);
     inicializarProceso();
 }
 
@@ -47,7 +47,7 @@ void inicializarProceso(){
     
     //TODO
     //LE PREGUNTO A MEMORIA
-    temporal_stop(procesoAInicializar->cronometros[NEW]);
+    cargarCronometro(procesoAInicializar,NEW);
     pasarAReady(procesoAInicializar);
  
 

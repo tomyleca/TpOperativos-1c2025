@@ -28,6 +28,8 @@ extern void* atenderIO(void* conexion);
 extern void avisarInicioIO(uint32_t PID,char* nombreIO,uint32_t tiempo);
 extern DispositivoIO* buscarIOSegunNombre(char* nombreIO);
 
+extern void cargarCronometro(PCB* proceso, ESTADO estado);
+
 
 
 

@@ -45,8 +45,8 @@ void* planificadorCortoPlazo(void* arg)
 
         if(procesoAEjecutar != NULL)
         {
-            temporal_stop(procesoAEjecutar->cronometros[READY]);
-            temporal_stop(procesoAEjecutar->cronometros[SWAP_READY]);
+            cargarCronometro(procesoAEjecutar,READY);
+            cargarCronometro(procesoAEjecutar,SWAP_READY);
             ejecutar(procesoAEjecutar);
            
         }
@@ -71,7 +71,7 @@ void ejecutar(PCB* proceso)
 void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 {
      
-    temporal_stop(procesoDespuesDeEjecucion->cronometros[EXECUTE]);
+    cargarCronometro(procesoDespuesDeEjecucion,EXECUTE);
     
 
     procesoDespuesDeEjecucion->duracionRafagaAnterior=temporal_gettime(procesoDespuesDeEjecucion->cronometroEjecucionActual);

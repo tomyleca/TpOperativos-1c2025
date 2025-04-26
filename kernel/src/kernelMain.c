@@ -104,3 +104,9 @@ void setearAlgoritmosDePlanificacion(){
 }
 
 
+void cargarCronometro(PCB* proceso,ESTADO estado)
+{
+    
+    temporal_stop(proceso->cronometros[estado]);
+    proceso->MT[estado]=temporal_gettime(proceso->cronometros[estado]);
+}
