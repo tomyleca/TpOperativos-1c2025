@@ -1,4 +1,4 @@
-#include "globalesKernel.h"
+#include "kernel.h"
 
 void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     //Creo un nuevo proceso
@@ -15,7 +15,10 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     {
         nuevoProceso->ME[i]=0;
         nuevoProceso->MT[i]=0;
+        nuevoProceso->cronometros[i]=temporal_create();
+        temporal_stop(nuevoProceso->cronometros[i]);
     }
+
 
     nuevoProceso->ME[NEW]++;
 
@@ -24,11 +27,11 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     nuevoProceso->estimadoRafagaActual=0;
    
     if(algoritmoColaNewEnFIFO)
-        agregarALista(semaforoListaNew,listaProcesosNew,nuevoProceso);
+        agregarALista(listaProcesosNew,nuevoProceso);
     else
-        agregarAListaOrdenada(semaforoListaNew,listaProcesosNew,nuevoProceso,menorTam);
+        agregarAListaOrdenada(listaProcesosNew,nuevoProceso,menorTam);
 
-    
+    temporal_resume(nuevoProceso->cronometros[NEW]);
     inicializarProceso();
 }
 
@@ -37,14 +40,18 @@ void inicializarProceso(){
     
     //TODO
     //ACA VA ALGO PARA ESPERAR EL ENTER
-    if (listaProcesosSwapReady!=NULL)
-        procesoAInicializar= sacarDeLista(semaforoListaSwapReady,listaProcesosSwapReady,0);
+    if (!list_is_empty(listaProcesosSwapReady->lista))
+        procesoAInicializar= sacarDeLista(listaProcesosSwapReady,0);
     else
-        procesoAInicializar = sacarDeLista(semaforoListaNew,listaProcesosNew,0);
+        procesoAInicializar = sacarDeLista(listaProcesosNew,0);
     
     //TODO
     //LE PREGUNTO A MEMORIA
+    cargarCronometro(procesoAInicializar,NEW);
     pasarAReady(procesoAInicializar);
+ 
+
+    
     
 
 
@@ -55,7 +62,9 @@ bool menorTam(PCB* PCB1,PCB* PCB2)
     return PCB1->tam <= PCB2->tam;
 }
 
+
 void pasarAReady(PCB* proceso){
-    agregarALista(semaforoListaReady,listaProcesosReady,proceso);
+    agregarALista(listaProcesosReady,proceso);
+    temporal_resume(proceso->cronometros[READY]);
     proceso->ME[READY]++;
 }

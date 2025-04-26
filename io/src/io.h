@@ -13,6 +13,9 @@
 #include "GlobalesIO.h"
 
 
-void leerConfigIO(t_config* config_io);
+extern void conectarseAKernel(char* nombre);
+extern void leerConfigIO(t_config* config_io);
+extern uint32_t recibirProcesoEnIOEIniciarUsleep();
+extern void avisarFinDeIO(uint32_t PID);
 
 #endif
