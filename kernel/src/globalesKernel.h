@@ -28,12 +28,12 @@ int64_t estimadoRafagaAnterior;
 int64_t duracionRafagaAnterior;
 int64_t estimadoRafagaActual;
 
-t_temporal* cronometros[6];
+t_temporal* cronometros[7];
 t_temporal* cronometroEjecucionActual;
 
 
-int ME[6];
-int MT[6];
+int ME[7];
+int MT[7];
 
 
 } PCB;

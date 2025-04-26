@@ -8,6 +8,7 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     nuevoProceso->PC=0;
     
     nuevoProceso->PID=pidDisponible;
+    //TODO semaforo
     pidDisponible++;
     
 
@@ -20,11 +21,13 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     }
 
 
-    nuevoProceso->ME[NEW]++;
+    
 
     nuevoProceso->estimadoRafagaAnterior=0;
     nuevoProceso->duracionRafagaAnterior=0;
     nuevoProceso->estimadoRafagaActual=0;
+
+    
    
     if(algoritmoColaNewEnFIFO)
         agregarALista(listaProcesosNew,nuevoProceso);
@@ -32,6 +35,7 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
         agregarAListaOrdenada(listaProcesosNew,nuevoProceso,menorTam);
 
     temporal_resume(nuevoProceso->cronometros[NEW]);
+    nuevoProceso->ME[NEW]++; 
     inicializarProceso();
 }
 
@@ -67,4 +71,4 @@ void pasarAReady(PCB* proceso){
     agregarALista(listaProcesosReady,proceso);
     temporal_resume(proceso->cronometros[READY]);
     proceso->ME[READY]++;
-}
+    }

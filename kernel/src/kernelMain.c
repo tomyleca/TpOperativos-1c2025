@@ -106,7 +106,7 @@ void setearAlgoritmosDePlanificacion(){
 
 void cargarCronometro(PCB* proceso,ESTADO estado)
 {
-    usleep(10000);
+    
     temporal_stop(proceso->cronometros[estado]);
     proceso->MT[estado]=temporal_gettime(proceso->cronometros[estado]);
 }

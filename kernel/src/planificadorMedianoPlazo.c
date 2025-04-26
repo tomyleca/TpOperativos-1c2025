@@ -3,7 +3,7 @@
 void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO){
     
     //TODO falta sacarlo de la lista donde esta
-
+    guardarDatosDeEjecucion(proceso);
 
     avisarInicioIO(proceso->PID,nombreIO,tiempo);
    
@@ -23,6 +23,7 @@ void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO
     pthread_t* hiloContador = malloc(sizeof(pthread_t));
     pthread_create(hiloContador,NULL,contadorParaSwap,proceso);
 
+    
     procesoEsperando = sacarDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
 
     free(PIDComoChar);
@@ -35,24 +36,26 @@ void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO
 }
 
 
-void* contadorParaSwap(char* PID){
+void* contadorParaSwap(PCB* proceso){
 
-    
-    t_temporal* contadorEsperaSwap = temporal_create();
+    char* PID = pasarUnsignedAChar(proceso->PID);
+    temporal_resume(proceso->cronometros[BLOCKED]);
+    proceso->ME[BLOCKED]++;
     
     
     
 
     while(1){
-        int tiempoTranscurrido = (int) temporal_gettime(contadorEsperaSwap);
+        int64_t tiempoTranscurrido = (int64_t) temporal_gettime(proceso->cronometros[BLOCKED]);
         if(tiempoTranscurrido>=4500)
         {
             procesoEnEsperaIO* procesoEsperandoIO = leerDeDiccionario(diccionarioProcesosBloqueados,PID);
             procesoEsperandoIO->estaENSwap=1;
+            cargarCronometro(proceso,BLOCKED);
             pasarASwapBlocked(procesoEsperandoIO);
             
         }
-        if(IOTerminado(PID))
+        else if(IOTerminado(PID))
         {
             //Creo que no hace falta proceso = sacarDeDiccionario(semaforoDiccionarioBlocked,PIDComoChar);
             procesoEnEsperaIO* procesoIOFinalizado = leerDeDiccionario(diccionarioProcesosBloqueados,PID);
@@ -62,7 +65,7 @@ void* contadorParaSwap(char* PID){
         }
     }
 
-    temporal_destroy(contadorEsperaSwap);
+    
     
 
     return NULL;
@@ -76,10 +79,14 @@ bool IOTerminado(char* PIDComoChar){
 
 void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO)
 {
-    //Le aviso a la memoria que el proceso paso a disco.
+    //TODO Le aviso a la memoria que el proceso paso a disco.
+    
+    temporal_resume(procesoEsperandoIO->proceso->cronometros[SWAP_BLOCKED]);
+    procesoEsperandoIO->proceso->ME[SWAP_BLOCKED]++;
 
     sem_wait(procesoEsperandoIO->semaforoIOFinalizada);
     pasarASwapReady(procesoEsperandoIO->proceso);
+
 
     
 }
@@ -94,6 +101,9 @@ char* pasarUnsignedAChar(uint32_t unsigned_)
 
 void pasarASwapReady(PCB* proceso)
 {
+    temporal_resume(proceso->cronometros[SWAP_READY]);
+    proceso->MT[SWAP_READY]++;
+
     if(algoritmoColaNewEnFIFO)
         agregarALista(listaProcesosSwapReady,proceso);
     else 

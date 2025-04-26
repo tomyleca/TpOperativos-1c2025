@@ -62,8 +62,9 @@ void ejecutar(PCB* proceso)
     nucleoCPUEnEjecucion->procesoEnEjecucion=proceso;
     agregarALista(listaCPUsEnUso,nucleoCPUEnEjecucion);
 
-    proceso->ME[EXECUTE]++;
+    
     temporal_resume(proceso->cronometros[EXECUTE]);
+    proceso->ME[EXECUTE]++;
     proceso->cronometroEjecucionActual=temporal_create();
 
 }
