@@ -74,12 +74,12 @@ void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio)
 	paquete->buffer->size += tamanio + sizeof(int);
 }
 
-void enviar_paquete(t_paquete* paquete, int socket_cliente)
+void enviar_paquete(t_paquete* paquete, int fdConexion)
 {
 	int bytes = paquete->buffer->size + 2*sizeof(int);
 	void* a_enviar = serializar_paquete(paquete, bytes);
 
-	send(socket_cliente, a_enviar, bytes, 0);
+	send(fdConexion, a_enviar, bytes, 0);
 
 	free(a_enviar);
 }
@@ -132,27 +132,6 @@ void recibir_mensaje(int socket_cliente, t_log *logger)
 }
 
 
-t_list *recibir_paquete(int socket_cliente)
-{
-	int size;
-	int desplazamiento = 0;
-	void *buffer;
-	t_list *valores = list_create();
-	int tamanio;
-
-	buffer = recibir_buffer(&size, socket_cliente);
-	while (desplazamiento < size)
-	{
-		memcpy(&tamanio, buffer + desplazamiento, sizeof(int));
-		desplazamiento += sizeof(int);
-		char *valor = malloc(tamanio);
-		memcpy(valor, buffer + desplazamiento, tamanio);
-		desplazamiento += tamanio;
-		list_add(valores, valor);
-	}
-	free(buffer);
-	return valores;
-}
 
 
 char *recibir_string_del_buffer(t_buffer *palabra)
@@ -243,6 +222,49 @@ int recibir_int_del_buffer(t_buffer *coso)
 }
 
 
+uint32_t recibir_uint32_t_del_buffer(t_buffer *coso)
+{
+	if (coso->size == 0)
+	{
+		printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if (coso->size < 0)
+	{
+		printf("\n[ERROR] Esto es raro. El t_buffer contiene un size NEGATIVO \n\n");
+		exit(EXIT_FAILURE);
+	}
+
+	uint32_t valor_a_devolver;
+	memcpy(&valor_a_devolver, coso->stream, sizeof(uint32_t));
+
+	uint32_t nuevo_size = coso->size - sizeof(uint32_t);
+	if (nuevo_size == 0)
+	{
+		free(coso->stream);
+		coso->stream = NULL;
+		coso->size = 0;
+		return valor_a_devolver;
+	}
+	if (nuevo_size < 0)
+	{
+		printf("\n[ERROR_uint32_t]: BUFFER CON TAMAÑO NEGATIVO\n\n");
+		// free(valor_a_devolver);
+		// return 0;
+		exit(EXIT_FAILURE);
+	}
+	void *nuevo_coso = malloc(nuevo_size);
+	memcpy(nuevo_coso, coso->stream + sizeof(uint32_t), nuevo_size);
+	free(coso->stream);
+	coso->stream = nuevo_coso;
+	coso->size = nuevo_size;
+
+	return valor_a_devolver;
+}
+
+
+
 t_paquete *crear_super_paquete(op_code code_op)
 {
 	t_paquete *super_paquete = malloc(sizeof(t_paquete));
@@ -273,6 +295,22 @@ void cargar_string_al_super_paquete(t_paquete *paquete, char *string)
 	paquete->buffer->size += sizeof(char) * size_string;
 }
 
+void cargar_uint32_t_al_super_paquete(t_paquete *paquete, uint32_t numero)
+{
+	if (paquete->buffer->size == 0)
+	{
+		paquete->buffer->stream = malloc(sizeof(uint32_t));
+		memcpy(paquete->buffer->stream, &numero, sizeof(uint32_t));
+	}
+	else
+	{
+		paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + sizeof(uint32_t));
+		memcpy(paquete->buffer->stream + paquete->buffer->size, &numero, sizeof(uint32_t));
+	}
+
+	paquete->buffer->size += sizeof(int);
+	
+}
 
 void cargar_int_al_super_paquete(t_paquete *paquete, int numero)
 {

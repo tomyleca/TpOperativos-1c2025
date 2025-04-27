@@ -27,16 +27,27 @@ pthread_t hilo_escuchar_kernel;
 pthread_t hilo_escuchar_kernel_interrupcion;
 pthread_t hilo_crear_kernel_memoria;
 //PROCESOS
-t_list* listaProcesosNew;
-t_list* listaProcesosReady;
-t_list* listaProcesosSwapReady;
+t_listaConSemaforos* listaProcesosNew;
+t_listaConSemaforos* listaProcesosReady;
+t_listaConSemaforos* listaProcesosSwapReady;
+t_listaConSemaforos* listaCPUsLibres;
+t_listaConSemaforos* listaCPUsEnUso;
 
-t_dictionary* diccionarioIODeProcesosBloqueados;
-t_dictionary* diccionarioProcesosSwapBloqueados;
+t_diccionarioConSemaforos* diccionarioProcesosBloqueados;
+
 
 uint32_t pidDisponible = 0;
 
 
 int algoritmoDePlanificacionInt;
+
+
+
+//IO
+t_listaConSemaforos* listaDispositivosIO;
+
+//CPU
+sem_t* semaforoIntentarPlanificar;
+
 
 

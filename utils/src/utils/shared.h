@@ -95,6 +95,8 @@ t_paquete *crear_super_paquete(op_code code_op);
 
 void cargar_string_al_super_paquete(t_paquete *paquete, char *string);
 
+void cargar_uint32_t_al_super_paquete(t_paquete *paquete, uint32_t numero);
+
 void cargar_int_al_super_paquete(t_paquete *paquete, int numero);
 
 t_buffer *recibiendo_super_paquete(int conexion);
@@ -102,6 +104,8 @@ t_buffer *recibiendo_super_paquete(int conexion);
 void *recibir_cosas_del_buffer(t_buffer *coso);
 
 void cargar_cosas_al_super_paquete(t_paquete *paquete, void *choclo, int size);
+
+uint32_t recibir_uint32_t_del_buffer(t_buffer *coso);
 
 int recibir_int_del_buffer(t_buffer *coso);
 

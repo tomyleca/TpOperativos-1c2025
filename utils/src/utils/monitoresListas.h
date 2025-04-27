@@ -3,30 +3,64 @@
 #include <stdlib.h>
 
 
+typedef struct{
+    t_list* lista;
+    sem_t* semaforoMutex;
+    sem_t* semaforoCantElementos;
+} t_listaConSemaforos;
 
 
+/**
+*@brief Crea una lista con semaforos(mutex para asegurar mutua exclusion y seamforoCantElementos para asegurarse que no este vacía)
+*/
+extern t_listaConSemaforos* crearListaConSemaforos();
 
-
-
-extern void iniciarSemaforosKernel();
 
 /**
 *@brief Agrega el elemento a la lista. Utiliza semáforos para evitar condiciones de carrera.
 */
-extern void agregarALista(sem_t* semaforo,t_list* lista,void* elemento);
+extern void agregarALista(t_listaConSemaforos* listaConSemaforos,void* elemento);
 
 /**
 *@brief Saca el elemento que se encuentra en la posición dada de la lista. Utiliza semáforos para evitar condiciones de carrera.
 */
-extern void* sacarDeLista(sem_t* semaforo,t_list* lista,unsigned int posicion);
+extern void* sacarDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion);
 
 
 /**
 *@brief Agrega el elemento a una lista según un orden determinado(que se pasa como parámetro). Utiliza semáforos para evitar condiciones de carrera.
 */
-extern void agregarAListaOrdenada(sem_t* semaforo,t_list* lista,void* elemento,bool (*funcionParaComparar) (void*,void*));
+extern void agregarAListaOrdenada(t_listaConSemaforos* listaConSemaforos,void* elemento,bool (*funcionParaComparar) (void*,void*));
 
 /**
 *@brief Ordena una lista según un orden determinado(que se pasa como parámetro). Utiliza semáforos para evitar condiciones de carrera.
 */
-extern void ordenarLista(sem_t* semaforo,t_list* lista,bool (*funcionParaComparar) (void*,void*));
+extern void ordenarLista(t_listaConSemaforos* listaConSemaforos,bool (*funcionParaComparar) (void*,void*));
+
+/**
+*@brief Saca el primer elemento de una lista que coincida con la condicion dada. Utiliza semáforos para evitar condiciones de carrera.
+*/
+extern void* sacarDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,bool (*condicion) (void*));
+
+
+/**
+*@brief Devuelve el elemento que se encuentra en la posición dada de la lista. Utiliza semáforos para evitar condiciones de carrera.
+*/
+extern void* leerDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion);
+
+/**
+*@brief Chequea si la lista esta vacia. Utiliza semáforos para evitar condiciones de carrera.
+*/
+extern bool chequearListaVacia(t_listaConSemaforos* listaConSemaforos);
+
+
+/**
+*@brief Remueve un elemento dado de la lista. Retorna true si lo encontró, false en otro caso. Utiliza semáforos para evitar condiciones de carrera.
+*/
+extern bool sacarElementoDeLista(t_listaConSemaforos* listaConSemaforos,void* elem);
+
+
+/**
+*@brief Hace clean de una lista con semaforos y borra sus semaforos, sin borrar los elementos referenciados en la lista. 
+*/
+extern void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos);

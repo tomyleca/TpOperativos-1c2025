@@ -1,68 +1,94 @@
 #include "kernel.h"
 
-void pasarABLoqueadoEIniciarContador(PCB* proceso){
+void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO){
     
-    //TODO
-    //falta sacarlo de la lista donde esta
+    //TODO falta sacarlo de la lista donde esta
+    guardarDatosDeEjecucion(proceso);
 
-    //Si hace falta lo agrego a un diccionario, creo que no
+    avisarInicioIO(proceso->PID,nombreIO,tiempo);
+   
     
+    procesoEnEsperaIO* procesoEsperando=malloc(sizeof(procesoEnEsperaIO));
+    procesoEsperando->proceso=proceso;
+    procesoEsperando->estaENSwap=0;
+    procesoEsperando->IOFinalizada=0;
+    procesoEsperando->semaforoIOFinalizada=malloc(sizeof(sem_t));
+    sem_init(procesoEsperando->semaforoIOFinalizada,1,0);
+
+    char* PIDComoChar = pasarUnsignedAChar(proceso->PID);
+    agregarADiccionario(diccionarioProcesosBloqueados,PIDComoChar,procesoEsperando);
+
+
 
     pthread_t* hiloContador = malloc(sizeof(pthread_t));
     pthread_create(hiloContador,NULL,contadorParaSwap,proceso);
+
+    
+    procesoEsperando = sacarDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
+
+    free(PIDComoChar);
+    free(procesoEsperando->semaforoIOFinalizada);
+    free(procesoEsperando);
 
 
 
 
 }
 
-void contadorParaSwap(PCB* proceso){
 
+void* contadorParaSwap(PCB* proceso){
+
+    char* PID = pasarUnsignedAChar(proceso->PID);
+    temporal_resume(proceso->cronometros[BLOCKED]);
+    proceso->ME[BLOCKED]++;
     
-    t_temporal* contadorEsperaSwap = temporal_create();
     
     
-    char* PIDComoChar = pasarUnsignedAChar(proceso->PID);
 
     while(1){
-        int tiempoTranscurrido = (int) temporal_gettime(contadorEsperaSwap);
+        int64_t tiempoTranscurrido = (int64_t) temporal_gettime(proceso->cronometros[BLOCKED]);
         if(tiempoTranscurrido>=4500)
         {
-            pasarASwapBlocked(proceso,PIDComoChar);
+            procesoEnEsperaIO* procesoEsperandoIO = leerDeDiccionario(diccionarioProcesosBloqueados,PID);
+            procesoEsperandoIO->estaENSwap=1;
+            cargarCronometro(proceso,BLOCKED);
+            pasarASwapBlocked(procesoEsperandoIO);
             
         }
-        if(IOTerminado(PIDComoChar))
+        else if(IOTerminado(PID))
         {
             //Creo que no hace falta proceso = sacarDeDiccionario(semaforoDiccionarioBlocked,PIDComoChar);
-            
-            pasarAReady(proceso);
+            procesoEnEsperaIO* procesoIOFinalizado = leerDeDiccionario(diccionarioProcesosBloqueados,PID);
+            pasarAReady(procesoIOFinalizado->proceso);
             
             break;
         }
     }
 
-    temporal_destroy(contadorEsperaSwap);
-    free(PIDComoChar);
+    
+    
+
+    return NULL;
 }
 
 bool IOTerminado(char* PIDComoChar){
     
-    bool estadoIO = leerDeDiccionario(semaforoDiccionarioIOBlocked, diccionarioIODeProcesosBloqueados, PIDComoChar);
-    return estadoIO;
+    procesoEnEsperaIO* procesoEsperando = leerDeDiccionario( diccionarioProcesosBloqueados, PIDComoChar);
+    return procesoEsperando->IOFinalizada;
 }
 
-void pasarASwapBlocked(PCB* proceso,char* PIDComoChar)
+void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO)
 {
-    //Creo que no hace falta agregarADiccionario(semaforoDiccionarioBlockedSwap,diccionarioProcesosSwapBloqueados,PIDComoChar,proceso);
+    //TODO Le aviso a la memoria que el proceso paso a disco.
+    
+    temporal_resume(procesoEsperandoIO->proceso->cronometros[SWAP_BLOCKED]);
+    procesoEsperandoIO->proceso->ME[SWAP_BLOCKED]++;
 
-    //Le aviso a la memoria que el proceso paso a disco.
+    sem_wait(procesoEsperandoIO->semaforoIOFinalizada);
+    pasarASwapReady(procesoEsperandoIO->proceso);
 
-    //Este while se podría mejorar con un semaforo, pero tendría que cambiar la forma en la que los dispositivos IO le avisan a los procesos que ya terminaron. Enrealidad tendría que tener dos implementaciones de la misma.
-    while(!IOTerminado(PIDComoChar));
 
-    pasarASwapReady(proceso);
-
-    //Aca lo agrego a la cola de new con mas prioridad
+    
 }
 
 char* pasarUnsignedAChar(uint32_t unsigned_)
@@ -75,5 +101,11 @@ char* pasarUnsignedAChar(uint32_t unsigned_)
 
 void pasarASwapReady(PCB* proceso)
 {
-    agregarALista(semaforoListaSwapReady,listaProcesosSwapReady,proceso);
+    temporal_resume(proceso->cronometros[SWAP_READY]);
+    proceso->MT[SWAP_READY]++;
+
+    if(algoritmoColaNewEnFIFO)
+        agregarALista(listaProcesosSwapReady,proceso);
+    else 
+        agregarAListaOrdenada(listaProcesosSwapReady,proceso,menorTam);
 }
