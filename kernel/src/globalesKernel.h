@@ -39,6 +39,11 @@ typedef enum{
     EXIT
 } ESTADO;
 
+//HILOS
+extern pthread_t hilo_escuchar_kernel;
+extern pthread_t hilo_escuchar_kernel_interrupcion;
+extern pthread_t hilo_conectar_kernel_memoria;
+extern pthread_t hilo_crear_kernel_memoria;
 typedef enum{
     FIFO,
     SJF,
@@ -101,14 +106,8 @@ extern sem_t* semaforoListaSwapReady;
 extern void iniciarConexiones();
 extern void cerrarConexiones();
 
-
 //OTRAS
 extern char* pasarUnsignedAChar(uint32_t unsigned_);
- 
-
-
-
-
 
 
 extern t_dictionary* diccionarioProcesosSwapBloqueados;

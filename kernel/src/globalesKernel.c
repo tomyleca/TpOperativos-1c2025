@@ -22,6 +22,10 @@ bool algoritmoColaNewEnFIFO;
 t_log_level log_level;
 t_log* logger_kernel;
 
+
+pthread_t hilo_escuchar_kernel;
+pthread_t hilo_escuchar_kernel_interrupcion;
+pthread_t hilo_crear_kernel_memoria;
 //PROCESOS
 t_list* listaProcesosNew;
 t_list* listaProcesosReady;
