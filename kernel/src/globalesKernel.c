@@ -21,7 +21,7 @@ bool algoritmoColaNewEnFIFO;
 
 t_log_level log_level;
 t_log* logger_kernel;
-
+t_config* config_kernel;
 
 pthread_t hilo_escuchar_kernel;
 pthread_t hilo_escuchar_kernel_interrupcion;

@@ -10,33 +10,11 @@
 #include "globalesKernel.h" 
 #include "../../utils/src/utils/configs.h"
 #include"../../utils/src/utils/shared.h"
+#include "cambiarDeEstado.h"
 
-typedef struct{
-    uint32_t pid;
-    char* archivoDePseudocodigo;
-    t_list* listaDeHilosDelProceso;
-    t_list* listaDeMutexDelProceso;
-    ESTADO estadoDelProceso;
-    uint32_t tamanio;
-    uint32_t siguienteTid;
-    uint32_t siguienteMid;
-    uint32_t prioridadTid0;
-}t_pcb;
+void dump_memory(uint32_t pid);
+void syscall_io(uint32_t pid, char* nombreIO, uint32_t tiempo);
 
-typedef struct t_tcb{
-    uint32_t tid;
-    char* archivoDePseudocodigo;
-    t_pcb* procesoPadre;
-    ESTADO estadoDelHilo;
-    uint32_t prioridad;
-    t_tcb* hiloBloqueadoPorJoin; //Hilo al que estoy bloqueando
-    t_list* mutexEnEspera; //Mutex a los cuales estoy esperando
-    bool bloqueadoPorJoin; //Para saber si estoy esperando algun hilo
-    bool bloqueadoPorIO;
-    uint32_t finDeq;
-    bool clockContando;
-}t_tcb;
-
-
+PCB* buscarPCBEnLista(t_list* lista, uint32_t pid);
 
 #endif
