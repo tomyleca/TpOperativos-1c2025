@@ -1,5 +1,7 @@
 #include "globalesKernel.h"
 
+sem_t* semaforoPIDDisponible;
+
 //CONFIG Y LOGGER
 int socket_kernel_io;
 int cliente_kernel;

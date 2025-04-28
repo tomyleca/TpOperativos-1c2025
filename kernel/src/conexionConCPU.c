@@ -22,16 +22,7 @@ void guardarDatosCPU(char* identificador,int fdConexion)
 }
 
 
-void pasarAExecute(PCB* proceso)
-{
-    nucleoCPU* nucleoCPULibre =  sacarDeLista(listaCPUsLibres,0);
-    nucleoCPULibre->procesoEnEjecucion=proceso;
-    agregarALista(listaCPUsEnUso,nucleoCPULibre);
-    //TODO mandar pid a CPU
-    
 
-
-}
 
 void pasarAExit(PCB* proceso){
     free(proceso->archivoPseudocodigo);

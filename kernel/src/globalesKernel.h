@@ -38,6 +38,8 @@ int MT[7];
 
 } PCB;
 
+extern sem_t* semaforoPIDDisponible;
+
 typedef enum{
     NEW,
     READY,

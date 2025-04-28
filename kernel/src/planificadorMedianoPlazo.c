@@ -11,7 +11,6 @@ void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO
     procesoEnEsperaIO* procesoEsperando=malloc(sizeof(procesoEnEsperaIO));
     procesoEsperando->proceso=proceso;
     procesoEsperando->estaENSwap=0;
-    procesoEsperando->IOFinalizada=0;
     procesoEsperando->semaforoIOFinalizada=malloc(sizeof(sem_t));
     sem_init(procesoEsperando->semaforoIOFinalizada,1,0);
 
@@ -21,46 +20,42 @@ void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO
 
 
     pthread_t* hiloContador = malloc(sizeof(pthread_t));
-    pthread_create(hiloContador,NULL,contadorParaSwap,proceso);
-
-    
-    procesoEsperando = sacarDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
+    pthread_create(hiloContador,NULL,manejarProcesoBloqueado,procesoEsperando);
 
     free(PIDComoChar);
-    free(procesoEsperando->semaforoIOFinalizada);
-    free(procesoEsperando);
-
-
-
 
 }
 
 
-void* contadorParaSwap(PCB* proceso){
+void* manejarProcesoBloqueado(procesoEnEsperaIO* procesoEnEsperaIO){
 
-    char* PID = pasarUnsignedAChar(proceso->PID);
-    temporal_resume(proceso->cronometros[BLOCKED]);
-    proceso->ME[BLOCKED]++;
+    char* PID = pasarUnsignedAChar(procesoEnEsperaIO->proceso->PID);
+    temporal_resume(procesoEnEsperaIO->proceso->cronometros[BLOCKED]);
+    procesoEnEsperaIO->proceso->ME[BLOCKED]++;
     
     
     
 
     while(1){
-        int64_t tiempoTranscurrido = (int64_t) temporal_gettime(proceso->cronometros[BLOCKED]);
-        if(tiempoTranscurrido>=4500)
+        int64_t tiempoTranscurrido = (int64_t) temporal_gettime(procesoEnEsperaIO->proceso->cronometros[BLOCKED]);
+        if(tiempoTranscurrido>=tiempo_suspension)
         {
-            procesoEnEsperaIO* procesoEsperandoIO = leerDeDiccionario(diccionarioProcesosBloqueados,PID);
-            procesoEsperandoIO->estaENSwap=1;
-            cargarCronometro(proceso,BLOCKED);
-            pasarASwapBlocked(procesoEsperandoIO);
+            //Paso el proceso a Swap
+            procesoEnEsperaIO->estaENSwap=1;
+            cargarCronometro(procesoEnEsperaIO->proceso,BLOCKED);
+            pasarASwapBlocked(procesoEnEsperaIO);
+            break;
             
         }
-        else if(IOTerminado(PID))
+        else if(sem_trywait(procesoEnEsperaIO->semaforoIOFinalizada)== 0)
         {
-            //Creo que no hace falta proceso = sacarDeDiccionario(semaforoDiccionarioBlocked,PIDComoChar);
-            procesoEnEsperaIO* procesoIOFinalizado = leerDeDiccionario(diccionarioProcesosBloqueados,PID);
-            pasarAReady(procesoIOFinalizado->proceso);
+            //Desbloqueo el proceso
+            sacarDeDiccionario(diccionarioProcesosBloqueados,PID);
+            cargarCronometro(procesoEnEsperaIO->proceso,BLOCKED);
+            pasarAReady(procesoEnEsperaIO->proceso);
             
+            free(procesoEnEsperaIO->semaforoIOFinalizada);
+            free(procesoEnEsperaIO);
             break;
         }
     }
@@ -71,11 +66,8 @@ void* contadorParaSwap(PCB* proceso){
     return NULL;
 }
 
-bool IOTerminado(char* PIDComoChar){
-    
-    procesoEnEsperaIO* procesoEsperando = leerDeDiccionario( diccionarioProcesosBloqueados, PIDComoChar);
-    return procesoEsperando->IOFinalizada;
-}
+
+
 
 void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO)
 {

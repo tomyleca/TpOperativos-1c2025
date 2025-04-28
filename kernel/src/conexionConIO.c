@@ -53,7 +53,11 @@ void avisarInicioIO(uint32_t PID,char* nombreIO,uint32_t tiempo)
 {
     DispositivoIO* dispositivoIO = buscarIOSegunNombre(nombreIO);
     
-    if(!dispositivoIO->ocupado)
+    if(dispositivoIO==NULL)
+    {
+        //TODO
+    }
+    else if(!dispositivoIO->ocupado)
     {
         t_paquete* paquete = crear_super_paquete(INICIA_IO_PROCESO);
         cargar_uint32_t_al_super_paquete(paquete,PID);

@@ -2,7 +2,7 @@
 
 void* planificadorCortoPlazo(void* arg)
 {
-    PCB* procesoAEjecutar;
+    PCB* procesoAEjecutar= NULL;
     while(1)
     {
         sem_wait(semaforoIntentarPlanificar);
@@ -16,7 +16,7 @@ void* planificadorCortoPlazo(void* arg)
             case FIFO:
                 procesoAEjecutar  = sacarDeLista(listaProcesosReady,0);
                 break;
-            case SJF:
+        case SJF:
                 ordenarLista(listaProcesosReady,menorEstimadoRafagaActual);
                 procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
                 break;
@@ -47,27 +47,29 @@ void* planificadorCortoPlazo(void* arg)
         {
             cargarCronometro(procesoAEjecutar,READY);
             cargarCronometro(procesoAEjecutar,SWAP_READY);
-            ejecutar(procesoAEjecutar);
+            pasarAExecute(procesoAEjecutar);
            
         }
     }
 
 }
 
-
-void ejecutar(PCB* proceso)
+void pasarAExecute(PCB* proceso)
 {
-    nucleoCPU* nucleoCPUEnEjecucion = sacarDeLista(listaCPUsLibres,0);
-    nucleoCPUEnEjecucion->ejecutando=true;
-    nucleoCPUEnEjecucion->procesoEnEjecucion=proceso;
-    agregarALista(listaCPUsEnUso,nucleoCPUEnEjecucion);
-
+    nucleoCPU* nucleoCPULibre =  sacarDeLista(listaCPUsLibres,0);
+    nucleoCPULibre->ejecutando=true;
+    nucleoCPULibre->procesoEnEjecucion=proceso;
+    agregarALista(listaCPUsEnUso,nucleoCPULibre);
     
+    //TODO mandar pid a CPU
+
+    proceso->cronometroEjecucionActual = temporal_create();
     temporal_resume(proceso->cronometros[EXECUTE]);
     proceso->ME[EXECUTE]++;
-    proceso->cronometroEjecucionActual=temporal_create();
-
+   
 }
+
+
 
 void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 {
@@ -79,7 +81,10 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
     procesoDespuesDeEjecucion->estimadoRafagaAnterior=procesoDespuesDeEjecucion->estimadoRafagaActual;
     estimarRafagaActual(procesoDespuesDeEjecucion);
 
-    temporal_destroy(procesoDespuesDeEjecucion->cronometroEjecucionActual);
+    temporal_stop(procesoDespuesDeEjecucion->cronometroEjecucionActual);
+    
+    //TODO arreglar esto con valgrind
+    //temporal_destroy(procesoDespuesDeEjecucion->cronometroEjecucionActual);
 
 }
 
@@ -127,6 +132,7 @@ PCB* terminarEjecucionNucleoCPU(nucleoCPU* nucleoCPU)
     agregarALista(listaCPUsLibres,nucleoCPU);
     PCB* procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
     guardarDatosDeEjecucion(procesoPostEjecucion);
+    sem_post(semaforoIntentarPlanificar);
     return procesoPostEjecucion;
 }
 

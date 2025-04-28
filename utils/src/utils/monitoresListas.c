@@ -70,6 +70,7 @@ void* leerDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion)
     sem_wait(listaConSemaforos->semaforoMutex);
         elem = list_get(listaConSemaforos->lista,posicion);
     sem_post(listaConSemaforos->semaforoMutex);
+    sem_post(listaConSemaforos->semaforoCantElementos);
     
     return elem;
 }

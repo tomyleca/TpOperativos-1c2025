@@ -8,8 +8,11 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     nuevoProceso->PC=0;
     
     nuevoProceso->PID=pidDisponible;
-    //TODO semaforo
+    
+    sem_wait(semaforoPIDDisponible);
     pidDisponible++;
+    sem_post(semaforoPIDDisponible);
+
     
 
     for(int i=0;i<7;i++)

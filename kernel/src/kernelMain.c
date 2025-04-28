@@ -21,13 +21,12 @@ int main(int argc, char* argv[]) {
 
 
     
-
+    prueba1();
     
    
 
-    INIT_PROC("1",4);
-    INIT_PROC("2",2);
-    guardarDatosCPU("id",1);
+  
+
 
     
 
@@ -46,8 +45,8 @@ void leerConfigKernel(t_config* config_kernel) {
     puerto_escucha_dispatch = config_get_int_value(config_kernel, "PUERTO_ESCUCHA_DISPATCH");
     puerto_escucha_interrupt = config_get_int_value(config_kernel, "PUERTO_ESCUCHA_INTERRUPT");
     puerto_escucha_IO = config_get_int_value(config_kernel, "PUERTO_ESCUCHA_IO");
-    algoritmo_planificacion = config_get_string_value(config_kernel, "ALGORITMO_PLANIFICACION");
-    algoritmo_cola_new = config_get_string_value(config_kernel, "ALGORITMO_COLA_NEW");
+    algoritmo_planificacion = config_get_string_value(config_kernel, "ALGORITMO_CORTO_PLAZO");
+    algoritmo_cola_new = config_get_string_value(config_kernel, "ALGORITMO_INGRESO_A_READY");
     alfa = config_get_int_value(config_kernel, "ALFA");
     tiempo_suspension = config_get_int_value(config_kernel, "TIEMPO_SUSPENSION");
     log_level = log_level_from_string(config_get_string_value(config_kernel, "LOG_LEVEL"));
@@ -73,6 +72,10 @@ void crearEstructuras()
 
     semaforoIntentarPlanificar = malloc(sizeof(sem_t));
     sem_init(semaforoIntentarPlanificar,1,0);
+    semaforoPIDDisponible = malloc(sizeof(sem_t));
+    sem_init(semaforoPIDDisponible,1,1);
+
+
 
     
 
