@@ -9,56 +9,16 @@ int main(int argc, char* argv[]) {
     //INICIO LOGGER
     logger_kernel = iniciar_logger("kernelLogger.log","kernelLogger",log_level);
 
-    /****************CONEXION KERNEL CON IO*********************/
+    iniciarConexiones();
 
-    //INICIO SERVIDOR KERNEL-IO
-    int socket_kernel_io = iniciar_servidor(logger_kernel, puerto_escucha_IO); 
+    //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
+    crearEstructuras();
 
     pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
     pthread_t* hiloPlanificadorCortoPlazo = malloc(sizeof(pthread_t));
     pthread_create(hiloAtenderIO,NULL,esperarClientesIO,NULL);
     pthread_create(hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
 
-    log_info(logger_kernel, "Servidor  iniciado para IO");
-
-    int cliente_kernel = esperar_cliente(socket_kernel_io);
-    log_info(logger_kernel, "Se conectó IO");
-
-    //CIERRO
-    log_info(logger_kernel, "Finalizando conexión");
-    liberar_conexion(socket_kernel_io);
-
-
-    /****************CONEXION KERNEL CON CPU*********************/
-
-    //INICIO SERVIDOR KERNEL-CPU
-
-    int socket_kernel_cpu_dispatch = iniciar_servidor(logger_kernel, puerto_escucha_dispatch); 
-
-    if(socket_kernel_cpu_dispatch == -1) {
-        log_error(logger_kernel, "Error al iniciar el servidor DISPATCH");
-        exit(1);
-    }
-    log_info(logger_kernel, "Servidor DISPATCH iniciado");
-
-    int socket_kernel_cpu_interrupt = iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
-
-    if(socket_kernel_cpu_interrupt == -1) {
-        log_error(logger_kernel, "Error al iniciar el servidor INTERRUPT");
-        exit(1);
-    }
-    log_info(logger_kernel, "Servidor INTERRUPT iniciado");
-
-    int cliente_kernel_dispatch = esperar_cliente(socket_kernel_cpu_dispatch);
-    log_info(logger_kernel, "Se conectó cpu a dispatch");
-
-    int cliente_kernel_interrupt = esperar_cliente(socket_kernel_cpu_interrupt);
-    log_info(logger_kernel, "Se conectó cpu a interrupt");
-
-    //CIERRO
-    log_info(logger_kernel, "Finalizando conexión");
-    liberar_conexion(socket_kernel_cpu_dispatch);
-    liberar_conexion(socket_kernel_cpu_interrupt);
 
     
 

@@ -65,7 +65,6 @@ typedef struct
     char* nombre;
     bool ocupado;
     int fdConexion;
-    t_list* colaProcesosEnEspera;
 } DispositivoIO;
 
 typedef struct{
