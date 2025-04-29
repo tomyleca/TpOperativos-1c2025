@@ -62,7 +62,10 @@ extern bool flag_interrupcion;
 extern op_code motivo_interrupcion;
 extern int valor_inicial;
 
-
+//MMU
+extern int cant_entradas_tabla; 
+extern int tamanio_pagina;              
+extern int cant_niveles;
 
 // TLB
 extern int entradas_tlb;

@@ -101,9 +101,25 @@ void peticion_escritura_a_memoria(int direccion_fisica, char* valor_registro_dat
 
 int mmu_traducir_direccion_logica(int direccion_logica)
 {
+    int nro_pagina = direccion_logica / tamanio_pagina;
+    int desplazamiento = direccion_logica % tamanio_pagina;
+    int tabla_actual = contexto->pid;
+    int entrada_nivel_X;
 
-    //direccion_fisica = frame * tamanio_pagina + desplazamiento;
-    //return direccion_fisica;
+    for(int nivel = 1; nivel < cant_niveles; nivel++) {
+
+        int potencia = (int)pow(cant_entradas_tabla, cant_niveles - nivel);
+        entrada_nivel_X = (nro_pagina / potencia) % cant_entradas_tabla;
+
+        //si no es el ultimo consulto a memoria por la siguiente tabla
+        if (nivel < cant_niveles - 1) {
+            int siguiente_tabla = SOLICITO_TABLA_A_MEMORIA ///////////
+            tabla_actual = siguiente_tabla;
+
+        } else {
+        }
+    }       
+    
 }
 
 void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
