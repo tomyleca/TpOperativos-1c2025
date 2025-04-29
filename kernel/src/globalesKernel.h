@@ -65,13 +65,12 @@ typedef enum{
 typedef struct
 {
     char* nombre;
-    bool ocupado;
+    sem_t* semaforoDispositivoOcupado;
     int fdConexion;
 } DispositivoIO;
 
 typedef struct{
     PCB* proceso;
-    bool IOFinalizada;
     sem_t* semaforoIOFinalizada;
     bool estaENSwap;
 } procesoEnEsperaIO;
@@ -155,7 +154,7 @@ extern void cerrarConexiones();
 //IO
 
 
-extern t_listaConSemaforos* listaDispositivosIO;
+extern t_diccionarioConSemaforos* diccionarioDispositivosIO;
 
 //CPU
 extern sem_t* semaforoIntentarPlanificar;

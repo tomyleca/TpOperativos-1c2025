@@ -19,7 +19,7 @@ t_diccionarioConSemaforos* crearDiccionarioConSemaforos(){
 void agregarADiccionario(t_diccionarioConSemaforos* diccionarioConSemaforos,char* clave, void* valor)
 {
     sem_wait(diccionarioConSemaforos->semaforoMutex);
-    dictionary_put(diccionarioConSemaforos->diccionario,"0",valor);
+    dictionary_put(diccionarioConSemaforos->diccionario,clave,valor);
     sem_post(diccionarioConSemaforos->semaforoMutex);
 }
 
@@ -36,7 +36,7 @@ void* sacarDeDiccionario(t_diccionarioConSemaforos* diccionarioConSemaforos,char
 {
     sem_wait(diccionarioConSemaforos->semaforoMutex);
     void* valor = dictionary_remove(diccionarioConSemaforos->diccionario,clave);
-    sem_wait(diccionarioConSemaforos->semaforoMutex);
+    sem_post(diccionarioConSemaforos->semaforoMutex);
 
     return valor;
 }

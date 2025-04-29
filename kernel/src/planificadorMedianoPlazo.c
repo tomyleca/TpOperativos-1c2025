@@ -1,11 +1,11 @@
 #include "kernel.h"
 
-void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO){
+void pasarABLoqueado(PCB* proceso,uint32_t tiempo,char* nombreIO){
     
-    //TODO falta sacarlo de la lista donde esta
+    
     guardarDatosDeEjecucion(proceso);
 
-    avisarInicioIO(proceso->PID,nombreIO,tiempo);
+    
    
     
     procesoEnEsperaIO* procesoEsperando=malloc(sizeof(procesoEnEsperaIO));
@@ -16,11 +16,13 @@ void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO
 
     char* PIDComoChar = pasarUnsignedAChar(proceso->PID);
     agregarADiccionario(diccionarioProcesosBloqueados,PIDComoChar,procesoEsperando);
+    avisarInicioIO(proceso->PID,nombreIO,tiempo);
 
 
 
     pthread_t* hiloContador = malloc(sizeof(pthread_t));
     pthread_create(hiloContador,NULL,manejarProcesoBloqueado,procesoEsperando);
+    
 
     free(PIDComoChar);
 
@@ -47,7 +49,7 @@ void* manejarProcesoBloqueado(procesoEnEsperaIO* procesoEnEsperaIO){
             break;
             
         }
-        else if(sem_trywait(procesoEnEsperaIO->semaforoIOFinalizada)== 0)
+        else if(sem_trywait(procesoEnEsperaIO->semaforoIOFinalizada) == 0)
         {
             //Desbloqueo el proceso
             sacarDeDiccionario(diccionarioProcesosBloqueados,PID);
@@ -77,6 +79,7 @@ void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO)
     procesoEsperandoIO->proceso->ME[SWAP_BLOCKED]++;
 
     sem_wait(procesoEsperandoIO->semaforoIOFinalizada);
+    cargarCronometro(procesoEsperandoIO->proceso,SWAP_BLOCKED);
     pasarASwapReady(procesoEsperandoIO->proceso);
 
 
@@ -100,4 +103,16 @@ void pasarASwapReady(PCB* proceso)
         agregarALista(listaProcesosSwapReady,proceso);
     else 
         agregarAListaOrdenada(listaProcesosSwapReady,proceso,menorTam);
+}
+
+void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO)
+{
+    DispositivoIO* dispositivoIOLiberado = leerDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
+    sem_post(dispositivoIOLiberado->semaforoDispositivoOcupado);
+
+    
+    char* PIDComoChar = pasarUnsignedAChar(PID);
+    procesoEnEsperaIO* procesoADesbloquear = leerDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
+    sem_post(procesoADesbloquear->semaforoIOFinalizada);
+    
 }

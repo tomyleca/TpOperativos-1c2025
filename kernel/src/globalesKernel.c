@@ -46,7 +46,7 @@ int algoritmoDePlanificacionInt;
 
 
 //IO
-t_listaConSemaforos* listaDispositivosIO;
+t_diccionarioConSemaforos* diccionarioDispositivosIO;
 
 //CPU
 sem_t* semaforoIntentarPlanificar;

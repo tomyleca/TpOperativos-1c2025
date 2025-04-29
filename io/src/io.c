@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     while(1)
     {
     uint32_t PID = recibirProcesoEnIOEIniciarUsleep();
-    avisarFinDeIO(PID);
+    avisarFinDeIO(PID,argv[1]);
     }
 
 
@@ -64,23 +64,25 @@ void conectarseAKernel(char* nombre)
 uint32_t recibirProcesoEnIOEIniciarUsleep()
 {
     opCodesKernelIO opCode = recibir_operacion(conexionKernel);
+    uint32_t PID;
     if(opCode==INICIA_IO_PROCESO)
     {    
         t_buffer* buffer = recibiendo_super_paquete(conexionKernel); 
-        uint32_t PID = recibir_uint32_t_del_buffer(buffer);
+        PID = recibir_uint32_t_del_buffer(buffer);
         uint32_t tiempo = recibir_uint32_t_del_buffer(buffer);
         
         usleep(tiempo);
     }
 
-    
+    return PID;
 }
 
-void avisarFinDeIO(uint32_t PID)
+void avisarFinDeIO(uint32_t PID,char* nombreIO)
 {
     t_paquete* paquete = crear_paquete();
     paquete->codigo_operacion=TERMINO_IO;
     cargar_uint32_t_al_super_paquete(paquete,PID);
+    cargar_string_al_super_paquete(paquete,nombreIO);
     enviar_paquete(paquete,conexionKernel);
     
 

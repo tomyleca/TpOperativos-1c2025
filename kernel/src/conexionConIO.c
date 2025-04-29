@@ -27,15 +27,21 @@ void* atenderIO(void* conexion)
             case HANDSHAKE_IO_KERNEL:
                 char* nombreIO = recibir_string_del_buffer(buffer);
                 DispositivoIO* nuevoDispositivoIO = malloc(sizeof(DispositivoIO));
+                
+                nuevoDispositivoIO->semaforoDispositivoOcupado = malloc(sizeof(sem_t));
+                sem_init(nuevoDispositivoIO->semaforoDispositivoOcupado,1,1);
+
                 nuevoDispositivoIO->nombre=nombreIO;
-                nuevoDispositivoIO->ocupado=false;
                 nuevoDispositivoIO->fdConexion= *fdConexion;
-                agregarALista(listaDispositivosIO,nuevoDispositivoIO);
+                agregarADiccionario(diccionarioDispositivosIO,nombreIO,nuevoDispositivoIO);
                 break;
+            
             case TERMINO_IO:
                 uint32_t PID =recibir_uint32_t_del_buffer(buffer);
-                //TODO
+                char* nombre = recibir_string_del_buffer(buffer);
+                manejarFinDeIO(PID,nombre);
                 break;
+            
             default:
                 break;
 
@@ -51,32 +57,24 @@ void* atenderIO(void* conexion)
 
 void avisarInicioIO(uint32_t PID,char* nombreIO,uint32_t tiempo)
 {
-    DispositivoIO* dispositivoIO = buscarIOSegunNombre(nombreIO);
+    DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
     
     if(dispositivoIO==NULL)
     {
-        //TODO
+        //TODO logger
+        PCB* procesoAEliminar = sacarDeDiccionario(diccionarioProcesosBloqueados,pasarUnsignedAChar(PID));
+        pasarAExit(procesoAEliminar);
     }
-    else if(!dispositivoIO->ocupado)
+    else 
     {
-        t_paquete* paquete = crear_super_paquete(INICIA_IO_PROCESO);
-        cargar_uint32_t_al_super_paquete(paquete,PID);
-        cargar_uint32_t_al_super_paquete(paquete,tiempo);
-        enviar_paquete(paquete,dispositivoIO->fdConexion);
+    sem_wait(dispositivoIO->semaforoDispositivoOcupado);
+
+    t_paquete* paquete = crear_super_paquete(INICIA_IO_PROCESO);
+    cargar_uint32_t_al_super_paquete(paquete,PID);
+    cargar_uint32_t_al_super_paquete(paquete,tiempo);
+    enviar_paquete(paquete,dispositivoIO->fdConexion);
     }
-    else
-    {
-        //TODO 
-    }
+
 
 }
 
-DispositivoIO* buscarIOSegunNombre(char* nombreIO)
-{
-    bool _mismoNombre(DispositivoIO* dispositivo)
-    {
-        return (strcmp(dispositivo->nombre,nombreIO) == 0);
-    };
-
-    return sacarDeListaSegunCondicion(listaDispositivosIO,_mismoNombre);
-}

@@ -25,10 +25,12 @@ void guardarDatosCPU(char* identificador,int fdConexion)
 
 
 void pasarAExit(PCB* proceso){
-    free(proceso->archivoPseudocodigo);
+    
 
     //TODO avisar a memoria y loguear metricas
     inicializarProceso();
+    //TODO liberar cronometros
+    free(proceso->archivoPseudocodigo);
     free(proceso);
 }
 

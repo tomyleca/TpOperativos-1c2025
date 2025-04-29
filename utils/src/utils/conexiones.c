@@ -101,7 +101,7 @@ int iniciar_servidor(t_log* logger, int puerto)
 		return -1;
 	}
 
-	printf("[ INFO ]: << SERVIDOR LISTO Y ESCUCHANDO	>>\n");
+	//printf("[ INFO ]: << SERVIDOR LISTO Y ESCUCHANDO	>>\n");
 
 	freeaddrinfo(servinfo);
 

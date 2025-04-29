@@ -10,7 +10,7 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     nuevoProceso->PID=pidDisponible;
     
     sem_wait(semaforoPIDDisponible);
-    pidDisponible++;
+        pidDisponible++;
     sem_post(semaforoPIDDisponible);
 
     
@@ -39,22 +39,39 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
 
     temporal_resume(nuevoProceso->cronometros[NEW]);
     nuevoProceso->ME[NEW]++; 
+    
+    if(nuevoProceso->PID==0) //Si es el primer proceso, espero el ENTER
+    {
+        while (1) {
+            char* input = readline("Apriete ENTER para empezar a planificar procesos.");  
+
+            if (*input == '\0') {  
+                break;
+            }
+        }
+    }    
+    
     inicializarProceso();
 }
 
 void inicializarProceso(){
     PCB* procesoAInicializar;
     
-    //TODO
-    //ACA VA ALGO PARA ESPERAR EL ENTER
-    if (!list_is_empty(listaProcesosSwapReady->lista))
+
+
+    if (!list_is_empty(listaProcesosSwapReady->lista)) //Esto es para darle mas prioridad a la lista Swap Ready
+        {
         procesoAInicializar= sacarDeLista(listaProcesosSwapReady,0);
+        cargarCronometro(procesoAInicializar,SWAP_READY);
+        }
     else
+        {
         procesoAInicializar = sacarDeLista(listaProcesosNew,0);
+        cargarCronometro(procesoAInicializar,NEW);
+        }
     
-    //TODO
-    //LE PREGUNTO A MEMORIA
-    cargarCronometro(procesoAInicializar,NEW);
+    //TODO LE PREGUNTO A MEMORIA
+    
     pasarAReady(procesoAInicializar);
  
 
@@ -63,6 +80,7 @@ void inicializarProceso(){
 
 
 }
+
 
 bool menorTam(PCB* PCB1,PCB* PCB2)
 {
@@ -74,4 +92,4 @@ void pasarAReady(PCB* proceso){
     agregarALista(listaProcesosReady,proceso);
     temporal_resume(proceso->cronometros[READY]);
     proceso->ME[READY]++;
-    }
+}

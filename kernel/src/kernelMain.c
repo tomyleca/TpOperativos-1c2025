@@ -62,12 +62,12 @@ void crearEstructuras()
     listaProcesosReady = crearListaConSemaforos();
     listaProcesosSwapReady = crearListaConSemaforos();
 
-    listaDispositivosIO = crearListaConSemaforos();
 
     listaCPUsLibres = crearListaConSemaforos();
     listaCPUsEnUso = crearListaConSemaforos();
 
     
+    diccionarioDispositivosIO = crearDiccionarioConSemaforos();
     diccionarioProcesosBloqueados = crearDiccionarioConSemaforos();
 
     semaforoIntentarPlanificar = malloc(sizeof(sem_t));
