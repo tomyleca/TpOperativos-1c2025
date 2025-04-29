@@ -108,12 +108,12 @@ int mmu_traducir_direccion_logica(int direccion_logica)
 
     for(int nivel = 1; nivel < cant_niveles; nivel++) {
 
-        int potencia = (int)pow(cant_entradas_tabla, cant_niveles - nivel);
+        int potencia = pow(cant_entradas_tabla, cant_niveles - nivel);
         entrada_nivel_X = (nro_pagina / potencia) % cant_entradas_tabla;
 
         //si no es el ultimo consulto a memoria por la siguiente tabla
         if (nivel < cant_niveles - 1) {
-            int siguiente_tabla = SOLICITO_TABLA_A_MEMORIA ///////////
+            int siguiente_tabla = SOLICITO_TABLA_A_MEMORIA ////// Función que trae tabla de memoria
             tabla_actual = siguiente_tabla;
 
         } else {
@@ -129,23 +129,6 @@ void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_int_al_super_paquete(paquete, tamanio);
     enviar_paquete(paquete, socket_cpu_memoria);
-    free(paquete);
-}
-
-void solicitar_contexto_a_memoria()
-{
-    // Creo el paquete
-    t_paquete* paquete;
-
-    paquete = crear_super_paquete(CPU_PIDE_CONTEXTO); 
-
-    cargar_int_al_super_paquete(paquete, contexto->pid);
-    //DEBERIA TMB CARGAR EL PC? SINO PARA Q CARAJO LO MANDO KERNEL A CPU? CREO QUE SI!!
-    cargar_int_al_super_paquete(paquete, contexto->registros.PC);
-
-    // Envio el paquete a memoria
-    enviar_paquete(paquete, socket_cpu_memoria);  //PRIMERA SOLICITUD A MEMORIA, ESPERO EL CONTEXTO TODOS LOS REGISTROS EN 0
-
     free(paquete);
 }
 
@@ -404,7 +387,7 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
             cargar_registros_a_paquete(paquete_memoria);
             break;
-        case INIT_PROCCESS:
+        case INIT_PROC:
             // MEMORIA
             contexto->registros.PC++;
             paquete_memoria = crear_super_paquete(ENVIAR_A_MEMORIA_UN_AVISO_DE_SYSCALL);
@@ -430,6 +413,16 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
     printf("Mando paquete a kenrel para comprobar algo xd --------------------\n");
     enviar_paquete(paquete_kernel_dispatch, socket_cpu_kernel_dispatch);
     free(paquete_kernel_dispatch);
-    sem_post(&sem_pid); 
+    //sem_post(&sem_pid); 
 }
 
+void liberar_array_strings(char **array) 
+{ 
+    if (array == NULL) return; // Si ya es null, entonces termino la función
+    
+    for (int i = 0; array[i] != NULL; i++) 
+    {   // Sino voy recorriendo y liberando
+        free(array[i]);
+    }
+    free(array);
+}

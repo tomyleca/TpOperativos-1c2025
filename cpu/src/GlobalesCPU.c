@@ -36,6 +36,11 @@ sem_t sem_hay_instruccion;
 sem_t sem_pid;
 sem_t sem_contexto;
 
+//MMU
+int cant_entradas_tabla; 
+int tamanio_pagina;              
+int cant_niveles;
+
 
 char* ip_memoria;
 int puerto_memoria;
