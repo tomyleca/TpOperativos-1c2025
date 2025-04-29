@@ -11,12 +11,15 @@
 #include "utils/conexiones.h"
 #include "utils/configs.h"
 #include "GlobalesMemoria.h"
+#include "funcionesMemoria.h"
 
 void leerConfigMemoria(t_config* config_memoria);
 
 void server_escucha(int fd_escucha_servidor,t_log* memoria_logger);
 
 int atender_cliente(int *fd_conexion);
+
+
 
 
 
