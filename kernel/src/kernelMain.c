@@ -3,7 +3,7 @@
 int main(int argc, char* argv[]) {
 
     //INICIO Y LEO CONFIG
-    t_config* config_kernel = iniciar_config("kernel.config");
+    config_kernel = iniciar_config("kernel.config");
     leerConfigKernel(config_kernel);
     
     //INICIO LOGGER
@@ -11,17 +11,16 @@ int main(int argc, char* argv[]) {
 
     //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
     crearEstructuras();
+    
+    inicializar_hilos_kernel(config_kernel);
 
-    inicializar_hilos(config_kernel);
+   
 
-    //CIERRO
-    log_info(logger_kernel, "Finalizando conexión");
-    pthread_join(hilo_escuchar_kernel, NULL);
-    pthread_join(hilo_escuchar_kernel_interrupcion, NULL);
-    pthread_detach(hilo_crear_kernel_memoria);
+    //INIT_PROC("1",4);
+    //INIT_PROC("2",2);
+    //guardarDatosCPU("id",1);
 
-    INIT_PROC("afsfas",4);
-
+    
     return 0;
 }
 
@@ -40,36 +39,57 @@ void leerConfigKernel(t_config* config_kernel) {
     
 }
 
-void inicializar_hilos(t_config* config_kernel)
-{   
-    //TIENE MAS SENTIDO QUE PRIMERO CONECTE CON MEMORIA, Y DESPUES ESCUCHE PETICIONES DE CPU, NO? ENTONCES CAMBIE EL ORDEN!!
-    socket_kernel_memoria = crear_conexion(logger_kernel,ip_memoria,puerto_memoria);
-    hilo_crear_kernel_memoria = crear_hilo_memoria();//EN ESTA FUNCION DSP CAMBIALE LO QUE LE QUERES PASAR PARA CREAR EL PRIMER HILO/PROCESOS
+void inicializar_hilos_kernel(t_config* config_kernel)
+{
+    /*pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
+    pthread_t* hiloPlanificadorCortoPlazo = malloc(sizeof(pthread_t));
+    pthread_create(hiloAtenderIO,NULL,esperarClientesIO,NULL);
+    pthread_create(hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
+    pthread_join(*hiloAtenderIO,NULL);
+    pthread_join(*hiloPlanificadorCortoPlazo,NULL);*/
 
-    //INICIO SERVIDOR KERNEL-CPU
+    socket_kernel_memoria = crear_conexion(logger_kernel, ip_memoria, puerto_memoria);
+    hilo_conectar_kernel_memoria = crear_hilo_memoria();
+
+    INIT_PROC("../memoria/pseudocodigo.txt", 4096);
+
     socket_kernel_cpu_dispatch = iniciar_servidor(logger_kernel, puerto_escucha_dispatch); 
-    hilo_escuchar_kernel = escuchar_dispatch_cpu();
-    
-    socket_kernel_cpu_interrupt= iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
-    hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_cpu();
+    log_info(logger_kernel, "Servidor DISPATCH iniciado");
+    socket_kernel_cpu_interrupt = iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
+    log_info(logger_kernel, "Servidor INTERRUPT iniciado");
 
-  
-    // El ultimo hilo es con join. Para que este se quede esperando, y no finalize el hilo.
+    hilo_escuchar_dispatch = escuchar_dispatch_cpu();
+	hilo_escuchar_interrupcion = escuchar_interrupcion_cpu();
+
+    pthread_join(hilo_escuchar_dispatch,NULL);
+    pthread_join(hilo_escuchar_interrupcion,NULL);
+    pthread_join(hilo_conectar_kernel_memoria,NULL);
+
 }
+
 
 void crearEstructuras()
 {
     setearAlgoritmosDePlanificacion();
 
-    listaProcesosNew = list_create();
-    listaProcesosReady = list_create();
-    listaProcesosSwapReady = list_create();
+    listaProcesosNew = crearListaConSemaforos();
+    listaProcesosReady = crearListaConSemaforos();
+    listaProcesosSwapReady = crearListaConSemaforos();
+
+    listaDispositivosIO = crearListaConSemaforos();
+
+    listaCPUsLibres = crearListaConSemaforos();
+    listaCPUsEnUso = crearListaConSemaforos();
 
     
-    diccionarioIODeProcesosBloqueados = dictionary_create();
+    diccionarioProcesosBloqueados = crearDiccionarioConSemaforos();
 
-    iniciarSemaforosKernel();
+    semaforoIntentarPlanificar = malloc(sizeof(sem_t));
+    sem_init(semaforoIntentarPlanificar,1,0);
 
+    
+
+    
 }
 
 void setearAlgoritmosDePlanificacion(){
@@ -96,23 +116,10 @@ void setearAlgoritmosDePlanificacion(){
 
 }
 
-void iniciarSemaforosKernel()
+
+void cargarCronometro(PCB* proceso,ESTADO estado)
 {
-    semaforoListaNew= malloc(sizeof(sem_t));
-    semaforoListaReady = malloc(sizeof(sem_t));
-    semaforoListaSwapReady = malloc(sizeof(sem_t));
-    
-    semaforoDiccionarioIOBlocked = malloc(sizeof(sem_t));
-    
-    sem_init(semaforoListaNew,1,1);
-    sem_init(semaforoListaReady,1,1);
-
-
-    sem_init(semaforoDiccionarioIOBlocked,1,1); 
-    sem_init(semaforoDiccionarioBlocked,1,1); 
-    sem_init(semaforoListaSwapReady,1,1);
-
-
-
+    usleep(10000);
+    temporal_stop(proceso->cronometros[estado]);
+    proceso->MT[estado]=temporal_gettime(proceso->cronometros[estado]);
 }
-

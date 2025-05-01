@@ -23,3 +23,4 @@ t_log_level log_level;
 char* dump_path;
 t_contexto* nuevo_contexto_provisorio; 
 t_contexto* nuevo_contexto;
+int fd_escucha_servidor;

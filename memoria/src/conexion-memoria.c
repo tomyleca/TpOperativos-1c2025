@@ -15,25 +15,26 @@ void leerConfigMemoria(t_config* config_memoria)
 }
 
 
-void server_escucha(int fd_escucha_servidor,t_log* memoria_logger)
+void server_escucha(int fd_escucha_servidor, t_log* logger_memoria) 
 {
-    while (1) {
-        // Espera a un cliente en el bucle principal
-        int fd_conexion = esperar_cliente(fd_escucha_servidor);
-        log_info(memoria_logger, "Cliente conectado y en espera.\n");
-        if (fd_conexion != -1) {
-            pthread_t hilo_conexion;
-            // Reservamos memoria para pasar el socket conexion al hilo
-            int* nueva_conexion = malloc(sizeof(int));
-            *nueva_conexion = fd_conexion;
-            //Responde al handshake del cliente que espera que se conecte.
-			//responder_handshake(fd_conexion);
-            // Crea un hilo para manejar la conexión del cliente
-            pthread_create(&hilo_conexion, NULL,(void*) atender_cliente, nueva_conexion);
-			pthread_detach(hilo_conexion);  // Detach para que no necesites un join más tarde
+    log_info(logger_memoria, "MEMORIA lista para recibir peticiones de KERNEL");
+    
+    while (1) 
+    {        
+        int socket_kernel_por_dudas = esperar_cliente(fd_escucha_servidor); 
+
+        log_info(logger_memoria, "## Kernel Conectado - FD del socket: <%d>", socket_kernel_por_dudas);
+        
+        if (socket_kernel_por_dudas != -1) 
+        {
+            // Crear un nuevo hilo para atender la petición del cliente Kernel
+            pthread_t hilo_atender_cliente;
+            pthread_create(&hilo_atender_cliente, NULL, (void*) atender_cliente, &socket_kernel_por_dudas);            
+            pthread_detach(hilo_atender_cliente); // No es necesario hacer join
         }
     }
 }
+
 
 int atender_cliente(int *fd_conexion)
 {    
@@ -41,6 +42,7 @@ int atender_cliente(int *fd_conexion)
     int cliente_fd = *fd_conexion;
     t_paquete* paquete;
     int pid;
+    printf("Si llegue aca, es porque tengo un cliente de kernel o cpu");
     while (1) {
         int cod_op = recibir_operacion(cliente_fd); 
         switch (cod_op) {
@@ -77,9 +79,9 @@ int atender_cliente(int *fd_conexion)
             nuevo_contexto = buscar_contexto_por_pid(datos_kernel.pid);
             crear_pid(nuevo_contexto, datos_kernel);
             // Respuesta a KERNEL----- EL NUMERO DE TABLA DE PRIMER NIVEL !!
-            paquete = crear_super_paquete(RESPUESTA_KERNEL_TPN); //TPN TABLA DE PRIMER NIVEL --- a implementar todavia!! 
+            //paquete = crear_super_paquete(RESPUESTA_KERNEL_TPN); //TPN TABLA DE PRIMER NIVEL --- a implementar todavia!! 
             //cargar_int_al_super_paquete(paquete, tabla_primer_nivel);
-            enviar_paquete(paquete, cliente_fd);
+            //enviar_paquete(paquete, cliente_fd);
             free(unBuffer);
             free(datos_kernel.archivo_pseudocodigo);
             break;       
@@ -90,8 +92,8 @@ int atender_cliente(int *fd_conexion)
                 free(unBuffer);
                 break;
             case -1:
-                //log_error(memoria_logger, "El cliente se desconectó. Terminando servidor.");
-                return 0;  // Terminar el ciclo y finalizar el hilo
+                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor.");
+                pthread_exit(NULL);
             
             default:
                 //log_warning(memoria_logger, "Operación desconocida.");

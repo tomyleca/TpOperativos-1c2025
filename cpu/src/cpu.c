@@ -10,7 +10,8 @@ int main(int argc, char* argv[]) {
     //INICIO LOGGER
     logger_cpu = iniciar_logger("cpuLogger.log","cpuLogger",log_level);
     
-    identificador_cpu = atoi(argv[1]);
+    identificador_cpu = 1;
+    //atoi(argv[1]);
     // INICIO HILOS
     inicializar_hilos(config_cpu);
 
@@ -57,7 +58,7 @@ void inicializar_hilos(t_config* config_cpu)
     pthread_detach(hilo_escuchar_kernel_interrupcion);
 
     hilo_interpretar_instruccion = crear_hilo_interpretar_instruccion();
-    pthread_join(hilo_interpretar_instruccion, NULL);
+    //pthread_join(hilo_interpretar_instruccion, NULL);
     //ESTE SI LO DESCOMENTO, TIRA SEG FAULT PORQUE INICIA EL HILO EN DECODE, HABRIA QUE PONER SEMAFORO SUPONGO!!
 }
 

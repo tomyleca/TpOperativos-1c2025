@@ -25,20 +25,21 @@ void hilo_memoria()
 {
     t_buffer* buffer;
     int cod_op;
+    printf("LLegue a hilo_memoria");
     while(1) 
     {
-        cod_op = recibir_operacion(socket_kernel_cpu_dispatch);
+        cod_op = recibir_operacion(socket_kernel_memoria);
         switch (cod_op) 
         {
             case MENSAJE:
                 //recibir_mensaje(socket_kernel_cpu_dispatch, logger_kernel);
-                break;
-            /*case -1:
+                break;            
+            case -1:
                 log_error(logger_kernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
-                exit(1);*/
-            /*default:
+                pthread_exit(NULL);
+            default:
                 log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
-                break;*/
+                break;
         }
     }
 }
@@ -49,6 +50,7 @@ void atender_dispatch_cpu()
     t_buffer* buffer;
     int cod_op;
     cliente_kernel_dispatch = esperar_cliente(socket_kernel_cpu_dispatch);
+    t_paquete* paquete;
     log_info(logger_kernel, "Se conectó DISPATCH");
 
     while(1) 
@@ -59,9 +61,16 @@ void atender_dispatch_cpu()
             case MENSAJE:
                 //recibir_mensaje(socket_kernel_cpu_dispatch, logger_kernel);
                 break;
+            case HANDSHAKE_CPU_KERNEL_D:
+            buffer = recibiendo_super_paquete(socket_kernel_cpu_dispatch);
+            char* identificador = recibir_int_del_buffer(buffer);
+            guardarDatosCPU(identificador, socket_kernel_cpu_dispatch);
+            printf("Llego identificador cpu");
+            enviar_pid_cpu(socket_kernel_cpu_dispatch);
+            break;
             /*case -1:
                 log_error(logger_kernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
-                exit(1);*/
+            pthread_exit(NULL);*/
             /*default:
                 log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
                 break;*/
@@ -75,6 +84,7 @@ void atender_interrupcion_cpu()
     int cod_op;
     cliente_kernel_interrupt = esperar_cliente(socket_kernel_cpu_interrupt);
     log_info(logger_kernel, "Se conectó INTERRUPT");
+    t_paquete* paquete;
 
     while(1) 
     {
@@ -84,9 +94,15 @@ void atender_interrupcion_cpu()
             case MENSAJE:
                 //recibir_mensaje(socket_kernel_cpu_interrupt, logger_kernel);
                 break;
+            case HANDSHAKE_CPU_KERNEL_I:
+            buffer = recibiendo_super_paquete(socket_kernel_cpu_interrupt);
+            char* identificador_i = recibir_string_del_buffer(buffer);
+            guardarDatosCPU(identificador_i, socket_kernel_cpu_interrupt);
+            printf("Llego identificador cpu");
+            break;
             /*case -1:
-                log_error(logger_kernel, "KERNEL INTERRUPT se desconecto. Terminando servidor");
-                exit(1);*/
+                log_error(logger_kernel, "KERNEL INTERRUPT se desconecto. Terminando servidor");    
+                pthread_exit(NULL);*/
             /*default:
                 log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
                 break;*/
@@ -109,10 +125,19 @@ void ejecutar_io()
                 break;
             case -1:
                 log_error(logger_kernel, "KERNEL se desconecto. Terminando servidor");
-                exit(1);
+                pthread_exit(NULL);
             default:
                 log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
                 break;
         }
     }
+}
+
+void enviar_pid_cpu(int socket_kernel_cpu_dispatch)
+{
+    t_paquete* paquete;
+    paquete = crear_super_paquete(PID_KERNEL_A_CPU);
+    cargar_int_al_super_paquete(paquete, 1);//PID
+    cargar_int_al_super_paquete(paquete, 0);//PC HARDCODEADO IGUAL!
+    enviar_paquete(paquete, socket_kernel_cpu_dispatch);
 }

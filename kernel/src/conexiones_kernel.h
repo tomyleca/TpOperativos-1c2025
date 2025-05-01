@@ -12,6 +12,7 @@
 #include "globalesKernel.h"
 #include "utils/conexiones.h"
 #include "utils/configs.h"
+#include "conexionConCPU.h"
 
 pthread_t escuchar_dispatch_cpu();
 
