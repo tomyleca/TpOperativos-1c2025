@@ -1,7 +1,8 @@
 #include "conexiones.h"
 
+
 //-----------------------------------------------CLIENTE----------------------------------------------
-int crear_conexion(t_log* server_name, char* ip, int puerto) {
+int crear_conexion(t_log* nombreLogger, char* ip, int puerto) {
     struct addrinfo hints, *servinfo;
 
     memset(&hints, 0, sizeof(hints));
@@ -13,27 +14,27 @@ int crear_conexion(t_log* server_name, char* ip, int puerto) {
 
     int resultado = getaddrinfo(ip, puerto_str, &hints, &servinfo);
     if (resultado != 0) {
-        log_error(server_name, "getaddrinfo fallo: %s", gai_strerror(resultado));
+        log_error(nombreLogger, "getaddrinfo fallo: %s", gai_strerror(resultado));
         free(puerto_str);
         return -1;
     }
 
     int socket_cliente = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
     if (socket_cliente == -1) {
-        log_error(server_name, "Error creando socket");
+        log_error(nombreLogger, "Error creando socket");
         freeaddrinfo(servinfo);
         free(puerto_str);
         return -1;
     }
 
     if (connect(socket_cliente, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
-        log_error(server_name, "Error al conectar con %s:%s", ip, puerto_str);
+        log_error(nombreLogger, "Error al conectar con %s:%s", ip, puerto_str);
         freeaddrinfo(servinfo);
         free(puerto_str);
         return -1;
     }
 
-    log_info(server_name, "Conexion exitosa con %s:%s", ip, puerto_str);
+    log_info(nombreLogger, "Conexion exitosa con %s:%s", ip, puerto_str);
 
     freeaddrinfo(servinfo);
     free(puerto_str);
@@ -56,6 +57,7 @@ int iniciar_servidor(t_log* logger, int puerto)
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
 
+
 	fd_servidor = getaddrinfo(NULL, puerto_str, &hints, &servinfo);
 	fd_servidor = socket(servinfo->ai_family,
                         	servinfo->ai_socktype,
@@ -67,6 +69,9 @@ int iniciar_servidor(t_log* logger, int puerto)
 		exit(EXIT_FAILURE);
 		return fd_servidor;
 	}
+
+    
+    setsockopt(fd_servidor, SOL_SOCKET, SO_REUSEPORT, &(int){1}, sizeof(int));
 
 	//Escucha y bindeo a puerto
 	bind(fd_servidor, servinfo->ai_addr, servinfo->ai_addrlen);

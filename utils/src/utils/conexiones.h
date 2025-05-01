@@ -14,7 +14,7 @@
 #include "shared.h"
 
 // CLIENTE
-int crear_conexion(t_log* server_name, char* ip, int puerto);
+int crear_conexion(t_log* nombreLogger, char* ip, int puerto);
 void generar_handshake(int socket, char *server_name, char *ip, char *puerto);
 
 //SERVIDOR

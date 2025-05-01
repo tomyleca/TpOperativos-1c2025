@@ -35,7 +35,7 @@ void hilo_memoria()
                 break;
             /*case -1:
                 log_error(logger_kernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
-                exit(1);*/
+                pthread_exit(NULL);*/
             /*default:
                 log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
                 break;*/
@@ -59,9 +59,13 @@ void atender_dispatch_cpu()
             case MENSAJE:
                 //recibir_mensaje(socket_kernel_cpu_dispatch, logger_kernel);
                 break;
+            case HANDSHAKE_CPU_KERNEL_D:
+            buffer = recibiendo_super_paquete(socket_kernel_cpu_dispatch);
+            int identificador2 = recibir_int_del_buffer(buffer);
+            break;
             /*case -1:
                 log_error(logger_kernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
-                exit(1);*/
+                pthread_exit(NULL);*/
             /*default:
                 log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
                 break;*/
@@ -84,9 +88,13 @@ void atender_interrupcion_cpu()
             case MENSAJE:
                 //recibir_mensaje(socket_kernel_cpu_interrupt, logger_kernel);
                 break;
+            case HANDSHAKE_CPU_KERNEL_I:
+            buffer = recibiendo_super_paquete(socket_kernel_cpu_interrupt);
+            int identificador = recibir_int_del_buffer(buffer);
+            break;
             /*case -1:
                 log_error(logger_kernel, "KERNEL INTERRUPT se desconecto. Terminando servidor");
-                exit(1);*/
+                pthread_exit(NULL);*/
             /*default:
                 log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
                 break;*/
@@ -109,7 +117,7 @@ void ejecutar_io()
                 break;
             case -1:
                 log_error(logger_kernel, "KERNEL se desconecto. Terminando servidor");
-                exit(1);
+                pthread_exit(NULL);
             default:
                 log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
                 break;

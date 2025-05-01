@@ -77,9 +77,9 @@ int atender_cliente(int *fd_conexion)
             nuevo_contexto = buscar_contexto_por_pid(datos_kernel.pid);
             crear_pid(nuevo_contexto, datos_kernel);
             // Respuesta a KERNEL----- EL NUMERO DE TABLA DE PRIMER NIVEL !!
-            paquete = crear_super_paquete(RESPUESTA_KERNEL_TPN); //TPN TABLA DE PRIMER NIVEL --- a implementar todavia!! 
+            //paquete = crear_super_paquete(RESPUESTA_KERNEL_TPN); //TPN TABLA DE PRIMER NIVEL --- a implementar todavia!! 
             //cargar_int_al_super_paquete(paquete, tabla_primer_nivel);
-            enviar_paquete(paquete, cliente_fd);
+            //enviar_paquete(paquete, cliente_fd);
             free(unBuffer);
             free(datos_kernel.archivo_pseudocodigo);
             break;       

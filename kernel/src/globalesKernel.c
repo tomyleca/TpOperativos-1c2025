@@ -39,4 +39,10 @@ uint32_t pidDisponible = 0;
 
 int algoritmoDePlanificacionInt;
 
+//IO
+t_list* listaDispositivosIO;
+
+sem_t* semaforoListaDispositivosIO;
+
+
 

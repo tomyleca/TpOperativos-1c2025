@@ -12,12 +12,10 @@ void iniciarConexiones()
     socket_kernel_io = iniciar_servidor(logger_kernel, puerto_escucha_IO);
     log_info(logger_kernel, "Servidor  iniciado para IO");
     
-    cliente_kernel = esperar_cliente(socket_kernel_io);
-    log_info(logger_kernel, "Se conectó IO");
+    
+    
 
-    //CIERRO
-    log_info(logger_kernel, "Finalizando conexión");
-    liberar_conexion(socket_kernel_io);
+ 
 
 
     /****************CONEXION KERNEL CON CPU*********************/
@@ -30,9 +28,9 @@ void iniciarConexiones()
     socket_kernel_cpu_interrupt = iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
     log_info(logger_kernel, "Servidor INTERRUPT iniciado");
     
-    cliente_kernel_dispatch = esperar_cliente(socket_kernel_cpu_dispatch);
+    //cliente_kernel_dispatch = esperar_cliente(socket_kernel_cpu_dispatch);
     
-    cliente_kernel_interrupt = esperar_cliente(socket_kernel_cpu_interrupt);
+    //cliente_kernel_interrupt = esperar_cliente(socket_kernel_cpu_interrupt);
 
 
 

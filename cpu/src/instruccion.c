@@ -101,7 +101,7 @@ void peticion_escritura_a_memoria(int direccion_fisica, char* valor_registro_dat
 
 int mmu_traducir_direccion_logica(int direccion_logica)
 {
-    int nro_pagina = direccion_logica / tamanio_pagina;
+    /*int nro_pagina = direccion_logica / tamanio_pagina;
     int desplazamiento = direccion_logica % tamanio_pagina;
     int tabla_actual = contexto->pid;
     int entrada_nivel_X;
@@ -118,8 +118,8 @@ int mmu_traducir_direccion_logica(int direccion_logica)
 
         } else {
         }
-    }       
-    
+    }       */
+    return 0;
 }
 
 void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
@@ -132,7 +132,17 @@ void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
     free(paquete);
 }
 
+void solicitar_contexto_a_memoria()
+{
+    // Creo el paquete
+    t_paquete* paquete = crear_super_paquete(CPU_PIDE_CONTEXTO);
+    cargar_int_al_super_paquete(paquete, contexto->pid);
+    cargar_int_al_super_paquete(paquete, contexto->registros.PC);
+    // Envio el paquete a memoria
+    enviar_paquete(paquete, socket_cpu_memoria);  //PRIMERA SOLICITUD A MEMORIA, ESPERO EL CONTEXTO TODOS LOS REGISTROS EN 0
 
+    free(paquete);
+}
 
 
 
@@ -387,7 +397,7 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
             cargar_registros_a_paquete(paquete_memoria);
             break;
-        case INIT_PROC:
+        case INIT_PROCCESS:
             // MEMORIA
             contexto->registros.PC++;
             paquete_memoria = crear_super_paquete(ENVIAR_A_MEMORIA_UN_AVISO_DE_SYSCALL);
@@ -414,15 +424,4 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
     enviar_paquete(paquete_kernel_dispatch, socket_cpu_kernel_dispatch);
     free(paquete_kernel_dispatch);
     //sem_post(&sem_pid); 
-}
-
-void liberar_array_strings(char **array) 
-{ 
-    if (array == NULL) return; // Si ya es null, entonces termino la función
-    
-    for (int i = 0; array[i] != NULL; i++) 
-    {   // Sino voy recorriendo y liberando
-        free(array[i]);
-    }
-    free(array);
 }

@@ -18,11 +18,22 @@ int main(int argc, char* argv[]) {
     log_info(logger_kernel, "Finalizando conexión");
     pthread_join(hilo_escuchar_kernel, NULL);
     pthread_join(hilo_escuchar_kernel_interrupcion, NULL);
-    pthread_detach(hilo_crear_kernel_memoria);
+    pthread_join(hilo_crear_kernel_memoria,NULL);
+    //INIT_PROC("afsfas",4);
+
+    /*pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
+    pthread_create(hiloAtenderIO,NULL,atenderIO,NULL);
+
+    
+
+    
+   
 
     INIT_PROC("afsfas",4);
 
-    return 0;
+
+    pthread_join(*hiloAtenderIO,NULL);
+    return 0;*/
 }
 
 void leerConfigKernel(t_config* config_kernel) {
@@ -45,7 +56,7 @@ void inicializar_hilos(t_config* config_kernel)
     //TIENE MAS SENTIDO QUE PRIMERO CONECTE CON MEMORIA, Y DESPUES ESCUCHE PETICIONES DE CPU, NO? ENTONCES CAMBIE EL ORDEN!!
     socket_kernel_memoria = crear_conexion(logger_kernel,ip_memoria,puerto_memoria);
     hilo_crear_kernel_memoria = crear_hilo_memoria();//EN ESTA FUNCION DSP CAMBIALE LO QUE LE QUERES PASAR PARA CREAR EL PRIMER HILO/PROCESOS
-
+    INIT_PROC("../memoria/pseudocodigo.txt", 4096);
     //INICIO SERVIDOR KERNEL-CPU
     socket_kernel_cpu_dispatch = iniciar_servidor(logger_kernel, puerto_escucha_dispatch); 
     hilo_escuchar_kernel = escuchar_dispatch_cpu();
@@ -53,9 +64,7 @@ void inicializar_hilos(t_config* config_kernel)
     socket_kernel_cpu_interrupt= iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
     hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_cpu();
 
-  
-    // El ultimo hilo es con join. Para que este se quede esperando, y no finalize el hilo.
-}
+  }
 
 void crearEstructuras()
 {
@@ -64,6 +73,8 @@ void crearEstructuras()
     listaProcesosNew = list_create();
     listaProcesosReady = list_create();
     listaProcesosSwapReady = list_create();
+
+    listaDispositivosIO = list_create();
 
     
     diccionarioIODeProcesosBloqueados = dictionary_create();
@@ -101,6 +112,8 @@ void iniciarSemaforosKernel()
     semaforoListaNew= malloc(sizeof(sem_t));
     semaforoListaReady = malloc(sizeof(sem_t));
     semaforoListaSwapReady = malloc(sizeof(sem_t));
+
+    semaforoListaDispositivosIO = malloc(sizeof(sem_t));
     
     semaforoDiccionarioIOBlocked = malloc(sizeof(sem_t));
     
@@ -109,8 +122,9 @@ void iniciarSemaforosKernel()
 
 
     sem_init(semaforoDiccionarioIOBlocked,1,1); 
-    sem_init(semaforoDiccionarioBlocked,1,1); 
+    //sem_init(semaforoDiccionarioBlocked,1,1); 
     sem_init(semaforoListaSwapReady,1,1);
+    sem_init(semaforoListaDispositivosIO,1,1);
 
 
 

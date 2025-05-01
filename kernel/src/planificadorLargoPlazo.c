@@ -7,6 +7,13 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     nuevoProceso->tam=tam;
     nuevoProceso->PC=0;
     
+    t_paquete* paquete = crear_super_paquete(RECIBIR_PID_KERNEL);
+    cargar_int_al_super_paquete(paquete, 1);//PID
+    cargar_int_al_super_paquete(paquete, 4096);
+    cargar_string_al_super_paquete(paquete, nuevoProceso->archivoPseudocodigo);
+    enviar_paquete(paquete, socket_kernel_memoria);
+
+
     nuevoProceso->PID=pidDisponible;
     pidDisponible++;
     
@@ -37,7 +44,7 @@ void inicializarProceso(){
     
     //TODO
     //ACA VA ALGO PARA ESPERAR EL ENTER
-    if (listaProcesosSwapReady!=NULL)
+    if (!list_is_empty(listaProcesosSwapReady))
         procesoAInicializar= sacarDeLista(semaforoListaSwapReady,listaProcesosSwapReady,0);
     else
         procesoAInicializar = sacarDeLista(semaforoListaNew,listaProcesosNew,0);

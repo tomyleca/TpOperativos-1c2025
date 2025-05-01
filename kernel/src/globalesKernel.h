@@ -11,6 +11,7 @@
 #include <commons/temporal.h>
 #include <pthread.h>
 #include <commons/collections/dictionary.h>
+#include "utils/shared.h"
 #include "../../utils/src/utils/monitoresListas.h"
 #include "../../utils/src/utils/monitoresDiccionarios.h"
 
@@ -49,6 +50,12 @@ typedef enum{
     SJF,
     SRT
 } PLANIFICADOR;
+
+typedef struct
+{
+    char* nombre;
+    bool ocupado;
+} DispositivoIO;
 
 
 extern int socket_kernel_memoria;
@@ -90,7 +97,7 @@ extern void estimarRafagaActual(PCB* proceso);
 //Cambiar de estado
 extern void pasarAReady(PCB* proceso);
 extern void pasarABLoqueadoEIniciarContador(PCB* proceso);
-extern void contadorParaSwap(PCB* proceso);
+extern void* contadorParaSwap(PCB* proceso);
 extern bool IOTerminado(char* PIDComoChar);
 extern void pasarASwapBlocked(PCB* proceso, char* PIDComoChar);
 extern void pasarASwapReady(PCB* proceso);
@@ -105,6 +112,12 @@ extern sem_t* semaforoListaSwapReady;
 //CONEXIONES
 extern void iniciarConexiones();
 extern void cerrarConexiones();
+
+//IO
+extern t_list* listaDispositivosIO;
+
+extern sem_t* semaforoListaDispositivosIO;
+
 
 //OTRAS
 extern char* pasarUnsignedAChar(uint32_t unsigned_);
