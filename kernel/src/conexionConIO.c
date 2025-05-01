@@ -7,7 +7,7 @@ void* esperarClientesIO(void* arg)
     {
         int* fdConexion = malloc(sizeof(int));
         *fdConexion = esperar_cliente(socket_kernel_io);
-        log_info(logger_kernel, "Se conectó IO");
+        log_info(loggerKernel, "Se conectó IO");
         pthread_t* nuevoHiloAtenderIO = malloc(sizeof(pthread_t));
         pthread_create(nuevoHiloAtenderIO,NULL,atenderIO,fdConexion);
     }
@@ -61,9 +61,9 @@ void avisarInicioIO(uint32_t PID,char* nombreIO,uint32_t tiempo)
     
     if(dispositivoIO==NULL)
     {
-        //TODO logger
-        PCB* procesoAEliminar = sacarDeDiccionario(diccionarioProcesosBloqueados,pasarUnsignedAChar(PID));
-        pasarAExit(procesoAEliminar);
+        procesoEnEsperaIO* procesoAEliminar = sacarDeDiccionario(diccionarioProcesosBloqueados,pasarUnsignedAChar(PID));
+        log_error(loggerKernel, "## (<%u>) Dispositivo IO no encontrado: %s.",procesoAEliminar->proceso->PID,nombreIO);
+        pasarAExit(procesoAEliminar->proceso);
     }
     else 
     {

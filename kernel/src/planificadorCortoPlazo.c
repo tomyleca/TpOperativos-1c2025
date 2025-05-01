@@ -45,8 +45,8 @@ void* planificadorCortoPlazo(void* arg)
 
         if(procesoAEjecutar != NULL)
         {
+            log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAEjecutar->PID,"READY","EXECUTE");
             cargarCronometro(procesoAEjecutar,READY);
-            cargarCronometro(procesoAEjecutar,SWAP_READY);
             pasarAExecute(procesoAEjecutar);
            
         }
@@ -111,6 +111,8 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
     {
         
         PCB* procesoDesalojado = terminarEjecucionNucleoCPU(nucleoConMenorRafagaRestante);
+        log_info(loggerKernel, "## (<%u>) - Desalojado por algoritmo SJF/SRT",procesoDesalojado->PID);
+        log_info(loggerKernel, "## (<%u>) Pasa del estado <%s> al estado <%s>",procesoDesalojado->PID,"EXECUTE",READY);
         pasarAReady(procesoDesalojado);
         return true;
     }

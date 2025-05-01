@@ -49,7 +49,7 @@ void atender_dispatch_cpu()
     t_buffer* buffer;
     int cod_op;
     cliente_kernel_dispatch = esperar_cliente(socket_kernel_cpu_dispatch);
-    log_info(logger_kernel, "Se conectó DISPATCH");
+    log_info(loggerKernel, "Se conectó DISPATCH");
 
     while(1) 
     {
@@ -74,7 +74,7 @@ void atender_interrupcion_cpu()
     t_buffer* buffer;
     int cod_op;
     cliente_kernel_interrupt = esperar_cliente(socket_kernel_cpu_interrupt);
-    log_info(logger_kernel, "Se conectó INTERRUPT");
+    log_info(loggerKernel, "Se conectó INTERRUPT");
 
     while(1) 
     {
@@ -108,10 +108,10 @@ void ejecutar_io()
                 //recibir_mensaje(socket_kernel_io, logger_kernel);
                 break;
             case -1:
-                log_error(logger_kernel, "KERNEL se desconecto. Terminando servidor");
+                log_error(loggerKernel, "KERNEL se desconecto. Terminando servidor");
                 exit(1);
             default:
-                log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
+                log_warning(loggerKernel, "Operacion desconocida. No quieras meter la pata");
                 break;
         }
     }

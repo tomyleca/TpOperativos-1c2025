@@ -109,7 +109,7 @@ extern char*  algoritmo_cola_new;
 extern bool algoritmoColaNewEnFIFO;
 
 extern t_log_level log_level;
-extern t_log* logger_kernel;
+extern t_log* loggerKernel;
 
 
 //PROCESOS

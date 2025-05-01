@@ -22,7 +22,7 @@ char* algoritmo_cola_new;
 bool algoritmoColaNewEnFIFO;
 
 t_log_level log_level;
-t_log* logger_kernel;
+t_log* loggerKernel;
 
 
 pthread_t hilo_escuchar_kernel;

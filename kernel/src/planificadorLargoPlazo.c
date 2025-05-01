@@ -39,6 +39,8 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
 
     temporal_resume(nuevoProceso->cronometros[NEW]);
     nuevoProceso->ME[NEW]++; 
+
+    log_info(loggerKernel, "## (<%u>) Se crea el proceso - Estado: NEW",nuevoProceso->PID);
     
     if(nuevoProceso->PID==0) //Si es el primer proceso, espero el ENTER
     {
@@ -62,17 +64,28 @@ void inicializarProceso(){
     if (!list_is_empty(listaProcesosSwapReady->lista)) //Esto es para darle mas prioridad a la lista Swap Ready
         {
         procesoAInicializar= sacarDeLista(listaProcesosSwapReady,0);
+        
+        
+        //TODO Preguntarle a memoria
+        log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"SWAP_READY","READY");
         cargarCronometro(procesoAInicializar,SWAP_READY);
+        pasarAReady(procesoAInicializar);
         }
     else
         {
         procesoAInicializar = sacarDeLista(listaProcesosNew,0);
+
+        
+        //TODO Preguntarle a memoria
+        log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"NEW","READY");
         cargarCronometro(procesoAInicializar,NEW);
+        pasarAReady(procesoAInicializar);
         }
     
-    //TODO LE PREGUNTO A MEMORIA
     
-    pasarAReady(procesoAInicializar);
+    
+    
+    
  
 
     

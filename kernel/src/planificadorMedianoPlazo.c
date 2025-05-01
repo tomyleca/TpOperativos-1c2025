@@ -4,6 +4,11 @@ void pasarABLoqueado(PCB* proceso,uint32_t tiempo,char* nombreIO){
     
     
     guardarDatosDeEjecucion(proceso);
+    log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <DISPOSITIVO_IO",proceso->PID);
+    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"READY","BLOCKED");
+    cargarCronometro(proceso,READY);
+    
+
 
     
    
@@ -44,6 +49,7 @@ void* manejarProcesoBloqueado(procesoEnEsperaIO* procesoEnEsperaIO){
         {
             //Paso el proceso a Swap
             procesoEnEsperaIO->estaENSwap=1;
+            log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoEnEsperaIO->proceso->PID,"BLOCKED","SWAP_BLOCKED");
             cargarCronometro(procesoEnEsperaIO->proceso,BLOCKED);
             pasarASwapBlocked(procesoEnEsperaIO);
             break;
@@ -53,6 +59,7 @@ void* manejarProcesoBloqueado(procesoEnEsperaIO* procesoEnEsperaIO){
         {
             //Desbloqueo el proceso
             sacarDeDiccionario(diccionarioProcesosBloqueados,PID);
+            log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoEnEsperaIO->proceso->PID,"BLOCKED","READY");
             cargarCronometro(procesoEnEsperaIO->proceso,BLOCKED);
             pasarAReady(procesoEnEsperaIO->proceso);
             
@@ -79,6 +86,7 @@ void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO)
     procesoEsperandoIO->proceso->ME[SWAP_BLOCKED]++;
 
     sem_wait(procesoEsperandoIO->semaforoIOFinalizada);
+    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoEsperandoIO->proceso->PID,"SWAP_BLOCKED","SWAP_READY");
     cargarCronometro(procesoEsperandoIO->proceso,SWAP_BLOCKED);
     pasarASwapReady(procesoEsperandoIO->proceso);
 
@@ -114,5 +122,8 @@ void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO)
     char* PIDComoChar = pasarUnsignedAChar(PID);
     procesoEnEsperaIO* procesoADesbloquear = leerDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
     sem_post(procesoADesbloquear->semaforoIOFinalizada);
+
+    log_info(loggerKernel, "## (<%u>) finalizó IO y pasa a READY",PID);
+
     
 }

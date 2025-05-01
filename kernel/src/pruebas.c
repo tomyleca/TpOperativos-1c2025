@@ -8,4 +8,5 @@ void prueba1()
     sleep(10);
     PCB* proceso = terminarEjecucionNucleoCPU(leerDeLista(listaCPUsEnUso,0));
     pasarABLoqueado(proceso,4700000,"Prueba");
+   
 }

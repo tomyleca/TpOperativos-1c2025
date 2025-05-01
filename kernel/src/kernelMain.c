@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
     leerConfigKernel(config_kernel);
     
     //INICIO LOGGER
-    logger_kernel = iniciar_logger("kernelLogger.log","kernelLogger",log_level);
+    loggerKernel = iniciar_logger("kernelLogger.log","kernelLogger",log_level);
 
     iniciarConexiones();
 
@@ -89,7 +89,7 @@ void setearAlgoritmosDePlanificacion(){
     else if(strcmp(algoritmo_cola_new,"PMCP")==0)
         algoritmoColaNewEnFIFO=false;
     else
-        log_error(logger_kernel,"ALGORITMO DE PLANIFICACION DESCONOCIDO");
+        log_error(loggerKernel,"ALGORITMO DE PLANIFICACION DESCONOCIDO");
     
 
     
@@ -101,7 +101,7 @@ void setearAlgoritmosDePlanificacion(){
     else if(strcmp(algoritmo_planificacion,"SRT")==0)
         algoritmoDePlanificacionInt=SRT;
     else
-        log_error(logger_kernel,"ALGORITMO DE PLANIFICACION DESCONOCIDO");
+        log_error(loggerKernel,"ALGORITMO DE PLANIFICACION DESCONOCIDO");
        
 
 }

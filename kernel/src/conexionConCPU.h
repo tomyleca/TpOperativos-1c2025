@@ -5,5 +5,6 @@
 
 
 extern  void guardarDatosCPU(char* identificador,int fdConexion);
+extern void loggearMetricas(PCB* proceso);
  
 #endif
