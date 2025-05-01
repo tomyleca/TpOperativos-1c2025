@@ -101,6 +101,17 @@ bool sacarElementoDeLista(t_listaConSemaforos* listaConSemaforos,void* elem)
     return elementoEncontrado;
 }
 
+void* leerDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,bool (*condicion) (void*))
+{
+    void* elem;
+    
+    sem_wait(listaConSemaforos->semaforoMutex);
+        elem = list_find(listaConSemaforos->lista,condicion);
+    sem_post(listaConSemaforos->semaforoMutex);
+
+    return elem;
+}
+
 void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos)
 {
     list_clean(listaConSemaforos->lista);
@@ -108,3 +119,4 @@ void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos)
     free(listaConSemaforos->semaforoCantElementos);
     free(listaConSemaforos->semaforoMutex);
 }
+

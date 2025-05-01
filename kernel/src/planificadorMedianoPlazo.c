@@ -2,9 +2,6 @@
 
 void pasarABLoqueado(PCB* proceso,uint32_t tiempo,char* nombreIO){
     
-    
-    guardarDatosDeEjecucion(proceso);
-    log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <DISPOSITIVO_IO",proceso->PID);
     log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"READY","BLOCKED");
     cargarCronometro(proceso,READY);
     
@@ -26,7 +23,7 @@ void pasarABLoqueado(PCB* proceso,uint32_t tiempo,char* nombreIO){
 
 
     pthread_t* hiloContador = malloc(sizeof(pthread_t));
-    pthread_create(hiloContador,NULL,manejarProcesoBloqueado,procesoEsperando);
+    pthread_create(hiloContador,NULL,(void *)manejarProcesoBloqueado,procesoEsperando);
     
 
     free(PIDComoChar);

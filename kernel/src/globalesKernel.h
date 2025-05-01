@@ -115,8 +115,9 @@ extern t_log* loggerKernel;
 //PROCESOS
 extern uint32_t pidDisponible;
 
-extern void INIT_PROC(char* archivoPseudocodigo,unsigned int tam);
+
 extern void inicializarProceso();
+PCB* buscarPCBEjecutando(uint32_t pid);
 
 //Ordenar listas
 extern bool menorTam(PCB* PCB1,PCB* PCB2);
@@ -133,7 +134,7 @@ extern void ejecutar(PCB* proceso);
 extern bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera);
 extern bool menorEstimadoRafagaRestante(nucleoCPU* CPU1,nucleoCPU* CPU2);
 
-extern PCB* terminarEjecucionNucleoCPU(nucleoCPU* nucleoCPU);
+extern void terminarEjecucion(PCB* proceso);
 extern void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion);
 
 extern t_listaConSemaforos* listaProcesosNew;

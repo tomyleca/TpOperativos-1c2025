@@ -13,7 +13,7 @@ void* planificadorCortoPlazo(void* arg)
             
 
 
-            case FIFO:
+        case FIFO:
                 procesoAEjecutar  = sacarDeLista(listaProcesosReady,0);
                 break;
         case SJF:
@@ -98,7 +98,7 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
     };
     
     sem_wait(listaCPUsEnUso->semaforoMutex);
-    t_list* listaCPUsOrdenadaPorRafagaRestante = list_sorted(listaCPUsEnUso->lista,menorEstimadoRafagaRestante);
+        t_list* listaCPUsOrdenadaPorRafagaRestante = list_sorted(listaCPUsEnUso->lista,menorEstimadoRafagaRestante);
     sem_post(listaCPUsEnUso->semaforoMutex);
     nucleoCPU* nucleoConMenorRafagaRestante = NULL;
     
@@ -110,9 +110,10 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
     if(nucleoConMenorRafagaRestante!=NULL)
     {
         
-        PCB* procesoDesalojado = terminarEjecucionNucleoCPU(nucleoConMenorRafagaRestante);
+        terminarEjecucion(nucleoConMenorRafagaRestante->procesoEnEjecucion);
+        PCB* procesoDesalojado = nucleoConMenorRafagaRestante->procesoEnEjecucion;
         log_info(loggerKernel, "## (<%u>) - Desalojado por algoritmo SJF/SRT",procesoDesalojado->PID);
-        log_info(loggerKernel, "## (<%u>) Pasa del estado <%s> al estado <%s>",procesoDesalojado->PID,"EXECUTE",READY);
+        log_info(loggerKernel, "## (<%u>) Pasa del estado <%s> al estado <%s>",procesoDesalojado->PID,"EXECUTE","READY");
         pasarAReady(procesoDesalojado);
         return true;
     }
@@ -127,15 +128,20 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 
 }
 
-PCB* terminarEjecucionNucleoCPU(nucleoCPU* nucleoCPU)
+void terminarEjecucion(PCB* proceso)
 {
-    sacarElementoDeLista(listaCPUsEnUso,nucleoCPU);
+    bool _ejecutandoProceso(nucleoCPU* nucleoCPU)
+    {
+        return nucleoCPU->procesoEnEjecucion == proceso;
+    };
+
+    nucleoCPU* nucleoCPU = sacarDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
     nucleoCPU->ejecutando=false;
     agregarALista(listaCPUsLibres,nucleoCPU);
     PCB* procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
     guardarDatosDeEjecucion(procesoPostEjecucion);
     sem_post(semaforoIntentarPlanificar);
-    return procesoPostEjecucion;
+    
 }
 
 bool menorEstimadoRafagaRestante(nucleoCPU* CPU1,nucleoCPU* CPU2)

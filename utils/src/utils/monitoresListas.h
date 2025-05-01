@@ -49,13 +49,18 @@ extern void* sacarDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,b
 extern void* leerDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion);
 
 /**
+*@brief Devuelve el primer elemento de una lista que coincida con la condicion dada. Utiliza semáforos para evitar condiciones de carrera.
+*/
+void* leerDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,bool (*condicion) (void*));
+
+/**
 *@brief Chequea si la lista esta vacia. Utiliza semáforos para evitar condiciones de carrera.
 */
 extern bool chequearListaVacia(t_listaConSemaforos* listaConSemaforos);
 
 
 /**
-*@brief Remueve un elemento dado de la lista. Retorna true si lo encontró, false en otro caso. Utiliza semáforos para evitar condiciones de carrera.
+*@brief Saca un elemento dado de la lista. Retorna true si lo encontró, false en otro caso. Utiliza semáforos para evitar condiciones de carrera.
 */
 extern bool sacarElementoDeLista(t_listaConSemaforos* listaConSemaforos,void* elem);
 
