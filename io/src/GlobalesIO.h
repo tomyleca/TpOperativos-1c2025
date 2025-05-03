@@ -23,7 +23,7 @@ extern char* valor;
 extern int conexionKernel;
 
 
-extern t_log* logger_io;
+extern t_log* loggerIO;
 extern t_config* config_io;
 extern t_log_level log_level;
 

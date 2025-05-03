@@ -15,7 +15,7 @@
 #include"../../utils/src/utils/conexiones.h"
 
 void dump_memory(uint32_t pid);
-void syscall_IO(uint32_t pid, char* nombreIO, uint32_t tiempo);
+void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo);
 extern void INIT_PROC(char* archivoPseudocodigo,unsigned int tam);
 
 

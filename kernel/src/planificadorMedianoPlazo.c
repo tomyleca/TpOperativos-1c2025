@@ -1,6 +1,6 @@
 #include "kernel.h"
 
-void pasarABLoqueado(PCB* proceso,uint32_t tiempo,char* nombreIO){
+void pasarABLoqueado(PCB* proceso,int64_t tiempo,char* nombreIO){
     
     log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"READY","BLOCKED");
     cargarCronometro(proceso,READY);
@@ -18,12 +18,14 @@ void pasarABLoqueado(PCB* proceso,uint32_t tiempo,char* nombreIO){
 
     char* PIDComoChar = pasarUnsignedAChar(proceso->PID);
     agregarADiccionario(diccionarioProcesosBloqueados,PIDComoChar,procesoEsperando);
+    
+
+
     avisarInicioIO(proceso->PID,nombreIO,tiempo);
-
-
-
     pthread_t* hiloContador = malloc(sizeof(pthread_t));
     pthread_create(hiloContador,NULL,(void *)manejarProcesoBloqueado,procesoEsperando);
+
+    
     
 
     free(PIDComoChar);
@@ -34,6 +36,9 @@ void pasarABLoqueado(PCB* proceso,uint32_t tiempo,char* nombreIO){
 void* manejarProcesoBloqueado(procesoEnEsperaIO* procesoEnEsperaIO){
 
     char* PID = pasarUnsignedAChar(procesoEnEsperaIO->proceso->PID);
+    t_temporal* cronometroBloqueadoActual = temporal_create();
+    temporal_resume(cronometroBloqueadoActual);
+
     temporal_resume(procesoEnEsperaIO->proceso->cronometros[BLOCKED]);
     procesoEnEsperaIO->proceso->ME[BLOCKED]++;
     
@@ -41,8 +46,8 @@ void* manejarProcesoBloqueado(procesoEnEsperaIO* procesoEnEsperaIO){
     
 
     while(1){
-        int64_t tiempoTranscurrido = (int64_t) temporal_gettime(procesoEnEsperaIO->proceso->cronometros[BLOCKED]);
-        if(tiempoTranscurrido>=tiempo_suspension)
+        int64_t tiempoTranscurrido = (int64_t) temporal_gettime(cronometroBloqueadoActual);
+        if(tiempoTranscurrido >=tiempo_suspension) 
         {
             //Paso el proceso a Swap
             procesoEnEsperaIO->estaENSwap=1;
@@ -65,6 +70,8 @@ void* manejarProcesoBloqueado(procesoEnEsperaIO* procesoEnEsperaIO){
             break;
         }
     }
+
+    //TODO temporal destroy
 
     
     
@@ -108,6 +115,8 @@ void pasarASwapReady(PCB* proceso)
         agregarALista(listaProcesosSwapReady,proceso);
     else 
         agregarAListaOrdenada(listaProcesosSwapReady,proceso,menorTam);
+
+    inicializarProceso();
 }
 
 void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO)

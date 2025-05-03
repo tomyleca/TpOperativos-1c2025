@@ -16,7 +16,7 @@ void inicializarProceso(){
         cargarCronometro(procesoAInicializar,SWAP_READY);
         pasarAReady(procesoAInicializar);
         }
-    else
+    else if (!list_is_empty(listaProcesosNew->lista))
         {
         procesoAInicializar = sacarDeLista(listaProcesosNew,0);
 
@@ -26,17 +26,9 @@ void inicializarProceso(){
         cargarCronometro(procesoAInicializar,NEW);
         pasarAReady(procesoAInicializar);
         }
-    
-    
-    
-    
-    
- 
 
+        
     
-    
-
-
 }
 
 

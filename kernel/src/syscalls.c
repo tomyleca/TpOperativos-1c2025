@@ -3,7 +3,7 @@
 void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     //Creo un nuevo proceso
     PCB* nuevoProceso=malloc(sizeof(PCB));
-    nuevoProceso->archivoPseudocodigo=archivoPseudocodigo;
+    nuevoProceso->archivoPseudocodigo=strdup(archivoPseudocodigo);
     nuevoProceso->tam=tam;
     nuevoProceso->PC=0;
     
@@ -97,7 +97,7 @@ void dump_memory(uint32_t pid) {
     liberar_conexion(socket_memoria_particular);
 }
 
-void syscall_IO(uint32_t pid, char* nombreIO, uint32_t tiempo) {
+void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
     log_info(loggerKernel, "## (<%u>) - Solicitó syscall: IO", pid);
 
     PCB* proceso = NULL;
@@ -124,7 +124,15 @@ void syscall_IO(uint32_t pid, char* nombreIO, uint32_t tiempo) {
     pasarABLoqueado(proceso, tiempo, nombreIO);
 }
 
+void syscallExit(uint32_t pid)
+{
+    PCB* proceso = NULL;
+    proceso = buscarPCBEjecutando(pid);
+    terminarEjecucion(proceso);
 
+    pasarAExit(proceso);
+
+}
 PCB* buscarPCBEjecutando(uint32_t pid) {
     bool _mismoPID(nucleoCPU* nucleoEnEjecucion) {
         return nucleoEnEjecucion->procesoEnEjecucion->PID == pid;
@@ -133,3 +141,5 @@ PCB* buscarPCBEjecutando(uint32_t pid) {
     nucleoCPU* nucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_mismoPID);
     return nucleoCPU->procesoEnEjecucion;
 }
+
+
