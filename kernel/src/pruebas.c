@@ -10,6 +10,6 @@ void prueba1()
     sleep(4);
     syscall_IO(1,"IO QUE NO EXISTE",1000);
     sleep(4);
-    syscall_IO(0,"IO QUE NO EXISTE",400);
+    syscallExit(0);
    
 }

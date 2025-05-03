@@ -79,7 +79,7 @@ void dump_memory(uint32_t pid) {
     
     if (proceso == NULL) {
         log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para DUMP_MEMORY", pid);
-        return;
+        exit(1);
     }
 
     //TODO conexion con memoria
@@ -103,12 +103,14 @@ void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
     PCB* proceso = NULL;
     proceso  = buscarPCBEjecutando(pid);
 
-    terminarEjecucion(proceso);
-   
     if (proceso == NULL) {
         log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", pid);
-        return;
+        exit(1);
     }
+    
+    terminarEjecucion(proceso);
+   
+
 
     DispositivoIO* dispositivo = NULL;
     dispositivo = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
@@ -128,6 +130,12 @@ void syscallExit(uint32_t pid)
 {
     PCB* proceso = NULL;
     proceso = buscarPCBEjecutando(pid);
+
+    if (proceso == NULL) {
+        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", pid);
+        exit(1);
+    }
+
     terminarEjecucion(proceso);
 
     pasarAExit(proceso);
@@ -139,7 +147,10 @@ PCB* buscarPCBEjecutando(uint32_t pid) {
     };
 
     nucleoCPU* nucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_mismoPID);
-    return nucleoCPU->procesoEnEjecucion;
+    if(nucleoCPU!= NULL)
+        return nucleoCPU->procesoEnEjecucion;
+    else
+        return NULL;
 }
 
 
