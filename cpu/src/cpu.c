@@ -50,14 +50,14 @@ void inicializar_hilos(t_config* config_cpu)
     socket_cpu_kernel_dispatch = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_dispatch);
     crear_handshake_cpu_kernel_dispatch(socket_cpu_kernel_dispatch);
     hilo_escuchar_kernel = escuchar_kernel();
-    pthread_join(hilo_escuchar_kernel,NULL);
+    pthread_detach(hilo_escuchar_kernel);
 
     socket_cpu_kernel_interrupt = crear_conexion(logger_cpu,ip_kernel, puerto_kernel_interrupt); // CPU SERVIDOR DE KERNEL INTERRUPT -> envia a kernel el estado actual
     crear_handshake_cpu_kernel_interrupt(socket_cpu_kernel_interrupt);
 	hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_kernel();
-    pthread_join(hilo_escuchar_kernel_interrupcion,NULL);
+    pthread_detach(hilo_escuchar_kernel_interrupcion);
 
-    hilo_interpretar_instruccion = crear_hilo_interpretar_instruccion(); 
+    hilo_interpretar_instruccion = crear_hilo_interpretar_instruccion();
     pthread_join(hilo_interpretar_instruccion, NULL);
     //ESTE SI LO DESCOMENTO, TIRA SEG FAULT PORQUE INICIA EL HILO EN DECODE, HABRIA QUE PONER SEMAFORO SUPONGO!!
 }

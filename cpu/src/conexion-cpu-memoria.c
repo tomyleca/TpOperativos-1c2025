@@ -160,7 +160,6 @@ void atender_dispatch_kernel()
                 sem_wait(&sem_contexto); // REVISAR EN QUE ALGORITMO SE USA
                 printf("pase el semaforo OTRO PROCESO\n");
                 contexto = malloc(sizeof(t_contexto_cpu));
-
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
                 contexto->pid = recibir_int_del_buffer(buffer);
                 contexto->registros.PC = recibir_int_del_buffer(buffer);

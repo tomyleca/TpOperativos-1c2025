@@ -91,11 +91,10 @@ int atender_cliente(int *fd_conexion)
                 free(unBuffer);
                 break;
             case -1:
-                //log_error(memoria_logger, "El cliente se desconectó. Terminando servidor.");
-                return 0;  // Terminar el ciclo y finalizar el hilo
-            
+                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor.");
+                pthread_exit(NULL);  
             default:
-                //log_warning(memoria_logger, "Operación desconocida.");
+                log_warning(logger_memoria, "Operación desconocida.");
                 break;
             }
         }

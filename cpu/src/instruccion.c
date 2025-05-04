@@ -288,7 +288,6 @@ void cargar_registros(t_buffer* buffer)
     contexto->registros.FX = recibir_int_del_buffer(buffer);
     contexto->registros.GX = recibir_int_del_buffer(buffer);
     contexto->registros.HX = recibir_int_del_buffer(buffer);
-    contexto->registros.PC = recibir_int_del_buffer(buffer);
 }
 
 // **********************************  
@@ -303,6 +302,7 @@ void iniciar_diccionario_instrucciones()
     dictionary_put(instrucciones, "DUMP_MEMORY", (void*)(intptr_t)I_DUMP_MEMORY);
     dictionary_put(instrucciones, "IO", (void*)(intptr_t)I_IO);
     dictionary_put(instrucciones, "GOTO", (void*)(intptr_t)I_GOTO);
+    dictionary_put(instrucciones, "NOOP", (void*)(intptr_t)I_NOOP);
 }
 
 

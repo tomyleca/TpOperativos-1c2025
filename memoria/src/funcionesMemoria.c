@@ -104,7 +104,8 @@ void crear_pid(t_contexto* nuevo_contexto, t_info_kernel info_kernel)
 {  
 
      // Inicializar el contexto principal del proceso
-    nuevo_contexto->pid = info_kernel.pid;
+    nuevo_contexto->pid = info_kernel.pid;  
+    nuevo_contexto->datos_pid.pc = 0;
     nuevo_contexto->tamanio_proceso = info_kernel.tamanio_proceso;
 
     nuevo_contexto->datos_pid.ax = 0;
@@ -115,7 +116,8 @@ void crear_pid(t_contexto* nuevo_contexto, t_info_kernel info_kernel)
     nuevo_contexto->datos_pid.fx = 0;
     nuevo_contexto->datos_pid.gx = 0;
     nuevo_contexto->datos_pid.hx = 0;
-    nuevo_contexto->datos_pid.pc = 0;
+  
+
     printf("Ruta recibida: '%s'\n", info_kernel.archivo_pseudocodigo);
 
 
@@ -198,6 +200,7 @@ void enviar_contexto(t_contexto* contexto_proceso, int socket_cpu)
     t_paquete* paquete_contexto = crear_super_paquete(CPU_RECIBE_CONTEXTO);
     
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->pid);
+    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.pc);
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.ax);
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.bx);
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.cx);
@@ -206,8 +209,7 @@ void enviar_contexto(t_contexto* contexto_proceso, int socket_cpu)
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.fx);
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.gx);
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.hx);
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.pc);
-    
+
     enviar_paquete(paquete_contexto, socket_cpu);
 
     free(paquete_contexto);

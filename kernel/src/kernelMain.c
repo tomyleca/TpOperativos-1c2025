@@ -58,11 +58,13 @@ void inicializar_hilos(t_config* config_kernel)
     //INICIO SERVIDOR KERNEL-CPU
     socket_kernel_cpu_dispatch = iniciar_servidor(logger_kernel, puerto_escucha_dispatch); 
     hilo_escuchar_kernel = escuchar_dispatch_cpu();
-    pthread_join(hilo_escuchar_kernel,NULL);
 
     socket_kernel_cpu_interrupt= iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
-    hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_cpu();
-    pthread_detach(hilo_escuchar_kernel_interrupcion);
+    hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_cpu(); 
+
+    pthread_join(hilo_escuchar_kernel,NULL);
+
+    pthread_join(hilo_escuchar_kernel_interrupcion,NULL);
     
     pthread_join(hilo_crear_kernel_memoria,NULL);
 
