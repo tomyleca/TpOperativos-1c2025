@@ -10,9 +10,12 @@ int main(int argc, char* argv[]) {
     //INICIO LOGGER
     logger_cpu = iniciar_logger("cpuLogger.log","cpuLogger",log_level);
     
+    identificador_cpu = 1;
+    //atoi(argv[1]);
     // INICIO HILOS
     inicializar_hilos(config_cpu);
 
+    inicializar_recursos();
 
     //CIERRO
     log_info(logger_cpu, "Cerrando conexión");
@@ -44,16 +47,25 @@ void inicializar_hilos(t_config* config_cpu)
     hilo_escuchar_memoria = escuchar_memoria();
     pthread_detach(hilo_escuchar_memoria);
 
-    socket_cpu_kernel_dispatch = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_dispatch); // CPU SERVIDOR DE KERNEL DISPATCH -> fin de ejecucion
+    socket_cpu_kernel_dispatch = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_dispatch);
+    crear_handshake_cpu_kernel_dispatch(socket_cpu_kernel_dispatch);
     hilo_escuchar_kernel = escuchar_kernel();
     pthread_detach(hilo_escuchar_kernel);
     
-    socket_cpu_kernel_interrupt = crear_conexion(logger_cpu,ip_kernel, puerto_kernel_interrupt);  // CPU SERVIDOR DE KERNEL INTERRUPT -> envia a kernel el estado actual
+    socket_cpu_kernel_interrupt = crear_conexion(logger_cpu,ip_kernel, puerto_kernel_interrupt); // CPU SERVIDOR DE KERNEL INTERRUPT -> envia a kernel el estado actual
+    crear_handshake_cpu_kernel_interrupt(socket_cpu_kernel_interrupt);
 	hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_kernel();
     pthread_detach(hilo_escuchar_kernel_interrupcion);
 
-    /*hilo_interpretar_instruccion = crear_hilo_interpretar_instruccion();
-    pthread_join(hilo_interpretar_instruccion, NULL);*/
+    hilo_interpretar_instruccion = crear_hilo_interpretar_instruccion();
+    //pthread_join(hilo_interpretar_instruccion, NULL);
     //ESTE SI LO DESCOMENTO, TIRA SEG FAULT PORQUE INICIA EL HILO EN DECODE, HABRIA QUE PONER SEMAFORO SUPONGO!!
 }
 
+void inicializar_recursos()
+{
+    // Inicializar semaforos
+    sem_init(&sem_hay_instruccion, 0, 0);
+    sem_init(&sem_pid, 0, 0);
+    sem_init(&sem_contexto, 0, 0);
+}

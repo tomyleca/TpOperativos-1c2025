@@ -51,10 +51,10 @@ typedef enum{
 } ESTADO;
 
 //HILOS
-extern pthread_t hilo_escuchar_kernel;
-extern pthread_t hilo_escuchar_kernel_interrupcion;
+extern pthread_t hilo_escuchar_dispatch;
+extern pthread_t hilo_escuchar_interrupcion;
 extern pthread_t hilo_conectar_kernel_memoria;
-extern pthread_t hilo_crear_kernel_memoria;
+
 typedef enum{
     FIFO,
     SJF,
@@ -109,7 +109,8 @@ extern char*  algoritmo_cola_new;
 extern bool algoritmoColaNewEnFIFO;
 
 extern t_log_level log_level;
-extern t_log* loggerKernel;
+extern t_log* logger_kernel;
+extern t_config* config_kernel;
 
 
 //PROCESOS

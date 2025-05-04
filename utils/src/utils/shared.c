@@ -329,6 +329,17 @@ void cargar_int_al_super_paquete(t_paquete *paquete, int numero)
 	
 }
 
+void liberar_array_strings(char **array) 
+{ 
+    if (array == NULL) return; // Si ya es null, entonces termino la función
+    
+    for (int i = 0; array[i] != NULL; i++) 
+    {   // Sino voy recorriendo y liberando
+        free(array[i]);
+    }
+    free(array);
+}
+
 t_buffer *recibiendo_super_paquete(int conexion)
 {
 	t_buffer *unBuffer = malloc(sizeof(t_buffer));

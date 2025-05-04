@@ -3,23 +3,14 @@
 int main(int argc, char* argv[]) {
 
     //INICIO Y LEO CONFIG
-    t_config* config_kernel = iniciar_config("kernel.config");
+    config_kernel = iniciar_config("kernel.config");
     leerConfigKernel(config_kernel);
     
     //INICIO LOGGER
-    loggerKernel = iniciar_logger("kernelLogger.log","kernelLogger",log_level);
-
-    iniciarConexiones();
+    logger_kernel = iniciar_logger("kernelLogger.log","kernelLogger",log_level);
 
     //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
     crearEstructuras();
-
-    pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
-    pthread_t* hiloPlanificadorCortoPlazo = malloc(sizeof(pthread_t));
-    pthread_create(hiloAtenderIO,NULL,esperarClientesIO,NULL);
-    pthread_create(hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
-
-
     
     prueba1();
     
@@ -27,14 +18,15 @@ int main(int argc, char* argv[]) {
 
   
 
+    //inicializar_hilos_kernel(config_kernel);
+
+   
+
+    //INIT_PROC("1",4);
+    //INIT_PROC("2",2);
+    //guardarDatosCPU("id",1);
 
     
-
-    
-
-
-    pthread_join(*hiloAtenderIO,NULL);
-    pthread_join(*hiloPlanificadorCortoPlazo,NULL);
     return 0;
 }
 
@@ -51,6 +43,34 @@ void leerConfigKernel(t_config* config_kernel) {
     tiempo_suspension = config_get_int_value(config_kernel, "TIEMPO_SUSPENSION");
     log_level = log_level_from_string(config_get_string_value(config_kernel, "LOG_LEVEL"));
     
+}
+
+void inicializar_hilos_kernel(t_config* config_kernel)
+{
+    /*pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
+    pthread_t* hiloPlanificadorCortoPlazo = malloc(sizeof(pthread_t));
+    pthread_create(hiloAtenderIO,NULL,esperarClientesIO,NULL);
+    pthread_create(hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
+    pthread_join(*hiloAtenderIO,NULL);
+    pthread_join(*hiloPlanificadorCortoPlazo,NULL);*/
+
+    socket_kernel_memoria = crear_conexion(logger_kernel, ip_memoria, puerto_memoria);
+    hilo_conectar_kernel_memoria = crear_hilo_memoria();
+
+    INIT_PROC("../memoria/pseudocodigo.txt", 4096);
+
+    socket_kernel_cpu_dispatch = iniciar_servidor(logger_kernel, puerto_escucha_dispatch); 
+    log_info(logger_kernel, "Servidor DISPATCH iniciado");
+    socket_kernel_cpu_interrupt = iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
+    log_info(logger_kernel, "Servidor INTERRUPT iniciado");
+
+    hilo_escuchar_dispatch = escuchar_dispatch_cpu();
+	hilo_escuchar_interrupcion = escuchar_interrupcion_cpu();
+
+    pthread_join(hilo_escuchar_dispatch,NULL);
+    pthread_join(hilo_escuchar_interrupcion,NULL);
+    pthread_join(hilo_conectar_kernel_memoria,NULL);
+
 }
 
 

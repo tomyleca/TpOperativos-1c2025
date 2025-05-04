@@ -4,12 +4,13 @@ sem_t* semaforoPIDDisponible;
 
 //CONFIG Y LOGGER
 int socket_kernel_io;
-int cliente_kernel;
 int socket_kernel_cpu_dispatch;
 int socket_kernel_cpu_interrupt;
 int cliente_kernel_dispatch;
 int cliente_kernel_interrupt;
 int socket_kernel_memoria;
+
+
 char* ip_memoria;
 char* algoritmo_planificacion;
 int puerto_memoria;
@@ -22,12 +23,14 @@ char* algoritmo_cola_new;
 bool algoritmoColaNewEnFIFO;
 
 t_log_level log_level;
-t_log* loggerKernel;
+t_log* logger_kernel;
+t_config* config_kernel;
 
 
-pthread_t hilo_escuchar_kernel;
-pthread_t hilo_escuchar_kernel_interrupcion;
-pthread_t hilo_crear_kernel_memoria;
+pthread_t hilo_escuchar_dispatch;
+pthread_t hilo_escuchar_interrupcion;
+pthread_t hilo_conectar_kernel_memoria;
+
 //PROCESOS
 t_listaConSemaforos* listaProcesosNew;
 t_listaConSemaforos* listaProcesosReady;

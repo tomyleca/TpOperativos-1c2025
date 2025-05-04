@@ -34,7 +34,7 @@ extern DispositivoIO* buscarIOSegunNombre(char* nombreIO);
 extern void cargarCronometro(PCB* proceso, ESTADO estado);
 
 
-void inicializar_hilos(t_config* config_kernel);
+void inicializar_hilos_kernel(t_config* config_kernel);
 
 
 
