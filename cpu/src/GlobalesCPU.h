@@ -24,7 +24,7 @@ extern int socket_cpu_kernel_dispatch;
 extern int socket_cpu_kernel_interrupt;
 extern int fd_cpu_kernel_dispatch;
 extern int fd_cpu_kernel_interrupt;
-extern int identificador_cpu;
+extern char* identificador_cpu;
 
 
 // Config
@@ -56,10 +56,10 @@ extern sem_t sem_contexto;
 
 // Conexiones a módulos
 extern char* ip_memoria;
-extern int puerto_memoria;
+extern char* puerto_memoria;
 extern char* ip_kernel;
-extern int puerto_kernel_dispatch;
-extern int puerto_kernel_interrupt;
+extern char* puerto_kernel_dispatch;
+extern char* puerto_kernel_interrupt;
 
 //OTROS
 extern bool flag_interrupcion;

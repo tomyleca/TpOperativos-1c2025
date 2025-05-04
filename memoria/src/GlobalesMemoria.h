@@ -57,11 +57,12 @@ extern int conexion;
 extern char* ip;
 extern char* puerto;
 extern char* valor;
+extern int fd_escucha_servidor;
 
 extern t_log* logger_memoria;
 extern t_config* config_memoria;
 
-extern int puerto_escucha;
+extern char* puerto_escucha;
 extern int tam_memoria;
 extern int tam_pagina;
 extern int entradas_por_tabla;

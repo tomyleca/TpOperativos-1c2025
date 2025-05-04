@@ -2,7 +2,7 @@
 
 void leerConfigMemoria(t_config* config_memoria) 
 {
-    puerto_escucha = config_get_int_value(config_memoria, "PUERTO_ESCUCHA");
+    puerto_escucha = config_get_string_value(config_memoria, "PUERTO_ESCUCHA");
     tam_memoria = config_get_int_value(config_memoria, "TAM_MEMORIA");
     tam_pagina = config_get_int_value(config_memoria, "TAM_PAGINA");
     entradas_por_tabla = config_get_int_value(config_memoria, "ENTRADAS_POR_TABLA");
@@ -47,10 +47,12 @@ int atender_cliente(int *fd_conexion)
             case MENSAJE:
                 //recibir_mensaje(cliente_fd);
                 break;
-        case CPU_PIDE_CONTEXTO: 
+            case CPU_PIDE_CONTEXTO: 
                 //usleep(retardo_memoria * 1000); // Convertir milisegundos a microsegundos
+                nuevo_contexto_provisorio = malloc(sizeof(t_contexto));
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_int_del_buffer(unBuffer);
+                nuevo_contexto_provisorio->datos_pid.pc = recibir_int_del_buffer(unBuffer);
                 if(pid >= 0)
                 {
                     nuevo_contexto_provisorio = buscar_contexto_por_pid(pid);                   
@@ -61,7 +63,6 @@ int atender_cliente(int *fd_conexion)
                     log_error(logger_memoria, "PID invalido");                   
                 }
                 free(unBuffer);
-                free(nuevo_contexto_provisorio);
                 break;
             case RECIBIR_PID_KERNEL:
             t_info_kernel datos_kernel; 

@@ -7,7 +7,7 @@ int socket_cpu_kernel_interrupt;
 char* ip;
 char* puerto;
 char* valor;
-int identificador_cpu;
+char* identificador_cpu;
 
 
 //Otros
@@ -43,10 +43,10 @@ int cant_niveles;
 
 
 char* ip_memoria;
-int puerto_memoria;
+char* puerto_memoria;
 char* ip_kernel;
-int puerto_kernel_dispatch;
-int puerto_kernel_interrupt;
+char* puerto_kernel_dispatch;
+char* puerto_kernel_interrupt;
 int entradas_tlb;
 char* reemplazo_tlb;
 int entradas_cache;

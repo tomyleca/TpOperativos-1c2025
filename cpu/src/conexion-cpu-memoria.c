@@ -3,7 +3,7 @@
 void crear_handshake_cpu_kernel_dispatch(int conexion_cpu_kernel)
 {
     t_paquete* paquete = crear_super_paquete(HANDSHAKE_CPU_KERNEL_D);
-    cargar_int_al_super_paquete(paquete, identificador_cpu);
+    cargar_string_al_super_paquete(paquete, identificador_cpu);
     enviar_paquete(paquete,conexion_cpu_kernel);
     free(paquete);
 }
@@ -11,7 +11,7 @@ void crear_handshake_cpu_kernel_dispatch(int conexion_cpu_kernel)
 void crear_handshake_cpu_kernel_interrupt(int conexion_cpu_kernel)
 {
     t_paquete* paquete = crear_super_paquete(HANDSHAKE_CPU_KERNEL_I);
-    cargar_int_al_super_paquete(paquete, identificador_cpu);
+    cargar_string_al_super_paquete(paquete, identificador_cpu);
     enviar_paquete(paquete,conexion_cpu_kernel);
     free(paquete);
 }
@@ -100,7 +100,7 @@ void atender_memoria()
                 break;
             case -1:
                 log_error(logger_cpu, "MEMORIA se desconecto. Terminando servidor");
-                exit(1);
+                pthread_exit(NULL);
             default:
                 log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
                 break;
@@ -123,8 +123,8 @@ void atender_interrupcion_kernel()
                 //recibir_mensaje(socket_cpu_kernel_interrupt, logger_cpu);
                 break;
             case -1:
-                log_error(logger_cpu, "KERNEL se desconecto. Terminando servidor");
-                exit(1);
+                log_error(logger_cpu, "KERNEL INTERRUPT se desconecto. Terminando servidor");
+                pthread_exit(NULL);
             default:
                 log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
                 break;
@@ -159,18 +159,19 @@ void atender_dispatch_kernel()
                 printf("RECIBI OTRO PROCESO\n");
                 sem_wait(&sem_contexto); // REVISAR EN QUE ALGORITMO SE USA
                 printf("pase el semaforo OTRO PROCESO\n");
+                contexto = malloc(sizeof(t_contexto_cpu));
 
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
                 contexto->pid = recibir_int_del_buffer(buffer);
                 contexto->registros.PC = recibir_int_del_buffer(buffer);
                 // ACA HAY QUE SOLICITAR A MEMORIA EL CONTEXTO CON EL PID RECIBIMOS DE KERNEL
-                solicitar_contexto_a_memoria(socket_cpu_kernel_dispatch); 
+                solicitar_contexto_a_memoria(contexto); 
                 free(buffer);
                 break;
                 
             case -1:
-                log_error(logger_cpu, "KERNEL INTERRUPT se desconecto. Terminando servidor");
-                exit(1);
+                log_error(logger_cpu, "KERNEL DISPATCH se desconecto. Terminando servidor");
+                pthread_exit(NULL);
             default:
                 log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata. Estoy en kernel dispatch");
                 break;

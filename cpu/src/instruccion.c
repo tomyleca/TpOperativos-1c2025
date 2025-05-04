@@ -132,7 +132,7 @@ void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
     free(paquete);
 }
 
-void solicitar_contexto_a_memoria()
+void solicitar_contexto_a_memoria(t_contexto_cpu* contexto)
 {
     // Creo el paquete
     t_paquete* paquete = crear_super_paquete(CPU_PIDE_CONTEXTO);

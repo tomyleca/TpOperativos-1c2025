@@ -2,20 +2,18 @@
 
 
 //-----------------------------------------------CLIENTE----------------------------------------------
-int crear_conexion(t_log* nombreLogger, char* ip, int puerto) {
+int crear_conexion(t_log* nombreLogger, char* ip, char* puerto) {
     struct addrinfo hints, *servinfo;
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    char* puerto_str = NULL;
-    asprintf(&puerto_str, "%d", puerto);
 
-    int resultado = getaddrinfo(ip, puerto_str, &hints, &servinfo);
+    int resultado = getaddrinfo(ip, puerto, &hints, &servinfo);
     if (resultado != 0) {
         log_error(nombreLogger, "getaddrinfo fallo: %s", gai_strerror(resultado));
-        free(puerto_str);
+        free(puerto);
         return -1;
     }
 
@@ -23,31 +21,28 @@ int crear_conexion(t_log* nombreLogger, char* ip, int puerto) {
     if (socket_cliente == -1) {
         log_error(nombreLogger, "Error creando socket");
         freeaddrinfo(servinfo);
-        free(puerto_str);
+        free(puerto);
         return -1;
     }
 
     if (connect(socket_cliente, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
-        log_error(nombreLogger, "Error al conectar con %s:%s", ip, puerto_str);
+        log_error(nombreLogger, "Error al conectar con %s:%s", ip, puerto);
         freeaddrinfo(servinfo);
-        free(puerto_str);
-        return -1;
+        free(puerto);
+        exit(1);
     }
 
-    log_info(nombreLogger, "Conexion exitosa con %s:%s", ip, puerto_str);
+    log_info(nombreLogger, "Conexion exitosa con %s:%s", ip, puerto);
 
     freeaddrinfo(servinfo);
-    free(puerto_str);
+    free(puerto);
     return socket_cliente;
 }
 
 
 //----------------------------------------SERVIDOR------------------------------------------------------------------
-int iniciar_servidor(t_log* logger, int puerto)
+int iniciar_servidor(t_log* logger, char* puerto)
 {
-    char puerto_str[10];
-    sprintf(puerto_str, "%d", puerto);
-
 	int fd_servidor;
     struct addrinfo hints, *servinfo;
 	//struct addrinfo hints, *servinfo;
@@ -57,11 +52,19 @@ int iniciar_servidor(t_log* logger, int puerto)
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
 
+    int resultado = getaddrinfo(NULL, puerto, &hints, &servinfo);
+    if (resultado != 0) {
+        log_error(logger, "Error en getaddrinfo: %s\n", gai_strerror(resultado));
+        exit(EXIT_FAILURE);
+    }
 
-	fd_servidor = getaddrinfo(NULL, puerto_str, &hints, &servinfo);
-	fd_servidor = socket(servinfo->ai_family,
-                        	servinfo->ai_socktype,
-                        	servinfo->ai_protocol);
+    fd_servidor = socket(servinfo->ai_family,
+                        servinfo->ai_socktype,
+                        servinfo->ai_protocol);
+    if(fd_servidor == -1) {
+        log_error(logger, "Error creando el socket del servidor\n");
+        exit(EXIT_FAILURE);
+    }
 
 	if(fd_servidor==-1)
 	{
@@ -79,7 +82,6 @@ int iniciar_servidor(t_log* logger, int puerto)
 	{
 		log_error(logger,"Hubo un error al intentar comenzar la escucha");
 		exit(EXIT_FAILURE);
-		return -1;
 	}
 
 	printf("[ INFO ]: << SERVIDOR LISTO Y ESCUCHANDO	>>\n");
