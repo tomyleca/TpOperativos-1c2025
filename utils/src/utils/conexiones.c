@@ -42,6 +42,7 @@ int crear_conexion(t_log* nombreLogger, char* ip, int puerto) {
 }
 
 
+
 void generar_handshake(int socket, char *nombreLogger, char *ip, char *puerto) {
     int32_t handshake = 1;
     int32_t result;
@@ -107,6 +108,7 @@ int iniciar_servidor(t_log* logger, int puerto)
 
 	return fd_servidor;
 }
+
 
 int esperar_cliente(int socket_servidor) {
     struct sockaddr_in dir_cliente;

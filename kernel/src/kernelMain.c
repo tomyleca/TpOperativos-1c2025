@@ -9,6 +9,8 @@ int main(int argc, char* argv[]) {
     //INICIO LOGGER
     loggerKernel = iniciar_logger("kernelLogger.log","kernelLogger",log_level);
 
+    iniciarConexiones();
+
     //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
     crearEstructuras();
     
@@ -42,10 +44,10 @@ int main(int argc, char* argv[]) {
 void leerConfigKernel(t_config* config_kernel) {
     
     ip_memoria = config_get_string_value(config_kernel, "IP_MEMORIA");
-    puerto_memoria = config_get_string_value(config_kernel, "PUERTO_MEMORIA");
-    puerto_escucha_dispatch = config_get_string_value(config_kernel, "PUERTO_ESCUCHA_DISPATCH");
-    puerto_escucha_interrupt = config_get_string_value(config_kernel, "PUERTO_ESCUCHA_INTERRUPT");
-    puerto_escucha_IO = config_get_string_value(config_kernel, "PUERTO_ESCUCHA_IO");
+    puerto_memoria = config_get_int_value(config_kernel, "PUERTO_MEMORIA");
+    puerto_escucha_dispatch = config_get_int_value(config_kernel, "PUERTO_ESCUCHA_DISPATCH");
+    puerto_escucha_interrupt = config_get_int_value(config_kernel, "PUERTO_ESCUCHA_INTERRUPT");
+    puerto_escucha_IO = config_get_int_value(config_kernel, "PUERTO_ESCUCHA_IO");
     algoritmo_planificacion = config_get_string_value(config_kernel, "ALGORITMO_CORTO_PLAZO");
     algoritmo_cola_new = config_get_string_value(config_kernel, "ALGORITMO_INGRESO_A_READY");
     alfa = config_get_int_value(config_kernel, "ALFA");
