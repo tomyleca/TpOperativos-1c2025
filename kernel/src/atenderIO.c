@@ -6,7 +6,7 @@ void* atenderIO(void* arg)
     while(1)
     {
         int fdConexion = esperar_cliente(socket_kernel_io);
-        log_info(logger_kernel, "Se conectó IO");
+        log_info(loggerKernel, "Se conectó IO");
         
         
         opCodesKernelIO opCode = recibir_operacion(fdConexion);

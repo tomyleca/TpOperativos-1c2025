@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
     leerConfigIO(config_io);
     
     //INICIO LOGGER
-    logger_io = iniciar_logger("ioLogger.log","ioLogger",log_level);
+    loggerIO = iniciar_logger("ioLogger.log","ioLogger",log_level);
 
  
 
@@ -31,22 +31,9 @@ int main(int argc, char* argv[]) {
 
     
 
-
-        if(argc!=2)
-    {
-        //TODO logger error
-        return EXIT_FAILURE;
-    }
-
-
-    conectarseAKernel(argv[1]);
-
     //CIERRO
     log_info(logger_io, "cerrando conexión");
     liberar_conexion(conexionKernel);
-
- 
-
 
  
 
@@ -65,12 +52,11 @@ void leerConfigIO(t_config* config_io)
 
 void conectarseAKernel(char* nombre)
 {
-    conexionKernel = crear_conexion(logger_io,ip_kernel,puerto_kernel);
+    conexionKernel = crear_conexion(loggerIO,ip_kernel,puerto_kernel);
     t_paquete* paquete = crear_paquete();
     paquete->codigo_operacion=HANDSHAKE_IO_KERNEL;
     cargar_string_al_super_paquete(paquete,nombre);
     enviar_paquete(paquete,conexionKernel);
-<<<<<<< HEAD
     
     
 }
@@ -84,6 +70,8 @@ uint32_t recibirProcesoEnIOEIniciarUsleep()
         t_buffer* buffer = recibiendo_super_paquete(conexionKernel); 
         PID = recibir_uint32_t_del_buffer(buffer);
         uint32_t tiempo = recibir_uint32_t_del_buffer(buffer);
+
+        log_info(loggerIO,"## PID: <%u> - Inicio de IO - Tiempo: <%u>",PID,tiempo);
         
         usleep(tiempo);
     }
@@ -98,6 +86,9 @@ void avisarFinDeIO(uint32_t PID,char* nombreIO)
     cargar_uint32_t_al_super_paquete(paquete,PID);
     cargar_string_al_super_paquete(paquete,nombreIO);
     enviar_paquete(paquete,conexionKernel);
+
+
+    log_info(loggerIO,"## PID: <%u> - Fin de IO",PID);
     
 
 =======

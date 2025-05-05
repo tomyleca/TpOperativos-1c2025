@@ -3,7 +3,7 @@
 void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
     //Creo un nuevo proceso
     PCB* nuevoProceso=malloc(sizeof(PCB));
-    nuevoProceso->archivoPseudocodigo=archivoPseudocodigo;
+    nuevoProceso->archivoPseudocodigo=strdup(archivoPseudocodigo);
     nuevoProceso->tam=tam;
     nuevoProceso->PC=0;
     
@@ -28,7 +28,7 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
 
     nuevoProceso->estimadoRafagaAnterior=0;
     nuevoProceso->duracionRafagaAnterior=0;
-    nuevoProceso->estimadoRafagaActual=0;
+    nuevoProceso->estimadoSiguienteRafaga=0;
 
     
    
@@ -79,7 +79,7 @@ void dump_memory(uint32_t pid) {
     
     if (proceso == NULL) {
         log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para DUMP_MEMORY", pid);
-        return;
+        exit(1);
     }
 
     //TODO conexion con memoria
@@ -97,18 +97,20 @@ void dump_memory(uint32_t pid) {
     liberar_conexion(socket_memoria_particular);
 }
 
-void syscall_IO(uint32_t pid, char* nombreIO, uint32_t tiempo) {
+void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
     log_info(loggerKernel, "## (<%u>) - Solicitó syscall: IO", pid);
 
     PCB* proceso = NULL;
     proceso  = buscarPCBEjecutando(pid);
 
-    terminarEjecucion(proceso);
-   
     if (proceso == NULL) {
         log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", pid);
-        return;
+        exit(1);
     }
+    
+    terminarEjecucion(proceso);
+   
+
 
     DispositivoIO* dispositivo = NULL;
     dispositivo = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
@@ -124,12 +126,31 @@ void syscall_IO(uint32_t pid, char* nombreIO, uint32_t tiempo) {
     pasarABLoqueado(proceso, tiempo, nombreIO);
 }
 
+void syscallExit(uint32_t pid)
+{
+    PCB* proceso = NULL;
+    proceso = buscarPCBEjecutando(pid);
 
+    if (proceso == NULL) {
+        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", pid);
+        exit(1);
+    }
+
+    terminarEjecucion(proceso);
+
+    pasarAExit(proceso);
+
+}
 PCB* buscarPCBEjecutando(uint32_t pid) {
     bool _mismoPID(nucleoCPU* nucleoEnEjecucion) {
         return nucleoEnEjecucion->procesoEnEjecucion->PID == pid;
     };
 
     nucleoCPU* nucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_mismoPID);
-    return nucleoCPU->procesoEnEjecucion;
+    if(nucleoCPU!= NULL)
+        return nucleoCPU->procesoEnEjecucion;
+    else
+        return NULL;
 }
+
+

@@ -62,11 +62,8 @@ typedef enum{
     SRT
 } PLANIFICADOR;
 
-typedef struct
-{
-    char* nombre;
-    bool ocupado;
-} DispositivoIO;
+
+
 
 
 typedef struct
@@ -103,6 +100,7 @@ extern int socket_kernel_cpu_interrupt;
 extern int cliente_kernel_dispatch;
 extern int cliente_kernel_interrupt;
 
+
 //CONFIG Y LOGGER
 extern char* ip_memoria;
 extern char* algoritmo_planificacion;
@@ -122,26 +120,26 @@ extern t_config* config_kernel;
 //PROCESOS
 extern uint32_t pidDisponible;
 
-
+/**
+ * @brief Se fija cual es el proximo proceso para pasar intentar pasar a Ready. Le consulta a memoria y ,si esta da el OK,lo pasa. De otra forma no hace nada.
+*/
 extern void inicializarProceso();
+
 PCB* buscarPCBEjecutando(uint32_t pid);
 
 //Ordenar listas
 extern bool menorTam(PCB* PCB1,PCB* PCB2);
-extern bool menorEstimadoRafagaActual(PCB* PCB1,PCB* PCB2);
+extern bool menorEstimadoSiguienteRafaga(PCB* PCB1,PCB* PCB2);
 
 //Planificador
-extern void estimarRafagaActual(PCB* proceso);
+/**
+ * @brief Estima el valor de la proxima ráfaga de un proceso dado.
+*/
+extern void estimarSiguienteRafaga(PCB* proceso);
 extern void* planificadorCortoPlazo(void* arg);
-extern void ejecutar(PCB* proceso);
 
-//Cambiar de estado
-extern void pasarAReady(PCB* proceso);
-extern void pasarABLoqueadoEIniciarContador(PCB* proceso);
-extern void* contadorParaSwap(PCB* proceso);
-extern bool IOTerminado(char* PIDComoChar);
-extern void pasarASwapBlocked(PCB* proceso, char* PIDComoChar);
-extern void pasarASwapReady(PCB* proceso);
+
+
 
 extern void terminarEjecucion(PCB* proceso);
 extern void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion);
@@ -171,11 +169,16 @@ extern sem_t* semaforoIntentarPlanificar;
 
 
 //OTRAS
+/**
+ * @brief Pasa un valor uint32_t a un char.
+*/
 extern char* pasarUnsignedAChar(uint32_t unsigned_);
 
  
-
-
+//HILOS 
+extern pthread_t hilo_escuchar_kernel;
+extern pthread_t hilo_escuchar_kernel_interrupcion;
+extern pthread_t hilo_crear_kernel_memoria;
 
 
 

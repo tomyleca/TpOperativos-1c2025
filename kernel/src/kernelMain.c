@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
     leerConfigKernel(config_kernel);
     
     //INICIO LOGGER
-    logger_kernel = iniciar_logger("kernelLogger.log","kernelLogger",log_level);
+    loggerKernel = iniciar_logger("kernelLogger.log","kernelLogger",log_level);
 
     //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
     crearEstructuras();
@@ -48,14 +48,14 @@ void leerConfigKernel(t_config* config_kernel) {
 void inicializar_hilos(t_config* config_kernel)
 {   
     //TIENE MAS SENTIDO QUE PRIMERO CONECTE CON MEMORIA, Y DESPUES ESCUCHE PETICIONES DE CPU, NO? ENTONCES CAMBIE EL ORDEN!!
-    socket_kernel_memoria = crear_conexion(logger_kernel,ip_memoria,puerto_memoria);
+    socket_kernel_memoria = crear_conexion(loggerKernel,ip_memoria,puerto_memoria);
     hilo_crear_kernel_memoria = crear_hilo_memoria();//EN ESTA FUNCION DSP CAMBIALE LO QUE LE QUERES PASAR PARA CREAR EL PRIMER HILO/PROCESOS
     INIT_PROC("kernel/pseudocodigo.txt", 4096);
 
-    socket_kernel_cpu_dispatch = iniciar_servidor(logger_kernel, puerto_escucha_dispatch); 
+    socket_kernel_cpu_dispatch = iniciar_servidor(loggerKernel, puerto_escucha_dispatch); 
     hilo_escuchar_kernel = escuchar_dispatch_cpu();
 
-    socket_kernel_cpu_interrupt= iniciar_servidor(logger_kernel, puerto_escucha_interrupt); 
+    socket_kernel_cpu_interrupt= iniciar_servidor(loggerKernel, puerto_escucha_interrupt); 
     hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_cpu(); 
 
     pthread_join(hilo_escuchar_kernel,NULL);
@@ -79,7 +79,7 @@ void crearEstructuras()
     listaCPUsLibres = crearListaConSemaforos();
     listaCPUsEnUso = crearListaConSemaforos();
 
-    listaDispositivosIO = list_create();
+
 
     
     diccionarioDispositivosIO = crearDiccionarioConSemaforos();
@@ -104,7 +104,7 @@ void setearAlgoritmosDePlanificacion(){
     else if(strcmp(algoritmo_cola_new,"PMCP")==0)
         algoritmoColaNewEnFIFO=false;
     else
-        log_error(loggerKernel,"ALGORITMO DE PLANIFICACION DESCONOCIDO");
+        log_error(loggerKernel,"## ALGORITMO DE PLANIFICACION DESCONOCIDO");
     
 
     
@@ -116,7 +116,7 @@ void setearAlgoritmosDePlanificacion(){
     else if(strcmp(algoritmo_planificacion,"SRT")==0)
         algoritmoDePlanificacionInt=SRT;
     else
-        log_error(loggerKernel,"ALGORITMO DE PLANIFICACION DESCONOCIDO");
+        log_error(loggerKernel,"## ALGORITMO DE PLANIFICACION DESCONOCIDO");
        
 
 }

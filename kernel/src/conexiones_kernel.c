@@ -32,13 +32,13 @@ void hilo_memoria()
         switch (cod_op) 
         {
             case MENSAJE:
-                //recibir_mensaje(socket_kernel_cpu_dispatch, logger_kernel);
+                //recibir_mensaje(socket_kernel_cpu_dispatch, loggerKernel);
                 break;            
             case -1:
-                log_error(logger_kernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
-                pthread_exit(NULL);*/
+                log_error(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
+                pthread_exit(NULL);
             /*default:
-                log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
+                log_warning(loggerKernel, "Operacion desconocida. No quieras meter la pata");
                 break;
         }
     }
@@ -51,14 +51,14 @@ void atender_dispatch_cpu()
     int cod_op;
     cliente_kernel_dispatch = esperar_cliente(socket_kernel_cpu_dispatch);
     t_paquete* paquete;
-    log_info(logger_kernel, "Se conectó DISPATCH");
+    log_info(loggerKernel, "Se conectó DISPATCH");
     while(1) 
     {
         cod_op = recibir_operacion(cliente_kernel_dispatch);
         switch (cod_op) 
         {
             case MENSAJE:
-                //recibir_mensaje(cliente_kernel_dispatch, logger_kernel);
+                //recibir_mensaje(cliente_kernel_dispatch, loggerKernel);
                 break;
             case HANDSHAKE_CPU_KERNEL_D:
             buffer = recibiendo_super_paquete(cliente_kernel_dispatch);
@@ -66,10 +66,10 @@ void atender_dispatch_cpu()
             enviar_pid_contexto_cpu(cliente_kernel_dispatch); 
             break;
             case -1:
-                log_error(logger_kernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
+                log_error(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
                 pthread_exit(NULL);
             default:
-                log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
+                log_warning(loggerKernel, "Operacion desconocida. No quieras meter la pata");
                 break;
         }
     }
@@ -80,7 +80,7 @@ void atender_interrupcion_cpu()
     t_buffer* buffer;
     int cod_op;
     cliente_kernel_interrupt = esperar_cliente(socket_kernel_cpu_interrupt);
-    log_info(logger_kernel, "Se conectó INTERRUPT");
+    log_info(loggerKernel, "Se conectó INTERRUPT");
     t_paquete* paquete;
 
     while(1) 
@@ -89,17 +89,17 @@ void atender_interrupcion_cpu()
         switch (cod_op) 
         {
             case MENSAJE:
-                //recibir_mensaje(cliente_kernel_interrupt, logger_kernel);
+                //recibir_mensaje(cliente_kernel_interrupt, loggerKernel);
                 break;
             case HANDSHAKE_CPU_KERNEL_I:
             buffer = recibiendo_super_paquete(cliente_kernel_interrupt);
             char* identificador = recibir_string_del_buffer(buffer);
             break;
             /*case -1:
-                log_error(logger_kernel, "KERNEL INTERRUPT se desconecto. Terminando servidor");
+                log_error(loggerKernel, "KERNEL INTERRUPT se desconecto. Terminando servidor");
                 pthread_exit(NULL);*/
             /*default:
-                log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
+                log_warning(loggerKernel, "Operacion desconocida. No quieras meter la pata");
                 break;*/
         }
     }
@@ -116,13 +116,13 @@ void ejecutar_io()
         switch (cod_op) 
         {
             case MENSAJE:
-                //recibir_mensaje(socket_kernel_io, logger_kernel);
+                //recibir_mensaje(socket_kernel_io, loggerKernel);
                 break;
             case -1:
-                log_error(logger_kernel, "KERNEL se desconecto. Terminando servidor");
+                log_error(loggerKernel, "KERNEL se desconecto. Terminando servidor");
                 pthread_exit(NULL);
             default:
-                log_warning(logger_kernel, "Operacion desconocida. No quieras meter la pata");
+                log_warning(loggerKernel, "Operacion desconocida. No quieras meter la pata");
                 break;
         }
     }

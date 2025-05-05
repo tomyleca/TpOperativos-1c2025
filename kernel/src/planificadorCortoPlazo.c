@@ -17,22 +17,22 @@ void* planificadorCortoPlazo(void* arg)
                 procesoAEjecutar  = sacarDeLista(listaProcesosReady,0);
                 break;
         case SJF:
-                ordenarLista(listaProcesosReady,menorEstimadoRafagaActual);
+                ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
                 procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
                 break;
                 
         case SRT: 
                 if(!chequearListaVacia(listaCPUsLibres))
                 {   
-                    ordenarLista(listaProcesosReady,menorEstimadoRafagaActual);
+                    ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
                     procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
                     break;
                 }
                 else 
                 {
-                    ordenarLista(listaProcesosReady,menorEstimadoRafagaActual);
+                    ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
                     procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
-                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoRafagaActual) == false)
+                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == false)
                         procesoAEjecutar = NULL;
                     
                     break;
@@ -78,8 +78,8 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
     
 
     procesoDespuesDeEjecucion->duracionRafagaAnterior=temporal_gettime(procesoDespuesDeEjecucion->cronometroEjecucionActual);
-    procesoDespuesDeEjecucion->estimadoRafagaAnterior=procesoDespuesDeEjecucion->estimadoRafagaActual;
-    estimarRafagaActual(procesoDespuesDeEjecucion);
+    procesoDespuesDeEjecucion->estimadoRafagaAnterior=procesoDespuesDeEjecucion->estimadoSiguienteRafaga;
+    estimarSiguienteRafaga(procesoDespuesDeEjecucion);
 
     temporal_stop(procesoDespuesDeEjecucion->cronometroEjecucionActual);
     
@@ -151,13 +151,13 @@ bool menorEstimadoRafagaRestante(nucleoCPU* CPU1,nucleoCPU* CPU2)
 
 
 
-bool menorEstimadoRafagaActual(PCB* PCB1,PCB* PCB2)
+bool menorEstimadoSiguienteRafaga(PCB* PCB1,PCB* PCB2)
 {
-    return PCB1->estimadoRafagaActual >= PCB2->estimadoRafagaActual;
+    return PCB1->estimadoSiguienteRafaga >= PCB2->estimadoSiguienteRafaga;
 }
 
-void estimarRafagaActual(PCB* proceso)
+void estimarSiguienteRafaga(PCB* proceso)
 {
-    proceso->estimadoRafagaActual= alfa * proceso->duracionRafagaAnterior + (1- alfa) * proceso->estimadoRafagaAnterior;
+    proceso->estimadoSiguienteRafaga= alfa * proceso->duracionRafagaAnterior + (1- alfa) * proceso->estimadoRafagaAnterior;
 }
 

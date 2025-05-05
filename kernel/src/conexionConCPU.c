@@ -40,13 +40,13 @@ void loggearMetricas(PCB* proceso)
 {   
     log_info(loggerKernel,"## (<%u>) - Métricas de estado: NEW (%d) (%d), READY (%d) (%d) EXECUTE (%d) (%d) BLOCKED (%d) (%d) SWAP_BLOCKED (%d) (%d) SWAP_READY (%d) (%d) EXIT (%d) (%d)",
     proceso->PID,
-    proceso->ME[0],proceso->MT[0],
-    proceso->ME[1],proceso->MT[1],
-    proceso->ME[2],proceso->MT[2],
-    proceso->ME[3],proceso->MT[3],
-    proceso->ME[4],proceso->MT[4],
-    proceso->ME[5],proceso->MT[5],
-    proceso->ME[6],proceso->MT[6]);
+    proceso->ME[NEW],proceso->MT[NEW],
+    proceso->ME[READY],proceso->MT[READY],
+    proceso->ME[EXECUTE],proceso->MT[EXECUTE],
+    proceso->ME[BLOCKED],proceso->MT[BLOCKED],
+    proceso->ME[SWAP_BLOCKED],proceso->MT[SWAP_BLOCKED],
+    proceso->ME[SWAP_READY],proceso->MT[SWAP_READY],
+    proceso->ME[EXIT],proceso->MT[EXIT]);
 }
 
 
