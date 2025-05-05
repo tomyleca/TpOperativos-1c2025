@@ -2,7 +2,7 @@
 
 int fdConexion;
 char* ip_kernel;
-int puerto_kernel;
+char* puerto_kernel;
 char* valor;
 int conexionKernel;
 

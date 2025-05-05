@@ -18,7 +18,7 @@
 
 extern int fdConexion;
 extern char* ip_kernel;
-extern int puerto_kernel;
+extern char* puerto_kernel;
 extern char* valor;
 extern int conexionKernel;
 

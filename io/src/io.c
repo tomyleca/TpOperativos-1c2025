@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 void leerConfigIO(t_config* config_io) 
 {
     ip_kernel = config_get_string_value(config_io, "IP_KERNEL");
-    puerto_kernel = config_get_int_value(config_io, "PUERTO_KERNEL");
+    puerto_kernel = config_get_string_value(config_io, "PUERTO_KERNEL");
     log_level = log_level_from_string(config_get_string_value(config_io, "LOG_LEVEL"));
     
 

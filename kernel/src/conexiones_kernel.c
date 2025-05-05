@@ -31,10 +31,10 @@ void hilo_memoria()
         switch (cod_op) 
         {
             case MENSAJE:
-                //recibir_mensaje(socket_kernel_cpu_dispatch, loggerKernel);
+                //recibir_mensaje(socket_kernel_memoria, loggerKernel);
                 break;
             /*case -1:
-                log_error(loggerKernel "KERNEL DISPATCH se desconecto. Terminando servidor");
+                log_error(loggerKernel "KERNEL MEMORIA se desconecto. Terminando servidor");
                 pthread_exit(NULL);*/
             /*default:
                 log_warning(loggerKernel "Operacion desconocida. No quieras meter la pata");
