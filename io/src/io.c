@@ -31,9 +31,22 @@ int main(int argc, char* argv[]) {
 
     
 
+
+        if(argc!=2)
+    {
+        //TODO logger error
+        return EXIT_FAILURE;
+    }
+
+
+    conectarseAKernel(argv[1]);
+
     //CIERRO
     log_info(logger_io, "cerrando conexión");
     liberar_conexion(conexionKernel);
+
+ 
+
 
  
 
@@ -57,6 +70,7 @@ void conectarseAKernel(char* nombre)
     paquete->codigo_operacion=HANDSHAKE_IO_KERNEL;
     cargar_string_al_super_paquete(paquete,nombre);
     enviar_paquete(paquete,conexionKernel);
+<<<<<<< HEAD
     
     
 }
@@ -86,4 +100,8 @@ void avisarFinDeIO(uint32_t PID,char* nombreIO)
     enviar_paquete(paquete,conexionKernel);
     
 
+=======
+    free(paquete);
+    
+>>>>>>> origin/CPU-Eze
 }

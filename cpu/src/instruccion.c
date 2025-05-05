@@ -101,9 +101,25 @@ void peticion_escritura_a_memoria(int direccion_fisica, char* valor_registro_dat
 
 int mmu_traducir_direccion_logica(int direccion_logica)
 {
+    /*int nro_pagina = direccion_logica / tamanio_pagina;
+    int desplazamiento = direccion_logica % tamanio_pagina;
+    int tabla_actual = contexto->pid;
+    int entrada_nivel_X;
 
-    //direccion_fisica = frame * tamanio_pagina + desplazamiento;
-    //return direccion_fisica;
+    for(int nivel = 1; nivel < cant_niveles; nivel++) {
+
+        int potencia = pow(cant_entradas_tabla, cant_niveles - nivel);
+        entrada_nivel_X = (nro_pagina / potencia) % cant_entradas_tabla;
+
+        //si no es el ultimo consulto a memoria por la siguiente tabla
+        if (nivel < cant_niveles - 1) {
+            int siguiente_tabla = SOLICITO_TABLA_A_MEMORIA ////// Función que trae tabla de memoria
+            tabla_actual = siguiente_tabla;
+
+        } else {
+        }
+    }       */
+    return 0;
 }
 
 void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
@@ -116,24 +132,17 @@ void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
     free(paquete);
 }
 
-void solicitar_contexto_a_memoria()
+void solicitar_contexto_a_memoria(t_contexto_cpu* contexto)
 {
     // Creo el paquete
-    t_paquete* paquete;
-
-    paquete = crear_super_paquete(CPU_PIDE_CONTEXTO); 
-
+    t_paquete* paquete = crear_super_paquete(CPU_PIDE_CONTEXTO);
     cargar_int_al_super_paquete(paquete, contexto->pid);
-    //DEBERIA TMB CARGAR EL PC? SINO PARA Q CARAJO LO MANDO KERNEL A CPU? CREO QUE SI!!
     cargar_int_al_super_paquete(paquete, contexto->registros.PC);
-
     // Envio el paquete a memoria
     enviar_paquete(paquete, socket_cpu_memoria);  //PRIMERA SOLICITUD A MEMORIA, ESPERO EL CONTEXTO TODOS LOS REGISTROS EN 0
 
     free(paquete);
 }
-
-
 
 
 
@@ -279,7 +288,6 @@ void cargar_registros(t_buffer* buffer)
     contexto->registros.FX = recibir_int_del_buffer(buffer);
     contexto->registros.GX = recibir_int_del_buffer(buffer);
     contexto->registros.HX = recibir_int_del_buffer(buffer);
-    contexto->registros.PC = recibir_int_del_buffer(buffer);
 }
 
 // **********************************  
@@ -294,6 +302,7 @@ void iniciar_diccionario_instrucciones()
     dictionary_put(instrucciones, "DUMP_MEMORY", (void*)(intptr_t)I_DUMP_MEMORY);
     dictionary_put(instrucciones, "IO", (void*)(intptr_t)I_IO);
     dictionary_put(instrucciones, "GOTO", (void*)(intptr_t)I_GOTO);
+    dictionary_put(instrucciones, "NOOP", (void*)(intptr_t)I_NOOP);
 }
 
 
@@ -414,6 +423,5 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
     printf("Mando paquete a kenrel para comprobar algo xd --------------------\n");
     enviar_paquete(paquete_kernel_dispatch, socket_cpu_kernel_dispatch);
     free(paquete_kernel_dispatch);
-    sem_post(&sem_pid); 
+    //sem_post(&sem_pid); 
 }
-

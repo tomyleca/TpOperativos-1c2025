@@ -14,8 +14,12 @@
 
 
 extern void conectarseAKernel(char* nombre);
+<<<<<<< HEAD
 extern void leerConfigIO(t_config* config_io);
 extern uint32_t recibirProcesoEnIOEIniciarUsleep();
 extern void avisarFinDeIO(uint32_t PID,char* nombreIO);
+=======
+void leerConfigIO(t_config* config_io);
+>>>>>>> origin/CPU-Eze
 
 #endif

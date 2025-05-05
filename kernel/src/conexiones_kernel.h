@@ -28,4 +28,6 @@ void atender_interrupcion_cpu();
 
 void ejecutar_io();
 
+void enviar_pid_contexto_cpu(int socket_kernel_cpu_dispatch);
+
 #endif

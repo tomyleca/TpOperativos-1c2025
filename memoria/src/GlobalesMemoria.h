@@ -14,15 +14,15 @@
 #include "utils/configs.h"
 
 typedef struct {
-    uint32_t ax;            // Registro AX
-    uint32_t bx;            // Registro BX
-    uint32_t cx;            // Registro CX
-    uint32_t dx;            // Registro DX
-    uint32_t ex;            // Registro EX
-    uint32_t fx;            // Registro FX
-    uint32_t gx;            // Registro GX
-    uint32_t hx;            // Registro HX
-    uint32_t pc;            // Program Counter
+    int ax;            // Registro AX
+    int bx;            // Registro BX
+    int cx;            // Registro CX
+    int dx;            // Registro DX
+    int ex;            // Registro EX
+    int fx;            // Registro FX
+    int gx;            // Registro GX
+    int hx;            // Registro HX
+    int pc;            // Program Counter
     char* pseudocodigo;     // Archivo de pseudocodigo de cada tid
     t_list* instrucciones;  // lista de instrucciones 
 } t_pids;
@@ -62,7 +62,7 @@ extern int fd_escucha_servidor;
 extern t_log* logger_memoria;
 extern t_config* config_memoria;
 
-extern int puerto_escucha;
+extern char* puerto_escucha;
 extern int tam_memoria;
 extern int tam_pagina;
 extern int entradas_por_tabla;

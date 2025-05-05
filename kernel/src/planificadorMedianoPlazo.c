@@ -66,6 +66,13 @@ void* manejarProcesoBloqueado(procesoEnEsperaIO* procesoEnEsperaIO){
         }
     }
 
+    temporal_destroy(contadorEsperaSwap);
+    free(PIDComoChar);
+
+    return NULL;
+}
+
+bool IOTerminado(char* PIDComoChar){
     
     
 
@@ -120,7 +127,7 @@ void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO)
     procesoEnEsperaIO* procesoADesbloquear = leerDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
     sem_post(procesoADesbloquear->semaforoIOFinalizada);
 
-    log_info(loggerKernel, "## (<%u>) finalizó IO y pasa a READY",PID);
+    log_info(logger_kernel, "## (<%u>) finalizó IO y pasa a READY",PID);
 
     
 }

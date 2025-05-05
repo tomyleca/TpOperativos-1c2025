@@ -1,6 +1,7 @@
 #ifndef UTILS_CONEXIONES_H_
 #define UTILS_CONEXIONES_H_
 
+#define _GNU_SOURCE 
 #include <stdio.h>
 #include <stdlib.h>
 #include <commons/log.h>
@@ -14,13 +15,13 @@
 #include "shared.h"
 
 // CLIENTE
-int crear_conexion(t_log* nombreLogger, char* ip, int puerto);
+int crear_conexion(t_log* nombreLogger, char* ip, char* puerto);
 void generar_handshake(int socket, char *server_name, char *ip, char *puerto);
 
 //SERVIDOR
 
 int esperar_cliente(int socket_servidor);
-int iniciar_servidor(t_log* logger, int puerto);
+int iniciar_servidor(t_log* logger, char* puerto);
 void recibir_handshake(int socket);
 
 

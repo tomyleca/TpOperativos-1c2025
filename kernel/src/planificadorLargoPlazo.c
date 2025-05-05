@@ -46,6 +46,7 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
 void inicializarProceso(){
     PCB* procesoAInicializar;
     
+<<<<<<< HEAD
 
 
     if (!list_is_empty(listaProcesosSwapReady->lista)) //Esto es para darle mas prioridad a la lista Swap Ready
@@ -58,6 +59,12 @@ void inicializarProceso(){
         cargarCronometro(procesoAInicializar,SWAP_READY);
         pasarAReady(procesoAInicializar);
         }
+=======
+    //TODO
+    //ACA VA ALGO PARA ESPERAR EL ENTER
+    if (!list_is_empty(listaProcesosSwapReady))
+        procesoAInicializar= sacarDeLista(semaforoListaSwapReady,listaProcesosSwapReady,0);
+>>>>>>> origin/CPU-Eze
     else
         {
         procesoAInicializar = sacarDeLista(listaProcesosNew,0);

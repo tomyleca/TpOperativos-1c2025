@@ -12,7 +12,11 @@
 #include "utils/shared.h"
 #include "utils/conexiones.h"
 #include "utils/configs.h"
+<<<<<<< HEAD
 #include "../../utils/src/utils/conexionKernelIO.h"
+=======
+#include "../../utils/src/utils/opCodesKernelIO.h"
+>>>>>>> origin/CPU-Eze
 
 
 

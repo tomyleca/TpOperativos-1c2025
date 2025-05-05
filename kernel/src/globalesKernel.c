@@ -13,11 +13,11 @@ int socket_kernel_memoria;
 
 char* ip_memoria;
 char* algoritmo_planificacion;
-int puerto_memoria;
+char* puerto_memoria;
 int tiempo_suspension;
-int puerto_escucha_dispatch;
-int puerto_escucha_interrupt;
-int puerto_escucha_IO;
+char* puerto_escucha_dispatch;
+char* puerto_escucha_interrupt;
+char* puerto_escucha_IO;
 int alfa;
 char* algoritmo_cola_new;
 bool algoritmoColaNewEnFIFO;
@@ -45,6 +45,12 @@ uint32_t pidDisponible = 0;
 
 
 int algoritmoDePlanificacionInt;
+
+//IO
+t_list* listaDispositivosIO;
+
+sem_t* semaforoListaDispositivosIO;
+
 
 
 

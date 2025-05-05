@@ -30,7 +30,7 @@ void destruir_diccionarios();
 
 void iniciar_diccionario_instrucciones();
 
-void solicitar_contexto_a_memoria();
+void solicitar_contexto_a_memoria(t_contexto_cpu* contexto);
 
 void cargar_registros(t_buffer* buffer);
 

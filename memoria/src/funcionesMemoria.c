@@ -9,9 +9,9 @@ t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo)
 
     char* filepath = string_new(); // Creo un string para almacenar la ruta del archivo
 
-    string_append(&filepath, "../pseudocodigo.txt");
+    string_append(&filepath, "/home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo.txt");
 
-    string_append(&filepath, archivo_pseudocodigo);
+    //string_append(&filepath, archivo_pseudocodigo);
 
     printf("Ruta del archivo: %s\n", filepath);
 
@@ -104,7 +104,8 @@ void crear_pid(t_contexto* nuevo_contexto, t_info_kernel info_kernel)
 {  
 
      // Inicializar el contexto principal del proceso
-    nuevo_contexto->pid = info_kernel.pid;
+    nuevo_contexto->pid = info_kernel.pid;  
+    nuevo_contexto->datos_pid.pc = 0;
     nuevo_contexto->tamanio_proceso = info_kernel.tamanio_proceso;
 
     nuevo_contexto->datos_pid.ax = 0;
@@ -115,7 +116,10 @@ void crear_pid(t_contexto* nuevo_contexto, t_info_kernel info_kernel)
     nuevo_contexto->datos_pid.fx = 0;
     nuevo_contexto->datos_pid.gx = 0;
     nuevo_contexto->datos_pid.hx = 0;
-    nuevo_contexto->datos_pid.pc = 0;
+  
+
+    printf("Ruta recibida: '%s'\n", info_kernel.archivo_pseudocodigo);
+
 
     nuevo_contexto->datos_pid.pseudocodigo = strdup(info_kernel.archivo_pseudocodigo);
     nuevo_contexto->datos_pid.instrucciones = leer_archivo_y_cargar_instrucciones(nuevo_contexto->datos_pid.pseudocodigo);
@@ -126,11 +130,12 @@ void crear_pid(t_contexto* nuevo_contexto, t_info_kernel info_kernel)
 
 t_contexto* buscar_contexto_por_pid(int pid)
 {
+    t_contexto* contexto_actual;
     // Recorrer la lista de contextos
     for (int i = 0; i < list_size(lista_contextos); i++) 
     {
         // Obtener el contexto actual
-        t_contexto* contexto_actual = list_get(lista_contextos, i);
+        contexto_actual = list_get(lista_contextos, i);
         
         // Verificar si el PID coincide
         if(contexto_actual->pid == pid) 
@@ -140,8 +145,8 @@ t_contexto* buscar_contexto_por_pid(int pid)
     }
 
     log_error(logger_memoria, "No se encontró el contexto para el PID %d", pid);
-    exit(1); // Si no se encuentra, devolver NULL
-    return 0;
+    //exit(1); // Si no se encuentra, devolver NULL
+    return contexto_actual;
 }
 
 void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
@@ -195,6 +200,7 @@ void enviar_contexto(t_contexto* contexto_proceso, int socket_cpu)
     t_paquete* paquete_contexto = crear_super_paquete(CPU_RECIBE_CONTEXTO);
     
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->pid);
+    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.pc);
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.ax);
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.bx);
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.cx);
@@ -203,8 +209,7 @@ void enviar_contexto(t_contexto* contexto_proceso, int socket_cpu)
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.fx);
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.gx);
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.hx);
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.pc);
-    
+
     enviar_paquete(paquete_contexto, socket_cpu);
 
     free(paquete_contexto);

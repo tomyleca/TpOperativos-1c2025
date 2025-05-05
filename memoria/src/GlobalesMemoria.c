@@ -8,10 +8,10 @@ char* valor;
 
 t_log* logger_memoria;
 t_config* config_memoria;
-
+int fd_escucha_servidor;
 
 t_list* lista_contextos;
-int puerto_escucha;
+char* puerto_escucha;
 int tam_memoria;
 int tam_pagina;
 int entradas_por_tabla;

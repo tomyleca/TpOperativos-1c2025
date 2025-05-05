@@ -11,6 +11,7 @@
 #include <commons/temporal.h>
 #include <pthread.h>
 #include <commons/collections/dictionary.h>
+#include "utils/shared.h"
 #include "../../utils/src/utils/monitoresListas.h"
 #include "../../utils/src/utils/monitoresDiccionarios.h"
 #include "../../utils/src/utils/conexionKernelIO.h"
@@ -61,6 +62,12 @@ typedef enum{
     SRT
 } PLANIFICADOR;
 
+typedef struct
+{
+    char* nombre;
+    bool ocupado;
+} DispositivoIO;
+
 
 typedef struct
 {
@@ -99,11 +106,11 @@ extern int cliente_kernel_interrupt;
 //CONFIG Y LOGGER
 extern char* ip_memoria;
 extern char* algoritmo_planificacion;
-extern int puerto_memoria;
+extern char* puerto_memoria;
 extern int tiempo_suspension;
-extern int puerto_escucha_dispatch;
-extern int puerto_escucha_interrupt;
-extern int puerto_escucha_IO;
+extern char* puerto_escucha_dispatch;
+extern char* puerto_escucha_interrupt;
+extern char* puerto_escucha_IO;
 extern int alfa;
 extern char*  algoritmo_cola_new;
 extern bool algoritmoColaNewEnFIFO;
@@ -111,7 +118,6 @@ extern bool algoritmoColaNewEnFIFO;
 extern t_log_level log_level;
 extern t_log* logger_kernel;
 extern t_config* config_kernel;
-
 
 //PROCESOS
 extern uint32_t pidDisponible;
@@ -129,11 +135,13 @@ extern void estimarRafagaActual(PCB* proceso);
 extern void* planificadorCortoPlazo(void* arg);
 extern void ejecutar(PCB* proceso);
 
-/**
- * @brief Chequea si en alguno de los CPUs en ejecución hay un proceso con una rafaga estimada restante menor a la rafaga estimada más baja de los procesos en ready. De ser así, libera el CPU y retorna true, de otra forma retorna false.
-*/
-extern bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera);
-extern bool menorEstimadoRafagaRestante(nucleoCPU* CPU1,nucleoCPU* CPU2);
+//Cambiar de estado
+extern void pasarAReady(PCB* proceso);
+extern void pasarABLoqueadoEIniciarContador(PCB* proceso);
+extern void* contadorParaSwap(PCB* proceso);
+extern bool IOTerminado(char* PIDComoChar);
+extern void pasarASwapBlocked(PCB* proceso, char* PIDComoChar);
+extern void pasarASwapReady(PCB* proceso);
 
 extern void terminarEjecucion(PCB* proceso);
 extern void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion);
