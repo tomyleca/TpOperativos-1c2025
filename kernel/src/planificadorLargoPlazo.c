@@ -46,7 +46,6 @@ void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
 void inicializarProceso(){
     PCB* procesoAInicializar;
     
-<<<<<<< HEAD
 
 
     if (!list_is_empty(listaProcesosSwapReady->lista)) //Esto es para darle mas prioridad a la lista Swap Ready
@@ -55,23 +54,17 @@ void inicializarProceso(){
         
         
         //TODO Preguntarle a memoria
-        log_info(logger_kernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"SWAP_READY","READY");
+        log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"SWAP_READY","READY");
         cargarCronometro(procesoAInicializar,SWAP_READY);
         pasarAReady(procesoAInicializar);
         }
-=======
-    //TODO
-    //ACA VA ALGO PARA ESPERAR EL ENTER
-    if (!list_is_empty(listaProcesosSwapReady))
-        procesoAInicializar= sacarDeLista(semaforoListaSwapReady,listaProcesosSwapReady,0);
->>>>>>> origin/CPU-Eze
     else
         {
         procesoAInicializar = sacarDeLista(listaProcesosNew,0);
 
         
         //TODO Preguntarle a memoria
-        log_info(logger_kernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"NEW","READY");
+        log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"NEW","READY");
         cargarCronometro(procesoAInicializar,NEW);
         pasarAReady(procesoAInicializar);
         }

@@ -124,31 +124,7 @@ void setearAlgoritmosDePlanificacion(){
 
 void cargarCronometro(PCB* proceso,ESTADO estado)
 {
-<<<<<<< HEAD
     
     temporal_stop(proceso->cronometros[estado]);
     proceso->MT[estado]=temporal_gettime(proceso->cronometros[estado]);
 }
-=======
-    semaforoListaNew= malloc(sizeof(sem_t));
-    semaforoListaReady = malloc(sizeof(sem_t));
-    semaforoListaSwapReady = malloc(sizeof(sem_t));
-
-    semaforoListaDispositivosIO = malloc(sizeof(sem_t));
-    
-    semaforoDiccionarioIOBlocked = malloc(sizeof(sem_t));
-    
-    sem_init(semaforoListaNew,1,1);
-    sem_init(semaforoListaReady,1,1);
-
-
-    sem_init(semaforoDiccionarioIOBlocked,1,1); 
-    //sem_init(semaforoDiccionarioBlocked,1,1); 
-    sem_init(semaforoListaSwapReady,1,1);
-    sem_init(semaforoListaDispositivosIO,1,1);
-
-
-
-}
-
->>>>>>> origin/CPU-Eze

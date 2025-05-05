@@ -2,11 +2,7 @@
 
 
 //-----------------------------------------------CLIENTE----------------------------------------------
-<<<<<<< HEAD
 int crear_conexion(t_log* nombreLogger, char* ip, int puerto) {
-=======
-int crear_conexion(t_log* nombreLogger, char* ip, char* puerto) {
->>>>>>> origin/CPU-Eze
     struct addrinfo hints, *servinfo;
 
     memset(&hints, 0, sizeof(hints));
@@ -17,11 +13,7 @@ int crear_conexion(t_log* nombreLogger, char* ip, char* puerto) {
     int resultado = getaddrinfo(ip, puerto, &hints, &servinfo);
     if (resultado != 0) {
         log_error(nombreLogger, "getaddrinfo fallo: %s", gai_strerror(resultado));
-<<<<<<< HEAD
-        free(puerto_str);
-=======
         free(puerto);
->>>>>>> origin/CPU-Eze
         return -1;
     }
 
@@ -34,21 +26,13 @@ int crear_conexion(t_log* nombreLogger, char* ip, char* puerto) {
     }
 
     if (connect(socket_cliente, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
-<<<<<<< HEAD
-        log_error(nombreLogger, "Error al conectar con %s:%s", ip, puerto_str);
-=======
         log_error(nombreLogger, "Error al conectar con %s:%s", ip, puerto);
->>>>>>> origin/CPU-Eze
         freeaddrinfo(servinfo);
         free(puerto);
         exit(1);
     }
 
-<<<<<<< HEAD
-    log_info(nombreLogger, "Conexion exitosa con %s:%s", ip, puerto_str);
-=======
     log_info(nombreLogger, "Conexion exitosa con %s:%s", ip, puerto);
->>>>>>> origin/CPU-Eze
 
     freeaddrinfo(servinfo);
     free(puerto);
