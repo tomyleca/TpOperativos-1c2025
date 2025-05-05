@@ -26,7 +26,7 @@ uint32_t tam;
 
 int64_t estimadoRafagaAnterior; 
 int64_t duracionRafagaAnterior;
-int64_t estimadoRafagaActual;
+int64_t estimadoSiguienteRafaga;
 
 t_temporal* cronometros[7];
 t_temporal* cronometroEjecucionActual;
@@ -115,18 +115,24 @@ extern t_log* loggerKernel;
 //PROCESOS
 extern uint32_t pidDisponible;
 
-
+/**
+ * @brief Se fija cual es el proximo proceso para pasar intentar pasar a Ready. Le consulta a memoria y ,si esta da el OK,lo pasa. De otra forma no hace nada.
+*/
 extern void inicializarProceso();
+
 PCB* buscarPCBEjecutando(uint32_t pid);
 
 //Ordenar listas
 extern bool menorTam(PCB* PCB1,PCB* PCB2);
-extern bool menorEstimadoRafagaActual(PCB* PCB1,PCB* PCB2);
+extern bool menorEstimadoSiguienteRafaga(PCB* PCB1,PCB* PCB2);
 
 //Planificador
-extern void estimarRafagaActual(PCB* proceso);
+/**
+ * @brief Estima el valor de la proxima ráfaga de un proceso dado.
+*/
+extern void estimarSiguienteRafaga(PCB* proceso);
 extern void* planificadorCortoPlazo(void* arg);
-extern void ejecutar(PCB* proceso);
+
 
 /**
  * @brief Chequea si en alguno de los CPUs en ejecución hay un proceso con una rafaga estimada restante menor a la rafaga estimada más baja de los procesos en ready. De ser así, libera el CPU y retorna true, de otra forma retorna false.
@@ -162,6 +168,9 @@ extern sem_t* semaforoIntentarPlanificar;
 
 
 //OTRAS
+/**
+ * @brief Pasa un valor uint32_t a un char.
+*/
 extern char* pasarUnsignedAChar(uint32_t unsigned_);
 
  
