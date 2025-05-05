@@ -12,21 +12,30 @@ int main(int argc, char* argv[]) {
     //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
     crearEstructuras();
     
+   
+    
+   
+    pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
+    pthread_t* hiloPlanificadorCortoPlazo = malloc(sizeof(pthread_t));
+    pthread_create(hiloAtenderIO,NULL,esperarClientesIO,NULL);
+    pthread_create(hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
+
+
+    
     prueba1();
     
    
 
   
 
-    //inicializar_hilos_kernel(config_kernel);
-
-   
-
-    //INIT_PROC("1",4);
-    //INIT_PROC("2",2);
-    //guardarDatosCPU("id",1);
 
     
+
+    
+
+
+    pthread_join(*hiloAtenderIO,NULL);
+    pthread_join(*hiloPlanificadorCortoPlazo,NULL);
     return 0;
 }
 
@@ -37,8 +46,8 @@ void leerConfigKernel(t_config* config_kernel) {
     puerto_escucha_dispatch = config_get_string_value(config_kernel, "PUERTO_ESCUCHA_DISPATCH");
     puerto_escucha_interrupt = config_get_string_value(config_kernel, "PUERTO_ESCUCHA_INTERRUPT");
     puerto_escucha_IO = config_get_string_value(config_kernel, "PUERTO_ESCUCHA_IO");
-    algoritmo_planificacion = config_get_string_value(config_kernel, "ALGORITMO_PLANIFICACION");
-    algoritmo_cola_new = config_get_string_value(config_kernel, "ALGORITMO_COLA_NEW");
+    algoritmo_planificacion = config_get_string_value(config_kernel, "ALGORITMO_CORTO_PLAZO");
+    algoritmo_cola_new = config_get_string_value(config_kernel, "ALGORITMO_INGRESO_A_READY");
     alfa = config_get_int_value(config_kernel, "ALFA");
     tiempo_suspension = config_get_int_value(config_kernel, "TIEMPO_SUSPENSION");
     log_level = log_level_from_string(config_get_string_value(config_kernel, "LOG_LEVEL"));

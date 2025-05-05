@@ -1,4 +1,4 @@
-#include "kernel.h"
+#include "conexiones_kernel.h"
 
 void iniciarConexiones()
 {
@@ -9,8 +9,8 @@ void iniciarConexiones()
     /****************CONEXION KERNEL CON IO*********************/
 
     //INICIO SERVIDOR KERNEL-IO
-    /*socket_kernel_io = iniciar_servidor(loggerKernel, puerto_escucha_IO);
-    log_info(loggerKernel, "Servidor  iniciado para IO");*/
+    socket_kernel_io = iniciar_servidor(loggerKernel, puerto_escucha_IO);
+    log_info(loggerKernel, "Servidor  iniciado para IO");
     
     
     
@@ -23,12 +23,13 @@ void iniciarConexiones()
     /****************CONEXION KERNEL CON CPU*********************/
 
     //INICIO SERVIDOR KERNEL-CPU
-
+    /*
     socket_kernel_cpu_dispatch = iniciar_servidor(loggerKernel, puerto_escucha_dispatch); 
     log_info(loggerKernel, "Servidor DISPATCH iniciado");
 
     socket_kernel_cpu_interrupt = iniciar_servidor(loggerKernel, puerto_escucha_interrupt); 
     log_info(loggerKernel, "Servidor INTERRUPT iniciado");
+    */
     
     //cliente_kernel_dispatch = esperar_cliente(socket_kernel_cpu_dispatch);
     

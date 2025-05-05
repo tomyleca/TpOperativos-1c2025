@@ -71,6 +71,8 @@ void* manejarProcesoBloqueado(procesoEnEsperaIO* procesoEnEsperaIO){
         }
     }
 
+    //TODO temporal destroy
+
     
     
 

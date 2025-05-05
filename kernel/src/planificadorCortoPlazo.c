@@ -160,4 +160,3 @@ void estimarSiguienteRafaga(PCB* proceso)
 {
     proceso->estimadoSiguienteRafaga= alfa * proceso->duracionRafagaAnterior + (1- alfa) * proceso->estimadoRafagaAnterior;
 }
-

@@ -152,5 +152,3 @@ PCB* buscarPCBEjecutando(uint32_t pid) {
     else
         return NULL;
 }
-
-

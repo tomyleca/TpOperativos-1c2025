@@ -9,25 +9,24 @@
 #include<readline/readline.h>
 #include <pthread.h>
 #include "utils/shared.h"
-#include "globalesKernel.h"
+#include "kernel.h"
 #include "utils/conexiones.h"
 #include "utils/configs.h"
-#include "conexionConCPU.h"
 
-pthread_t escuchar_dispatch_cpu();
+extern pthread_t escuchar_dispatch_cpu();
 
-pthread_t escuchar_interrupcion_cpu();
+extern pthread_t escuchar_interrupcion_cpu();
 
-pthread_t crear_hilo_memoria();
+extern pthread_t crear_hilo_memoria();
 
-void hilo_memoria();
+extern void hilo_memoria();
 
-void atender_dispatch_cpu();
+extern void atender_dispatch_cpu();
 
-void atender_interrupcion_cpu();
+extern void atender_interrupcion_cpu();
 
-void ejecutar_io();
+extern void ejecutar_io();
 
-void enviar_pid_contexto_cpu(int socket_kernel_cpu_dispatch);
+extern void enviar_pid_contexto_cpu(int socket_kernel_cpu_dispatch);
 
 #endif

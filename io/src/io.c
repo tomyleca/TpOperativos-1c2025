@@ -31,9 +31,7 @@ int main(int argc, char* argv[]) {
 
     
 
-    //CIERRO
-    log_info(logger_io, "cerrando conexión");
-    liberar_conexion(conexionKernel);
+
 
  
 
@@ -88,11 +86,11 @@ void avisarFinDeIO(uint32_t PID,char* nombreIO)
     enviar_paquete(paquete,conexionKernel);
 
 
-    log_info(loggerIO,"## PID: <%u> - Fin de IO",PID);
+    //log_info(loggerIO,"## PID: <%u> - Fin de IO",PID);
     
 
-=======
+
     free(paquete);
     
->>>>>>> origin/CPU-Eze
+
 }

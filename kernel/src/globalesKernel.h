@@ -11,7 +11,6 @@
 #include <commons/temporal.h>
 #include <pthread.h>
 #include <commons/collections/dictionary.h>
-#include "utils/shared.h"
 #include "../../utils/src/utils/monitoresListas.h"
 #include "../../utils/src/utils/monitoresDiccionarios.h"
 #include "../../utils/src/utils/conexionKernelIO.h"
@@ -27,7 +26,7 @@ uint32_t tam;
 
 int64_t estimadoRafagaAnterior; 
 int64_t duracionRafagaAnterior;
-int64_t estimadoRafagaActual;
+int64_t estimadoSiguienteRafaga;
 
 t_temporal* cronometros[7];
 t_temporal* cronometroEjecucionActual;
@@ -52,18 +51,15 @@ typedef enum{
 } ESTADO;
 
 //HILOS
-extern pthread_t hilo_escuchar_dispatch;
-extern pthread_t hilo_escuchar_interrupcion;
+extern pthread_t hilo_escuchar_kernel;
+extern pthread_t hilo_escuchar_kernel_interrupcion;
 extern pthread_t hilo_conectar_kernel_memoria;
-
+extern pthread_t hilo_crear_kernel_memoria;
 typedef enum{
     FIFO,
     SJF,
     SRT
 } PLANIFICADOR;
-
-
-
 
 
 typedef struct
@@ -100,22 +96,24 @@ extern int socket_kernel_cpu_interrupt;
 extern int cliente_kernel_dispatch;
 extern int cliente_kernel_interrupt;
 
-
 //CONFIG Y LOGGER
 extern char* ip_memoria;
 extern char* algoritmo_planificacion;
-extern char* puerto_memoria;
+extern int puerto_memoria;
 extern int tiempo_suspension;
-extern char* puerto_escucha_dispatch;
-extern char* puerto_escucha_interrupt;
-extern char* puerto_escucha_IO;
+extern int puerto_escucha_dispatch;
+extern int puerto_escucha_interrupt;
+extern int puerto_escucha_IO;
 extern int alfa;
 extern char*  algoritmo_cola_new;
 extern bool algoritmoColaNewEnFIFO;
 
 extern t_log_level log_level;
 extern t_log* loggerKernel;
+
+
 extern t_config* config_kernel;
+
 
 //PROCESOS
 extern uint32_t pidDisponible;
@@ -139,7 +137,11 @@ extern void estimarSiguienteRafaga(PCB* proceso);
 extern void* planificadorCortoPlazo(void* arg);
 
 
-
+/**
+ * @brief Chequea si en alguno de los CPUs en ejecución hay un proceso con una rafaga estimada restante menor a la rafaga estimada más baja de los procesos en ready. De ser así, libera el CPU y retorna true, de otra forma retorna false.
+*/
+extern bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera);
+extern bool menorEstimadoRafagaRestante(nucleoCPU* CPU1,nucleoCPU* CPU2);
 
 extern void terminarEjecucion(PCB* proceso);
 extern void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion);
@@ -175,11 +177,6 @@ extern sem_t* semaforoIntentarPlanificar;
 extern char* pasarUnsignedAChar(uint32_t unsigned_);
 
  
-//HILOS 
-extern pthread_t hilo_escuchar_kernel;
-extern pthread_t hilo_escuchar_kernel_interrupcion;
-extern pthread_t hilo_crear_kernel_memoria;
-
 
 
 

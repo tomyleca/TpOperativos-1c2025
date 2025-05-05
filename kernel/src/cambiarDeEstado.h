@@ -10,6 +10,7 @@ extern void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO);
 extern void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO);
 extern void pasarASwapReady(PCB* proceso);
 extern void pasarAExecute(PCB* proceso);
+extern bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera);
 extern void pasarAExit(PCB* proceso);
 
 #endif
