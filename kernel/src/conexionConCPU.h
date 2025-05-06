@@ -1,7 +1,7 @@
 #ifndef CONEXION_CON_CPU_H
 #define CONEXION_CON_CPU_H
 
-#include "globalesKernel.h"
+#include "kernel.h"
 
 /**
  * @brief Guarda los datos de una nueva CPU.

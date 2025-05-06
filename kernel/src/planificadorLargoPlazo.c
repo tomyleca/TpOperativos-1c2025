@@ -1,6 +1,5 @@
 #include "kernel.h"
 
-
 void inicializarProceso(){
     PCB* procesoAInicializar;
     
@@ -31,11 +30,11 @@ void inicializarProceso(){
     
 }
 
-
 bool menorTam(PCB* PCB1,PCB* PCB2)
 {
     return PCB1->tam <= PCB2->tam;
 }
+
 
 
 void pasarAReady(PCB* proceso){

@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 void leerConfigIO(t_config* config_io) 
 {
     ip_kernel = config_get_string_value(config_io, "IP_KERNEL");
-    puerto_kernel = config_get_int_value(config_io, "PUERTO_KERNEL");
+    puerto_kernel = config_get_string_value(config_io, "PUERTO_KERNEL");
     log_level = log_level_from_string(config_get_string_value(config_io, "LOG_LEVEL"));
     
 
@@ -61,18 +61,21 @@ void conectarseAKernel(char* nombre)
 
 uint32_t recibirProcesoEnIOEIniciarUsleep()
 {
-    opCodesKernelIO opCode = recibir_operacion(conexionKernel);
-    uint32_t PID;
-    if(opCode==INICIA_IO_PROCESO)
-    {    
-        t_buffer* buffer = recibiendo_super_paquete(conexionKernel); 
-        PID = recibir_uint32_t_del_buffer(buffer);
-        uint32_t tiempo = recibir_uint32_t_del_buffer(buffer);
 
-        log_info(loggerIO,"## PID: <%u> - Inicio de IO - Tiempo: <%u>",PID,tiempo);
-        
-        usleep(tiempo);
-    }
+    opCodesKernelIO opCode;
+    do
+    {
+        opCode =recibir_operacion(conexionKernel);
+    } while(opCode!=INICIA_IO_PROCESO);
+    uint32_t PID;
+    t_buffer* buffer = recibiendo_super_paquete(conexionKernel); 
+    PID = recibir_uint32_t_del_buffer(buffer);
+    uint32_t tiempo = recibir_uint32_t_del_buffer(buffer);
+
+    log_info(loggerIO,"## PID: <%u> - Inicio de IO - Tiempo: <%u>",PID,tiempo);
+    
+    usleep(tiempo);
+ 
 
     return PID;
 }
@@ -86,7 +89,7 @@ void avisarFinDeIO(uint32_t PID,char* nombreIO)
     enviar_paquete(paquete,conexionKernel);
 
 
-    log_info(loggerIO,"## PID: <%u> - Fin de IO",PID);
+    //log_info(loggerIO,"## PID: <%u> - Fin de IO",PID);
     
 
 }

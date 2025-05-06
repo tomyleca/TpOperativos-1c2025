@@ -99,17 +99,20 @@ extern int cliente_kernel_interrupt;
 //CONFIG Y LOGGER
 extern char* ip_memoria;
 extern char* algoritmo_planificacion;
-extern int puerto_memoria;
+extern char* puerto_memoria;
 extern int tiempo_suspension;
-extern int puerto_escucha_dispatch;
-extern int puerto_escucha_interrupt;
-extern int puerto_escucha_IO;
+extern char* puerto_escucha_dispatch;
+extern char* puerto_escucha_interrupt;
+extern char* puerto_escucha_IO;
 extern int alfa;
 extern char*  algoritmo_cola_new;
 extern bool algoritmoColaNewEnFIFO;
 
 extern t_log_level log_level;
 extern t_log* loggerKernel;
+
+
+extern t_config* config_kernel;
 
 
 //PROCESOS
@@ -174,9 +177,6 @@ extern sem_t* semaforoIntentarPlanificar;
 extern char* pasarUnsignedAChar(uint32_t unsigned_);
 
  
-
-
-
 
 
 
