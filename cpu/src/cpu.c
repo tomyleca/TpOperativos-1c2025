@@ -17,11 +17,7 @@ int main(int argc, char* argv[]) {
     inicializar_hilos(config_cpu);
 
 
-    //CIERRO
-    log_info(logger_cpu, "Cerrando conexión");
-    liberar_conexion(socket_cpu_kernel_dispatch);
-    liberar_conexion(socket_cpu_kernel_interrupt);
-    liberar_conexion(socket_cpu_memoria);
+
 
     return 0;
 }
@@ -43,9 +39,9 @@ void leerConfigCpu(t_config* config_cpu) {
 
 void inicializar_hilos(t_config* config_cpu)
 {
-    socket_cpu_memoria = crear_conexion(logger_cpu, ip_memoria, puerto_memoria);
-    hilo_escuchar_memoria = escuchar_memoria();
-    pthread_detach(hilo_escuchar_memoria);
+    //socket_cpu_memoria = crear_conexion(logger_cpu, ip_memoria, puerto_memoria);
+    //hilo_escuchar_memoria = escuchar_memoria();
+    //pthread_detach(hilo_escuchar_memoria);
 
     socket_cpu_kernel_dispatch = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_dispatch);
     crear_handshake_cpu_kernel_dispatch(socket_cpu_kernel_dispatch);

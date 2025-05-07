@@ -4,5 +4,7 @@
 #include "kernel.h"
 
 extern void prueba1();
+extern void prueba2();
+extern void puebaConCPU();
 
 #endif

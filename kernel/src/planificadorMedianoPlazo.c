@@ -112,9 +112,14 @@ void pasarASwapReady(PCB* proceso)
     proceso->MT[SWAP_READY]++;
 
     if(algoritmoColaNewEnFIFO)
+    {
         agregarALista(listaProcesosSwapReady,proceso);
+    }
     else 
+    {
         agregarAListaOrdenada(listaProcesosSwapReady,proceso,menorTam);
+    }
+
 
     inicializarProceso();
 }

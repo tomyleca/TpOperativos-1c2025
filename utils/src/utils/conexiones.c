@@ -96,7 +96,7 @@ int iniciar_servidor(t_log* logger, char* puerto)
 		return -1;
 	}
 
-	printf("[ INFO ]: << SERVIDOR LISTO Y ESCUCHANDO	>>\n");
+	//printf("[ INFO ]: << SERVIDOR LISTO Y ESCUCHANDO	>>\n");
 
 	freeaddrinfo(servinfo);
 
@@ -145,3 +145,15 @@ void recibir_handshake(int socket) {
 
      free(handshake);
  }*/
+
+void enviarOK(int fdConexion)
+{
+    uint32_t OK = 1;
+    send(fdConexion,&OK,sizeof(uint32_t),0);
+}
+
+bool esperarOK(int fdConexion)
+{
+    uint32_t OK;
+    return recv(fdConexion,OK,sizeof(uint32_t),0);
+}

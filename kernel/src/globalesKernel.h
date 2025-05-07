@@ -11,6 +11,7 @@
 #include <commons/temporal.h>
 #include <pthread.h>
 #include <commons/collections/dictionary.h>
+#include "../../utils/src/utils/conexiones.h"
 #include "../../utils/src/utils/monitoresListas.h"
 #include "../../utils/src/utils/monitoresDiccionarios.h"
 #include "../../utils/src/utils/conexionKernelIO.h"
@@ -158,7 +159,7 @@ extern int algoritmoDePlanificacionInt;
 
 
 //CONEXIONES
-extern void iniciarConexiones();
+extern void iniciarServidores();
 extern void cerrarConexiones();
 
 //IO

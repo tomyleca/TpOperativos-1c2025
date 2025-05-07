@@ -7,7 +7,7 @@ void* esperarClientesIO(void* arg)
     {
         int* fdConexion = malloc(sizeof(int));
         *fdConexion = esperar_cliente(socket_kernel_io);
-        log_info(loggerKernel, "Se conectó IO");
+        log_info(loggerKernel, "## Se conectó IO");
         pthread_t* nuevoHiloAtenderIO = malloc(sizeof(pthread_t));
         pthread_create(nuevoHiloAtenderIO,NULL,atenderIO,fdConexion);
     }

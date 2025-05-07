@@ -61,7 +61,7 @@ void pasarAExecute(PCB* proceso)
     nucleoCPULibre->procesoEnEjecucion=proceso;
     agregarALista(listaCPUsEnUso,nucleoCPULibre);
     
-    //TODO mandar pid a CPU
+    mandarContextoACPU(proceso->PID,proceso->PC,nucleoCPULibre->fdConexion);
 
     proceso->cronometroEjecucionActual = temporal_create();
     temporal_resume(proceso->cronometros[EXECUTE]);

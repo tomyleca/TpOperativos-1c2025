@@ -9,22 +9,25 @@ int main(int argc, char* argv[]) {
     //INICIO LOGGER
     loggerKernel = iniciar_logger("kernelLogger.log","kernelLogger",log_level);
 
-    inicializar_hilos_kernel(config_kernel);
+    //INICIO SEVIDORES PARA COMUNICACION IO-KERNEL Y CPU-KERNEL
+    iniciarServidores();
 
     //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
     crearEstructuras();
     
    
-    
-   
-    /*pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
+    pthread_t* hiloAtenderDispatch = malloc(sizeof(pthread_t));
+    pthread_t* hiloAtenderInterrupt = malloc(sizeof(pthread_t));
+    pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
     pthread_t* hiloPlanificadorCortoPlazo = malloc(sizeof(pthread_t));
+    pthread_create(hiloAtenderDispatch,NULL,esperarClientesDispatch,NULL);
+    pthread_create(hiloAtenderInterrupt,NULL,esperarClientesInterrupt,NULL);
     pthread_create(hiloAtenderIO,NULL,esperarClientesIO,NULL);
     pthread_create(hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
 
 
     
-    prueba1();
+    pruebaConCPU();
     
    
 
@@ -37,7 +40,9 @@ int main(int argc, char* argv[]) {
 
 
     pthread_join(*hiloAtenderIO,NULL);
-    pthread_join(*hiloPlanificadorCortoPlazo,NULL);*/
+    pthread_join(*hiloPlanificadorCortoPlazo,NULL);
+    pthread_join(*hiloAtenderDispatch,NULL);
+    pthread_join(*hiloAtenderInterrupt,NULL);
     return 0;
 }
 
@@ -56,26 +61,6 @@ void leerConfigKernel(t_config* config_kernel) {
     
 }
 
-void inicializar_hilos_kernel(t_config* config_kernel)
-{   
-    //TIENE MAS SENTIDO QUE PRIMERO CONECTE CON MEMORIA, Y DESPUES ESCUCHE PETICIONES DE CPU, NO? ENTONCES CAMBIE EL ORDEN!!
-    socket_kernel_memoria = crear_conexion(loggerKernel,ip_memoria,puerto_memoria);
-    hilo_crear_kernel_memoria = crear_hilo_memoria();//EN ESTA FUNCION DSP CAMBIALE LO QUE LE QUERES PASAR PARA CREAR EL PRIMER HILO/PROCESOS
-    //INIT_PROC("kernel/pseudocodigo.txt", 4096);
-
-    socket_kernel_cpu_dispatch = iniciar_servidor(loggerKernel, puerto_escucha_dispatch); 
-    hilo_escuchar_kernel = escuchar_dispatch_cpu();
-
-    socket_kernel_cpu_interrupt= iniciar_servidor(loggerKernel, puerto_escucha_interrupt); 
-    hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_cpu(); 
-
-    pthread_join(hilo_escuchar_kernel,NULL);
-
-    pthread_join(hilo_escuchar_kernel_interrupcion,NULL);
-    
-    pthread_join(hilo_crear_kernel_memoria,NULL);
-
-  }
 
 
 void crearEstructuras()
