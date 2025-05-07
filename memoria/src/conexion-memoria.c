@@ -1,19 +1,5 @@
 #include "conexion-memoria.h"
 
-void leerConfigMemoria(t_config* config_memoria) 
-{
-    puerto_escucha = config_get_int_value(config_memoria, "PUERTO_ESCUCHA");
-    tam_memoria = config_get_int_value(config_memoria, "TAM_MEMORIA");
-    tam_pagina = config_get_int_value(config_memoria, "TAM_PAGINA");
-    entradas_por_tabla = config_get_int_value(config_memoria, "ENTRADAS_POR_TABLA");
-    cant_niveles = config_get_int_value(config_memoria, "CANTIDAD_NIVELES");
-    retardo_memoria = config_get_int_value(config_memoria, "RETARDO_MEMORIA");
-    path_swapfile = config_get_string_value(config_memoria, "PATH_SWAPFILE");
-    retardo_swap = config_get_int_value(config_memoria, "RETARDO_SWAP");
-    log_level = log_level_from_string(config_get_string_value(config_memoria, "LOG_LEVEL"));
-    dump_path = config_get_string_value(config_memoria, "DUMP_PATH"); 
-}
-
 
 void server_escucha(int fd_escucha_servidor,t_log* memoria_logger)
 {
@@ -38,7 +24,7 @@ void server_escucha(int fd_escucha_servidor,t_log* memoria_logger)
 int atender_cliente(int *fd_conexion)
 {    
     /*lista_particiones = inicializar_lista_particiones(PARTICIONES);*/
-	t_buffer* unBuffer;
+	// t_buffer* unBuffer;
     int cliente_fd = *fd_conexion;
 
     while (1) {
