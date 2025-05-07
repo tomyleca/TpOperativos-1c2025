@@ -54,7 +54,7 @@ void* sacarDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,bool (*c
 {
     void* elem;
 
-    sem_wait(listaConSemaforos->semaforoCantElementos);
+    
     sem_wait(listaConSemaforos->semaforoMutex);
         elem = list_remove_by_condition(listaConSemaforos->lista,condicion);
     sem_post(listaConSemaforos->semaforoMutex);
@@ -90,12 +90,11 @@ bool sacarElementoDeLista(t_listaConSemaforos* listaConSemaforos,void* elem)
 {
     bool elementoEncontrado;
 
-    sem_wait(listaConSemaforos->semaforoCantElementos);
+
     sem_wait(listaConSemaforos->semaforoMutex);
         elementoEncontrado = list_remove_element(listaConSemaforos->lista,elem);
     sem_post(listaConSemaforos->semaforoMutex);
-    if(!elementoEncontrado) //Para que no descuente un elemento si quiere sacarlo y no esta.
-        sem_post(listaConSemaforos->semaforoCantElementos);
+
 
 
     return elementoEncontrado;

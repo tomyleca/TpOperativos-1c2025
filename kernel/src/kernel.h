@@ -15,6 +15,7 @@
 #include "utils/conexiones.h"
 #include "pruebas.h"
 #include "syscalls.h"
+#include "pruebas.h"
 
 void leerConfigKernel(t_config* config_kernel);
 void crearEstructuras();

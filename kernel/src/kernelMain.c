@@ -71,7 +71,7 @@ void crearEstructuras()
     listaProcesosReady = crearListaConSemaforos();
     listaProcesosSwapReady = crearListaConSemaforos();
 
-
+    listaCPUsAInicializar = crearListaConSemaforos();
     listaCPUsLibres = crearListaConSemaforos();
     listaCPUsEnUso = crearListaConSemaforos();
 
@@ -85,6 +85,8 @@ void crearEstructuras()
     sem_init(semaforoIntentarPlanificar,1,0);
     semaforoPIDDisponible = malloc(sizeof(sem_t));
     sem_init(semaforoPIDDisponible,1,1);
+    semaforoGuardarDatosCPU = malloc(sizeof(sem_t));
+    sem_init(semaforoGuardarDatosCPU,1,1);
 
 
 

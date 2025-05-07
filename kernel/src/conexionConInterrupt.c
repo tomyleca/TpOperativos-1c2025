@@ -15,7 +15,7 @@ void* esperarClientesInterrupt(void* arg)
 
 void atender_interrupcion_cpu(void* conexion) 
 {
-    int* fdConexion = (int*) conexion;
+    int fdConexion = *(int*) conexion;
     
     t_buffer* buffer;
     op_code cod_op;
@@ -25,15 +25,16 @@ void atender_interrupcion_cpu(void* conexion)
 
     while(1) 
     {
-        cod_op = recibir_operacion(*fdConexion);
+        cod_op = recibir_operacion(fdConexion);
         switch (cod_op) 
         {
             case MENSAJE:
                 //recibir_mensaje(*fdConexion, loggerKernel,);
                 break;
             case HANDSHAKE_CPU_KERNEL_I:
-                buffer = recibiendo_super_paquete(*fdConexion);
+                buffer = recibiendo_super_paquete(fdConexion);
                 char* identificador = recibir_string_del_buffer(buffer);
+                guardarDatosCPUInterrupt(identificador,fdConexion);
             break;
             /*case -1:
                 log_error(loggerKernel, "KERNEL INTERRUPT se desconecto. Terminando servidor");
@@ -45,3 +46,28 @@ void atender_interrupcion_cpu(void* conexion)
     }
 }
 
+void guardarDatosCPUInterrupt(char* identificador,int fdConexion)
+{
+    sem_wait(semaforoGuardarDatosCPU);
+    
+    nucleoCPU* nucleoCPU = chequearSiCPUYaPuedeInicializarse(identificador);
+    if(nucleoCPU == NULL)//Si esta en NULL quiere decir que la otra conexion todavía no llego
+    {
+        nucleoCPU = malloc(sizeof(nucleoCPU));
+        nucleoCPU->identificador= malloc(strlen(identificador));
+        strcpy(nucleoCPU->identificador,identificador);
+        nucleoCPU->procesoEnEjecucion=NULL;
+        nucleoCPU->fdConexionInterrupt = fdConexion;
+        agregarALista(listaCPUsAInicializar,nucleoCPU);
+    }
+    else
+    {
+        sacarElementoDeLista(listaCPUsAInicializar,nucleoCPU);
+        agregarALista(listaCPUsLibres,nucleoCPU);
+        nucleoCPU->fdConexionInterrupt = fdConexion;
+        sem_post(semaforoIntentarPlanificar);
+    }
+
+    sem_post(semaforoGuardarDatosCPU);
+
+}

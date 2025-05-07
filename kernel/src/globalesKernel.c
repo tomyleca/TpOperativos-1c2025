@@ -34,6 +34,7 @@ pthread_t hilo_crear_kernel_memoria;
 t_listaConSemaforos* listaProcesosNew;
 t_listaConSemaforos* listaProcesosReady;
 t_listaConSemaforos* listaProcesosSwapReady;
+t_listaConSemaforos* listaCPUsAInicializar;
 t_listaConSemaforos* listaCPUsLibres;
 t_listaConSemaforos* listaCPUsEnUso;
 
@@ -52,3 +53,5 @@ t_diccionarioConSemaforos* diccionarioDispositivosIO;
 
 //CPU
 sem_t* semaforoIntentarPlanificar;
+
+sem_t* semaforoGuardarDatosCPU;

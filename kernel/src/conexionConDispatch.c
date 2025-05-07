@@ -34,7 +34,7 @@ void atender_dispatch_cpu(void* conexion)
             case HANDSHAKE_CPU_KERNEL_D:
                 buffer = recibiendo_super_paquete(fdConexion);
                 char* identificador = recibir_string_del_buffer(buffer);    
-                guardarDatosCPU(identificador,fdConexion);
+                guardarDatosCPUDispatch(identificador,fdConexion);
                 break;
             case IO:
                 buffer = recibiendo_super_paquete(fdConexion);
@@ -55,25 +55,43 @@ void atender_dispatch_cpu(void* conexion)
 
 
 
-void guardarDatosCPU(char* identificador,int fdConexion)
+void guardarDatosCPUDispatch(char* identificador,int fdConexion)
 {
-    nucleoCPU* nuevoNucleoCPU = malloc(sizeof(nucleoCPU));
-    nuevoNucleoCPU->identificador= malloc(strlen(identificador));
-    nuevoNucleoCPU->identificador=identificador;
+    sem_wait(semaforoGuardarDatosCPU);
     
-    nuevoNucleoCPU->procesoEnEjecucion=NULL;
-    nuevoNucleoCPU->fdConexion = fdConexion;
+    nucleoCPU* nucleoCPU = chequearSiCPUYaPuedeInicializarse(identificador);
+    if(nucleoCPU == NULL)//Si esta en NULL quiere decir que la otra conexion todavía no llego
+    {
+        nucleoCPU = malloc(sizeof(nucleoCPU));
+        nucleoCPU->identificador= malloc(strlen(identificador));
+        strcpy(nucleoCPU->identificador,identificador);
+        nucleoCPU->procesoEnEjecucion=NULL;
+        nucleoCPU->fdConexionDispatch = fdConexion;
+        agregarALista(listaCPUsAInicializar,nucleoCPU);
+    }
+    else 
+    {
+        sacarElementoDeLista(listaCPUsAInicializar,nucleoCPU);
+        agregarALista(listaCPUsLibres,nucleoCPU);
+        nucleoCPU->fdConexionDispatch = fdConexion;
+        sem_post(semaforoIntentarPlanificar);
+    }
 
-   
-   
-
-    agregarALista(listaCPUsLibres,nuevoNucleoCPU);
-    sem_post(semaforoIntentarPlanificar);
-
-    
-
+    sem_post(semaforoGuardarDatosCPU);
 }
 
+
+
+
+nucleoCPU* chequearSiCPUYaPuedeInicializarse(char* identificador)
+{
+bool _mismoIdentificador(nucleoCPU* nucleoCPU)
+{
+    return (strcmp(nucleoCPU->identificador,identificador) == 0);
+};
+
+return sacarDeListaSegunCondicion(listaCPUsAInicializar,_mismoIdentificador);
+}
 
 
 

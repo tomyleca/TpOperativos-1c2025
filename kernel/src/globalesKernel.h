@@ -81,7 +81,8 @@ typedef struct{
     char* identificador;
     bool ejecutando;
     PCB* procesoEnEjecucion;
-    int fdConexion;
+    int fdConexionDispatch;
+    int fdConexionInterrupt;
     
     
 }
@@ -150,6 +151,7 @@ extern void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion);
 extern t_listaConSemaforos* listaProcesosNew;
 extern t_listaConSemaforos* listaProcesosReady;
 extern t_listaConSemaforos* listaProcesosSwapReady;
+extern t_listaConSemaforos* listaCPUsAInicializar;
 extern t_listaConSemaforos* listaCPUsLibres;
 extern t_listaConSemaforos* listaCPUsEnUso;
 
@@ -169,6 +171,8 @@ extern t_diccionarioConSemaforos* diccionarioDispositivosIO;
 
 //CPU
 extern sem_t* semaforoIntentarPlanificar;
+
+extern sem_t* semaforoGuardarDatosCPU;
 
 
 //OTRAS
