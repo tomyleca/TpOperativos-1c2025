@@ -13,7 +13,6 @@
 #include "utils/configs.h"
 #include "utils/shared.h"
 #include "utils/conexiones.h"
-#include "conexiones_kernel.h"
 #include "pruebas.h"
 #include "syscalls.h"
 

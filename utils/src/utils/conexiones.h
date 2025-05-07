@@ -23,6 +23,10 @@ int esperar_cliente(int socket_servidor);
 int iniciar_servidor(t_log* logger, char* puerto);
 void recibir_handshake(int socket);
 
+//GENERALES
+extern void enviarOK(int fdConexion);
+extern bool esperarOK(int fdConexion);
+
 
 //void realizar_handshake(op_code module, int server);
 

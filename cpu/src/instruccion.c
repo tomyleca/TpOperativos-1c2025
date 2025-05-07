@@ -399,28 +399,39 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
         case SEGMENTATION_FAULT:
         //MEMORIA
             contexto->registros.PC++;
-            paquete_memoria = crear_super_paquete(ENVIAR_A_MEMORIA_UN_AVISO_DE_SYSCALL);
+            paquete_kernel_dispatch->codigo_operacion=SEGMENTATION_FAULT;
+            paquete_memoria = crear_super_paquete(SEGMENTATION_FAULT);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
+            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
+            cargar_registros_a_paquete(paquete_memoria);
         break;
         case IO:
             // KERNEL
             cargar_int_al_super_paquete(paquete_kernel_dispatch, (int)atoi(instruccion[1]));
             // MEMORIA
             contexto->registros.PC++;
-            paquete_memoria = crear_super_paquete(ENVIAR_A_MEMORIA_UN_AVISO_DE_SYSCALL);
+            paquete_kernel_dispatch->codigo_operacion=IO;
+            paquete_memoria = crear_super_paquete(IO);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
+            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
+            cargar_registros_a_paquete(paquete_memoria);
             break;
         case DUMP_MEMORY:
             // MEMORIA
             contexto->registros.PC++;
-            paquete_memoria = crear_super_paquete(ENVIAR_A_MEMORIA_UN_AVISO_DE_SYSCALL);
+            paquete_kernel_dispatch->codigo_operacion=DUMP_MEMORY;
+            paquete_memoria = crear_super_paquete(DUMP_MEMORY);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
+            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
+            cargar_registros_a_paquete(paquete_memoria);
             break;
         case INIT_PROCCESS:
             // MEMORIA
             contexto->registros.PC++;
-            paquete_memoria = crear_super_paquete(ENVIAR_A_MEMORIA_UN_AVISO_DE_SYSCALL);
+            paquete_kernel_dispatch->codigo_operacion=INIT_PROCCESS;
+            paquete_memoria = crear_super_paquete(INIT_PROCCESS);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
+            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
             cargar_string_al_super_paquete(paquete_memoria, instruccion[1]); // NOMBRE DEL ARCHIVO DE PSEUDOCODIGO
             cargar_int_al_super_paquete(paquete_memoria, (int)atoi(instruccion[2]) ); // TAMANIO DEL PROCESO 
             break;
