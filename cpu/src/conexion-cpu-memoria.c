@@ -163,6 +163,7 @@ void atender_dispatch_kernel()
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
                 contexto->pid = recibir_int_del_buffer(buffer);
                 contexto->registros.PC = recibir_int_del_buffer(buffer);
+                enviarOK(socket_cpu_kernel_dispatch);
                 // ACA HAY QUE SOLICITAR A MEMORIA EL CONTEXTO CON EL PID RECIBIMOS DE KERNEL
                 solicitar_contexto_a_memoria(contexto); 
                 free(buffer);

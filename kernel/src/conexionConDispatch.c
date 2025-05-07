@@ -18,7 +18,7 @@ void atender_dispatch_cpu(void* conexion)
     
     t_buffer* buffer;
     int cod_op;
-    nucleoCPU* nucleoCPUEnEjecucion = malloc(sizeof(nucleoCPUEnEjecucion));
+    
     
     
    
@@ -34,8 +34,15 @@ void atender_dispatch_cpu(void* conexion)
             case HANDSHAKE_CPU_KERNEL_D:
                 buffer = recibiendo_super_paquete(fdConexion);
                 char* identificador = recibir_string_del_buffer(buffer);    
-                guardarDatosCPU(identificador,fdConexion,nucleoCPUEnEjecucion);
+                guardarDatosCPU(identificador,fdConexion);
                 break;
+            case IO:
+                buffer = recibiendo_super_paquete(fdConexion);
+                uint32_t PID = recibir_uint32_t_del_buffer(buffer);
+                char* nombreIO = recibir_string_del_buffer(buffer);
+                int64_t tiempoEnIO = recibir_int64_t_del_buffer(buffer);
+                syscall_IO(PID,nombreIO,tiempoEnIO);
+                
             case -1:
                 log_error(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
                 pthread_exit(NULL);
@@ -48,9 +55,9 @@ void atender_dispatch_cpu(void* conexion)
 
 
 
-void guardarDatosCPU(char* identificador,int fdConexion,nucleoCPU* nuevoNucleoCPU)
+void guardarDatosCPU(char* identificador,int fdConexion)
 {
- 
+    nucleoCPU* nuevoNucleoCPU = malloc(sizeof(nucleoCPU));
     nuevoNucleoCPU->identificador= malloc(strlen(identificador));
     nuevoNucleoCPU->identificador=identificador;
     
@@ -99,8 +106,7 @@ void loggearMetricas(PCB* proceso)
 
 void mandarContextoACPU(uint32_t PID,uint32_t PC,int fdConexion)
 {
-    t_paquete* paquete = crear_paquete();
-    paquete->codigo_operacion = PID_KERNEL_A_CPU;
+    t_paquete* paquete = crear_super_paquete(PID_KERNEL_A_CPU);
     cargar_uint32_t_al_super_paquete(paquete,PID);
     cargar_uint32_t_al_super_paquete(paquete,PC);
     enviar_paquete(paquete,fdConexion);

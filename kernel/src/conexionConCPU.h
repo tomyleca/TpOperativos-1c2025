@@ -6,7 +6,7 @@
 /**
  * @brief Guarda los datos de una nueva CPU.
 */
-extern  void guardarDatosCPU(char* identificador,int fdConexion,nucleoCPU* nuevoNucleoCPU);
+extern  void guardarDatosCPU(char* identificador,int fdConexion);
 
 /**
  * @brief Loggea las métricas de estado antes de finalizar el proceso

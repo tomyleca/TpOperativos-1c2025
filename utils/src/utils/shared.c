@@ -265,6 +265,49 @@ uint32_t recibir_uint32_t_del_buffer(t_buffer *coso)
 
 
 
+int64_t recibir_int64_t_del_buffer(t_buffer *coso)
+{
+	if (coso->size == 0)
+	{
+		printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if (coso->size < 0)
+	{
+		printf("\n[ERROR] Esto es raro. El t_buffer contiene un size NEGATIVO \n\n");
+		exit(EXIT_FAILURE);
+	}
+
+	int64_t valor_a_devolver;
+	memcpy(&valor_a_devolver, coso->stream, sizeof(int64_t));
+
+	int64_t nuevo_size = coso->size - sizeof(int64_t);
+	if (nuevo_size == 0)
+	{
+		free(coso->stream);
+		coso->stream = NULL;
+		coso->size = 0;
+		return valor_a_devolver;
+	}
+	if (nuevo_size < 0)
+	{
+		printf("\n[ERROR_int64_t]: BUFFER CON TAMAÑO NEGATIVO\n\n");
+		// free(valor_a_devolver);
+		// return 0;
+		exit(EXIT_FAILURE);
+	}
+	void *nuevo_coso = malloc(nuevo_size);
+	memcpy(nuevo_coso, coso->stream + sizeof(int64_t), nuevo_size);
+	free(coso->stream);
+	coso->stream = nuevo_coso;
+	coso->size = nuevo_size;
+
+	return valor_a_devolver;
+}
+
+
+
 t_paquete *crear_super_paquete(op_code code_op)
 {
 	t_paquete *super_paquete = malloc(sizeof(t_paquete));

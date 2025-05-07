@@ -116,6 +116,8 @@ void cargar_cosas_al_super_paquete(t_paquete *paquete, void *choclo, int size);
 
 uint32_t recibir_uint32_t_del_buffer(t_buffer *coso);
 
+int64_t recibir_int64_t_del_buffer(t_buffer *coso);
+
 int recibir_int_del_buffer(t_buffer *coso);
 
 char *recibir_string_del_buffer(t_buffer *palabra);
