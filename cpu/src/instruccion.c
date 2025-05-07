@@ -403,7 +403,7 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
             paquete_memoria = crear_super_paquete(SEGMENTATION_FAULT);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
-            cargar_registros_a_paquete(paquete_memoria);
+            
         break;
         case IO:
             // KERNEL
@@ -414,7 +414,7 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
             paquete_memoria = crear_super_paquete(IO);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
-            cargar_registros_a_paquete(paquete_memoria);
+            
             break;
         case DUMP_MEMORY:
             // MEMORIA
@@ -423,7 +423,7 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
             paquete_memoria = crear_super_paquete(DUMP_MEMORY);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
-            cargar_registros_a_paquete(paquete_memoria);
+            
             break;
         case INIT_PROCCESS:
             // MEMORIA
