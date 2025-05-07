@@ -10,13 +10,21 @@
 #include <semaphore.h>
 #include "utils/shared.h"
 #include "utils/conexiones.h"
+#include "pthread.h"
 #include "utils/configs.h"
 
 typedef struct 
 {
-    int pid;
+    uint32_t pid;
     t_registros registros;
 } t_contexto_cpu;
+
+typedef struct {
+    int pid;
+    int nro_pagina;
+    int nro_marco;
+    int timestamp; // para LRU
+} EntradaTLB;
 
 
 extern int socket_cpu_memoria;
@@ -26,6 +34,7 @@ extern int fd_cpu_kernel_dispatch;
 extern int fd_cpu_kernel_interrupt;
 extern char* identificador_cpu;
 
+extern int timestamp_actual;
 
 // Config
 extern char* ip;
@@ -42,6 +51,12 @@ extern pthread_t hilo_crear_kernel_memoria;
 extern pthread_t hilo_escuchar_memoria;
 extern pthread_t hilo_interpretar_instruccion;
 
+extern EntradaTLB* TLB_proceso;
+extern t_list* lista_tlb;
+
+extern pthread_mutex_t mutex_motivo_interrupcion;
+
+
 //DICTIONARYS
 
 extern t_dictionary* registros;
@@ -53,6 +68,9 @@ extern t_contexto_cpu* contexto;
 extern sem_t sem_hay_instruccion;
 extern sem_t sem_pid;
 extern sem_t sem_contexto;
+extern sem_t sem_interrupcion;
+extern sem_t sem_nueva_instruccion;
+
 
 
 // Conexiones a módulos

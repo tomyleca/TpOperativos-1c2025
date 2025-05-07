@@ -26,7 +26,6 @@ pthread_t hilo_escuchar_memoria;
 pthread_t hilo_interpretar_instruccion;
 
 //DICTIONARYS
-t_dictionary* registros;
 t_dictionary* instrucciones;
 
 
@@ -36,11 +35,21 @@ t_contexto_cpu* contexto;
 sem_t sem_hay_instruccion;
 sem_t sem_pid;
 sem_t sem_contexto;
+sem_t sem_interrupcion;
+sem_t sem_nueva_instruccion;
+
+
 
 //MMU
 int cant_entradas_tabla; 
 int tamanio_pagina;              
 int cant_niveles;
+int timestamp_actual;
+
+EntradaTLB* TLB_proceso;
+t_list* lista_tlb;
+
+pthread_mutex_t mutex_motivo_interrupcion;
 
 
 char* ip_memoria;

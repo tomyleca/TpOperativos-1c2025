@@ -38,7 +38,7 @@ typedef enum
     CPU_PIDE_CONTEXTO,
     RECIBIR_PID_KERNEL,
     RESPUESTA_KERNEL_TPN,
-    CREAR_PID_OK
+    CREAR_PID_OK,
 } op_code; 
 
 typedef struct
@@ -54,14 +54,6 @@ typedef struct
 } t_paquete;
 
 typedef struct {
-    uint32_t AX;
-    uint32_t BX;
-    uint32_t CX;
-    uint32_t DX;
-    uint32_t EX;
-    uint32_t FX;
-    uint32_t GX;
-    uint32_t HX;
     uint32_t PC;
 } t_registros;
 

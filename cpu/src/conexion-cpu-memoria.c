@@ -58,6 +58,7 @@ void atender_memoria()
         {
             case CPU_RECIBE_INSTRUCCION_MEMORIA: 
                 //ACA LLEGA LA SOLICITUD DE LA INSTRUCCION DE MEMORIA
+                sem_wait(&sem_nueva_instruccion);
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 contexto->pid = recibir_int_del_buffer(buffer);
                 instruccion_recibida = recibir_string_del_buffer(buffer); // instruccion_recibida se usa en instruccion.c
@@ -69,9 +70,7 @@ void atender_memoria()
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 contexto->pid = recibir_int_del_buffer(buffer);
                 contexto->registros.PC = recibir_int_del_buffer(buffer); 
-                cargar_registros(buffer);
                 fetch(socket_cpu_memoria);
-                //recibir_contexto(); 
                 free(buffer);
                 break;
 
@@ -90,14 +89,14 @@ void atender_memoria()
                 free(buffer); 
                 break;
 
-            case CPU_RECIBE_OK_ACTUALIZAR_CONTEXTO: //MANDO PID CON LOS REGISTROS O PCB COMPLETO
+            /*case CPU_RECIBE_OK_ACTUALIZAR_CONTEXTO: //MANDO PID CON LOS REGISTROS O PCB COMPLETO
                buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 contexto->pid = recibir_int_del_buffer(buffer);
                 printf("Antes de semaforo de contexto\n");  
                 sem_post(&sem_contexto);
                 printf("Despues de semaforo de contexto\n");  
                 free(buffer); 
-                break;
+                break;*/ //TODO esto nose si va, dsp lo vemos cuando hagamos memoria
             case -1:
                 log_error(logger_cpu, "MEMORIA se desconecto. Terminando servidor");
                 pthread_exit(NULL);
@@ -121,6 +120,24 @@ void atender_interrupcion_kernel()
         {
             case MENSAJE:
                 //recibir_mensaje(socket_cpu_kernel_interrupt, logger_cpu);
+                break;    
+            case INTERRUPCION_PID:
+                sem_wait(&sem_interrupcion);
+
+                log_info(logger_cpu, " ## Llega interrupción al puerto Interrupt.");
+                
+                pthread_mutex_lock(&mutex_motivo_interrupcion);
+                flag_interrupcion = true;
+                printf("Adentro de lmutex interrup \n");
+                motivo_interrupcion = INTERRUPCION_PID;
+                pthread_mutex_unlock(&mutex_motivo_interrupcion);
+
+                buffer = recibiendo_super_paquete(socket_cpu_kernel_interrupt);     
+
+                int pid = recibir_int_del_buffer(buffer);
+                int pc = recibir_int_del_buffer(buffer);
+
+                free(buffer);
                 break;
             case -1:
                 log_error(logger_cpu, "KERNEL INTERRUPT se desconecto. Terminando servidor");
@@ -155,10 +172,7 @@ void atender_dispatch_kernel()
                 case PID_KERNEL_A_CPU:
                 printf("ANTES DE RECIBIR OTRO PROCESO\n");
                 sem_wait(&sem_pid);
-                
-                printf("RECIBI OTRO PROCESO\n");
-                sem_wait(&sem_contexto); // REVISAR EN QUE ALGORITMO SE USA
-                printf("pase el semaforo OTRO PROCESO\n");
+                //sem_wait(&sem_contexto); //TODO esto se activa dsp de verificar si va tmb en atender_memoria
                 contexto = malloc(sizeof(t_contexto_cpu));
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
                 contexto->pid = recibir_int_del_buffer(buffer);

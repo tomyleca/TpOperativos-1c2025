@@ -2,6 +2,8 @@
 
 void instruccion_noop(char** parte)
 {
+    log_instruccion(parte);
+
     if(parte[1] == NULL)
     {
     usleep(10000);
@@ -20,6 +22,14 @@ void instruccion_escribir_memoria(char** parte)
     // WRITE_MEM (Registro Dirección, Registro Datos): 
     // Lee el valor del Registro Datos y lo escribe en la dirección física de memoria obtenida a partir de la Dirección Lógica almacenada en el Registro Dirección
     // Le pasamos a memoria el contenido a escribir (que se encuentra en registro datos) y la direccion fisica (que se encuentra en registro direccion) 
+    log_instruccion(parte);
+
+    char* accion;
+
+    if(strcmp(parte[0],"WRITE")==0)
+    {
+        accion = "ESCRIBIR";
+    }
 
     // Leo el tamaño que  tama
     char* datos_a_escribir = parte[2];         // parte[2] = Cadena sin espacios
@@ -37,7 +47,10 @@ void instruccion_escribir_memoria(char** parte)
         return;
     }
 
+    log_info(logger_cpu, "PID: <%d> - Acción: <%s> - Dirección Física: <%u> - Valor: <%s>", contexto->pid, accion ,direccion_fisica, datos_a_escribir);
+
     peticion_escritura_a_memoria(direccion_fisica, datos_a_escribir);
+
 
     // Aumento el PC para que lea la proxima instruccion
     contexto->registros.PC++;
@@ -54,6 +67,14 @@ void instruccion_leer_memoria(char** parte)
 {  
     // READ(Registro Direccion, Tamaño): 
     // Lee el valor de memoria correspondiente a la Dirección Lógica que se encuentra en el Registro Dirección y lo almacena en el Registro Datos
+    log_instruccion(parte);
+    char* accion; 
+
+    if(strcmp(parte[0],"READ")==0)
+    {
+        accion = "LEER";
+    }
+    
 
      // Leo el tamaño que va a leer en memoria
      int tamanio = atoi(parte[2]); // parte[2] = "20"
@@ -61,13 +82,15 @@ void instruccion_leer_memoria(char** parte)
     // Obtengo la direccion logica (registro direccion)
     int direccion_logica = atoi(parte[1]); // parte[1] = "0"
 
-    int direccion_fisica = mmu_traducir_direccion_logica(direccion_logica);
+    int direccion_fisica = buscar_en_tlb(direccion_logica);
 
     if (direccion_fisica < 0) {
         log_error(logger_cpu, "Segmentation Fault al traducir la dirección lógica %d", direccion_logica);
         enviar_interrupcion_a_kernel_y_memoria(parte, SEGMENTATION_FAULT);
         return;
     }
+
+    log_info(logger_cpu, "PID: <%d> - Acción: <%s> - Dirección Física: <%u> - Valor: <%d>", contexto->pid, accion ,direccion_fisica, tamanio);
 
     peticion_lectura_a_memoria(direccion_fisica, tamanio);
     
@@ -80,6 +103,8 @@ void instruccion_leer_memoria(char** parte)
 
 void instruccion_goto(char** parte)
 {
+    log_instruccion(parte);
+
     if(parte[1] == NULL) {
         log_error(logger_cpu, "Falta parametro para GOTO.");
         return;
@@ -99,28 +124,104 @@ void peticion_escritura_a_memoria(int direccion_fisica, char* valor_registro_dat
     free(paquete);
 }
 
-int mmu_traducir_direccion_logica(int direccion_logica)
-{
-    /*int nro_pagina = direccion_logica / tamanio_pagina;
+
+int buscar_en_tlb(int direccion_logica) {
+    int nro_pagina = direccion_logica / tamanio_pagina;
     int desplazamiento = direccion_logica % tamanio_pagina;
-    int tabla_actual = contexto->pid;
+
+    // Recorrer la lista_tlb para buscar la entrada con la misma nro_pagina
+    // Si pasa y devuelve algo dentro del for, es TLB HIT y no hace nada mas que esto.
+    for (int i = 0; i < list_size(lista_tlb); i++) {
+        EntradaTLB *entrada = list_get(lista_tlb, i);
+        if (entrada->nro_pagina == nro_pagina) {
+            if (strcmp(reemplazo_tlb, "FIFO") == 0) {
+            log_info(logger_cpu, "PID: <%d> - TLB HIT - Pagina: <%d>", contexto->pid, nro_pagina);
+            int direccion_fisica = entrada->nro_marco * tamanio_pagina + desplazamiento;
+            return direccion_fisica;
+            }
+            else if (strcmp(reemplazo_tlb, "LRU") == 0) {
+                log_info(logger_cpu, "PID: <%d> - TLB HIT - Pagina: <%d>", contexto->pid, nro_pagina);
+                int direccion_fisica = entrada->nro_marco * tamanio_pagina + desplazamiento;
+                entrada->timestamp = obtener_timestamp_actual(); 
+                return direccion_fisica;
+            }
+            else{
+                log_error(logger_cpu, "ERROR: No existe el algoritmo pasado por config_cpu");
+            }
+        }
+    }
+    
+    // TLB miss: consultar MMU y agregar la nueva entrada a la TLB
+    log_info(logger_cpu, "PID: <%d> - TLB MISS - Pagina: <%d>", contexto->pid, nro_pagina);
+    int direccion_fisica = mmu_traducir_direccion_logica(direccion_logica);
+    
+    return direccion_fisica;
+}
+
+void agregar_a_tlb(int pid, int nro_pagina, int nro_marco) {
+    // Crear una nueva entrada para la TLB
+    TLB_proceso = malloc(sizeof(EntradaTLB));
+    TLB_proceso->pid = pid;
+    TLB_proceso->nro_pagina = nro_pagina;
+    TLB_proceso->nro_marco = nro_marco;
+    TLB_proceso->timestamp = obtener_timestamp_actual(); 
+    
+    if (list_size(lista_tlb) >= entradas_tlb) {
+        if (strcmp(reemplazo_tlb, "FIFO") == 0) {
+            list_remove(lista_tlb, 0);
+        } 
+        else if(strcmp(reemplazo_tlb, "LRU") == 0) {
+            int indice_mas_viejo = 0;
+            for (int i = 1; i < list_size(lista_tlb); i++) {
+                EntradaTLB *entrada = list_get(lista_tlb, i);
+                if (entrada->timestamp < ((EntradaTLB *)list_get(lista_tlb, indice_mas_viejo))->timestamp) {
+                    indice_mas_viejo = i;
+                }
+            }
+            list_remove(lista_tlb, indice_mas_viejo);
+        }
+    }
+    // Agregar la nueva entrada a la TLB
+    list_add(lista_tlb, TLB_proceso);
+}
+
+int obtener_timestamp_actual() {
+    return timestamp_actual++;// ACTUALIZO UN TIMESTAMP GLOBAL, para que cambie y siempre sea uno mayor que otro. 
+}
+
+
+int mmu_traducir_direccion_logica(int direccion_logica) {
+
+    int nro_pagina = direccion_logica / tamanio_pagina;
+    int desplazamiento = direccion_logica % tamanio_pagina;
+    int tabla_actual = contexto->pid;  // Empezamos con la tabla de primer nivel asociada al proceso
     int entrada_nivel_X;
+    int nro_marco = -1;
 
-    for(int nivel = 1; nivel < cant_niveles; nivel++) {
-
-        int potencia = pow(cant_entradas_tabla, cant_niveles - nivel);
+    for (int nivel = 1; nivel <= cant_niveles; nivel++) {
+        int potencia = (int) pow(cant_entradas_tabla, cant_niveles - nivel);
         entrada_nivel_X = (nro_pagina / potencia) % cant_entradas_tabla;
 
-        //si no es el ultimo consulto a memoria por la siguiente tabla
-        if (nivel < cant_niveles - 1) {
-            int siguiente_tabla = SOLICITO_TABLA_A_MEMORIA ////// Función que trae tabla de memoria
-            tabla_actual = siguiente_tabla;
-
+        if (nivel < cant_niveles) {
+            //TODO HACER TODO ESTO
+            //tabla_actual = solicitar_tabla_a_memoria(tabla_actual, entrada_nivel_X);
         } else {
+           // nro_marco = solicitar_marco_a_memoria(tabla_actual, entrada_nivel_X);
         }
-    }       */
-    return 0;
+    }
+
+    if (nro_marco == -1) {
+        // Si no estaba en memoria, podriamos necesitar pedir a swap
+        //nro_marco = solicitar_pagina_a_swap(tabla_actual, entrada_nivel_X);//TODO hacer esta funcion
+        //agregar_a_tlb(contexto->pid, nro_pagina, nro_marco); // TODO esto a verificar dsp
+    }
+
+    // Calculamos dirección física
+    int direccion_fisica = nro_marco * tamanio_pagina + desplazamiento;
+    agregar_a_tlb(contexto->pid, nro_pagina, nro_marco);
+    return direccion_fisica;
 }
+
 
 void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
 {
@@ -152,7 +253,7 @@ void fetch(int socket_cpu_memoria)
 {   
     // Obtener instrucción
     // Deberemos devolverle la instrucción correspondiente pid y al Program Counter recibido. 
-
+    
     t_paquete* paquete;
 
     // CASO EN EL QUE SE EJECUTA  SOLAMENTE UNA INSTRUCCION COMUN Y SE VUELVE A SOLICITAR OTRA
@@ -162,6 +263,8 @@ void fetch(int socket_cpu_memoria)
 
     cargar_int_al_super_paquete(paquete, contexto->registros.PC);
 
+    log_info(logger_cpu, "## PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
+
     // Envio el paquete a memoria
     enviar_paquete(paquete, socket_cpu_memoria);
     free(paquete);
@@ -169,7 +272,6 @@ void fetch(int socket_cpu_memoria)
 
 void decode()
 {     
-    // INIT_PROC proceso1 256
 
     printf("Antes de el semaforo hay instruccion\n");
     sem_wait(&sem_hay_instruccion); 
@@ -183,7 +285,7 @@ void decode()
         switch (instruccion_enum) // Según la instrucción que sea, ejecuta la instruccion (execute)
         {
             case I_READ_MEM:
-                //instruccion_leer_memoria(parte);  
+                instruccion_leer_memoria(parte);  
                 break;
             case I_WRITE_MEM:
                 instruccion_escribir_memoria(parte); 
@@ -211,35 +313,33 @@ void decode()
 void check_interrupt()
 {   
     char** parte = NULL;
-    //pthread_mutex_lock(&mutex_motivo_interrupcion);
+    pthread_mutex_lock(&mutex_motivo_interrupcion);
     bool hay_interrupcion = flag_interrupcion;  // Leer flag
-    //pthread_mutex_unlock(&mutex_motivo_interrupcion);
+    pthread_mutex_unlock(&mutex_motivo_interrupcion);
 
     if(hay_interrupcion) // hay una interrupcion
     {   
-        //pthread_mutex_lock(&mutex_motivo_interrupcion);
+        pthread_mutex_lock(&mutex_motivo_interrupcion);
         int motivo = motivo_interrupcion;  // Leer motivo
-        //pthread_mutex_unlock(&mutex_motivo_interrupcion);
+        pthread_mutex_unlock(&mutex_motivo_interrupcion);
 
         if(motivo == INTERRUPCION_PID) // le envio el contexto a memoria 
         {
             printf("antes de enviar motivo de interrupcion\n");
             enviar_interrupcion_a_kernel_y_memoria(parte, motivo_interrupcion);
             printf("despues de enviar motivo de interrupcion\n");
-            //pthread_mutex_lock(&mutex_motivo_interrupcion);
+            pthread_mutex_lock(&mutex_motivo_interrupcion);
             flag_interrupcion = false;
             motivo_interrupcion = -1;
-            //pthread_mutex_unlock(&mutex_motivo_interrupcion);
+            pthread_mutex_unlock(&mutex_motivo_interrupcion);
             
-            //sem_post(&sem_interrupcion);
+            sem_post(&sem_interrupcion);
             
         } else {
             log_error(logger_cpu, "Motivo de interrupcion inesperado: %d", motivo);
         }
 
-        // motivo de interrupcion , tid, char: instruccion 
         printf("ADENTRO del mutex check instruccion 2/n");
-        
         free(instruccion_recibida);
         instruccion_recibida = NULL; 
         
@@ -249,46 +349,20 @@ void check_interrupt()
         instruccion_recibida = NULL;
         printf("--------------No hay interrupcion \n");
         
-        //pthread_mutex_lock(&mutex_motivo_interrupcion);
+        pthread_mutex_lock(&mutex_motivo_interrupcion);
         if(motivo_interrupcion != INTERRUPCION_PID)
         {
             motivo_interrupcion = -1;
         }
         printf("despues de motivo de interrupcion = -1 \n");
-        //pthread_mutex_unlock(&mutex_motivo_interrupcion);
+        pthread_mutex_unlock(&mutex_motivo_interrupcion);
 
         fetch(socket_cpu_memoria); // Aca vuelvo a pedirle una instruccion a memoria
         
-        // sem_post(&sem_nueva_instruccion);
+        sem_post(&sem_nueva_instruccion);
     }
 }
 
-
-void cargar_registros_a_paquete(t_paquete* paquete_memoria)
-{
-    cargar_int_al_super_paquete(paquete_memoria, contexto->registros.AX);
-    cargar_int_al_super_paquete(paquete_memoria, contexto->registros.BX);
-    cargar_int_al_super_paquete(paquete_memoria, contexto->registros.CX);
-    cargar_int_al_super_paquete(paquete_memoria, contexto->registros.DX);
-    cargar_int_al_super_paquete(paquete_memoria, contexto->registros.EX);
-    cargar_int_al_super_paquete(paquete_memoria, contexto->registros.FX);
-    cargar_int_al_super_paquete(paquete_memoria, contexto->registros.GX);
-    cargar_int_al_super_paquete(paquete_memoria, contexto->registros.HX);
-    cargar_int_al_super_paquete(paquete_memoria, contexto->registros.PC);
-}
-
-
-void cargar_registros(t_buffer* buffer)
-{   
-    contexto->registros.AX = recibir_int_del_buffer(buffer);
-    contexto->registros.BX = recibir_int_del_buffer(buffer);
-    contexto->registros.CX = recibir_int_del_buffer(buffer);
-    contexto->registros.DX = recibir_int_del_buffer(buffer);
-    contexto->registros.EX = recibir_int_del_buffer(buffer);
-    contexto->registros.FX = recibir_int_del_buffer(buffer);
-    contexto->registros.GX = recibir_int_del_buffer(buffer);
-    contexto->registros.HX = recibir_int_del_buffer(buffer);
-}
 
 // **********************************  
 
@@ -309,58 +383,6 @@ void iniciar_diccionario_instrucciones()
 void destruir_diccionarios() 
 {
 	dictionary_destroy(instrucciones);
-	dictionary_destroy(registros);
-}
-
-
-void iniciar_diccionario_registros()  
-{
-	registros = dictionary_create();
-	dictionary_put(registros, "PC", &contexto->registros.PC);
-	dictionary_put(registros, "AX", &contexto->registros.AX);
-	dictionary_put(registros, "BX", &contexto->registros.BX);
-	dictionary_put(registros, "CX", &contexto->registros.CX);
-	dictionary_put(registros, "DX", &contexto->registros.DX);
-	dictionary_put(registros, "EX", &contexto->registros.EX);
-	dictionary_put(registros, "FX", &contexto->registros.FX);
-	dictionary_put(registros, "GX", &contexto->registros.GX);
-	dictionary_put(registros, "HX", &contexto->registros.HX);
-}
-
-
-int obtener_valor_registro_segun_nombre(char* nombre_registro)
-{
-    if(strcmp(nombre_registro,"AX")==0)
-    {
-        return contexto->registros.AX;
-    } else if(strcmp(nombre_registro,"BX")==0)
-    {
-        return contexto->registros.BX;
-    } else if(strcmp(nombre_registro,"CX")==0)
-    {
-        return contexto->registros.CX;
-        
-    } else if(strcmp(nombre_registro,"DX")==0)
-    {
-        return contexto->registros.DX;
-    } else if(strcmp(nombre_registro,"EX")==0)
-    {
-        return contexto->registros.EX;
-    } else if(strcmp(nombre_registro,"FX")==0)
-    {
-        return contexto->registros.FX;
-    }
-     else if(strcmp(nombre_registro,"GX")==0)
-    {
-        return contexto->registros.GX;
-    } else if(strcmp(nombre_registro,"HX")==0)
-    {
-        return contexto->registros.HX;
-    } else if(strcmp(nombre_registro,"PC")==0)
-    {
-        return contexto->registros.PC;
-    } 
-    return -1;
 }
 
 void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_de_interrupcion)
@@ -368,7 +390,7 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
     t_paquete *paquete_kernel_dispatch;
     t_paquete *paquete_memoria;
     
-    // KERNEL -> PID, TID y motivo_de_interrupcion -> le mandamos esto a kernel para que pueda resolver la interrupcion (syscalls)
+    // KERNEL -> PID y motivo_de_interrupcion -> le mandamos esto a kernel para que pueda resolver la interrupcion (syscalls)
     paquete_kernel_dispatch = crear_super_paquete(motivo_de_interrupcion);
     cargar_int_al_super_paquete(paquete_kernel_dispatch, contexto->pid);
 
@@ -379,7 +401,6 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
             contexto->registros.PC++;
             paquete_memoria = crear_super_paquete(ENVIAR_A_MEMORIA_UN_AVISO_DE_SYSCALL);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
-            cargar_registros_a_paquete(paquete_memoria);
         break;
         case IO:
             // KERNEL
@@ -388,14 +409,12 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
             contexto->registros.PC++;
             paquete_memoria = crear_super_paquete(ENVIAR_A_MEMORIA_UN_AVISO_DE_SYSCALL);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
-            cargar_registros_a_paquete(paquete_memoria);
             break;
         case DUMP_MEMORY:
             // MEMORIA
             contexto->registros.PC++;
             paquete_memoria = crear_super_paquete(ENVIAR_A_MEMORIA_UN_AVISO_DE_SYSCALL);
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
-            cargar_registros_a_paquete(paquete_memoria);
             break;
         case INIT_PROCCESS:
             // MEMORIA
@@ -404,7 +423,6 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
             cargar_string_al_super_paquete(paquete_memoria, instruccion[1]); // NOMBRE DEL ARCHIVO DE PSEUDOCODIGO
             cargar_int_al_super_paquete(paquete_memoria, (int)atoi(instruccion[2]) ); // TAMANIO DEL PROCESO 
-            cargar_registros_a_paquete(paquete_memoria);
             break;
         default:
             log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
@@ -424,4 +442,19 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
     enviar_paquete(paquete_kernel_dispatch, socket_cpu_kernel_dispatch);
     free(paquete_kernel_dispatch);
     //sem_post(&sem_pid); 
+}
+
+void log_instruccion(char** parte) {
+    if (parte == NULL || parte[0] == NULL) {
+        log_info(logger_cpu, "## PID: %d - Ejecutando: <instrucción vacía o nula>", contexto->pid);
+        return;
+    }
+
+    if (parte[1] && parte[2]) {
+        log_info(logger_cpu, "## PID: %d - Ejecutando: %s - %s %s", contexto->pid, parte[0], parte[1], parte[2]);
+    } else if (parte[1]) {
+        log_info(logger_cpu, "## PID: %d - Ejecutando: %s - %s", contexto->pid, parte[0], parte[1]);
+    } else {
+        log_info(logger_cpu, "## PID: %d - Ejecutando: %s -", contexto->pid, parte[0]);
+    }
 }

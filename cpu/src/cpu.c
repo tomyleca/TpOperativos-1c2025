@@ -68,4 +68,12 @@ void inicializar_recursos()
     sem_init(&sem_hay_instruccion, 0, 0);
     sem_init(&sem_pid, 0, 1);
     sem_init(&sem_contexto, 0, 1);
+    sem_init(&sem_interrupcion, 0, 1);
+    sem_init(&sem_nueva_instruccion, 0, 1);
+
+
+    pthread_mutex_init(&mutex_motivo_interrupcion, NULL);
+
+
+    lista_tlb = list_create();
 }
