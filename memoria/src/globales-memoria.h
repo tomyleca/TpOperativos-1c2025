@@ -1,18 +1,25 @@
 #ifndef GLOBALES_MEMORIA_H_
 #define GLOBALES_MEMORIA_H_
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<commons/log.h>
-#include<commons/string.h>
-#include<commons/config.h>
-#include <pthread.h>
-#include <commons/collections/list.h>
-#include<readline/readline.h>
-#include "utils/shared.h"
 #include "utils/conexiones.h"
 #include "utils/configs.h"
+#include "utils/shared.h"
 
+
+#include <commons/collections/list.h>
+#include <commons/config.h>
+#include <commons/log.h>
+#include <commons/string.h>
+
+#include <pthread.h>
+#include <readline/readline.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ERROR_MEMORIA_INSUFICIENTE -1
+#define OK 0
+#define ERROR_CREACION_ESTRUCTURAS -2
+#define SOLICITAR_MEMORIA_PROCESO 1
 typedef struct {
     uint32_t ax;            // Registro AX
     uint32_t bx;            // Registro BX
@@ -52,6 +59,7 @@ typedef struct{
 
 extern t_contexto* nuevo_contexto_provisorio;
 extern t_contexto* nuevo_contexto;
+
 
 extern int conexion;
 extern char* ip;

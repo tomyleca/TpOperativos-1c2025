@@ -1,4 +1,4 @@
-#include "GlobalesMemoria.h"
+#include "globales-memoria.h"
 
 
 int conexion;
