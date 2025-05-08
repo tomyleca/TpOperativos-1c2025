@@ -4,14 +4,21 @@
 #include "utils/conexiones.h"
 #include "utils/configs.h"
 #include "utils/shared.h"
+
 #include <commons/collections/list.h>
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/string.h>
+
 #include <pthread.h>
 #include <readline/readline.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#define ERROR_MEMORIA_INSUFICIENTE -1
+#define OK 0
+#define ERROR_CREACION_ESTRUCTURAS -2
+#define SOLICITAR_MEMORIA_PROCESO 1
 
 extern int conexion;
 extern char* ip;

@@ -33,8 +33,14 @@ void liberar_pagina(int nivel, int entrada) {
         tablas_nivel[nivel]->entradas[entrada] = -1; // Liberar la entrada
     }
 }
+int asignar_marco_libre() {
+    // Implementación para buscar un marco libre en la memoria
+}
 
 
+void liberar_marco(int marco) {
+    // Implementación para liberar un marco en la memoria
+}
 void escribir_memoria(int direccion_fisica, void* dato, size_t tamanio) {
     if (direccion_fisica + tamanio > tam_memoria) {
         log_error(logger_memoria, "Error: Escritura fuera de los límites de la memoria.");

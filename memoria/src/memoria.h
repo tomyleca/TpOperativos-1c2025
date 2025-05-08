@@ -8,6 +8,8 @@
 #include <commons/config.h>
 #include <readline/readline.h>
 #include "conexion-memoria.h"
-#include "GlobalesMemoria.h"
+#include "globales-memoria.h"
+#include "administracion-memoria.h"
+
 
 #endif

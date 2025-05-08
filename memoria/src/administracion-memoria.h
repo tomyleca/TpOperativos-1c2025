@@ -2,7 +2,7 @@
 #define ADMINISTRACION_MEMORIA_H_
 
 
-#include "GlobalesMemoria.h"
+#include "globales-memoria.h"
 #include "utils/conexiones.h"
 #include "utils/configs.h"
 #include "utils/shared.h"
@@ -23,6 +23,8 @@ typedef struct {
 extern TablaNivel** tablas_nivel; 
 extern int cantidad_tablas;
 
+void liberar_marco(int marco) ;
+int asignar_marco_libre();
 void leerConfigMemoria(t_config* config_memoria);
 int asignar_pagina(int nivel, int entrada, int valor);
 void liberar_pagina(int nivel, int entrada);
