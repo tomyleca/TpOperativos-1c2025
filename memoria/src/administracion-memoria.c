@@ -7,7 +7,7 @@ void* memoria_usuario = NULL;
 
 void leerConfigMemoria(t_config* config_memoria) 
 {
-    puerto_escucha = config_get_int_value(config_memoria, "PUERTO_ESCUCHA");
+    puerto_escucha = config_get_string_value(config_memoria, "PUERTO_ESCUCHA");
     tam_memoria = config_get_int_value(config_memoria, "TAM_MEMORIA");
     tam_pagina = config_get_int_value(config_memoria, "TAM_PAGINA");
     entradas_por_tabla = config_get_int_value(config_memoria, "ENTRADAS_POR_TABLA");

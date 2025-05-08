@@ -14,7 +14,7 @@
 #include "utils/configs.h"
 
 
-#include "funcionesMemoria.h"
+#include "funciones-memoria.h"
 #include "utils/shared.h"
 #include "globales-memoria.h"
 #include "administracion-memoria.h"
