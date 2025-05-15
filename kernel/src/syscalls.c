@@ -1,6 +1,6 @@
 #include <syscalls.h>
 
-void INIT_PROC(char* archivoPseudocodigo,unsigned int tam){
+void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     //Creo un nuevo proceso
     PCB* nuevoProceso=malloc(sizeof(PCB));
     nuevoProceso->archivoPseudocodigo=strdup(archivoPseudocodigo);

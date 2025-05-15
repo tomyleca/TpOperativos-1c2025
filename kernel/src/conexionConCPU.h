@@ -6,7 +6,7 @@
 /**
  * @brief Guarda los datos de una nueva CPU.
 */
-extern  void guardarDatosCPUDispatch(char* identificador,int fdConexion);
+extern  nucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion);
 
 /**
  * @brief Loggea las métricas de estado antes de finalizar el proceso
@@ -21,9 +21,9 @@ extern void atender_dispatch_cpu(void* conexion);
 
 extern void atender_interrupcion_cpu(void* conexion);
 
-extern void guardarDatosCPUDispatch(char* identificador,int fdConexion);
+extern nucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion);
 
-extern void guardarDatosCPUInterrupt(char* identificador,int fdConexion);
+extern nucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion);
 
 extern nucleoCPU* chequearSiCPUYaPuedeInicializarse(char* identificador);
 

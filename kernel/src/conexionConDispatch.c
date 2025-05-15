@@ -18,7 +18,8 @@ void atender_dispatch_cpu(void* conexion)
     
     t_buffer* buffer;
     int cod_op;
-    
+    nucleoCPU* nucleoCPU;
+    uint32_t PID;
     
     
    
@@ -34,15 +35,33 @@ void atender_dispatch_cpu(void* conexion)
             case HANDSHAKE_CPU_KERNEL_D:
                 buffer = recibiendo_super_paquete(fdConexion);
                 char* identificador = recibir_string_del_buffer(buffer);    
-                guardarDatosCPUDispatch(identificador,fdConexion);
+                nucleoCPU = guardarDatosCPUDispatch(identificador,fdConexion);
                 break;
             case IO:
                 buffer = recibiendo_super_paquete(fdConexion);
-                uint32_t PID = recibir_uint32_t_del_buffer(buffer);
+                PID = recibir_uint32_t_del_buffer(buffer);
                 char* nombreIO = recibir_string_del_buffer(buffer);
                 int64_t tiempoEnIO = recibir_int64_t_del_buffer(buffer);
                 syscall_IO(PID,nombreIO,tiempoEnIO);
-                
+                break;
+            case DUMP_MEMORY:
+                buffer = recibiendo_super_paquete(fdConexion);
+                PID = recibir_uint32_t_del_buffer(buffer);
+                dump_memory(PID);
+                break;
+            case INIT_PROCCESS:
+                buffer = recibiendo_super_paquete(fdConexion);
+                PID = recibir_uint32_t_del_buffer(buffer);
+                char* nombrePseudocodigo = recibir_string_del_buffer(buffer);
+                uint32_t tam = recibir_uint32_t_del_buffer(buffer);
+                INIT_PROC(nombrePseudocodigo,tam);
+                break;
+            case SYSCALL_EXIT:
+                buffer = recibiendo_super_paquete(fdConexion);
+                PID = recibir_uint32_t_del_buffer(buffer);
+                syscallExit(PID);
+                break;
+            
             case -1:
                 log_error(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
                 pthread_exit(NULL);
@@ -55,7 +74,7 @@ void atender_dispatch_cpu(void* conexion)
 
 
 
-void guardarDatosCPUDispatch(char* identificador,int fdConexion)
+nucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion)
 {
     sem_wait(semaforoGuardarDatosCPU);
     
@@ -78,6 +97,8 @@ void guardarDatosCPUDispatch(char* identificador,int fdConexion)
     }
 
     sem_post(semaforoGuardarDatosCPU);
+
+    return nucleoCPU;
 }
 
 

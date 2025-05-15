@@ -5,6 +5,6 @@
 
 extern void prueba1();
 extern void prueba2();
-extern void puebaConCPU();
+extern void pruebaConCPU();
 
 #endif

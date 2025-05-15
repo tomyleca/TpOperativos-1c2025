@@ -16,7 +16,7 @@
 
 extern void dump_memory(uint32_t pid);
 extern void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo);
-extern void INIT_PROC(char* archivoPseudocodigo,unsigned int tam);
+extern void INIT_PROC(char* archivoPseudocodigo,uint32_t tam);
 extern void syscallExit(uint32_t pid);
 
 

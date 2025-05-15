@@ -27,6 +27,7 @@ int main(int argc, char* argv[]) {
 
 
     
+    
     pruebaConCPU();
     
    
@@ -88,6 +89,7 @@ void crearEstructuras()
     semaforoGuardarDatosCPU = malloc(sizeof(sem_t));
     sem_init(semaforoGuardarDatosCPU,1,1);
 
+  
 
 
     

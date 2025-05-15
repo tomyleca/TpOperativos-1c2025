@@ -13,6 +13,7 @@ void pasarABLoqueado(PCB* proceso,int64_t tiempo,char* nombreIO){
     procesoEnEsperaIO* procesoEsperando=malloc(sizeof(procesoEnEsperaIO));
     procesoEsperando->proceso=proceso;
     procesoEsperando->estaENSwap=0;
+    procesoEsperando->tiempo=tiempo;
     procesoEsperando->semaforoIOFinalizada=malloc(sizeof(sem_t));
     sem_init(procesoEsperando->semaforoIOFinalizada,1,0);
 
@@ -128,7 +129,9 @@ void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO)
 {
     DispositivoIO* dispositivoIOLiberado = leerDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
     sem_post(dispositivoIOLiberado->semaforoDispositivoOcupado);
-
+    
+    if(!list_is_empty(dispositivoIOLiberado->colaEsperandoIO->lista)) //Si la cola de procesos en espera no esta vacía, empiezo el IO del proceso esperando
+        empezarIODelProximoEnEspera(dispositivoIOLiberado);
     
     char* PIDComoChar = pasarUnsignedAChar(PID);
     procesoEnEsperaIO* procesoADesbloquear = leerDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
@@ -137,4 +140,13 @@ void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO)
     log_info(loggerKernel, "## (<%u>) finalizó IO y pasa a READY",PID);
 
     
+}
+
+//TODO probarlo
+void empezarIODelProximoEnEspera(DispositivoIO* dispositivoIO)
+{
+    uint32_t PIDEnEspera = sacarDeLista(dispositivoIO->colaEsperandoIO,0);
+    procesoEnEsperaIO* procesoEnEsperaIO = leerDeDiccionario(diccionarioProcesosBloqueados,pasarUnsignedAChar(PIDEnEspera));
+
+    avisarInicioIO(PIDEnEspera,dispositivoIO->nombre,procesoEnEsperaIO->tiempo);
 }

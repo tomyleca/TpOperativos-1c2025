@@ -67,6 +67,7 @@ typedef struct
 {
     char* nombre;
     sem_t* semaforoDispositivoOcupado;
+    t_listaConSemaforos* colaEsperandoIO;
     int fdConexion;
 } DispositivoIO;
 
@@ -74,6 +75,7 @@ typedef struct{
     PCB* proceso;
     sem_t* semaforoIOFinalizada;
     bool estaENSwap;
+    int64_t tiempo;
 } procesoEnEsperaIO;
 
 

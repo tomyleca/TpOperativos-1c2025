@@ -435,6 +435,15 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
             cargar_string_al_super_paquete(paquete_memoria, instruccion[1]); // NOMBRE DEL ARCHIVO DE PSEUDOCODIGO
             cargar_int_al_super_paquete(paquete_memoria, (int)atoi(instruccion[2]) ); // TAMANIO DEL PROCESO 
             break;
+        case SYSCALL_EXIT:
+                contexto->registros.PC++;
+            paquete_kernel_dispatch->codigo_operacion=INIT_PROCCESS;
+            paquete_memoria = crear_super_paquete(INIT_PROCCESS);
+            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
+            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
+            break;
+
+
         default:
             log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
             break;

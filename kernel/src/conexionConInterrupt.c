@@ -20,6 +20,7 @@ void atender_interrupcion_cpu(void* conexion)
     t_buffer* buffer;
     op_code cod_op;
     
+    nucleoCPU* nucleoCPU;
     
    
 
@@ -34,7 +35,7 @@ void atender_interrupcion_cpu(void* conexion)
             case HANDSHAKE_CPU_KERNEL_I:
                 buffer = recibiendo_super_paquete(fdConexion);
                 char* identificador = recibir_string_del_buffer(buffer);
-                guardarDatosCPUInterrupt(identificador,fdConexion);
+                nucleoCPU = guardarDatosCPUInterrupt(identificador,fdConexion);
             break;
             /*case -1:
                 log_error(loggerKernel, "KERNEL INTERRUPT se desconecto. Terminando servidor");
@@ -46,7 +47,7 @@ void atender_interrupcion_cpu(void* conexion)
     }
 }
 
-void guardarDatosCPUInterrupt(char* identificador,int fdConexion)
+nucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)
 {
     sem_wait(semaforoGuardarDatosCPU);
     
@@ -69,5 +70,7 @@ void guardarDatosCPUInterrupt(char* identificador,int fdConexion)
     }
 
     sem_post(semaforoGuardarDatosCPU);
+
+    return nucleoCPU;
 
 }
