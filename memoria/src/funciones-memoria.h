@@ -12,7 +12,7 @@
 #include "utils/shared.h"
 #include "utils/conexiones.h"
 #include "utils/configs.h"
-#include "GlobalesMemoria.h"
+#include "globales-memoria.h"
 
 t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo);
 

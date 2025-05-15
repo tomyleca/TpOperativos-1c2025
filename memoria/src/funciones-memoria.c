@@ -1,4 +1,4 @@
-#include "funcionesMemoria.h"
+#include "funciones-memoria.h"
 
 //********** LEE EL ARCHIVO Y CARGA LAS INSTRUCCIONES EN UNA LISTA (LAS INSTRUCCIONES LAS DEJA DEL TIPO "t_instruccion_codigo")
 t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo)
