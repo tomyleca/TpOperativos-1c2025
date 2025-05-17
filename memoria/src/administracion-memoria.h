@@ -13,26 +13,78 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdbool.h>
 
+// =====================
+// Configuración de memoria
+// =====================
+
+
+extern bool *bitmap_frames;
+extern char *memoria_real;
+
+// =====================
+// Estructuras de datos
+// =====================
 
 typedef struct {
-    int* entradas; 
-} TablaNivel;
+  int accesos_tabla_paginas;
+  int instrucciones_solicitadas;
+  int bajadas_swap;
+  int subidas_memoria;
+  int lecturas_memoria;
+  int escrituras_memoria;
+} MetricaProceso;
 
-// Variables globales para las tablas de paginación
-extern TablaNivel** tablas_nivel; 
-extern int cantidad_tablas;
+typedef struct {
+  int pid; // ID único
+  MetricaProceso metricas;
+  int cant_paginas;      // páginas asignadas
+  int *frames;           // array de frames físicos asignados
+  int tamanio_reservado; // en bytes
+  char nombre[64];
+  int cantidad_instrucciones;
+} Proceso;
 
-void liberar_marco(int marco) ;
-int asignar_marco_libre();
+extern Proceso **Procesos;
+extern int cantidad_Procesos;
+
+typedef struct TablaPagina {
+  struct TablaPagina **entradas;
+  int *frames;
+  int es_hoja;
+} TablaPagina;
+
+extern TablaPagina *tabla_raiz;
+
+// =====================
+// Prototipos
+// =====================
 void leerConfigMemoria(t_config* config_memoria);
-int asignar_pagina(int nivel, int entrada, int valor);
-void liberar_pagina(int nivel, int entrada);
-void escribir_memoria(int direccion_fisica, void* dato, size_t tamanio);
-void leer_memoria(int direccion_fisica, void* buffer, size_t tamanio);
-void inicializar_tablas_paginacion();
-int traducir_direccion_logica(int direccion_logica);
+void asignar_parametros_artificial();
+void inicializar_memoria();
+TablaPagina *crear_tabla_nivel(int nivel_actual);
+void imprimir_tabla(TablaPagina *tabla, int nivel, int indent);
+void liberar_tabla(TablaPagina *tabla);
+void mostrar_bitmap();
+int asignar_frame_libre();
+void asignar_frames_hojas(TablaPagina *tabla);
 
-void inicializar_estructuras_memoria();
+//* interaccion con memoria
+Proceso *crear_proceso();
+int *reservar_frames(int cantidad);
+int reservar_memoria(Proceso *p, int bytes);
+void escribir_byte(Proceso *p, int direccion_virtual, char valor);
+void escribir_memoria(Proceso *p, int direccion_virtual, char valor);
+char leer_byte(Proceso *p, int direccion_virtual);
+void leer_memoria(Proceso *p, int direccion_virtual);
+Proceso *crear_proceso_y_reservar(const char *nombre, int bytes);
+void mostrar_procesos_activos();
+void liberar_memoria(Proceso *p, int pagina_base, int cantidad);
+void destruir_proceso(Proceso *p);
+char **leer_instrucciones(const char *ruta, int *cantidad);
+void interpretar_instruccion(char *linea);
+
 
 #endif
+

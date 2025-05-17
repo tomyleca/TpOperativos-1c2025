@@ -12,10 +12,11 @@ int fd_escucha_servidor;
 
 t_list* lista_contextos;
 char* puerto_escucha;
-int tam_memoria;
-int tam_pagina;
-int entradas_por_tabla;
-int cant_niveles;
+int TAM_MEMORIA;
+int TAM_PAGINA;
+int ENTRADAS_POR_TABLA;
+int CANTIDAD_NIVELES;
+int CANT_FRAMES;
 int retardo_memoria;
 char* path_swapfile;
 int retardo_swap;

@@ -71,10 +71,12 @@ extern t_log* logger_memoria;
 extern t_config* config_memoria;
 
 extern char* puerto_escucha;
-extern int tam_memoria;
-extern int tam_pagina;
-extern int entradas_por_tabla;
-extern int cant_niveles;
+extern int TAM_MEMORIA;
+extern int TAM_PAGINA;
+extern int ENTRADAS_POR_TABLA;
+extern int CANTIDAD_NIVELES;
+extern int CANT_FRAMES;
+
 extern int retardo_memoria;
 extern char* path_swapfile;
 extern int retardo_swap;
