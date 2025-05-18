@@ -15,6 +15,8 @@
 
 typedef enum
 {
+    OK,
+    ERROR,
     MENSAJE,
     PAQUETE,
     HANDSHAKE,
@@ -40,7 +42,13 @@ typedef enum
     RECIBIR_PID_KERNEL,
     RESPUESTA_KERNEL_TPN,
     CREAR_PID_OK,
+    CHEQUEAR_SI_HAY_MEMORIA_LIBRE,
+    NO_HAY_MEMORIA
+
+    
 } op_code; 
+
+
 
 typedef struct
 {

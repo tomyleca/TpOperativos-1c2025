@@ -9,7 +9,7 @@ void server_escucha(int fd_escucha_servidor,t_log* memoria_logger)
     while (1) {
         // Espera a un cliente en el bucle principal
         int fd_conexion = esperar_cliente(fd_escucha_servidor);
-        log_info(memoria_logger, "Cliente conectado y en espera.\n");
+        log_info(memoria_logger, "Cliente conectado y en espera.");
         if (fd_conexion != -1) {
             pthread_t hilo_conexion;
             // Reservamos memoria para pasar el socket conexion al hilo
@@ -19,7 +19,7 @@ void server_escucha(int fd_escucha_servidor,t_log* memoria_logger)
             //Responde al handshake del cliente que espera que se conecte.
 			//responder_handshake(fd_conexion);
             // Crea un hilo para manejar la conexión del cliente
-            pthread_create(&hilo_conexion, NULL,(void*) atender_cliente, &nueva_conexion);
+            pthread_create(&hilo_conexion, NULL,(void*) atender_cliente, nueva_conexion);
 			pthread_detach(hilo_conexion);  // Detach para que no necesites un join más tarde
         }
     }
@@ -59,13 +59,23 @@ int atender_cliente(int *fd_conexion)
                 free(unBuffer);
             break;
 
+            case CHEQUEAR_SI_HAY_MEMORIA_LIBRE:
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                uint32_t tam = recibir_uint32_t_del_buffer(unBuffer);
+                //TODO chequear si hay que mandar el OK
+                t_paquete* paquete = crear_super_paquete(OK);
+                enviar_paquete(paquete,cliente_fd);
+                free(paquete);
+
+            break;
+
             case RECIBIR_PID_KERNEL:
                 t_info_kernel datos_kernel; 
                 datos_kernel.pid = 0;
                 datos_kernel.tamanio_proceso = 0;
                 unBuffer = recibiendo_super_paquete(cliente_fd);
-                datos_kernel.pid = recibir_int_del_buffer(unBuffer);
-                datos_kernel.tamanio_proceso = recibir_int_del_buffer(unBuffer); 
+                datos_kernel.pid = recibir_uint32_t_del_buffer(unBuffer);
+                datos_kernel.tamanio_proceso = recibir_uint32_t_del_buffer(unBuffer); 
                 datos_kernel.archivo_pseudocodigo = recibir_string_del_buffer(unBuffer);
                 printf("---------------------------------------------\n");
                 printf("PID LLEGADO DE KERNEL %d\n", datos_kernel.pid);
@@ -76,8 +86,10 @@ int atender_cliente(int *fd_conexion)
                 //paquete = crear_super_paquete(RESPUESTA_KERNEL_TPN); //TPN TABLA DE PRIMER NIVEL --- a implementar todavia!! 
                 //cargar_int_al_super_paquete(paquete, tabla_primer_nivel);
                 //enviar_paquete(paquete, cliente_fd);
+                enviar_paquete(crear_super_paquete(OK),cliente_fd);
                 free(unBuffer);
                 free(datos_kernel.archivo_pseudocodigo);
+                //TODO revisar esto
             break;    
 
             case CPU_PIDE_INSTRUCCION_A_MEMORIA: //PARA INICIAR DECODE ESTO!!

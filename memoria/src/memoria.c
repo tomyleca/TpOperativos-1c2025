@@ -16,12 +16,12 @@ int main(int argc, char* argv[]) {
 
 	lista_contextos = list_create();
 
+    //TODO hacerlo un hilo
 	server_escucha(fd_escucha_servidor, logger_memoria);
  
     inicializar_estructuras_memoria();
  
-    server_escucha(fd_escucha_servidor, logger_memoria);
-
+    
 
 
     return EXIT_SUCCESS;

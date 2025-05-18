@@ -165,6 +165,7 @@ extern int algoritmoDePlanificacionInt;
 //CONEXIONES
 extern void iniciarServidores();
 extern void cerrarConexiones();
+extern bool esperarOK2(int fdConexion);
 
 //IO
 
@@ -175,6 +176,9 @@ extern t_diccionarioConSemaforos* diccionarioDispositivosIO;
 extern sem_t* semaforoIntentarPlanificar;
 
 extern sem_t* semaforoGuardarDatosCPU;
+
+//MEMORIA
+extern void mandarDatosProcesoAMemoria(PCB* proceso);
 
 
 //OTRAS
