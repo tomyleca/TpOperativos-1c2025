@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
     mostrar_bitmap();//TODO: Borrar esto es testing
 
     //! ACA SIMULAMOS LLEGDA DE PAQUETE
-    int cant_instrucciones = 0;
+    /*int cant_instrucciones = 0;
     char **instrucciones =
     leer_instrucciones("pseudocodigo.txt", &cant_instrucciones);
    
@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
         interpretar_instruccion(instrucciones[i]);
         free(instrucciones[i]);
     }
-    free(instrucciones);
+    free(instrucciones);*/
   
 
      //INICIO LOGGER
@@ -29,8 +29,7 @@ int main(int argc, char* argv[]) {
 	fd_escucha_servidor = iniciar_servidor(logger_memoria, puerto_escucha);
 	log_info(logger_memoria, "Servidor listo para recibir clientes");
 	lista_contextos = list_create();
-	server_escucha(fd_escucha_servidor, logger_memoria);
-    server_escucha(fd_escucha_servidor, logger_memoria);
+	pthread_create(&hilo_memoria,NULL, (void*)server_escucha,&fd_escucha_servidor);
 
     //! ACA SE LIBRERA TODA LA MEMORIA OJO 
     liberar_tabla(tabla_raiz);

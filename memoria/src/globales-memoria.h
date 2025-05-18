@@ -21,14 +21,6 @@
 #define ERROR_CREACION_ESTRUCTURAS -2
 #define SOLICITAR_MEMORIA_PROCESO 1
 typedef struct {
-    uint32_t ax;            // Registro AX
-    uint32_t bx;            // Registro BX
-    uint32_t cx;            // Registro CX
-    uint32_t dx;            // Registro DX
-    uint32_t ex;            // Registro EX
-    uint32_t fx;            // Registro FX
-    uint32_t gx;            // Registro GX
-    uint32_t hx;            // Registro HX
     uint32_t pc;            // Program Counter
     char* pseudocodigo;     // Archivo de pseudocodigo de cada tid
     t_list* instrucciones;  // lista de instrucciones 
@@ -83,6 +75,8 @@ extern int retardo_swap;
 extern t_log_level log_level;
 extern char* dump_path;
 extern t_list* lista_contextos;
+extern pthread_t hilo_memoria;
+
 
 
 #endif

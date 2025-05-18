@@ -108,24 +108,13 @@ void crear_pid(t_contexto* nuevo_contexto, t_info_kernel info_kernel)
     nuevo_contexto->datos_pid.pc = 0;
     nuevo_contexto->tamanio_proceso = info_kernel.tamanio_proceso;
 
-    nuevo_contexto->datos_pid.ax = 0;
-    nuevo_contexto->datos_pid.bx = 0;
-    nuevo_contexto->datos_pid.cx = 0;
-    nuevo_contexto->datos_pid.dx = 0;
-    nuevo_contexto->datos_pid.ex = 0;
-    nuevo_contexto->datos_pid.fx = 0;
-    nuevo_contexto->datos_pid.gx = 0;
-    nuevo_contexto->datos_pid.hx = 0;
-  
-
     printf("Ruta recibida: '%s'\n", info_kernel.archivo_pseudocodigo);
-
 
     nuevo_contexto->datos_pid.pseudocodigo = strdup(info_kernel.archivo_pseudocodigo);
     nuevo_contexto->datos_pid.instrucciones = leer_archivo_y_cargar_instrucciones(nuevo_contexto->datos_pid.pseudocodigo);
     list_add(lista_contextos, nuevo_contexto);
     // Crear la tabla de primer nivel y guardar el ID en el contexto
-    //nuevo_contexto->id_tabla_primer_nivel = crear_tabla_primer_nivel();
+    //nuevo_contexto->id_tabla_primer_nivel = crear_tabla_nivel(1)
 }
 
 t_contexto* buscar_contexto_por_pid(int pid)
@@ -201,15 +190,7 @@ void enviar_contexto(t_contexto* contexto_proceso, int socket_cpu)
     
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->pid);
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.pc);
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.ax);
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.bx);
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.cx);
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.dx);
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.ex);
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.fx);
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.gx);
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.hx);
-
+   
     enviar_paquete(paquete_contexto, socket_cpu);
 
     free(paquete_contexto);
