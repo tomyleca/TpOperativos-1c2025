@@ -2,14 +2,15 @@
 
 
 
-void server_escucha(int fd_escucha_servidor,t_log* memoria_logger)
+void server_escucha(int* fd_escucha_servidor)
 {
     log_info(logger_memoria, "MEMORIA lista para recibir peticiones de KERNEL");
 
     while (1) {
         // Espera a un cliente en el bucle principal
-        int fd_conexion = esperar_cliente(fd_escucha_servidor);
-        log_info(memoria_logger, "Cliente conectado y en espera.");
+        int fd_conexion_2 = *fd_escucha_servidor;
+        int fd_conexion = esperar_cliente(fd_conexion_2);
+        log_info(logger_memoria, "Cliente conectado y en espera.\n");
         if (fd_conexion != -1) {
             pthread_t hilo_conexion;
             // Reservamos memoria para pasar el socket conexion al hilo
@@ -82,9 +83,9 @@ int atender_cliente(int *fd_conexion)
                 nuevo_contexto = malloc(sizeof(t_contexto)); //ESTE MALLOC LO HAGO PORQUE NECESITO GUARDAR PUNTEROS A MI LISTA
                 nuevo_contexto = buscar_contexto_por_pid(datos_kernel.pid);
                 crear_pid(nuevo_contexto, datos_kernel);
-                // Respuesta a KERNEL----- EL NUMERO DE TABLA DE PRIMER NIVEL !!
-                //paquete = crear_super_paquete(RESPUESTA_KERNEL_TPN); //TPN TABLA DE PRIMER NIVEL --- a implementar todavia!! 
-                //cargar_int_al_super_paquete(paquete, tabla_primer_nivel);
+                // Respuesta a KERNEL-----
+                //paquete = crear_super_paquete(RESPUESTA_KERNEL_OK);
+                //cargar_string_al_super_paquete(paquete, "OK");
                 //enviar_paquete(paquete, cliente_fd);
                 enviar_paquete(crear_super_paquete(OK),cliente_fd);
                 free(unBuffer);
