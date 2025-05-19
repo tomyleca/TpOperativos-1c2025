@@ -36,6 +36,8 @@ int main(int argc, char* argv[]) {
     free(memoria_real);
     free(bitmap_frames);
 
+    pthread_join(hilo_memoria,NULL);
+
     return EXIT_SUCCESS;
 
 }
