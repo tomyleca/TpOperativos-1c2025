@@ -168,7 +168,8 @@ void agregar_a_tlb(int pid, int nro_pagina, int nro_marco) {
     
     if (list_size(lista_tlb) >= entradas_tlb) {
         if (strcmp(reemplazo_tlb, "FIFO") == 0) {
-            list_remove(lista_tlb, 0);
+            EntradaTLB* entrada_removida = list_remove(lista_tlb, 0);
+            free(entrada_removida);
         } 
         else if(strcmp(reemplazo_tlb, "LRU") == 0) {
             int indice_mas_viejo = 0;
@@ -178,7 +179,8 @@ void agregar_a_tlb(int pid, int nro_pagina, int nro_marco) {
                     indice_mas_viejo = i;
                 }
             }
-            list_remove(lista_tlb, indice_mas_viejo);
+            EntradaTLB* entrada_removida = list_remove(lista_tlb, indice_mas_viejo);
+            free(entrada_removida);
         }
     }
     // Agregar la nueva entrada a la TLB
@@ -478,3 +480,132 @@ void log_instruccion(char** parte) {
         log_info(logger_cpu, "## PID: %d - Ejecutando: %s -", contexto->pid, parte[0]);
     }
 }
+
+
+
+// *********CACHE**********
+
+typedef struct 
+{
+    int pid;                    
+    int nro_pagina;            
+    int nro_marco;             
+    char* contenido;           
+    bool bit_referencia;       
+    bool bit_modificacion;  //para el CLOCK modificado   
+    bool bit_validez;           
+} EntradaCache;
+
+EntradaCache* cache_paginas;
+int puntero_clock;  
+
+void inicializar_cache() 
+{
+    if (entradas_cache <= 0) {
+        cache_paginas = NULL;
+        return;
+    }
+
+    cache_paginas = malloc(sizeof(EntradaCache) * entradas_cache);
+    puntero_clock = 0;
+    
+    // Inicializo todas las entradas  deshabilitadas
+    for (int i = 0; i < entradas_cache; i++) {
+        cache_paginas[i].pid = -1;
+        cache_paginas[i].nro_pagina = -1;
+        cache_paginas[i].nro_marco = -1;
+        cache_paginas[i].contenido = malloc(tamanio_pagina);
+        memset(cache_paginas[i].contenido, 0, tamanio_pagina);
+        cache_paginas[i].bit_referencia = false;
+        cache_paginas[i].bit_modificacion = false;
+        cache_paginas[i].bit_validez = false;
+    }
+}
+
+int buscar_en_cache(int pid, int nro_pagina) 
+{   
+    for (int i = 0; i < entradas_cache; i++) {
+        if (cache_paginas[i].bit_validez && 
+            cache_paginas[i].pid == pid && 
+            cache_paginas[i].nro_pagina == nro_pagina) {
+            
+            cache_paginas[i].bit_referencia = true;
+            
+            log_info(logger_cpu, "PID: <%d> - CACHE HIT - Página: <%d>", pid, nro_pagina);
+            return i; // Devuelve indice
+        }
+    }
+    
+    log_info(logger_cpu, "PID: <%d> - CACHE MISS - Página: <%d>", pid, nro_pagina);
+    return -1; // No encontrada
+}
+
+char leer_byte_con_cache(int direccion_logica) 
+{
+    // Si caché está deshabilitada, entonces voy directo a memoria
+    if (cache_paginas == NULL) {
+        int direccion_fisica = buscar_en_tlb(direccion_logica);
+        if (direccion_fisica == -1) {
+            return 0;
+        }
+    
+        
+
+
+    }
+    
+    //CACHÉ HABILITADA
+
+    //Descompongo direccion logica
+    int nro_pagina = direccion_logica / tamanio_pagina;
+    int desplazamiento = direccion_logica % tamanio_pagina;
+    
+    // Busco en caché 
+    int indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
+    if (indice_cache != -1) {
+        // CACHE HIT -> pagina encontrada
+        return cache_paginas[indice_cache].contenido[desplazamiento];
+    }
+    
+    // CACHE MISS -> busco pagina en memoria fisica
+    int direccion_fisica = buscar_en_tlb(direccion_logica);
+    if (direccion_fisica == -1) {
+        return 0;
+    }
+    
+    int nro_marco = direccion_fisica / tamanio_pagina;
+    //cargar_pagina_en_cache(); FALTA ESTA FUNCION!!!
+    
+    // Busco de nuevo en caché
+    indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
+    if (indice_cache != -1) {
+        return cache_paginas[indice_cache].contenido[desplazamiento];
+    }
+    
+    return 0; 
+}
+
+int algoritmo_clock() 
+{
+    int inicio = puntero_clock;
+    
+    for (int i = 0; i < entradas_cache; i++) {
+        if (cache_paginas[puntero_clock].bit_referencia == false) {
+            int victima = puntero_clock;
+            puntero_clock = (puntero_clock + 1) % entradas_cache; //avanzo
+            return victima;
+        }
+
+        cache_paginas[puntero_clock].bit_referencia = false; //si es true le da otra vuelta
+        puntero_clock = (puntero_clock + 1) % entradas_cache; //avanzo
+    }
+    
+    //si todas estaban en true, ahora todas tienen false y no devuelve victima
+    int victima = puntero_clock;
+    puntero_clock = (puntero_clock + 1) % entradas_cache;
+
+    return victima;
+}
+
+
+
