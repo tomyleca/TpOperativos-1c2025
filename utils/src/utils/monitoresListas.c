@@ -54,7 +54,7 @@ void* sacarDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,bool (*c
 {
     void* elem;
 
-    sem_wait(listaConSemaforos->semaforoCantElementos);
+    
     sem_wait(listaConSemaforos->semaforoMutex);
         elem = list_remove_by_condition(listaConSemaforos->lista,condicion);
     sem_post(listaConSemaforos->semaforoMutex);
@@ -70,6 +70,7 @@ void* leerDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion)
     sem_wait(listaConSemaforos->semaforoMutex);
         elem = list_get(listaConSemaforos->lista,posicion);
     sem_post(listaConSemaforos->semaforoMutex);
+    sem_post(listaConSemaforos->semaforoCantElementos);
     
     return elem;
 }
@@ -89,15 +90,25 @@ bool sacarElementoDeLista(t_listaConSemaforos* listaConSemaforos,void* elem)
 {
     bool elementoEncontrado;
 
-    sem_wait(listaConSemaforos->semaforoCantElementos);
+
     sem_wait(listaConSemaforos->semaforoMutex);
         elementoEncontrado = list_remove_element(listaConSemaforos->lista,elem);
     sem_post(listaConSemaforos->semaforoMutex);
-    if(!elementoEncontrado) //Para que no descuente un elemento si quiere sacarlo y no esta.
-        sem_post(listaConSemaforos->semaforoCantElementos);
+
 
 
     return elementoEncontrado;
+}
+
+void* leerDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,bool (*condicion) (void*))
+{
+    void* elem;
+    
+    sem_wait(listaConSemaforos->semaforoMutex);
+        elem = list_find(listaConSemaforos->lista,condicion);
+    sem_post(listaConSemaforos->semaforoMutex);
+
+    return elem;
 }
 
 void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos)
@@ -107,3 +118,4 @@ void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos)
     free(listaConSemaforos->semaforoCantElementos);
     free(listaConSemaforos->semaforoMutex);
 }
+

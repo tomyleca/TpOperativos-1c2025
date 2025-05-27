@@ -14,9 +14,11 @@
 #include "cambiarDeEstado.h"
 #include"../../utils/src/utils/conexiones.h"
 
-void dump_memory(uint32_t pid);
-void syscall_io(uint32_t pid, char* nombreIO, uint32_t tiempo);
+extern void dump_memory(uint32_t pid);
+extern void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo);
+extern void INIT_PROC(char* archivoPseudocodigo,uint32_t tam);
+extern void syscallExit(uint32_t pid);
 
-PCB* buscarPCBEnLista(t_list* lista, uint32_t pid);
+
 
 #endif

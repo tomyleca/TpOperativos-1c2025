@@ -1,13 +1,70 @@
 #include <syscalls.h>
 
+void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
+    //Creo un nuevo proceso
+    PCB* nuevoProceso=malloc(sizeof(PCB));
+    nuevoProceso->archivoPseudocodigo=strdup(archivoPseudocodigo);
+    nuevoProceso->tam=tam;
+    nuevoProceso->PC=0;
+    
+    nuevoProceso->PID=pidDisponible;
+    
+    sem_wait(semaforoPIDDisponible);
+        pidDisponible++;
+    sem_post(semaforoPIDDisponible);
+
+    
+
+    for(int i=0;i<7;i++)
+    {
+        nuevoProceso->ME[i]=0;
+        nuevoProceso->MT[i]=0;
+        nuevoProceso->cronometros[i]=temporal_create();
+        temporal_stop(nuevoProceso->cronometros[i]);
+    }
+
+
+    
+
+    nuevoProceso->estimadoRafagaAnterior=0;
+    nuevoProceso->duracionRafagaAnterior=0;
+    nuevoProceso->estimadoSiguienteRafaga=0;
+
+    
+   
+    if(algoritmoColaNewEnFIFO)
+        agregarALista(listaProcesosNew,nuevoProceso);
+    else
+        agregarAListaOrdenada(listaProcesosNew,nuevoProceso,menorTam);
+
+    temporal_resume(nuevoProceso->cronometros[NEW]);
+    nuevoProceso->ME[NEW]++; 
+
+    log_info(loggerKernel, "## (<%u>) Se crea el proceso - Estado: NEW",nuevoProceso->PID);
+    
+    if(nuevoProceso->PID==0) //Si es el primer proceso, espero el ENTER
+    {
+        while (1) {
+            char* input = readline("Apriete ENTER para empezar a planificar procesos.");  
+
+            if (*input == '\0') {  
+                break;
+            }
+        }
+    }    
+    
+    inicializarProceso();
+}
+
+
 void dump_memory(uint32_t pid) {
-    log_info(logger_kernel, "## (%d) - Solicitó syscall: DUMP_MEMORY", pid);
-    int socket_memoria_particular = crear_conexion(logger_kernel, ip_memoria, puerto_memoria);
+    log_info(loggerKernel, "## (<%d>) - Solicitó syscall: DUMP_MEMORY", pid);
+    int socket_memoria_particular = crear_conexion(loggerKernel, ip_memoria, puerto_memoria);
 
     t_paquete* paquete = crear_super_paquete(DUMP_MEMORY);
 
     if (paquete == NULL) {
-        log_error(logger_kernel, "Error al crear el paquete para DUMP_MEMORY");
+        log_error(loggerKernel, "Error al crear el paquete para DUMP_MEMORY");
         return;
     }
 
@@ -15,65 +72,85 @@ void dump_memory(uint32_t pid) {
     enviar_paquete(paquete, socket_memoria_particular);
     eliminar_paquete(paquete);
 
-    op_code respuesta = recibir_operacion(socket_memoria_particular);
+    //op_code respuesta = recibir_operacion(socket_memoria_particular);
 
     PCB* proceso = NULL;
-
-    sem_wait(listaProcesosReady->semaforoMutex);
-    proceso = buscarPCBEnLista(listaProcesosReady->lista, pid);
-    sem_post(listaProcesosReady->semaforoMutex);
-
+    proceso = buscarPCBEjecutando(pid);
+    
     if (proceso == NULL) {
-        log_error(logger_kernel, "## (%d) - No se encontró el PCB para DUMP_MEMORY", pid);
-        return;
+        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para DUMP_MEMORY", pid);
+        exit(1);
     }
 
+    //TODO conexion con memoria
+    /*
     if (respuesta == DUMP_MEMORY_OK) {
-        log_info(logger_kernel, "## (%d) - Finalizó correctamente DUMP_MEMORY", pid);
+        log_info(loggerKernel, "## (<%u>) - Finalizó correctamente DUMP_MEMORY", pid);
         pasarAReady(proceso);
-    } else {
-        log_error(logger_kernel, "## (%d) - Error en DUMP_MEMORY. Finalizando proceso", pid);
+    }
+    */ 
+    else {
+        log_error(loggerKernel, "## (<%u>) - Error en DUMP_MEMORY. Finalizando proceso", pid);
         pasarAExit(proceso);
     }
 
     liberar_conexion(socket_memoria_particular);
 }
 
-void syscall_io(uint32_t pid, char* nombreIO, uint32_t tiempo) {
-    log_info(logger_kernel, "## (%d) - Solicitó syscall: IO", pid);
+void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
+    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: IO", pid);
 
     PCB* proceso = NULL;
-
-    sem_wait(listaProcesosReady->semaforoMutex);
-    proceso = buscarPCBEnLista(listaProcesosReady->lista, pid);
-    sem_post(listaProcesosReady->semaforoMutex);
+    proceso  = buscarPCBEjecutando(pid);
 
     if (proceso == NULL) {
-        log_error(logger_kernel, "## (%d) - No se encontró el PCB para syscall IO", pid);
-        return;
+        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", pid);
+        exit(1);
     }
+    
+    terminarEjecucion(proceso);
+   
+
 
     DispositivoIO* dispositivo = NULL;
-    sem_wait(listaDispositivosIO->semaforoMutex);
-    dispositivo = buscarIOSegunNombre(nombreIO);
-    sem_post(listaDispositivosIO->semaforoMutex);
+    dispositivo = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
 
     if (dispositivo == NULL) {
-        log_error(logger_kernel, "## (%d) - Dispositivo IO %s no encontrado. Finalizando proceso", pid, nombreIO);
+        log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", pid, nombreIO);
         pasarAExit(proceso);
         return;
     }
 
-    log_info(logger_kernel, "## (%d) - Bloqueado por IO: %s", pid, nombreIO);
+    log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",pid,nombreIO);
 
-    pasarABLoqueadoEIniciarContador(proceso, tiempo, nombreIO);
+    pasarABLoqueado(proceso, tiempo, nombreIO);
 }
 
-PCB* buscarPCBEnLista(t_list* lista, uint32_t pid) {
-    bool _mismoPID(PCB* pcb) {
-        return pcb->PID == pid;
+void syscallExit(uint32_t pid)
+{
+    PCB* proceso = NULL;
+    proceso = buscarPCBEjecutando(pid);
+
+    if (proceso == NULL) {
+        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", pid);
+        exit(1);
     }
 
-    return list_find(lista, (void*)_mismoPID);
+    terminarEjecucion(proceso);
+
+    pasarAExit(proceso);
+
 }
+PCB* buscarPCBEjecutando(uint32_t pid) {
+    bool _mismoPID(nucleoCPU* nucleoEnEjecucion) {
+        return nucleoEnEjecucion->procesoEnEjecucion->PID == pid;
+    };
+
+    nucleoCPU* nucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_mismoPID);
+    if(nucleoCPU!= NULL)
+        return nucleoCPU->procesoEnEjecucion;
+    else
+        return NULL;
+}
+
 

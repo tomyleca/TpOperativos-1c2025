@@ -1,5 +1,7 @@
 #include "globalesKernel.h"
 
+sem_t* semaforoPIDDisponible;
+
 //CONFIG Y LOGGER
 int socket_kernel_io;
 int cliente_kernel;
@@ -10,17 +12,19 @@ int cliente_kernel_interrupt;
 int socket_kernel_memoria;
 char* ip_memoria;
 char* algoritmo_planificacion;
-int puerto_memoria;
+char* puerto_memoria;
 int tiempo_suspension;
-int puerto_escucha_dispatch;
-int puerto_escucha_interrupt;
-int puerto_escucha_IO;
+char* puerto_escucha_dispatch;
+char* puerto_escucha_interrupt;
+char* puerto_escucha_IO;
 int alfa;
 char* algoritmo_cola_new;
 bool algoritmoColaNewEnFIFO;
 
 t_log_level log_level;
-t_log* logger_kernel;
+t_log* loggerKernel;
+
+t_config* config_kernel;
 
 pthread_t hilo_escuchar_kernel;
 pthread_t hilo_escuchar_kernel_interrupcion;
@@ -29,6 +33,7 @@ pthread_t hilo_crear_kernel_memoria;
 t_listaConSemaforos* listaProcesosNew;
 t_listaConSemaforos* listaProcesosReady;
 t_listaConSemaforos* listaProcesosSwapReady;
+t_listaConSemaforos* listaCPUsAInicializar;
 t_listaConSemaforos* listaCPUsLibres;
 t_listaConSemaforos* listaCPUsEnUso;
 
@@ -43,10 +48,9 @@ int algoritmoDePlanificacionInt;
 
 
 //IO
-t_listaConSemaforos* listaDispositivosIO;
+t_diccionarioConSemaforos* diccionarioDispositivosIO;
 
 //CPU
 sem_t* semaforoIntentarPlanificar;
 
-
-
+sem_t* semaforoGuardarDatosCPU;

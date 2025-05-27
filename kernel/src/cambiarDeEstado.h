@@ -4,12 +4,14 @@
 
 
 extern void pasarAReady(PCB* proceso);
-extern void pasarABLoqueadoEIniciarContador(PCB* proceso,uint32_t tiempo,char* nombreIO);
-extern void* contadorParaSwap(PCB* proceso);
-extern bool IOTerminado(char* PIDComoChar);
+extern void pasarABLoqueado(PCB* proceso,int64_t tiempo,char* nombreIO);
+extern void* manejarProcesoBloqueado(procesoEnEsperaIO* procesoEnEsperaIO);
+extern void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO);
+extern void empezarIODelProximoEnEspera(DispositivoIO* dispositivoIO);
 extern void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO);
 extern void pasarASwapReady(PCB* proceso);
 extern void pasarAExecute(PCB* proceso);
+extern bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera);
 extern void pasarAExit(PCB* proceso);
 
 #endif

@@ -2,7 +2,7 @@
 
 void* planificadorCortoPlazo(void* arg)
 {
-    PCB* procesoAEjecutar;
+    PCB* procesoAEjecutar= NULL;
     while(1)
     {
         sem_wait(semaforoIntentarPlanificar);
@@ -13,26 +13,26 @@ void* planificadorCortoPlazo(void* arg)
             
 
 
-            case FIFO:
+        case FIFO:
                 procesoAEjecutar  = sacarDeLista(listaProcesosReady,0);
                 break;
-            case SJF:
-                ordenarLista(listaProcesosReady,menorEstimadoRafagaActual);
+        case SJF:
+                ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
                 procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
                 break;
                 
         case SRT: 
                 if(!chequearListaVacia(listaCPUsLibres))
                 {   
-                    ordenarLista(listaProcesosReady,menorEstimadoRafagaActual);
+                    ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
                     procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
                     break;
                 }
                 else 
                 {
-                    ordenarLista(listaProcesosReady,menorEstimadoRafagaActual);
+                    ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
                     procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
-                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoRafagaActual) == false)
+                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == false)
                         procesoAEjecutar = NULL;
                     
                     break;
@@ -45,29 +45,31 @@ void* planificadorCortoPlazo(void* arg)
 
         if(procesoAEjecutar != NULL)
         {
+            log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAEjecutar->PID,"READY","EXECUTE");
             cargarCronometro(procesoAEjecutar,READY);
-            cargarCronometro(procesoAEjecutar,SWAP_READY);
-            ejecutar(procesoAEjecutar);
+            pasarAExecute(procesoAEjecutar);
            
         }
     }
 
 }
 
-
-void ejecutar(PCB* proceso)
+void pasarAExecute(PCB* proceso)
 {
-    nucleoCPU* nucleoCPUEnEjecucion = sacarDeLista(listaCPUsLibres,0);
-    nucleoCPUEnEjecucion->ejecutando=true;
-    nucleoCPUEnEjecucion->procesoEnEjecucion=proceso;
-    agregarALista(listaCPUsEnUso,nucleoCPUEnEjecucion);
-
+    nucleoCPU* nucleoCPULibre =  sacarDeLista(listaCPUsLibres,0);
+    nucleoCPULibre->ejecutando=true;
+    nucleoCPULibre->procesoEnEjecucion=proceso;
+    agregarALista(listaCPUsEnUso,nucleoCPULibre);
     
+    mandarContextoACPU(proceso->PID,proceso->PC,nucleoCPULibre->fdConexionDispatch);
+
+    proceso->cronometroEjecucionActual = temporal_create();
     temporal_resume(proceso->cronometros[EXECUTE]);
     proceso->ME[EXECUTE]++;
-    proceso->cronometroEjecucionActual=temporal_create();
-
+   
 }
+
+
 
 void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 {
@@ -76,10 +78,13 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
     
 
     procesoDespuesDeEjecucion->duracionRafagaAnterior=temporal_gettime(procesoDespuesDeEjecucion->cronometroEjecucionActual);
-    procesoDespuesDeEjecucion->estimadoRafagaAnterior=procesoDespuesDeEjecucion->estimadoRafagaActual;
-    estimarRafagaActual(procesoDespuesDeEjecucion);
+    procesoDespuesDeEjecucion->estimadoRafagaAnterior=procesoDespuesDeEjecucion->estimadoSiguienteRafaga;
+    estimarSiguienteRafaga(procesoDespuesDeEjecucion);
 
-    temporal_destroy(procesoDespuesDeEjecucion->cronometroEjecucionActual);
+    temporal_stop(procesoDespuesDeEjecucion->cronometroEjecucionActual);
+    
+    //TODO arreglar esto con valgrind
+    //temporal_destroy(procesoDespuesDeEjecucion->cronometroEjecucionActual);
 
 }
 
@@ -93,7 +98,7 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
     };
     
     sem_wait(listaCPUsEnUso->semaforoMutex);
-    t_list* listaCPUsOrdenadaPorRafagaRestante = list_sorted(listaCPUsEnUso->lista,menorEstimadoRafagaRestante);
+        t_list* listaCPUsOrdenadaPorRafagaRestante = list_sorted(listaCPUsEnUso->lista,menorEstimadoRafagaRestante);
     sem_post(listaCPUsEnUso->semaforoMutex);
     nucleoCPU* nucleoConMenorRafagaRestante = NULL;
     
@@ -105,7 +110,10 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
     if(nucleoConMenorRafagaRestante!=NULL)
     {
         
-        PCB* procesoDesalojado = terminarEjecucionNucleoCPU(nucleoConMenorRafagaRestante);
+        terminarEjecucion(nucleoConMenorRafagaRestante->procesoEnEjecucion);
+        PCB* procesoDesalojado = nucleoConMenorRafagaRestante->procesoEnEjecucion;
+        log_info(loggerKernel, "## (<%u>) - Desalojado por algoritmo SJF/SRT",procesoDesalojado->PID);
+        log_info(loggerKernel, "## (<%u>) Pasa del estado <%s> al estado <%s>",procesoDesalojado->PID,"EXECUTE","READY");
         pasarAReady(procesoDesalojado);
         return true;
     }
@@ -120,14 +128,20 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 
 }
 
-PCB* terminarEjecucionNucleoCPU(nucleoCPU* nucleoCPU)
+void terminarEjecucion(PCB* proceso)
 {
-    sacarElementoDeLista(listaCPUsEnUso,nucleoCPU);
+    bool _ejecutandoProceso(nucleoCPU* nucleoCPU)
+    {
+        return nucleoCPU->procesoEnEjecucion == proceso;
+    };
+
+    nucleoCPU* nucleoCPU = sacarDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
     nucleoCPU->ejecutando=false;
     agregarALista(listaCPUsLibres,nucleoCPU);
     PCB* procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
     guardarDatosDeEjecucion(procesoPostEjecucion);
-    return procesoPostEjecucion;
+    sem_post(semaforoIntentarPlanificar);
+    
 }
 
 bool menorEstimadoRafagaRestante(nucleoCPU* CPU1,nucleoCPU* CPU2)
@@ -137,13 +151,12 @@ bool menorEstimadoRafagaRestante(nucleoCPU* CPU1,nucleoCPU* CPU2)
 
 
 
-bool menorEstimadoRafagaActual(PCB* PCB1,PCB* PCB2)
+bool menorEstimadoSiguienteRafaga(PCB* PCB1,PCB* PCB2)
 {
-    return PCB1->estimadoRafagaActual >= PCB2->estimadoRafagaActual;
+    return PCB1->estimadoSiguienteRafaga >= PCB2->estimadoSiguienteRafaga;
 }
 
-void estimarRafagaActual(PCB* proceso)
+void estimarSiguienteRafaga(PCB* proceso)
 {
-    proceso->estimadoRafagaActual= alfa * proceso->duracionRafagaAnterior + (1- alfa) * proceso->estimadoRafagaAnterior;
+    proceso->estimadoSiguienteRafaga= alfa * proceso->duracionRafagaAnterior + (1- alfa) * proceso->estimadoRafagaAnterior;
 }
-
