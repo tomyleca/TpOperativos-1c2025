@@ -99,13 +99,6 @@ void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO)
     
 }
 
-char* pasarUnsignedAChar(uint32_t unsigned_)
-{
-    //El buffer es de 11 bytes porque para guardar el maximo número representable por un unsigned de 32 bits(4294967295) como caracteres en un char* es de 10 bytes + el '\0'
-    char* buffer=malloc(sizeof(12));
-    snprintf(buffer,12,"%u",unsigned_);
-    return buffer;
-}
 
 void pasarASwapReady(PCB* proceso)
 {

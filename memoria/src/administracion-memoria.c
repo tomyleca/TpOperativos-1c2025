@@ -10,6 +10,7 @@ char *memoria_real = NULL;
 Proceso **Procesos = NULL;
 int cantidad_Procesos = 0;
 TablaPagina *tabla_raiz = NULL;
+t_diccionarioConSemaforos* diccionarioProcesos;
 
 void leerConfigMemoria(t_config* config_memoria) 
 {
@@ -160,20 +161,20 @@ void asignar_frames_hojas(TablaPagina *tabla) {
   }
 }
 
-Proceso *crear_proceso() {
+Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   Proceso *p = malloc(sizeof(Proceso));
   if (!p) {
     fprintf(stderr, "Error al crear proceso\n");
     exit(EXIT_FAILURE);
   }
 
-  p->pid = proximo_pid++; // ← PID único, nunca se repite
+  p->pid = PID;  
   p->cant_paginas = 0;
   p->frames = NULL;
   p->tamanio_reservado = 0;
 
-  Procesos = realloc(Procesos, sizeof(Proceso *) * (cantidad_Procesos + 1));
-  Procesos[cantidad_Procesos++] = p;
+  
+  agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
 
   return p;
 }
@@ -327,42 +328,25 @@ void liberar_memoria(Proceso *p, int pagina_base, int cantidad) {
   free(a_liberar);
 }
 
-void destruir_proceso(Proceso *p) {
+void destruirProceso(uint32_t PID) {
+  Proceso* p = sacarDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(PID));
   liberar_memoria(p, 0, p->cant_paginas);
-
-  // Eliminar de la lista de procesos activos
-  bool encontrado = false;
-  for (int i = 0; i < cantidad_Procesos; i++) {
-    if (Procesos[i] == p) {
-      encontrado = true;
-      for (int j = i + 1; j < cantidad_Procesos; j++) {
-        Procesos[j - 1] = Procesos[j];
-      }
-      cantidad_Procesos--;
-      break;
-    }
-  }
-
-  if (encontrado) {
-    Procesos = realloc(Procesos, sizeof(Proceso *) * cantidad_Procesos);
-  }
 
   free(p->frames);
   free(p);
 }
 
-Proceso *crear_proceso_y_reservar(const char *nombre, int bytes) {
-  Proceso *p = crear_proceso();
-  if (reservar_memoria(p, bytes) < 0) {
+Proceso *guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
+  Proceso *p = guardarProceso(PID,tam,pseudocodigo);
+  if (reservar_memoria(p, tam) < 0) {
     fprintf(stderr, "Error: no se pudo asignar memoria al proceso\n");
     free(p);
     return NULL;
   }
 
-  strncpy(p->nombre, nombre, sizeof(p->nombre) - 1);
-  p->nombre[sizeof(p->nombre) - 1] = '\0';
+ 
   memset(&p->metricas, 0, sizeof(MetricaProceso));
-  p->tamanio_reservado = bytes;
+  p->tamanio_reservado = tam;
 
   return p;
 }
@@ -403,7 +387,7 @@ void interpretar_instruccion(char *linea) {
     char nombre[32];
     int tamanio;
     sscanf(linea, "INIT_PROC %s %d", nombre, &tamanio);
-    crear_proceso_y_reservar(nombre, tamanio);
+    //crear_proceso_y_reservar(nombre, tamanio);  COMENTADO PARA PROBAR
 
     //Todo: si falla que hacemos?
 
@@ -436,7 +420,7 @@ void interpretar_instruccion(char *linea) {
 
   } else if (strcmp(instruccion, "EXIT") == 0) {
     if (cantidad_Procesos > 0) {
-      destruir_proceso(Procesos[cantidad_Procesos - 1]); // último creado
+      //destruir_proceso(Procesos[cantidad_Procesos - 1]); // último creado COMENTADO PARA PROBAR
       printf(">>> Proceso finalizado.\n");
       mostrar_bitmap();//TODO: Borrar esto es testing
     } else {

@@ -8,8 +8,9 @@ int main(int argc, char* argv[]) {
     leerConfigMemoria(config_memoria);  
     inicializar_memoria();// inicializa la memoria con los datos de memoria.config
     tabla_raiz = crear_tabla_nivel(1);// aca se crean las tablas y frames 
-    imprimir_tabla(tabla_raiz, 1, 0);//TODO: Borrar esto es testing
-    mostrar_bitmap();//TODO: Borrar esto es testing
+    //imprimir_tabla(tabla_raiz, 1, 0);//TODO: Borrar esto es testing
+    //mostrar_bitmap();//TODO: Borrar esto es testing
+    diccionarioProcesos = crearDiccionarioConSemaforos();
 
     //! ACA SIMULAMOS LLEGDA DE PAQUETE
     /*int cant_instrucciones = 0;

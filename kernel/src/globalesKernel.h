@@ -182,10 +182,7 @@ extern void mandarDatosProcesoAMemoria(PCB* proceso);
 
 
 //OTRAS
-/**
- * @brief Pasa un valor uint32_t a un char.
-*/
-extern char* pasarUnsignedAChar(uint32_t unsigned_);
+
 
  
 

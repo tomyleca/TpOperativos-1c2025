@@ -80,9 +80,7 @@ int atender_cliente(int *fd_conexion)
                 datos_kernel.archivo_pseudocodigo = recibir_string_del_buffer(unBuffer);
                 printf("---------------------------------------------\n");
                 printf("PID LLEGADO DE KERNEL %d\n", datos_kernel.pid);
-                nuevo_contexto = malloc(sizeof(t_contexto)); //ESTE MALLOC LO HAGO PORQUE NECESITO GUARDAR PUNTEROS A MI LISTA
-                nuevo_contexto = buscar_contexto_por_pid(datos_kernel.pid);
-                crear_pid(nuevo_contexto, datos_kernel);
+                guardarProcesoYReservar(datos_kernel.pid,datos_kernel.tamanio_proceso,datos_kernel.archivo_pseudocodigo);
                 // Respuesta a KERNEL-----
                 //paquete = crear_super_paquete(RESPUESTA_KERNEL_OK);
                 //cargar_string_al_super_paquete(paquete, "OK");
