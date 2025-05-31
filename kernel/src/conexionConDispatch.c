@@ -81,10 +81,10 @@ nucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion)
     nucleoCPU* nucleoCPU = chequearSiCPUYaPuedeInicializarse(identificador);
     if(nucleoCPU == NULL)//Si esta en NULL quiere decir que la otra conexion todavía no llego
     {
-        nucleoCPU = malloc(sizeof(nucleoCPU));
-        nucleoCPU->identificador= malloc(strlen(identificador));
+        nucleoCPU = malloc(sizeof(*nucleoCPU));
+        nucleoCPU->identificador= malloc(strlen(identificador)+1);
         strcpy(nucleoCPU->identificador,identificador);
-        nucleoCPU->procesoEnEjecucion=NULL;
+       nucleoCPU->procesoEnEjecucion=NULL;
         nucleoCPU->fdConexionDispatch = fdConexion;
         agregarALista(listaCPUsAInicializar,nucleoCPU);
     }
