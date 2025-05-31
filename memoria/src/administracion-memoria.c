@@ -9,7 +9,7 @@ bool *bitmap_frames = NULL;
 char *memoria_real = NULL;
 Proceso **Procesos = NULL;
 int cantidad_Procesos = 0;
-TablaPagina *tabla_raiz = NULL;
+
 
 void leerConfigMemoria(t_config* config_memoria) 
 {
@@ -61,13 +61,46 @@ TablaPagina *crear_tabla_nivel(int nivel_actual) {
       tabla->frames[i] = -1; // sin frame asignado aún
   } else {
     tabla->frames = NULL;
-    tabla->entradas = malloc(sizeof(TablaPagina *) * ENTRADAS_POR_TABLA);
-    for (int i = 0; i < ENTRADAS_POR_TABLA; i++){
-        tabla->entradas[i] = crear_tabla_nivel(nivel_actual + 1);
+    tabla->entradas = calloc( ENTRADAS_POR_TABLA, sizeof(TablaPagina *));
+    }
+  
+
+  return tabla;
+}
+int traducir_direccion(Proceso *p, int direccion_virtual) {
+  int nro_pagina = direccion_virtual / TAM_PAGINA;
+  int desplazamiento = direccion_virtual % TAM_PAGINA;
+
+  TablaPagina *tabla = p->tabla_raiz;
+
+  int bits_por_nivel = 0;
+  int divisor = 1;
+  for (int i = 1; i < CANTIDAD_NIVELES; i++)
+    divisor *= ENTRADAS_POR_TABLA;
+
+  for (int nivel = 1; nivel <= CANTIDAD_NIVELES; nivel++) {
+    p->metricas.accesos_tabla_paginas++;
+
+    int entrada = (nro_pagina / divisor) % ENTRADAS_POR_TABLA;
+
+    if (nivel == CANTIDAD_NIVELES) {
+      int frame = tabla->frames[entrada];
+      if (frame == -1) {
+        fprintf(stderr, "Error: página no asignada\n");
+        return -1;
+      }
+      return frame * TAM_PAGINA + desplazamiento;
+    } else {
+      tabla = tabla->entradas[entrada];
+      if (!tabla) {
+        fprintf(stderr, "Error: tabla intermedia nula\n");
+        return -1;
+      }
+      divisor /= ENTRADAS_POR_TABLA;
     }
   }
 
-  return tabla;
+  return -1; 
 }
 
 void asignar_frames_en_tabla(TablaPagina *tabla, int paginas_a_reservar, int *frames, int *pagina_logica_actual, int nivel_actual, Proceso *p) {
@@ -85,7 +118,12 @@ void asignar_frames_en_tabla(TablaPagina *tabla, int paginas_a_reservar, int *fr
         (*pagina_logica_actual)++;
       }
     } else {
+      if (*pagina_logica_actual < paginas_a_reservar) {
+      if (tabla->entradas[i] == NULL) {
+        tabla->entradas[i] = crear_tabla_nivel(nivel_actual + 1);
+      }
       asignar_frames_en_tabla(tabla->entradas[i], paginas_a_reservar, frames, pagina_logica_actual, nivel_actual + 1, p);
+      }
     }
   }
 }
@@ -101,8 +139,11 @@ void imprimir_tabla(TablaPagina *tabla, int nivel_actual, int indent) {
       else
         printf("Nivel %d - Entrada %d: Frame %d\n", nivel_actual, i, frame);
     } else {
-      printf("Nivel %d - Entrada %d:\n", nivel_actual, i);
-      imprimir_tabla(tabla->entradas[i], nivel_actual + 1, indent + 1);
+      if(tabla->entradas[i]!=NULL){
+        printf("Nivel %d - Entrada %d:\n", nivel_actual, i);
+        imprimir_tabla(tabla->entradas[i], nivel_actual + 1, indent + 1);
+      }
+ 
     }
   }
 }
@@ -168,8 +209,6 @@ Proceso *crear_proceso() {
   }
 
   p->pid = proximo_pid++; // ← PID único, nunca se repite
-  p->cant_paginas = 0;
-  p->frames = NULL;
   p->tamanio_reservado = 0;
 
   Procesos = realloc(Procesos, sizeof(Proceso *) * (cantidad_Procesos + 1));
@@ -209,34 +248,24 @@ int reservar_memoria(Proceso *p, int bytes) {
     fprintf(stderr, "No hay suficientes frames libres para %d bytes\n", bytes);
     return -1;
   }
+  if (p->tabla_raiz == NULL) {
+    p->tabla_raiz = crear_tabla_nivel(1);
+    int pagina_logica_actual = 0;
+    asignar_frames_en_tabla(p->tabla_raiz, paginas_necesarias, frames, &pagina_logica_actual, 1, p);
 
-  int pagina_base = p->cant_paginas;
-  p->frames = realloc(p->frames, sizeof(int) * (p->cant_paginas + paginas_necesarias));
-  for (int i = 0; i < paginas_necesarias; i++){
-    p->frames[p->cant_paginas++] = frames[i];
+    p->tamanio_reservado += paginas_necesarias * TAM_PAGINA;
   }
 
-
-  int pagina_logica_actual = 0;
-  asignar_frames_en_tabla(tabla_raiz, paginas_necesarias, frames, &pagina_logica_actual, 1, p);
-
   free(frames);
-  return pagina_base;
+  return 0;
 }
 
 void escribir_byte(Proceso *p, int direccion_virtual, char valor) {
-  int pagina_logica = direccion_virtual / TAM_PAGINA;
-  int offset = direccion_virtual % TAM_PAGINA;
+  int direccion_fisica = traducir_direccion(p, direccion_virtual);
+  if (direccion_fisica == -1) {  return;}
+  
 
-  if (pagina_logica >= p->cant_paginas) {
-    fprintf(stderr, "Segmentation fault: dirección fuera del rango asignado\n");
-    return;
-  }
-
-  int frame = p->frames[pagina_logica];
-  int direccion_fisica = frame * TAM_PAGINA + offset;
-
-  memoria_real[direccion_fisica] = valor;
+  memoria_real[direccion_fisica]= valor;
 }
 
 void escribir_memoria(Proceso *p, int direccion_virtual, char valor) {
@@ -248,16 +277,12 @@ void escribir_memoria(Proceso *p, int direccion_virtual, char valor) {
 }
 
 char leer_byte(Proceso *p, int direccion_virtual) {
-  int pagina_logica = direccion_virtual / TAM_PAGINA;
-  int offset = direccion_virtual % TAM_PAGINA;
+  int direccion_fisica = traducir_direccion(p, direccion_virtual);
 
-  if (pagina_logica >= p->cant_paginas) {
-    fprintf(stderr, "Segmentation fault: acceso fuera de rango\n");
+  if (direccion_fisica == -1) {
     return -1;
   }
 
-  int frame = p->frames[pagina_logica];
-  int direccion_fisica = frame * TAM_PAGINA + offset;
   return memoria_real[direccion_fisica];
 }
 
@@ -265,19 +290,17 @@ void leer_memoria(Proceso *p, int direccion_virtual) {
   char val = leer_byte(p, direccion_virtual);
   p->metricas.lecturas_memoria++;
 
-  printf("← Proceso %d leyó '%c' en dir virtual %d\n", p->pid, val,
-         direccion_virtual);
+  printf("Proceso %d leyó '%c' en dir virtual %d\n", p->pid, val, direccion_virtual);
 }
 
 void mostrar_procesos_activos() {
   printf("\n=== Procesos Activos ===\n");
   for (int i = 0; i < cantidad_Procesos; i++) {
     Proceso *p = Procesos[i];
-    printf("PID %d: %d bytes (%d páginas) → Frames: ", p->pid,
-           p->tamanio_reservado, p->cant_paginas);
-    for (int j = 0; j < p->cant_paginas; j++) {
-      printf("%d ", p->frames[j]);
-    }
+    int cant_paginas = (p->tamanio_reservado + TAM_PAGINA - 1) / TAM_PAGINA;
+
+    printf("PID %d: %d bytes (%d paginas) | Tabla raiz en %p\n", p->pid, p->tamanio_reservado, cant_paginas, (void *)p->tabla_raiz);
+
     printf("\n");
   }
 }
@@ -300,55 +323,62 @@ void limpiar_frames_en_tabla(TablaPagina *tabla, int *frames, int cantidad,
   }
 }
 
-void liberar_memoria(Proceso *p, int pagina_base, int cantidad) {
-  if (pagina_base + cantidad > p->cant_paginas) {
-    fprintf(stderr, "Error: rango inválido para liberar\n");
-    return;
+void liberar_frames_en_tabla(TablaPagina *tabla, int nivel_actual) {
+  if (tabla->es_hoja) {
+    for (int i = 0; i < ENTRADAS_POR_TABLA; i++) {
+      if (tabla->frames[i] != -1) {
+        bitmap_frames[tabla->frames[i]] = false;
+        tabla->frames[i] = -1;
+      }
+    }
+  } else {
+    for (int i = 0; i < ENTRADAS_POR_TABLA; i++) {
+      if (tabla->entradas[i]) {
+        liberar_frames_en_tabla(tabla->entradas[i], nivel_actual + 1);
+      }
+    }
   }
+}
 
-  int *a_liberar = malloc(sizeof(int) * cantidad);
-  for (int i = 0; i < cantidad; i++) {
-    int frame = p->frames[pagina_base + i];
-    a_liberar[i] = frame;
-    bitmap_frames[frame] = false;
-  }
+void liberar_memoria(Proceso *p) {
 
-  int idx = 0;
-  limpiar_frames_en_tabla(tabla_raiz, a_liberar, cantidad, &idx, 1, p);
 
-  for (int i = pagina_base + cantidad; i < p->cant_paginas; i++) {
-    p->frames[i - cantidad] = p->frames[i];
-  }
+    if (!p || !p->tabla_raiz){
+        return;
+    }
+  
 
-  p->cant_paginas -= cantidad;
-  p->frames = realloc(p->frames, sizeof(int) * p->cant_paginas);
-  p->tamanio_reservado -= cantidad * TAM_PAGINA;
-
-  free(a_liberar);
+  liberar_frames_en_tabla(p->tabla_raiz, 1);
+  liberar_tabla(p->tabla_raiz);
+  p->tabla_raiz = NULL;
+  p->tamanio_reservado=0;
 }
 
 void destruir_proceso(Proceso *p) {
-  liberar_memoria(p, 0, p->cant_paginas);
+  liberar_memoria(p); // libera frames y tabla
 
   // Eliminar de la lista de procesos activos
-  bool encontrado = false;
   for (int i = 0; i < cantidad_Procesos; i++) {
     if (Procesos[i] == p) {
-      encontrado = true;
       for (int j = i + 1; j < cantidad_Procesos; j++) {
         Procesos[j - 1] = Procesos[j];
       }
       cantidad_Procesos--;
       break;
+      }
     }
-  }
 
-  if (encontrado) {
     Procesos = realloc(Procesos, sizeof(Proceso *) * cantidad_Procesos);
-  }
+    free(p);
 
-  free(p->frames);
-  free(p);
+}
+
+void dump_memory(Proceso *p) {
+  mostrar_bitmap();
+  if (cantidad_Procesos > 0) {
+    imprimir_tabla(p->tabla_raiz, 1, 0);
+  }
+  mostrar_procesos_activos();
 }
 
 Proceso *crear_proceso_y_reservar(const char *nombre, int bytes) {
@@ -430,9 +460,7 @@ void interpretar_instruccion(char *linea) {
     printf("Simulando IO en %s por %d ms\n", recurso, tiempo);
 
   } else if (strcmp(instruccion, "DUMP_MEMORY") == 0) {
-    mostrar_bitmap();
-    imprimir_tabla(tabla_raiz, 1, 0);
-    mostrar_procesos_activos();
+   dump_memory(Procesos[cantidad_Procesos - 1]);
 
   } else if (strcmp(instruccion, "EXIT") == 0) {
     if (cantidad_Procesos > 0) {

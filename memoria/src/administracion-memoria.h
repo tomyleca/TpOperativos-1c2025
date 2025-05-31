@@ -36,26 +36,25 @@ typedef struct {
   int escrituras_memoria;
 } MetricaProceso;
 
-typedef struct {
-  int pid; // ID único
-  MetricaProceso metricas;
-  int cant_paginas;      // páginas asignadas
-  int *frames;           // array de frames físicos asignados
-  int tamanio_reservado; // en bytes
-  char nombre[64];
-  int cantidad_instrucciones;
-} Proceso;
-
-extern Proceso **Procesos;
-extern int cantidad_Procesos;
-
 typedef struct TablaPagina {
   struct TablaPagina **entradas;
   int *frames;
   int es_hoja;
 } TablaPagina;
+typedef struct {
+  int pid; // ID único
+  MetricaProceso metricas;        // array de frames físicos asignados
+  int tamanio_reservado; // en bytes
+  char nombre[64];
+  int cantidad_instrucciones;
+  TablaPagina *tabla_raiz;
+} Proceso;
 
-extern TablaPagina *tabla_raiz;
+extern Proceso **Procesos;
+extern int cantidad_Procesos;
+
+
+
 
 // =====================
 // Prototipos
@@ -80,11 +79,12 @@ char leer_byte(Proceso *p, int direccion_virtual);
 void leer_memoria(Proceso *p, int direccion_virtual);
 Proceso *crear_proceso_y_reservar(const char *nombre, int bytes);
 void mostrar_procesos_activos();
-void liberar_memoria(Proceso *p, int pagina_base, int cantidad);
+void liberar_memoria(Proceso *p);
 void destruir_proceso(Proceso *p);
 char **leer_instrucciones(const char *ruta, int *cantidad);
 void interpretar_instruccion(char *linea);
 
+void dump_memory (Proceso *p);
 
 #endif
 
