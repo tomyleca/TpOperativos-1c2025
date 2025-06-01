@@ -80,7 +80,7 @@ int atender_cliente(int *fd_conexion)
                 datos_kernel.archivo_pseudocodigo = recibir_string_del_buffer(unBuffer);
                 printf("---------------------------------------------\n");
                 printf("PID LLEGADO DE KERNEL %d\n", datos_kernel.pid);
-                //guardarProcesoYReservar(datos_kernel.pid,datos_kernel.tamanio_proceso,datos_kernel.archivo_pseudocodigo);
+                guardarProcesoYReservar(datos_kernel.pid,datos_kernel.tamanio_proceso,datos_kernel.archivo_pseudocodigo);
                 // Respuesta a KERNEL-----
                 //paquete = crear_super_paquete(RESPUESTA_KERNEL_OK);
                 //cargar_string_al_super_paquete(paquete, "OK");

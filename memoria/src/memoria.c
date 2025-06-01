@@ -8,9 +8,10 @@ int main(int argc, char* argv[]) {
     leerConfigMemoria(config_memoria);  
     inicializar_memoria();// inicializa la memoria con los datos de memoria.config
     mostrar_bitmap();//TODO: Borrar esto es testing
-    Proceso *p=crear_proceso_y_reservar("30",30);
-    dump_memory(p);
-    free(p);
+    diccionarioProcesos = crearDiccionarioConSemaforos();
+    //Proceso *p= guardarProcesoYReservar(0,30,"30");
+    //dump_memory(p);
+    //free(p);
      //INICIO LOGGER
     logger_memoria = iniciar_logger("memoriaLogger.log","memoriaLogger",log_level);
 	fd_escucha_servidor = iniciar_servidor(logger_memoria, puerto_escucha);

@@ -210,8 +210,9 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   }
 
   p->pid = PID;  
-  p->cant_paginas = 0;
-  p->frames = NULL;
+  p->tamanio_reservado=0;
+  
+
   p->tamanio_reservado = 0;
 
   
