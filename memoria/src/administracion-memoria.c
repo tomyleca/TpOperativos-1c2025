@@ -379,9 +379,9 @@ void destruir_proceso(Proceso *p) {
 
 void dump_memory(Proceso *p) {
   mostrar_bitmap();
-  if (cantidad_Procesos > 0) {
-    imprimir_tabla(p->tabla_raiz, 1, 0);
-  }
+ 
+  imprimir_tabla(p->tabla_raiz, 1, 0);
+  
   mostrar_procesos_activos();
 }
 
@@ -393,8 +393,9 @@ Proceso *guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) 
     return NULL;
   }
 
- 
+  
   memset(&p->metricas, 0, sizeof(MetricaProceso));
+  dump_memory(p);
   p->tamanio_reservado = tam;
 
   return p;
