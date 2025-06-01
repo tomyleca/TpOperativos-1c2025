@@ -9,7 +9,8 @@ bool *bitmap_frames = NULL;
 char *memoria_real = NULL;
 Proceso **Procesos = NULL;
 int cantidad_Procesos = 0;
-
+TablaPagina *tabla_raiz = NULL;
+t_diccionarioConSemaforos* diccionarioProcesos;
 
 void leerConfigMemoria(t_config* config_memoria) 
 {
@@ -201,18 +202,20 @@ void asignar_frames_hojas(TablaPagina *tabla) {
   }
 }
 
-Proceso *crear_proceso() {
+Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   Proceso *p = malloc(sizeof(Proceso));
   if (!p) {
     fprintf(stderr, "Error al crear proceso\n");
     exit(EXIT_FAILURE);
   }
 
-  p->pid = proximo_pid++; // ← PID único, nunca se repite
+  p->pid = PID;  
+  p->cant_paginas = 0;
+  p->frames = NULL;
   p->tamanio_reservado = 0;
 
-  Procesos = realloc(Procesos, sizeof(Proceso *) * (cantidad_Procesos + 1));
-  Procesos[cantidad_Procesos++] = p;
+  
+  agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
 
   return p;
 }
@@ -381,18 +384,17 @@ void dump_memory(Proceso *p) {
   mostrar_procesos_activos();
 }
 
-Proceso *crear_proceso_y_reservar(const char *nombre, int bytes) {
-  Proceso *p = crear_proceso();
-  if (reservar_memoria(p, bytes) < 0) {
+Proceso *guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
+  Proceso *p = guardarProceso(PID,tam,pseudocodigo);
+  if (reservar_memoria(p, tam) < 0) {
     fprintf(stderr, "Error: no se pudo asignar memoria al proceso\n");
     free(p);
     return NULL;
   }
 
-  strncpy(p->nombre, nombre, sizeof(p->nombre) - 1);
-  p->nombre[sizeof(p->nombre) - 1] = '\0';
+ 
   memset(&p->metricas, 0, sizeof(MetricaProceso));
-  p->tamanio_reservado = bytes;
+  p->tamanio_reservado = tam;
 
   return p;
 }
@@ -433,7 +435,7 @@ void interpretar_instruccion(char *linea) {
     char nombre[32];
     int tamanio;
     sscanf(linea, "INIT_PROC %s %d", nombre, &tamanio);
-    crear_proceso_y_reservar(nombre, tamanio);
+    //crear_proceso_y_reservar(nombre, tamanio);  COMENTADO PARA PROBAR
 
     //Todo: si falla que hacemos?
 

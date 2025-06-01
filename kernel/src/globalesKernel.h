@@ -165,6 +165,7 @@ extern int algoritmoDePlanificacionInt;
 //CONEXIONES
 extern void iniciarServidores();
 extern void cerrarConexiones();
+extern bool esperarOK2(int fdConexion);
 
 //IO
 
@@ -176,12 +177,12 @@ extern sem_t* semaforoIntentarPlanificar;
 
 extern sem_t* semaforoGuardarDatosCPU;
 
+//MEMORIA
+extern void mandarDatosProcesoAMemoria(PCB* proceso);
+
 
 //OTRAS
-/**
- * @brief Pasa un valor uint32_t a un char.
-*/
-extern char* pasarUnsignedAChar(uint32_t unsigned_);
+
 
  
 

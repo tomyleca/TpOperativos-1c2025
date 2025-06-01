@@ -6,6 +6,7 @@
 #include "utils/conexiones.h"
 #include "utils/configs.h"
 #include "utils/shared.h"
+#include "utils/monitoresDiccionarios.h"
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/string.h>
@@ -45,12 +46,12 @@ typedef struct {
   int pid; // ID único
   MetricaProceso metricas;        // array de frames físicos asignados
   int tamanio_reservado; // en bytes
-  char nombre[64];
   int cantidad_instrucciones;
   TablaPagina *tabla_raiz;
 } Proceso;
 
-extern Proceso **Procesos;
+extern t_diccionarioConSemaforos* diccionarioProcesos;
+//extern Proceso **Procesos;
 extern int cantidad_Procesos;
 
 
@@ -70,14 +71,14 @@ int asignar_frame_libre();
 void asignar_frames_hojas(TablaPagina *tabla);
 
 //* interaccion con memoria
-Proceso *crear_proceso();
+Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo);
 int *reservar_frames(int cantidad);
 int reservar_memoria(Proceso *p, int bytes);
 void escribir_byte(Proceso *p, int direccion_virtual, char valor);
 void escribir_memoria(Proceso *p, int direccion_virtual, char valor);
 char leer_byte(Proceso *p, int direccion_virtual);
 void leer_memoria(Proceso *p, int direccion_virtual);
-Proceso *crear_proceso_y_reservar(const char *nombre, int bytes);
+Proceso *guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo);
 void mostrar_procesos_activos();
 void liberar_memoria(Proceso *p);
 void destruir_proceso(Proceso *p);
