@@ -214,7 +214,7 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   }
   p->pid = PID;  
   p->tamanio_reservado = 0;
-rADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
+  agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
 
 
   return p;
