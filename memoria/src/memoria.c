@@ -9,9 +9,8 @@ int main(int argc, char* argv[]) {
     inicializar_memoria();// inicializa la memoria con los datos de memoria.config
     mostrar_bitmap();//TODO: Borrar esto es testing
     diccionarioProcesos = crearDiccionarioConSemaforos();
-    Proceso *p= guardarProcesoYReservar(0,30,"30");
-    Proceso *p2= guardarProcesoYReservar(0,30,"30");
-    dump_memory(p);
+   // guardarProcesoYReservar(0,30,"30");
+
     //free(p);
      //INICIO LOGGER
     logger_memoria = iniciar_logger("memoriaLogger.log","memoriaLogger",log_level);

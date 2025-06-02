@@ -7,9 +7,7 @@
 int proximo_pid = 0;
 bool *bitmap_frames = NULL;
 char *memoria_real = NULL;
-Proceso **Procesos = NULL;
-int cantidad_Procesos = 0;
-TablaPagina *tabla_raiz = NULL;
+// Mutexes
 t_diccionarioConSemaforos* diccionarioProcesos;
 
 void leerConfigMemoria(t_config* config_memoria) 
@@ -32,6 +30,8 @@ void inicializar_memoria() {
   CANT_FRAMES = TAM_MEMORIA / TAM_PAGINA;
 
   printf("Cantidad de frames: %d\n", CANT_FRAMES);
+  printf("Tamaño de pagina: %d\n", TAM_PAGINA);
+
   memoria_real = malloc(TAM_MEMORIA);
   if (!memoria_real) {
     fprintf(stderr, "ERROR: No se pudo asignar memoria simulada\n");
@@ -74,7 +74,7 @@ int traducir_direccion(Proceso *p, int direccion_virtual) {
 
   TablaPagina *tabla = p->tabla_raiz;
 
-  int bits_por_nivel = 0;
+
   int divisor = 1;
   for (int i = 1; i < CANTIDAD_NIVELES; i++)
     divisor *= ENTRADAS_POR_TABLA;
@@ -208,15 +208,12 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
     fprintf(stderr, "Error al crear proceso\n");
     exit(EXIT_FAILURE);
   }
-
   p->pid = PID;  
-  p->tamanio_reservado=0;
   
-
   p->tamanio_reservado = 0;
 
-  
   agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
+
 
   return p;
 }
@@ -242,23 +239,26 @@ int *reservar_frames(int cantidad) {
     return NULL;
   }
 
+
   return frames;
 }
 
 int reservar_memoria(Proceso *p, int bytes) {
+
+
+
   int paginas_necesarias = (bytes + TAM_PAGINA - 1) / TAM_PAGINA;
   int *frames = reservar_frames(paginas_necesarias);
   if (!frames) {
     fprintf(stderr, "No hay suficientes frames libres para %d bytes\n", bytes);
     return -1;
   }
-  if (p->tabla_raiz == NULL) {
     p->tabla_raiz = crear_tabla_nivel(1);
     int pagina_logica_actual = 0;
     asignar_frames_en_tabla(p->tabla_raiz, paginas_necesarias, frames, &pagina_logica_actual, 1, p);
 
     p->tamanio_reservado += paginas_necesarias * TAM_PAGINA;
-  }
+    
 
   free(frames);
   return 0;
@@ -299,15 +299,22 @@ void leer_memoria(Proceso *p, int direccion_virtual) {
 
 void mostrar_procesos_activos() {
   printf("\n=== Procesos Activos ===\n");
-  for (int i = 0; i < cantidad_Procesos; i++) {
-    Proceso *p = Procesos[i];
-    int cant_paginas = (p->tamanio_reservado + TAM_PAGINA - 1) / TAM_PAGINA;
 
-    printf("PID %d: %d bytes (%d paginas) | Tabla raiz en %p\n", p->pid, p->tamanio_reservado, cant_paginas, (void *)p->tabla_raiz);
+  sem_wait(diccionarioProcesos->semaforoMutex);
 
-    printf("\n");
+  t_list* procesos = dictionary_elements(diccionarioProcesos->diccionario);
+  for (int i = 0; i < list_size(procesos); i++) {
+      Proceso* p = list_get(procesos, i);
+      int cant_paginas = (p->tamanio_reservado + TAM_PAGINA - 1) / TAM_PAGINA;
+      printf("PID %d: %d bytes (%d páginas) | Tabla raíz en %p\n",
+             p->pid, p->tamanio_reservado, cant_paginas, (void*) p->tabla_raiz);
   }
+
+  list_destroy(procesos);
+
+  sem_post(diccionarioProcesos->semaforoMutex);
 }
+
 
 void limpiar_frames_en_tabla(TablaPagina *tabla, int *frames, int cantidad,
                              int *index, int nivel_actual, Proceso *p) {
@@ -361,27 +368,16 @@ void liberar_memoria(Proceso *p) {
 void destruir_proceso(Proceso *p) {
   liberar_memoria(p); // libera frames y tabla
 
-  // Eliminar de la lista de procesos activos
-  for (int i = 0; i < cantidad_Procesos; i++) {
-    if (Procesos[i] == p) {
-      for (int j = i + 1; j < cantidad_Procesos; j++) {
-        Procesos[j - 1] = Procesos[j];
-      }
-      cantidad_Procesos--;
-      break;
-      }
-    }
-
-    Procesos = realloc(Procesos, sizeof(Proceso *) * cantidad_Procesos);
+  sacarDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(p->pid));
     free(p);
+
+    
 
 }
 
 void dump_memory(Proceso *p) {
   mostrar_bitmap();
- 
   imprimir_tabla(p->tabla_raiz, 1, 0);
-  
   mostrar_procesos_activos();
 }
 
@@ -392,13 +388,10 @@ Proceso *guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) 
     free(p);
     return NULL;
   }
-
   
   memset(&p->metricas, 0, sizeof(MetricaProceso));
   dump_memory(p);
-  p->tamanio_reservado = tam;
-
-  return p;
+return p;
 }
 
 char **leer_instrucciones(const char *ruta, int *cantidad) {
@@ -424,62 +417,4 @@ char **leer_instrucciones(const char *ruta, int *cantidad) {
   fclose(archivo);
   *cantidad = count;
   return lineas;
-}
-
-void interpretar_instruccion(char *linea) {
-  char instruccion[32];
-  sscanf(linea, "%s", instruccion);
-
-  //TODO: ACA ESTAMOS ASUMIENDO QUE LAS INSTRUCCIONES TIENE UN SENTIDO Y ORDEN LOGICO
-  //TODO: VERIFICAR SI PUEDE ELIMINAR OTRO PROCESO.
-
-  if (strcmp(instruccion, "INIT_PROC") == 0) {
-    char nombre[32];
-    int tamanio;
-    sscanf(linea, "INIT_PROC %s %d", nombre, &tamanio);
-    //crear_proceso_y_reservar(nombre, tamanio);  COMENTADO PARA PROBAR
-
-    //Todo: si falla que hacemos?
-
-
-  } else if (strcmp(instruccion, "WRITE") == 0) {
-    int dir;
-    char valor[256];
-    sscanf(linea, "WRITE %d %s", &dir, valor);
-    int len = strlen (valor);
-    for (int i = 0; i < len; i++){
-        escribir_memoria(Procesos[cantidad_Procesos - 1], dir+i, valor[i]);
-    }
-  } else if (strcmp(instruccion, "READ") == 0) {
-    int dir, size;
-    sscanf(linea, "READ %d %d", &dir, &size);
-    for (int i = 0; i < size; i++){
-        leer_memoria(Procesos[cantidad_Procesos - 1], dir + i);
-    }
-  } else if (strcmp(instruccion, "IO") == 0) {
-    // simular espera con sleep o impresión
-    int tiempo;
-    char recurso[32];
-    sscanf(linea, "IO %s %d", recurso, &tiempo);
-    printf("Simulando IO en %s por %d ms\n", recurso, tiempo);
-
-  } else if (strcmp(instruccion, "DUMP_MEMORY") == 0) {
-   dump_memory(Procesos[cantidad_Procesos - 1]);
-
-  } else if (strcmp(instruccion, "EXIT") == 0) {
-    if (cantidad_Procesos > 0) {
-      destruir_proceso(Procesos[cantidad_Procesos - 1]); // último creado
-      printf(">>> Proceso finalizado.\n");
-      mostrar_bitmap();//TODO: Borrar esto es testing
-    } else {
-      printf(">>> No hay proceso activo para finalizar.\n");
-    }
-
-  } else if (strcmp(instruccion, "NOOP") == 0 ||
-             strcmp(instruccion, "GOTO") == 0) {
-    // ignorar o loguear
-
-  } else {
-    printf("Instrucción desconocida: %s\n", instruccion);
-  }
 }

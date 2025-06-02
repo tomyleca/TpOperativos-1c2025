@@ -44,14 +44,14 @@ typedef struct TablaPagina {
 } TablaPagina;
 typedef struct {
   int pid; // ID único
-  MetricaProceso metricas;        // array de frames físicos asignados
-  int tamanio_reservado; // en bytes
+  MetricaProceso metricas;  
+  int tamanio_reservado ; // en bytes
   int cantidad_instrucciones;
   TablaPagina *tabla_raiz;
 } Proceso;
 
 extern t_diccionarioConSemaforos* diccionarioProcesos;
-//extern Proceso **Procesos;
+
 extern int cantidad_Procesos;
 
 
@@ -61,7 +61,6 @@ extern int cantidad_Procesos;
 // Prototipos
 // =====================
 void leerConfigMemoria(t_config* config_memoria);
-void asignar_parametros_artificial();
 void inicializar_memoria();
 TablaPagina *crear_tabla_nivel(int nivel_actual);
 void imprimir_tabla(TablaPagina *tabla, int nivel, int indent);
