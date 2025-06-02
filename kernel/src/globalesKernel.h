@@ -109,7 +109,9 @@ extern char* puerto_escucha_dispatch;
 extern char* puerto_escucha_interrupt;
 extern char* puerto_escucha_IO;
 extern int alfa;
+extern int64_t estimacion_inicial;
 extern char*  algoritmo_cola_new;
+
 extern bool algoritmoColaNewEnFIFO;
 
 extern t_log_level log_level;

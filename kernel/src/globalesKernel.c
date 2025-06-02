@@ -17,8 +17,11 @@ char* puerto_escucha_dispatch;
 char* puerto_escucha_interrupt;
 char* puerto_escucha_IO;
 int alfa;
+int64_t estimacion_inicial;
+
 char* algoritmo_cola_new;
 bool algoritmoColaNewEnFIFO;
+
 
 t_log_level log_level;
 t_log* loggerKernel;

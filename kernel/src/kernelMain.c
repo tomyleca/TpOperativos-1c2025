@@ -59,6 +59,7 @@ void leerConfigKernel(t_config* config_kernel) {
     alfa = config_get_int_value(config_kernel, "ALFA");
     tiempo_suspension = config_get_int_value(config_kernel, "TIEMPO_SUSPENSION");
     log_level = log_level_from_string(config_get_string_value(config_kernel, "LOG_LEVEL"));
+    estimacion_inicial = config_get_int_value(config_kernel,"ESTIMACION_INICIAL");
     
 }
 

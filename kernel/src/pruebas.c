@@ -3,7 +3,7 @@
 void prueba1()
 {
     INIT_PROC("1",4);
-    INIT_PROC("2",9000000000);
+    INIT_PROC("2",2);
     guardarDatosCPUDispatch("1",1);
     guardarDatosCPUInterrupt("1",3);
     sleep(4);

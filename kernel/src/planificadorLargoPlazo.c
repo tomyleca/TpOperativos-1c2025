@@ -15,8 +15,8 @@ void inicializarProceso(){
             log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"SWAP_READY","READY");
             cargarCronometro(procesoAInicializar,SWAP_READY);
             mandarDatosProcesoAMemoria(procesoAInicializar);
-
             pasarAReady(procesoAInicializar);
+            inicializarProceso(); // Mientras la respuesta sea OK sigo intentando inicializar procesos
            
         }
         }
@@ -31,6 +31,7 @@ void inicializarProceso(){
             log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"NEW","READY");
             cargarCronometro(procesoAInicializar,NEW);
             pasarAReady(procesoAInicializar);
+            inicializarProceso(); // Mientras la respuesta sea OK sigo intentando inicializar procesos
         }
         
 
