@@ -77,7 +77,7 @@ void escribir_byte(Proceso *p, int direccion_virtual, char valor);
 void escribir_memoria(Proceso *p, int direccion_virtual, char valor);
 char leer_byte(Proceso *p, int direccion_virtual);
 void leer_memoria(Proceso *p, int direccion_virtual);
-Proceso *guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo);
+int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo);
 void mostrar_procesos_activos();
 void liberar_memoria(Proceso *p);
 void destruir_proceso(Proceso *p);
