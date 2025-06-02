@@ -62,7 +62,7 @@ TablaPagina *crear_tabla_nivel(int nivel_actual) {
       tabla->frames[i] = -1; // sin frame asignado aún
   } else {
     tabla->frames = NULL;
-    tabla->entradas = calloc( ENTRADAS_POR_TABLA, sizeof(TablaPagina *));
+    tabla->entradas = calloc(ENTRADAS_POR_TABLA, sizeof(TablaPagina *));
     }
   
 
@@ -136,11 +136,15 @@ void imprimir_tabla(TablaPagina *tabla, int nivel_actual, int indent) {
     if (tabla->es_hoja) {
       int frame = tabla->frames[i];
       if (frame == -1)
-        printf("Nivel %d - Entrada %d: [SIN FRAME]\n", nivel_actual, i);
+       printf("Nivel %d - Entrada %d: [SIN FRAME]\n", nivel_actual, i);
       else
         printf("Nivel %d - Entrada %d: Frame %d\n", nivel_actual, i, frame);
     } else {
-      if(tabla->entradas[i]!=NULL){
+          if (tabla->entradas == NULL) {
+            printf("  (entradas == NULL)\n");
+            return;
+        }
+      if(tabla->entradas[i] != NULL){
         printf("Nivel %d - Entrada %d:\n", nivel_actual, i);
         imprimir_tabla(tabla->entradas[i], nivel_actual + 1, indent + 1);
       }
@@ -209,10 +213,8 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
     exit(EXIT_FAILURE);
   }
   p->pid = PID;  
-  
   p->tamanio_reservado = 0;
-
-  agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
+rADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
 
 
   return p;
@@ -258,7 +260,6 @@ int reservar_memoria(Proceso *p, int bytes) {
     asignar_frames_en_tabla(p->tabla_raiz, paginas_necesarias, frames, &pagina_logica_actual, 1, p);
 
     p->tamanio_reservado += paginas_necesarias * TAM_PAGINA;
-    
 
   free(frames);
   return 0;
@@ -390,8 +391,10 @@ Proceso *guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) 
   }
   
   memset(&p->metricas, 0, sizeof(MetricaProceso));
+
   dump_memory(p);
 return p;
+
 }
 
 char **leer_instrucciones(const char *ruta, int *cantidad) {
