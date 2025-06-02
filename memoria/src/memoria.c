@@ -19,13 +19,14 @@ int main(int argc, char* argv[]) {
 	lista_contextos = list_create();
 	pthread_create(&hilo_memoria,NULL, (void*)server_escucha,&fd_escucha_servidor);
 
-    //! ACA SE LIBRERA TODA LA MEMORIA OJO 
  
-    free(memoria_real);
-    free(bitmap_frames);
 
     pthread_join(hilo_memoria,NULL);
 
-    return EXIT_SUCCESS;
+   //! ACA SE LIBRERA TODA LA MEMORIA OJO 
+    free(memoria_real);
+     free(bitmap_frames);
+ 
+     return EXIT_SUCCESS;
 
 }

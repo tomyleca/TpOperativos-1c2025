@@ -4,7 +4,6 @@
 #include <string.h>
 
 
-int proximo_pid = 0;
 bool *bitmap_frames = NULL;
 char *memoria_real = NULL;
 // Mutexes
