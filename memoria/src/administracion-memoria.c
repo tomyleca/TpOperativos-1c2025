@@ -62,7 +62,7 @@ TablaPagina *crear_tabla_nivel(int nivel_actual) {
       tabla->frames[i] = -1; // sin frame asignado aún
   } else {
     tabla->frames = NULL;
-    tabla->entradas = calloc( ENTRADAS_POR_TABLA, sizeof(TablaPagina *));
+    tabla->entradas = calloc(ENTRADAS_POR_TABLA, sizeof(TablaPagina *));
     }
   
 
@@ -136,11 +136,15 @@ void imprimir_tabla(TablaPagina *tabla, int nivel_actual, int indent) {
     if (tabla->es_hoja) {
       int frame = tabla->frames[i];
       if (frame == -1)
-        printf("Nivel %d - Entrada %d: [SIN FRAME]\n", nivel_actual, i);
+       printf("Nivel %d - Entrada %d: [SIN FRAME]\n", nivel_actual, i);
       else
         printf("Nivel %d - Entrada %d: Frame %d\n", nivel_actual, i, frame);
     } else {
-      if(tabla->entradas[i]!=NULL){
+          if (tabla->entradas == NULL) {
+            printf("  (entradas == NULL)\n");
+            return;
+        }
+      if(tabla->entradas[i] != NULL){
         printf("Nivel %d - Entrada %d:\n", nivel_actual, i);
         imprimir_tabla(tabla->entradas[i], nivel_actual + 1, indent + 1);
       }
@@ -208,12 +212,8 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
     fprintf(stderr, "Error al crear proceso\n");
     exit(EXIT_FAILURE);
   }
-
   p->pid = PID;  
   p->tamanio_reservado=0;
-  
-
-  p->tamanio_reservado = 0;
 
   
   agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
@@ -252,14 +252,11 @@ int reservar_memoria(Proceso *p, int bytes) {
     fprintf(stderr, "No hay suficientes frames libres para %d bytes\n", bytes);
     return -1;
   }
-  if (p->tabla_raiz == NULL) {
     p->tabla_raiz = crear_tabla_nivel(1);
     int pagina_logica_actual = 0;
     asignar_frames_en_tabla(p->tabla_raiz, paginas_necesarias, frames, &pagina_logica_actual, 1, p);
 
     p->tamanio_reservado += paginas_necesarias * TAM_PAGINA;
-  }
-
   free(frames);
   return 0;
 }
@@ -392,10 +389,8 @@ Proceso *guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) 
     free(p);
     return NULL;
   }
-
   
   memset(&p->metricas, 0, sizeof(MetricaProceso));
-  dump_memory(p);
   p->tamanio_reservado = tam;
 
   return p;
