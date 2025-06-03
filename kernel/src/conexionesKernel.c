@@ -37,9 +37,14 @@ void iniciarServidores()
     log_info(loggerKernel, "## Servidor INTERRUPT iniciado");
     
     
-    //cliente_kernel_dispatch = esperar_cliente(socket_kernel_cpu_dispatch);
-    
-    //cliente_kernel_interrupt = esperar_cliente(socket_kernel_cpu_interrupt);
 
+}
+
+bool esperarOK2(int fdConexion)
+{
+    if(recibir_operacion(fdConexion)== OK)
+        return 1;
+    else
+        return 0;
 
 }

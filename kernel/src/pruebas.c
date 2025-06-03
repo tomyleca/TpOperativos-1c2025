@@ -4,7 +4,8 @@ void prueba1()
 {
     INIT_PROC("1",4);
     INIT_PROC("2",2);
-    //guardarDatosCPU("id",1);
+    guardarDatosCPUDispatch("1",1);
+    guardarDatosCPUInterrupt("1",3);
     sleep(4);
     syscall_IO(0,"Prueba",7000000);
     sleep(4);

@@ -1,6 +1,8 @@
 #include <semaphore.h>
 #include <commons/collections/dictionary.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
 
 typedef struct{
     t_dictionary* diccionario;
@@ -12,9 +14,17 @@ typedef struct{
 
 
 t_diccionarioConSemaforos* crearDiccionarioConSemaforos(); 
-void agregarADiccionario(t_diccionarioConSemaforos* diccionarioConSemaforos,char* clave, void* valor);
-void* leerDeDiccionario(t_diccionarioConSemaforos* dicionarioConSemaforos,char* clave);
-void* sacarDeDiccionario(t_diccionarioConSemaforos* diccionarioConSemaforos,char* clave);
+
+extern void agregarADiccionario(t_diccionarioConSemaforos* diccionarioConSemaforos,char* clave, void* valor);
+extern void* leerDeDiccionario(t_diccionarioConSemaforos* dicionarioConSemaforos,char* clave);
+extern void* sacarDeDiccionario(t_diccionarioConSemaforos* diccionarioConSemaforos,char* clave);
+
+
+
+/**
+ * @brief Pasa un valor uint32_t a un char.
+*/
+extern char* pasarUnsignedAChar(uint32_t unsigned_);
 
 
 

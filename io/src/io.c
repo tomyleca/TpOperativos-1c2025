@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 
         if(argc!=2)
     {
-        //TODO logger error
+        log_error(loggerIO,"## Error en los argumentos para inicializar IO.");
         return EXIT_FAILURE;
     }
 

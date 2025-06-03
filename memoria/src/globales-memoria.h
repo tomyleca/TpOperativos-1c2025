@@ -27,8 +27,8 @@ typedef struct {
 } t_pids;
 
 typedef struct {
-    int pid; // Identificador del proceso
-    int tamanio_proceso;
+    uint32_t pid; // Identificador del proceso
+    uint32_t tamanio_proceso;
     t_pids datos_pid;
     int id_tabla_primer_nivel; // Identificador de la tabla de primer nivel
 } t_contexto;
@@ -36,9 +36,9 @@ typedef struct {
 
 // Estructura para la información que envía Kernel 
 typedef struct {
-    int pid; 
+    uint32_t pid; 
     char* archivo_pseudocodigo; 
-    int tamanio_proceso; 
+    uint32_t tamanio_proceso; 
 } t_info_kernel; // Aca van los datos del proceso que nos manda Kernel
 
 // Estructura para las instrucciones

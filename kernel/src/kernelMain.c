@@ -26,9 +26,9 @@ int main(int argc, char* argv[]) {
     pthread_create(hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
 
 
+    prueba1();
     
-    
-    pruebaConCPU();
+    //pruebaConCPU();
     
    
 

@@ -43,7 +43,7 @@ void* planificadorCortoPlazo(void* arg)
         }
 
 
-        if(procesoAEjecutar != NULL)
+        if(procesoAEjecutar != NULL && procesoAEjecutar->PID >= 0) //Lo del PID es un chequeo de que estoy apuntando a un struct de tipo PCB
         {
             log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAEjecutar->PID,"READY","EXECUTE");
             cargarCronometro(procesoAEjecutar,READY);

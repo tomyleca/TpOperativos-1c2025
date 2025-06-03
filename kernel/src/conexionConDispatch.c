@@ -81,10 +81,10 @@ nucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion)
     nucleoCPU* nucleoCPU = chequearSiCPUYaPuedeInicializarse(identificador);
     if(nucleoCPU == NULL)//Si esta en NULL quiere decir que la otra conexion todavía no llego
     {
-        nucleoCPU = malloc(sizeof(nucleoCPU));
-        nucleoCPU->identificador= malloc(strlen(identificador));
+        nucleoCPU = malloc(sizeof(*nucleoCPU));
+        nucleoCPU->identificador= malloc(strlen(identificador)+1);
         strcpy(nucleoCPU->identificador,identificador);
-        nucleoCPU->procesoEnEjecucion=NULL;
+       nucleoCPU->procesoEnEjecucion=NULL;
         nucleoCPU->fdConexionDispatch = fdConexion;
         agregarALista(listaCPUsAInicializar,nucleoCPU);
     }
@@ -149,6 +149,6 @@ void mandarContextoACPU(uint32_t PID,uint32_t PC,int fdConexion)
     cargar_uint32_t_al_super_paquete(paquete,PID);
     cargar_uint32_t_al_super_paquete(paquete,PC);
     enviar_paquete(paquete,fdConexion);
-    esperarOK(fdConexion);
+    esperarOK2(fdConexion);
     free(paquete);
 }
