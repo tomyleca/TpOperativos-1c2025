@@ -74,8 +74,10 @@ typedef struct
 typedef struct{
     PCB* proceso;
     sem_t* semaforoIOFinalizada;
+    sem_t* semaforoMutex;
     bool estaENSwap;
     int64_t tiempo;
+    
 } procesoEnEsperaIO;
 
 
@@ -184,6 +186,7 @@ extern int mandarDatosProcesoAMemoria(PCB* proceso);
 
 
 //OTRAS
+extern void esperarCancelacionDeHilo(pthread_t hiloACancelar);;
 
 
  
