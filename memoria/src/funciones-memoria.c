@@ -117,9 +117,9 @@ void crear_pid(t_contexto* nuevo_contexto, t_info_kernel info_kernel)
     //nuevo_contexto->id_tabla_primer_nivel = crear_tabla_nivel(1)
 }
 
-t_contexto* buscar_contexto_por_pid(int pid)
+Proceso* buscar_contexto_por_pid(int pid)
 {
-    t_contexto* contexto_actual;
+    Proceso* contexto_actual;
     // Recorrer la lista de contextos
     for (int i = 0; i < list_size(lista_contextos); i++) 
     {
@@ -141,21 +141,22 @@ t_contexto* buscar_contexto_por_pid(int pid)
 void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
 {
     int pid = recibir_int_del_buffer(buffer);
-    int pc = recibir_int_del_buffer(buffer);
+    uint32_t pc = recibir_uint32_t_del_buffer(buffer);
     
-    t_contexto* nuevo_context = buscar_contexto_por_pid(pid); 
-    char* instruccion = obtener_instruccion_por_indice(nuevo_context->datos_pid.instrucciones, pc++);
+    Proceso* nuevo_contexto = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid)); 
+    char* instruccion = obtener_instruccion_por_indice(nuevo_contexto->lista_instrucciones, pc++);
     
     printf("Indice: %d -- INSTRUCCION: %s \n", pc, instruccion);
     
     t_paquete* paquete_contexto = crear_super_paquete(CPU_RECIBE_INSTRUCCION_MEMORIA);
-    cargar_int_al_super_paquete(paquete_contexto, nuevo_context->pid);
+    cargar_int_al_super_paquete(paquete_contexto, nuevo_contexto->pid);
     cargar_string_al_super_paquete(paquete_contexto, instruccion);
     
     char** partes = string_split(instruccion, " ");
     
     enviar_paquete(paquete_contexto, socket_cpu);
-    free(paquete_contexto);  
+    free(paquete_contexto);
+    free(nuevo_contexto);
     
     // Liberar memoria usada por el string_split
     liberar_array_strings(partes);   
@@ -176,7 +177,7 @@ char* obtener_instruccion_por_indice(t_list* instrucciones, uint32_t indice_inst
  	}
 }
 
-void enviar_contexto(t_contexto* contexto_proceso, int socket_cpu)
+/*void enviar_contexto(Proceso* contexto_proceso, int socket_cpu)
 {   
     // Verificar que ambos contextos no sean NULL
     if (contexto_proceso == NULL || contexto_proceso->pid == NULL) 
@@ -189,9 +190,9 @@ void enviar_contexto(t_contexto* contexto_proceso, int socket_cpu)
     t_paquete* paquete_contexto = crear_super_paquete(CPU_RECIBE_CONTEXTO);
     
     cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->pid);
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.pc);
+    cargar_string_al_super_paquete(paquete, contexto_proceso->lista_instrucciones)
    
     enviar_paquete(paquete_contexto, socket_cpu);
 
     free(paquete_contexto);
-}
+}*/

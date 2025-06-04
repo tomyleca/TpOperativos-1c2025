@@ -66,14 +66,6 @@ void atender_memoria()
                 free(buffer);
                 break;
 
-            case CPU_RECIBE_CONTEXTO:  
-                buffer = recibiendo_super_paquete(socket_cpu_memoria);
-                contexto->pid = recibir_int_del_buffer(buffer);
-                contexto->registros.PC = recibir_int_del_buffer(buffer); 
-                fetch(socket_cpu_memoria);
-                free(buffer);
-                break;
-
             case CPU_RECIBE_OK_DE_LECTURA:
                buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 contexto->pid = recibir_int_del_buffer(buffer);
@@ -85,18 +77,10 @@ void atender_memoria()
             case CPU_RECIBE_OK_DE_ESCRITURA:
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 contexto->pid = recibir_int_del_buffer(buffer);
-                direccion_fisica = recibir_int_del_buffer(buffer);                
+                direccion_fisica = recibir_int_del_buffer(buffer);
+                            
                 free(buffer); 
                 break;
-
-            /*case CPU_RECIBE_OK_ACTUALIZAR_CONTEXTO: //MANDO PID CON LOS REGISTROS O PCB COMPLETO
-               buffer = recibiendo_super_paquete(socket_cpu_memoria);
-                contexto->pid = recibir_int_del_buffer(buffer);
-                printf("Antes de semaforo de contexto\n");  
-                sem_post(&sem_contexto);
-                printf("Despues de semaforo de contexto\n");  
-                free(buffer); 
-                break;*/ //TODO esto nose si va, dsp lo vemos cuando hagamos memoria
             case -1:
                 log_error(logger_cpu, "MEMORIA se desconecto. Terminando servidor");
                 pthread_exit(NULL);
@@ -172,14 +156,13 @@ void atender_dispatch_kernel()
                 case PID_KERNEL_A_CPU:
                 printf("ANTES DE RECIBIR OTRO PROCESO\n");
                 sem_wait(&sem_pid);
-                //sem_wait(&sem_contexto); //TODO esto se activa dsp de verificar si va tmb en atender_memoria
                 contexto = malloc(sizeof(t_contexto_cpu));
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
                 contexto->pid = recibir_int_del_buffer(buffer);
                 contexto->registros.PC = recibir_int_del_buffer(buffer);
                 enviarOK(socket_cpu_kernel_dispatch);
-                // ACA HAY QUE SOLICITAR A MEMORIA EL CONTEXTO CON EL PID RECIBIMOS DE KERNEL
-                solicitar_contexto_a_memoria(contexto); 
+                // ACA HAY QUE SOLICITAR A MEMORIA LA PRIMER INSTRUCCION CON EL PID RECIBIMOS DE KERNEL
+                fetch(socket_cpu_memoria); 
                 free(buffer);
                 break;
                 

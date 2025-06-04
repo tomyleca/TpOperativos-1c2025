@@ -15,11 +15,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
+#include <funciones-memoria.h>
+#include <globales-memoria.h>
 
 // =====================
 // Configuración de memoria
 // =====================
-
 
 extern bool *bitmap_frames;
 extern char *memoria_real;
@@ -28,34 +29,10 @@ extern char *memoria_real;
 // Estructuras de datos
 // =====================
 
-typedef struct {
-  int accesos_tabla_paginas;
-  int instrucciones_solicitadas;
-  int bajadas_swap;
-  int subidas_memoria;
-  int lecturas_memoria;
-  int escrituras_memoria;
-} MetricaProceso;
-
-typedef struct TablaPagina {
-  struct TablaPagina **entradas;
-  int *frames;
-  int es_hoja;
-} TablaPagina;
-typedef struct {
-  int pid; // ID único
-  MetricaProceso metricas;  
-  int tamanio_reservado ; // en bytes
-  int cantidad_instrucciones;
-  TablaPagina *tabla_raiz;
-} Proceso;
 
 extern t_diccionarioConSemaforos* diccionarioProcesos;
 
 extern int cantidad_Procesos;
-
-
-
 
 // =====================
 // Prototipos

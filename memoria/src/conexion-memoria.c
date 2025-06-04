@@ -33,6 +33,8 @@ int atender_cliente(int *fd_conexion)
     int cliente_fd = *fd_conexion;
     t_paquete* paquete;
     int pid;
+    int direccion_fisica;
+    int tamanio;
     printf("Si llegue aca, es porque tengo un cliente de kernel o cpu");
 
     while (1) {
@@ -42,24 +44,6 @@ int atender_cliente(int *fd_conexion)
             case MENSAJE:
                 //recibir_mensaje(cliente_fd);
                 break;
-            case CPU_PIDE_CONTEXTO: 
-                //usleep(retardo_memoria * 1000); // Convertir milisegundos a microsegundos
-                nuevo_contexto_provisorio = malloc(sizeof(t_contexto));
-                unBuffer = recibiendo_super_paquete(cliente_fd);
-                pid = recibir_int_del_buffer(unBuffer);
-                nuevo_contexto_provisorio->datos_pid.pc = recibir_int_del_buffer(unBuffer);
-                if(pid >= 0)
-                {
-                    nuevo_contexto_provisorio = buscar_contexto_por_pid(pid);                   
-                    enviar_contexto(nuevo_contexto_provisorio, cliente_fd); 
-                }
-                else
-                {
-                    log_error(logger_memoria, "PID invalido");                   
-                }
-                free(unBuffer);
-            break;
-
             case CHEQUEAR_SI_HAY_MEMORIA_LIBRE:
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 uint32_t tam = recibir_uint32_t_del_buffer(unBuffer);
@@ -100,6 +84,46 @@ int atender_cliente(int *fd_conexion)
                 buscar_y_mandar_instruccion(unBuffer,cliente_fd);
                 free(unBuffer);
             break;
+
+            case CPU_PIDE_LEER_MEMORIA:
+                usleep(retardo_memoria* 1000);
+                printf("en CPU_PIDE_LEER_MEMORIA------------------------------------------------------------------\n");
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                pid = recibir_int_del_buffer(unBuffer);
+                direccion_fisica = recibir_int_del_buffer(unBuffer);
+                tamanio = recibir_int_del_buffer(unBuffer);
+                printf("Direccion fisica en leer memoria: %d --------------------------------------------------------\n", direccion_fisica);
+                free(unBuffer);
+                //TODO ver que pasa aca con el tema de la direc fisica en memoria
+                // Respuesta a CPU
+                paquete = crear_super_paquete(CPU_RECIBE_OK_DE_LECTURA);
+                cargar_int_al_super_paquete(paquete, pid);
+                cargar_string_al_super_paquete(paquete, "OK");
+                cargar_int_al_super_paquete(paquete, tamanio);
+                enviar_paquete(paquete, cliente_fd);
+                free(paquete);
+                break;
+
+            case CPU_PIDE_ESCRIBIR_MEMORIA:
+                usleep(retardo_memoria * 1000);
+                printf("en CPU_PIDE_ESCRIBIR_MEMORIA------------------------------------------------------------------\n");
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                pid = recibir_int_del_buffer(unBuffer);
+                direccion_fisica = recibir_int_del_buffer(unBuffer);
+                uint32_t valor_registro = recibir_uint32_t_del_buffer(unBuffer);
+                log_info(logger_memoria, "Valor del dato a ecribir en memoria: %d", valor_registro);
+                free(unBuffer);
+                
+                // escribir_memoria(pid, direccion_fisica, valor_registro); //TODO hacer esto
+
+                // Respuesta a CPU
+                paquete = crear_super_paquete(CPU_RECIBE_OK_DE_ESCRITURA);
+                cargar_int_al_super_paquete(paquete, pid);
+                cargar_int_al_super_paquete(paquete, direccion_fisica);
+                enviar_paquete(paquete, cliente_fd);
+                free(paquete);
+                printf("despues de mandar el paquete a cpu de CPU_PIDE_ESCRIBIR_MEMORIA\n");
+                break;
             
             case -1:
                  log_error(logger_memoria, "El cliente se desconectó. Terminando servidor.");

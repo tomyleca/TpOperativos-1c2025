@@ -9,6 +9,8 @@ char *memoria_real = NULL;
 // Mutexes
 t_diccionarioConSemaforos* diccionarioProcesos;
 
+
+
 void leerConfigMemoria(t_config* config_memoria) 
 {
     puerto_escucha = config_get_string_value(config_memoria, "PUERTO_ESCUCHA");
@@ -214,7 +216,8 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   p->pid = PID;  
   p->tamanio_reservado = 0;
   agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
-
+  p->pseudocodigo = pseudocodigo;
+  p->lista_instrucciones = leer_archivo_y_cargar_instrucciones(p->pseudocodigo);
 
   return p;
 }
