@@ -137,7 +137,7 @@ void loggearMetricas(PCB* proceso)
     proceso->ME[EXECUTE],proceso->MT[EXECUTE],
     proceso->ME[BLOCKED],proceso->MT[BLOCKED],
     proceso->ME[SWAP_BLOCKED],proceso->MT[SWAP_BLOCKED],
-    proceso->ME[SWAP_READY],proceso->MT[SWAP_READY],
+    proceso->ME[SWAP_READY],proceso->MT[SWAP_READY], //TODO ver por que no anda
     proceso->ME[EXIT],proceso->MT[EXIT]);
 }
 

@@ -19,7 +19,7 @@ extern void* esperarClientesInterrupt(void* arg);
 
 extern void atender_dispatch_cpu(void* conexion);
 
-extern void atender_interrupcion_cpu(void* conexion);
+extern void esperarDatosInterrupt(void* conexion);
 
 extern nucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion);
 

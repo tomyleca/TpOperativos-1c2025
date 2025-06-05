@@ -8,43 +8,28 @@ void* esperarClientesInterrupt(void* arg)
         *fdConexion = esperar_cliente(socket_kernel_cpu_interrupt);
         log_info(loggerKernel, "## Se conectó INTERRUPT");
         pthread_t hilo_interrupcion_cpu;
-        pthread_create(&hilo_interrupcion_cpu, NULL, (void*) atender_interrupcion_cpu, fdConexion);
+        pthread_create(&hilo_interrupcion_cpu, NULL, (void*) esperarDatosInterrupt, fdConexion);
     }
 }
 
 
-void atender_interrupcion_cpu(void* conexion) 
+void esperarDatosInterrupt(void* conexion) 
 {
     int fdConexion = *(int*) conexion;
     
     t_buffer* buffer;
     op_code cod_op;
     
-    nucleoCPU* nucleoCPU;
-    
-   
-
-    while(1) 
+    cod_op = recibir_operacion(fdConexion);
+    while(cod_op != HANDSHAKE_CPU_KERNEL_I)
     {
         cod_op = recibir_operacion(fdConexion);
-        switch (cod_op) 
-        {
-            case MENSAJE:
-                //recibir_mensaje(*fdConexion, loggerKernel,);
-                break;
-            case HANDSHAKE_CPU_KERNEL_I:
-                buffer = recibiendo_super_paquete(fdConexion);
-                char* identificador = recibir_string_del_buffer(buffer);
-                nucleoCPU = guardarDatosCPUInterrupt(identificador,fdConexion);
-            break;
-            /*case -1:
-                log_error(loggerKernel, "KERNEL INTERRUPT se desconecto. Terminando servidor");
-                pthread_exit(NULL);*/
-            /*default:
-                log_warning(loggerKernel, "Operacion desconocida. No quieras meter la pata");
-                break;*/
-        }
-    }
+    }//ESPERO QUE ME MANDE EL COD OP CORRECTO
+    
+    buffer = recibiendo_super_paquete(fdConexion);
+    char* identificador = recibir_string_del_buffer(buffer);
+    guardarDatosCPUInterrupt(identificador,fdConexion);
+
 }
 
 nucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)

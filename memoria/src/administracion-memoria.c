@@ -384,18 +384,19 @@ void dump_memory(Proceso *p) {
   mostrar_procesos_activos();
 }
 
-Proceso *guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
+int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   Proceso *p = guardarProceso(PID,tam,pseudocodigo);
   if (reservar_memoria(p, tam) < 0) {
     fprintf(stderr, "Error: no se pudo asignar memoria al proceso\n");
     free(p);
-    return NULL;
+    return -1;
   }
   
   memset(&p->metricas, 0, sizeof(MetricaProceso));
 
   dump_memory(p);
-return p;
+
+return 0;
 
 }
 

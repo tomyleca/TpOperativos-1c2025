@@ -74,8 +74,10 @@ typedef struct
 typedef struct{
     PCB* proceso;
     sem_t* semaforoIOFinalizada;
+    sem_t* semaforoMutex;
     bool estaENSwap;
     int64_t tiempo;
+    
 } procesoEnEsperaIO;
 
 
@@ -109,7 +111,9 @@ extern char* puerto_escucha_dispatch;
 extern char* puerto_escucha_interrupt;
 extern char* puerto_escucha_IO;
 extern int alfa;
+extern int64_t estimacion_inicial;
 extern char*  algoritmo_cola_new;
+
 extern bool algoritmoColaNewEnFIFO;
 
 extern t_log_level log_level;
@@ -178,10 +182,11 @@ extern sem_t* semaforoIntentarPlanificar;
 extern sem_t* semaforoGuardarDatosCPU;
 
 //MEMORIA
-extern void mandarDatosProcesoAMemoria(PCB* proceso);
+extern int mandarDatosProcesoAMemoria(PCB* proceso);
 
 
 //OTRAS
+extern void esperarCancelacionDeHilo(pthread_t hiloACancelar);;
 
 
  

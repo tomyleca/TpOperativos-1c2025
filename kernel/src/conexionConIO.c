@@ -56,20 +56,20 @@ void* atenderIO(void* conexion)
 
 }
 
-void avisarInicioIO(uint32_t PID,char* nombreIO,int64_t tiempo)
+void avisarInicioIO(procesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo)
 {
     DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
     
 
-    if(!sem_trywait(dispositivoIO->semaforoDispositivoOcupado))
+    if(sem_trywait(dispositivoIO->semaforoDispositivoOcupado) != 0)
         {
-        agregarALista(dispositivoIO->colaEsperandoIO,PID); // Si el dispositivo ya esta ocupado entra acá
-        log_info(loggerKernel,"## <%u> Dispositivo IO: %s ocupado. Se agrega el PID a la Cola de Espera del dispositivo",PID,dispositivoIO->nombre);
+        agregarALista(dispositivoIO->colaEsperandoIO,procesoEnEsperaIO); // Si el dispositivo ya esta ocupado entra acá
+        log_info(loggerKernel,"## <%u> Dispositivo IO: %s ocupado. Se agrega el PID a la Cola de Espera del dispositivo",procesoEnEsperaIO->proceso->PID,dispositivoIO->nombre);
         }
     else
     {
         t_paquete* paquete = crear_super_paquete(INICIA_IO_PROCESO);
-        cargar_uint32_t_al_super_paquete(paquete,PID);
+        cargar_uint32_t_al_super_paquete(paquete,procesoEnEsperaIO->proceso->PID);
         cargar_uint32_t_al_super_paquete(paquete,tiempo);
         enviar_paquete(paquete,dispositivoIO->fdConexion);
     }
