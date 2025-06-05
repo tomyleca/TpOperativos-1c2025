@@ -62,11 +62,92 @@ int escribir_pagina_swap(uint32_t pid, uint32_t pagina, void* contenido) {
     return 0;
 }
 
+int leer_pagina_swap(uint32_t pid, uint32_t pagina, void* buffer) {
+    pthread_mutex_lock(&swap_system->mutex);
+    
     // Buscar la entrada correspondiente
+    bool buscar_entrada(void* elem) {
+        t_entrada_swap* entrada = (t_entrada_swap*)elem;
+        return entrada->pid == pid && entrada->pagina == pagina;
+    }
+    
+    t_entrada_swap* entrada = list_find(swap_system->entradas, buscar_entrada);
+    
+    if (entrada == NULL) {
+        pthread_mutex_unlock(&swap_system->mutex);
+        return -1;
+    }
+    
     // Leer la página del archivo
+    fseek(swap_system->archivo, entrada->offset_swap, SEEK_SET);
+    fread(buffer, 1, tam_pagina, swap_system->archivo);
+    
+    pthread_mutex_unlock(&swap_system->mutex);
+    return 0;
+}
+
+void suspender_proceso(Proceso* p) {
+    void escribir_pagina_en_swap(TablaPagina* tabla, int nivel) {
+        if (tabla == NULL) return;
+        
+        if (tabla->es_hoja) {
+            for (int i = 0; i < entradas_por_tabla; i++) {
+                if (tabla->frames[i] != -1) {
                     // Obtener el contenido de la página
+                    void* contenido = malloc(tam_pagina);
+                    memcpy(contenido, memoria_real + (tabla->frames[i] * tam_pagina), tam_pagina);
+                    
                     // Escribir en SWAP
+                    escribir_pagina_swap(p->pid, i, contenido);
+                    free(contenido);
+                    
                     // Liberar el frame
+                    bitmap_frames[tabla->frames[i]] = false;
+                    tabla->frames[i] = -1;
+                    
+                    actualizar_metricas(p, BAJADA_SWAP);
+                }
+            }
+        } else {
+            for (int i = 0; i < entradas_por_tabla; i++) {
+                if (tabla->entradas[i] != NULL) {
+                    escribir_pagina_en_swap(tabla->entradas[i], nivel + 1);
+                }
+            }
+        }
+    }
+    
+    escribir_pagina_en_swap(p->tabla_raiz, 0);
+}
+
+void desuspender_proceso(Proceso* p) {
+    void leer_pagina_de_swap(TablaPagina* tabla, int nivel) {
+        if (tabla == NULL) return;
+        
+        if (tabla->es_hoja) {
+            for (int i = 0; i < entradas_por_tabla; i++) {
                 // Intentar leer la página del SWAP
+                void* buffer = malloc(tam_pagina);
+                if (leer_pagina_swap(p->pid, i, buffer) == 0) {
                     // Asignar un nuevo frame
+                    int frame = asignar_frame_libre();
+                    if (frame != -1) {
+                        tabla->frames[i] = frame;
                         // Copiar el contenido a memoria
+                        memcpy(memoria_real + (frame * tam_pagina), buffer, tam_pagina);
+                        actualizar_metricas(p, SUBIDA_MEMORIA);
+                    }
+                }
+                free(buffer);
+            }
+        } else {
+            for (int i = 0; i < entradas_por_tabla; i++) {
+                if (tabla->entradas[i] != NULL) {
+                    leer_pagina_de_swap(tabla->entradas[i], nivel + 1);
+                }
+            }
+        }
+    }
+    
+    leer_pagina_de_swap(p->tabla_raiz, 0);
+}
