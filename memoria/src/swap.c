@@ -61,3 +61,12 @@ int escribir_pagina_swap(uint32_t pid, uint32_t pagina, void* contenido) {
     pthread_mutex_unlock(&swap_system->mutex);
     return 0;
 }
+
+    // Buscar la entrada correspondiente
+    // Leer la página del archivo
+                    // Obtener el contenido de la página
+                    // Escribir en SWAP
+                    // Liberar el frame
+                // Intentar leer la página del SWAP
+                    // Asignar un nuevo frame
+                        // Copiar el contenido a memoria

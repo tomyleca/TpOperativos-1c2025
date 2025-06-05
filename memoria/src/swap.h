@@ -24,6 +24,9 @@ extern t_swap* swap_system;
 void inicializar_swap();
 void cerrar_swap();
 int escribir_pagina_swap(uint32_t pid, uint32_t pagina, void* contenido);
+int leer_pagina_swap(uint32_t pid, uint32_t pagina, void* buffer);
+void suspender_proceso(Proceso* p);
+void desuspender_proceso(Proceso* p);
 
 #endif
 
