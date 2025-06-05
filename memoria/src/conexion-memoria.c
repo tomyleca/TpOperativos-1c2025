@@ -44,25 +44,7 @@ int atender_cliente(int *fd_conexion)
             case MENSAJE:
                 //recibir_mensaje(cliente_fd);
                 break;
-            case CPU_PIDE_CONTEXTO: 
-                //usleep(retardo_memoria * 1000); // Convertir milisegundos a microsegundos
-                nuevo_contexto_provisorio = malloc(sizeof(t_contexto));
-                unBuffer = recibiendo_super_paquete(cliente_fd);
-                pid = recibir_int_del_buffer(unBuffer);
-                nuevo_contexto_provisorio->datos_pid.pc = recibir_int_del_buffer(unBuffer);
-                if(pid >= 0)
-                {
-                    nuevo_contexto_provisorio = buscar_contexto_por_pid(pid);                   
-                    enviar_contexto(nuevo_contexto_provisorio, cliente_fd); 
-                }
-                else
-                {
-                    log_error(logger_memoria, "PID invalido");                   
-                }
-                free(unBuffer);
-            break;
-
-
+        
             case GUARDAR_PROCESO_EN_MEMORIA:
                 t_info_kernel datos_kernel; 
                 datos_kernel.pid = 0;

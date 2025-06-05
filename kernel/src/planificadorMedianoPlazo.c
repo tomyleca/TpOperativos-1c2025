@@ -105,7 +105,8 @@ void esperarCancelacionDeHilo(pthread_t hiloACancelar)
 
 void contadorParaSwap (procesoEnEsperaIO* procesoEnEsperaIO)
 {
-    usleep(tiempo_suspension); //TODO ver si hay que pasarlo a microsegundos o como es
+    
+    usleep(tiempo_suspension*1000); //  *1000 para pasar de milisegundos a microsegundos //TODO ver si hay que pasarlo a microsegundos o como es
     
     //Paso el proceso a Swap
     sem_wait(procesoEnEsperaIO->semaforoMutex); 

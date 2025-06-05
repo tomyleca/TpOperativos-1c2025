@@ -74,7 +74,7 @@ uint32_t recibirProcesoEnIOEIniciarUsleep()
 
     log_info(loggerIO,"## PID: <%u> - Inicio de IO - Tiempo: <%u>",PID,tiempo);
     
-    usleep(tiempo);
+    usleep(tiempo*1000); //  *1000 para pasar de milisegundos a microsegundos
  
 
     return PID;
