@@ -17,6 +17,7 @@
 #include <stdbool.h>
 #include <funciones-memoria.h>
 #include <globales-memoria.h>
+#include "swap.h"
 
 // =====================
 // Configuración de memoria
