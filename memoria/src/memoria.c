@@ -15,8 +15,6 @@ int main(int argc, char* argv[]) {
 
 	pthread_create(&hilo_memoria,NULL, (void*)server_escucha,&fd_escucha_servidor);
 
- 
-
     pthread_join(hilo_memoria,NULL);
 
    //! ACA SE LIBRERA TODA LA MEMORIA OJO 

@@ -261,8 +261,6 @@ void fetch(int socket_cpu_memoria)
 
 void decode()
 {     
-
-
     while(1)
     {
         printf("Antes de el semaforo hay instruccion\n");
@@ -287,32 +285,26 @@ void decode()
             case I_GOTO:
                 instruccion_goto(parte);
                 break;
-            case IO:
+            case I_IO:
                 syscall_IO(parte);
                 break;
-
-       
-          
-            
-            case DUMP_MEMORY:
-     
-               
-            
-            case INIT_PROCCESS:
-
-                
-            case SYSCALL_EXIT:
-      
-                case -1:
-                    log_warning(logger_cpu, "Algo paso en el interpretar instruccion!!!");
-                    destruir_diccionarios();
+            case I_DUMP_MEMORY:
+                syscallDUMP_MEMORY(parte);
+                break;
+            case I_INIT_PROCESS:
+                syscallINIT_PROC(parte);
+                break;
+            case I_EXIT:
+                syscallEXIT(parte);
+                break;
+            case -1:
+                log_warning(logger_cpu, "Algo paso en el interpretar instruccion!!!");
+                destruir_diccionarios();
                     return;
-                default:
-                    log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
-                    break;
-
+            default:
+                log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
+                break;
             }
-            // dictionary_destroy(registros);
         }
         return;
 }
@@ -384,6 +376,8 @@ void iniciar_diccionario_instrucciones()
     dictionary_put(instrucciones, "IO", (void*)(intptr_t)I_IO);
     dictionary_put(instrucciones, "GOTO", (void*)(intptr_t)I_GOTO);
     dictionary_put(instrucciones, "NOOP", (void*)(intptr_t)I_NOOP);
+    dictionary_put(instrucciones, "INIT_PROC", (void*) (intptr_t)I_INIT_PROCESS);
+    dictionary_put(instrucciones, "EXIT", (void*) (intptr_t)I_EXIT);
 }
 
 

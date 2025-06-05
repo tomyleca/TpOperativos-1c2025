@@ -1,7 +1,5 @@
 #include "conexion-memoria.h"
 
-
-
 void server_escucha(int* fd_escucha_servidor)
 {
     log_info(logger_memoria, "MEMORIA lista para recibir peticiones de KERNEL");
@@ -62,19 +60,16 @@ int atender_cliente(int *fd_conexion)
                 else 
                     enviar_paquete(crear_super_paquete(OK),cliente_fd);
                 
-                
                 free(unBuffer);
                 free(datos_kernel.archivo_pseudocodigo);
                 //TODO revisar esto
-            break;    
-
-            case CPU_PIDE_INSTRUCCION_A_MEMORIA: //PARA INICIAR DECODE ESTO!!
+            break;   
+             case CPU_PIDE_INSTRUCCION_A_MEMORIA: //PARA INICIAR DECODE ESTO!!
                 usleep(retardo_memoria * 1000);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 buscar_y_mandar_instruccion(unBuffer,cliente_fd);
                 free(unBuffer);
             break;
-
             case CPU_PIDE_LEER_MEMORIA:
                 usleep(retardo_memoria* 1000);
                 printf("en CPU_PIDE_LEER_MEMORIA------------------------------------------------------------------\n");
@@ -114,7 +109,7 @@ int atender_cliente(int *fd_conexion)
                 free(paquete);
                 printf("despues de mandar el paquete a cpu de CPU_PIDE_ESCRIBIR_MEMORIA\n");
                 break;
-            
+             
             case -1:
                  log_error(logger_memoria, "El cliente se desconectó. Terminando servidor.");
                 pthread_exit(NULL);  

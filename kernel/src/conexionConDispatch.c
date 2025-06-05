@@ -49,6 +49,7 @@ void atender_dispatch_cpu(void* conexion)
             case DUMP_MEMORY:
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
+                PC = recibir_uint32_t_del_buffer(buffer);
                 dump_memory(PID);
                 break;
             case INIT_PROCCESS:
@@ -61,6 +62,7 @@ void atender_dispatch_cpu(void* conexion)
             case SYSCALL_EXIT:
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
+                PC = recibir_uint32_t_del_buffer(buffer);
                 syscallExit(PID);
                 break;
             

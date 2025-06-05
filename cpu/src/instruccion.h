@@ -13,12 +13,14 @@
 
 typedef enum
 {
+    I_WRITE_MEM,
 	I_READ_MEM,
-	I_WRITE_MEM,
     I_DUMP_MEMORY,
     I_IO,
     I_NOOP,
-    I_GOTO
+    I_GOTO,
+    I_INIT_PROCESS,
+    I_EXIT
 }enum_instrucciones;
 
 void iniciar_diccionario_instrucciones();
@@ -43,6 +45,12 @@ void instruccion_goto();
 //-------------SYSCALLS --------------//
 
 void syscall_IO(char** parte);
+
+void syscallDUMP_MEMORY(char** parte);
+
+void syscallEXIT(char** parte);
+
+void syscallINIT_PROC(char** parte);
 
 //-------------SYSCALLS MEMORIA FUNCIONES--------------//
 
