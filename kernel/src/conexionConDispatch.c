@@ -20,6 +20,7 @@ void atender_dispatch_cpu(void* conexion)
     int cod_op;
     nucleoCPU* nucleoCPU;
     uint32_t PID;
+    uint32_t PC;
     
     
    
@@ -40,6 +41,7 @@ void atender_dispatch_cpu(void* conexion)
             case IO:
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
+                PC = recibir_uint32_t_del_buffer(buffer);
                 char* nombreIO = recibir_string_del_buffer(buffer);
                 int64_t tiempoEnIO = recibir_int64_t_del_buffer(buffer);
                 syscall_IO(PID,nombreIO,tiempoEnIO);

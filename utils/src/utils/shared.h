@@ -106,6 +106,8 @@ void cargar_string_al_super_paquete(t_paquete *paquete, char *string);
 
 void cargar_uint32_t_al_super_paquete(t_paquete *paquete, uint32_t numero);
 
+void cargar_int64_t_al_super_paquete(t_paquete* paquete,int64_t numero);
+
 void cargar_int_al_super_paquete(t_paquete *paquete, int numero);
 
 t_buffer *recibiendo_super_paquete(int conexion);

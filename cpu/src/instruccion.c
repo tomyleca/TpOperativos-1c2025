@@ -262,11 +262,13 @@ void fetch(int socket_cpu_memoria)
 void decode()
 {     
 
-    printf("Antes de el semaforo hay instruccion\n");
-    sem_wait(&sem_hay_instruccion); 
-    printf("Despues de el semaforo hay instruccion\n");
+
     while(1)
     {
+        printf("Antes de el semaforo hay instruccion\n");
+        sem_wait(&sem_hay_instruccion); 
+        printf("Despues de el semaforo hay instruccion\n");
+        
         char** parte = string_split(instruccion_recibida, " "); // Divido la instrucción (que es un string) en partes  (decode)
 
         int instruccion_enum = (int)(intptr_t)dictionary_get(instrucciones, parte[0]); // Aca se obtiene la instrucción (el enum) a partir del diccionario
@@ -285,18 +287,34 @@ void decode()
             case I_GOTO:
                 instruccion_goto(parte);
                 break;
-            case -1:
-                log_warning(logger_cpu, "Algo paso en el interpretar instruccion!!!");
-                destruir_diccionarios();
-                return;
-            default:
-                log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
+            case IO:
+                syscall_IO(parte);
                 break;
 
+       
+          
+            
+            case DUMP_MEMORY:
+     
+               
+            
+            case INIT_PROCCESS:
+
+                
+            case SYSCALL_EXIT:
+      
+                case -1:
+                    log_warning(logger_cpu, "Algo paso en el interpretar instruccion!!!");
+                    destruir_diccionarios();
+                    return;
+                default:
+                    log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
+                    break;
+
+            }
+            // dictionary_destroy(registros);
         }
-        // dictionary_destroy(registros);
-    }
-    return;
+        return;
 }
 
 void check_interrupt()
@@ -379,13 +397,13 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
     t_paquete *paquete_kernel_dispatch;
     t_paquete *paquete_memoria;
     
-    // KERNEL -> PID y motivo_de_interrupcion -> le mandamos esto a kernel para que pueda resolver la interrupcion (syscalls)
+    
     paquete_kernel_dispatch = crear_super_paquete(motivo_de_interrupcion);
     cargar_int_al_super_paquete(paquete_kernel_dispatch, contexto->pid);
 
     switch (motivo_de_interrupcion)
     {    
-        case SEGMENTATION_FAULT:
+        case SEGMENTATION_FAULT: //TODO esto va en otro lado
         //MEMORIA
             contexto->registros.PC++;
             paquete_kernel_dispatch->codigo_operacion=SEGMENTATION_FAULT;
@@ -394,43 +412,6 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
             
         break;
-        case IO:
-            // KERNEL
-            cargar_int_al_super_paquete(paquete_kernel_dispatch, (int)atoi(instruccion[1]));
-            // MEMORIA
-            contexto->registros.PC++;
-            paquete_kernel_dispatch->codigo_operacion=IO;
-            paquete_memoria = crear_super_paquete(IO);
-            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
-            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
-            
-            break;
-        case DUMP_MEMORY:
-            // MEMORIA
-            contexto->registros.PC++;
-            paquete_kernel_dispatch->codigo_operacion=DUMP_MEMORY;
-            paquete_memoria = crear_super_paquete(DUMP_MEMORY);
-            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
-            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
-            
-            break;
-        case INIT_PROCCESS:
-            // MEMORIA
-            contexto->registros.PC++;
-            paquete_kernel_dispatch->codigo_operacion=INIT_PROCCESS;
-            paquete_memoria = crear_super_paquete(INIT_PROCCESS);
-            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
-            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
-            cargar_string_al_super_paquete(paquete_memoria, instruccion[1]); // NOMBRE DEL ARCHIVO DE PSEUDOCODIGO
-            cargar_int_al_super_paquete(paquete_memoria, (int)atoi(instruccion[2]) ); // TAMANIO DEL PROCESO 
-            break;
-        case SYSCALL_EXIT:
-                contexto->registros.PC++;
-            paquete_kernel_dispatch->codigo_operacion=INIT_PROCCESS;
-            paquete_memoria = crear_super_paquete(INIT_PROCCESS);
-            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
-            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
-            break;
 
 
         default:

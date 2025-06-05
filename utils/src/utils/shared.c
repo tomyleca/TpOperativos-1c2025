@@ -351,8 +351,24 @@ void cargar_uint32_t_al_super_paquete(t_paquete *paquete, uint32_t numero)
 		memcpy(paquete->buffer->stream + paquete->buffer->size, &numero, sizeof(uint32_t));
 	}
 
-	paquete->buffer->size += sizeof(int);
+	paquete->buffer->size += sizeof(uint32_t);
 	
+}
+
+void cargar_int64_t_al_super_paquete(t_paquete* paquete,int64_t numero)
+{
+	if (paquete->buffer->size == 0)
+		{
+			paquete->buffer->stream = malloc(sizeof(int64_t));
+			memcpy(paquete->buffer->stream, &numero, sizeof(int64_t));
+		}
+		else
+		{
+			paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + sizeof(int64_t));
+			memcpy(paquete->buffer->stream + paquete->buffer->size, &numero, sizeof(int64_t));
+		}
+
+		paquete->buffer->size += sizeof(int64_t);
 }
 
 void cargar_int_al_super_paquete(t_paquete *paquete, int numero)

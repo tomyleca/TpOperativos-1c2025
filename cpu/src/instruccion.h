@@ -40,6 +40,10 @@ void instruccion_leer_memoria();
 
 void instruccion_goto();
 
+//-------------SYSCALLS --------------//
+
+void syscall_IO(char** parte);
+
 //-------------SYSCALLS MEMORIA FUNCIONES--------------//
 
 void peticion_lectura_a_memoria(int direccion_fisica, int tamanio);
