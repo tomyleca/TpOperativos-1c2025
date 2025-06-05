@@ -34,6 +34,13 @@ extern t_diccionarioConSemaforos* diccionarioProcesos;
 
 extern int cantidad_Procesos;
 
+typedef struct {
+    MetricaProceso metricas;
+    uint32_t ultimo_acceso;    // Para LRU
+    bool referencia;           // Para CLOCK
+    bool modificada;           // Para CLOCK-M
+} t_metricas_extendidas;
+
 // =====================
 // Prototipos
 // =====================
@@ -62,6 +69,16 @@ char **leer_instrucciones(const char *ruta, int *cantidad);
 void interpretar_instruccion(char *linea);
 
 void dump_memory (Proceso *p);
+void actualizar_metricas(Proceso* p, int tipo_operacion);
+void generar_dump_memoria(Proceso* p);
+void log_metricas_proceso(Proceso* p);
+// Constantes para tipos de operaciones
+#define ACCESO_TABLA_PAGINAS 1
+#define INSTRUCCION_SOLICITADA 2
+#define BAJADA_SWAP 3
+#define SUBIDA_MEMORIA 4
+#define LECTURA_MEMORIA 5
+#define ESCRITURA_MEMORIA 6
 
 #endif
 

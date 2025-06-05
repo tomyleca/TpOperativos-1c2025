@@ -10,6 +10,7 @@ char *memoria_real = NULL;
 t_diccionarioConSemaforos* diccionarioProcesos;
 
 
+static t_swap* swap = NULL;
 
 void leerConfigMemoria(t_config* config_memoria) 
 {
@@ -422,4 +423,88 @@ char **leer_instrucciones(const char *ruta, int *cantidad) {
   fclose(archivo);
   *cantidad = count;
   return lineas;
+}
+
+void actualizar_metricas(Proceso* p, int tipo_operacion) {
+    if (!p) return;
+
+    switch (tipo_operacion) {
+        case ACCESO_TABLA_PAGINAS:
+            p->metricas.accesos_tabla_paginas++;
+            break;
+        case INSTRUCCION_SOLICITADA:
+            p->metricas.instrucciones_solicitadas++;
+            break;
+        case BAJADA_SWAP:
+            p->metricas.bajadas_swap++;
+            break;
+        case SUBIDA_MEMORIA:
+            p->metricas.subidas_memoria++;
+            break;
+        case LECTURA_MEMORIA:
+            p->metricas.lecturas_memoria++;
+            break;
+        case ESCRITURA_MEMORIA:
+            p->metricas.escrituras_memoria++;
+            break;
+    }
+}
+
+void generar_dump_memoria(Proceso* p) {
+    if (!p) return;
+
+    time_t now = time(NULL);
+    char timestamp[20];
+    strftime(timestamp, sizeof(timestamp), "%Y%m%d-%H%M%S", localtime(&now));
+    
+    char* filename = string_from_format("%s/%d-%s.dmp", dump_path, p->pid, timestamp);
+    
+    FILE* dump_file = fopen(filename, "wb");
+    if (!dump_file) {
+        log_error(logger_memoria, "Error al crear archivo de dump: %s", filename);
+        free(filename);
+        return;
+    }
+
+    void escribir_pagina_en_dump(TablaPagina* tabla) {
+        if (tabla->es_hoja) {
+            for (int i = 0; i < ENTRADAS_POR_TABLA; i++) {
+                if (tabla->frames[i] != -1) {
+                    int dir_fisica = tabla->frames[i] * TAM_PAGINA;
+                    fwrite(&memoria_real[dir_fisica], 1, TAM_PAGINA, dump_file);
+                } else {
+                    char* ceros = calloc(1, TAM_PAGINA);
+                    fwrite(ceros, 1, TAM_PAGINA, dump_file);
+                    free(ceros);
+                }
+            }
+        } else {
+            for (int i = 0; i < ENTRADAS_POR_TABLA; i++) {
+                if (tabla->entradas[i]) {
+                    escribir_pagina_en_dump(tabla->entradas[i]);
+                }
+            }
+        }
+    }
+
+    escribir_pagina_en_dump(p->tabla_raiz);
+    fclose(dump_file);
+    free(filename);
+    
+    log_info(logger_memoria, "Memory dump generado para proceso %d", p->pid);
+}
+
+void log_metricas_proceso(Proceso* p) {
+    if (!p) return;
+
+    log_info(logger_memoria, 
+        "PID: %d - Métricas - Acc.T.Pag: %d; Inst.Sol.: %d; SWAP: %d; Mem.Prin.: %d; Lec.Mem.: %d; Esc.Mem.: %d",
+        p->pid,
+        p->metricas.accesos_tabla_paginas,
+        p->metricas.instrucciones_solicitadas,
+        p->metricas.bajadas_swap,
+        p->metricas.subidas_memoria,
+        p->metricas.lecturas_memoria,
+        p->metricas.escrituras_memoria
+    );
 }
