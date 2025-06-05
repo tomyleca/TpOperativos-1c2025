@@ -23,6 +23,7 @@ extern t_swap* swap_system;
 
 void inicializar_swap();
 void cerrar_swap();
+int escribir_pagina_swap(uint32_t pid, uint32_t pagina, void* contenido);
 
 #endif
 

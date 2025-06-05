@@ -34,3 +34,30 @@ void cerrar_swap() {
 static void liberar_entrada(void* elem) {
     free(elem);
 }
+
+int escribir_pagina_swap(uint32_t pid, uint32_t pagina, void* contenido) {
+    pthread_mutex_lock(&swap_system->mutex);
+    
+    bool buscar_entrada(void* elem) {
+        t_entrada_swap* entrada = (t_entrada_swap*)elem;
+        return entrada->pid == pid && entrada->pagina == pagina;
+    }
+    
+    t_entrada_swap* entrada = list_find(swap_system->entradas, buscar_entrada);
+    
+    if (entrada == NULL) {
+        entrada = malloc(sizeof(t_entrada_swap));
+        entrada->pid = pid;
+        entrada->pagina = pagina;
+        entrada->offset_swap = list_size(swap_system->entradas) * tam_pagina;
+        entrada->modificada = false;
+        list_add(swap_system->entradas, entrada);
+    }
+    
+    fseek(swap_system->archivo, entrada->offset_swap, SEEK_SET);
+    fwrite(contenido, 1, tam_pagina, swap_system->archivo);
+    fflush(swap_system->archivo);
+    
+    pthread_mutex_unlock(&swap_system->mutex);
+    return 0;
+}
