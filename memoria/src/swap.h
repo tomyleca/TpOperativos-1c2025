@@ -1,22 +1,10 @@
-#ifndef ADMINISTRACION_MEMORIA_H_
-#define ADMINISTRACION_MEMORIA_H_
+#ifndef SWAP_H_
+#define SWAP_H_
 
-
-#include "globales-memoria.h"
-#include "utils/conexiones.h"
-#include "utils/configs.h"
-#include "utils/shared.h"
-#include "utils/monitoresDiccionarios.h"
-#include <commons/config.h>
-#include <commons/log.h>
-#include <commons/string.h>
-#include <readline/readline.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include <stdint.h>
 #include <stdbool.h>
-#include <funciones-memoria.h>
-#include <globales-memoria.h>
+#include <commons/collections/list.h>
+#include "administracion-memoria.h"
 
 typedef struct {
     uint32_t pid;
@@ -30,5 +18,10 @@ typedef struct {
     t_list* entradas;     // Lista de t_entrada_swap
     pthread_mutex_t mutex;
 } t_swap;
+
+extern t_swap* swap_system;
+
+void inicializar_swap();
+
 #endif
 
