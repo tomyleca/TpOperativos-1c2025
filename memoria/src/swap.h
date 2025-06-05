@@ -22,6 +22,7 @@ typedef struct {
 extern t_swap* swap_system;
 
 void inicializar_swap();
+void cerrar_swap();
 
 #endif
 

@@ -21,3 +21,16 @@ void inicializar_swap() {
     log_info(logger_memoria, "Sistema de SWAP inicializado correctamente");
 }
 
+void cerrar_swap() {
+    if (swap_system != NULL) {
+        pthread_mutex_destroy(&swap_system->mutex);
+        list_destroy_and_destroy_elements(swap_system->entradas, free);
+        fclose(swap_system->archivo);
+        free(swap_system);
+        swap_system = NULL;
+    }
+}
+
+static void liberar_entrada(void* elem) {
+    free(elem);
+}
