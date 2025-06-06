@@ -26,7 +26,7 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
 
     
 
-    nuevoProceso->estimadoRafagaAnterior=0;
+    nuevoProceso->estimadoRafagaAnterior=estimacion_inicial;
     nuevoProceso->duracionRafagaAnterior=0;
     nuevoProceso->estimadoSiguienteRafaga=0;
 
@@ -45,11 +45,12 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     if(nuevoProceso->PID==0) //Si es el primer proceso, espero el ENTER
     {
         while (1) {
-            char* input = readline("Apriete ENTER para empezar a planificar procesos.");  
+            char* input = readline("Apriete ENTER para empezar a planificar procesos.\n");  
 
             if (*input == '\0') {  
                 break;
             }
+            
         }
     }    
     

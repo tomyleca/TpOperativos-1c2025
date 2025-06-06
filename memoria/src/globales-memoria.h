@@ -49,9 +49,33 @@ typedef struct{
     char* tercero_parametro;
 } t_instruccion_codigo;
 
-extern t_contexto* nuevo_contexto_provisorio;
-extern t_contexto* nuevo_contexto;
+typedef struct {
+  int accesos_tabla_paginas;
+  int instrucciones_solicitadas;
+  int bajadas_swap;
+  int subidas_memoria;
+  int lecturas_memoria;
+  int escrituras_memoria;
+} MetricaProceso;
 
+typedef struct TablaPagina {
+  struct TablaPagina **entradas;
+  int *frames;
+  int es_hoja;
+} TablaPagina;
+
+typedef struct {
+  int pid; // ID único
+  MetricaProceso metricas;  
+  int tamanio_reservado ; // en bytes
+  char* pseudocodigo;
+  TablaPagina *tabla_raiz;
+  t_list* lista_instrucciones;
+  uint32_t pc;
+} Proceso;
+
+extern Proceso* nuevo_contexto_provisorio; 
+extern Proceso* nuevo_contexto;
 
 extern int conexion;
 extern char* ip;

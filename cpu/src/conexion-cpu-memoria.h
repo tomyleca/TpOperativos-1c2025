@@ -16,7 +16,6 @@
 pthread_t escuchar_memoria();
 pthread_t escuchar_kernel();
 pthread_t escuchar_interrupcion_kernel();
-pthread_t crear_hilo_interpretar_instruccion();
 void crear_handshake_cpu_kernel_dispatch(int conexion_cpu_kernel);
 void crear_handshake_cpu_kernel_interrupt(int conexion_cpu_kernel);
 

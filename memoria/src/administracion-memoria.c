@@ -9,6 +9,8 @@ char *memoria_real = NULL;
 // Mutexes
 t_diccionarioConSemaforos* diccionarioProcesos;
 
+
+
 void leerConfigMemoria(t_config* config_memoria) 
 {
     puerto_escucha = config_get_string_value(config_memoria, "PUERTO_ESCUCHA");
@@ -212,9 +214,10 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
     exit(EXIT_FAILURE);
   }
   p->pid = PID;  
-  p->tamanio_reservado = 0;
+  p->tamanio_reservado = tam;
   agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
-
+  p->pseudocodigo = pseudocodigo;
+  p->lista_instrucciones = leer_archivo_y_cargar_instrucciones(p->pseudocodigo);
 
   return p;
 }
@@ -381,18 +384,19 @@ void dump_memory(Proceso *p) {
   mostrar_procesos_activos();
 }
 
-Proceso *guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
+int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   Proceso *p = guardarProceso(PID,tam,pseudocodigo);
   if (reservar_memoria(p, tam) < 0) {
     fprintf(stderr, "Error: no se pudo asignar memoria al proceso\n");
     free(p);
-    return NULL;
+    return -1;
   }
   
   memset(&p->metricas, 0, sizeof(MetricaProceso));
 
   dump_memory(p);
-return p;
+
+return 0;
 
 }
 

@@ -40,11 +40,3 @@ void iniciarServidores()
 
 }
 
-bool esperarOK2(int fdConexion)
-{
-    if(recibir_operacion(fdConexion)== OK)
-        return 1;
-    else
-        return 0;
-
-}

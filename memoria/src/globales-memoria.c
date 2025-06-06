@@ -23,6 +23,8 @@ int retardo_swap;
 t_log_level log_level;
 char* dump_path;
 pthread_t hilo_memoria;
-t_contexto* nuevo_contexto_provisorio; 
-t_contexto* nuevo_contexto;
+
+Proceso* nuevo_contexto_provisorio; 
+Proceso* nuevo_contexto;
+
 int fd_escucha_servidor;

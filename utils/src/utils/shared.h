@@ -32,17 +32,17 @@ typedef enum
     INTERRUPCION_PID,
     PID_KERNEL_A_CPU,
     CPU_RECIBE_INSTRUCCION_MEMORIA,
+    RECIBIR_TAMANO_PAG,
     CPU_RECIBE_CONTEXTO,
     CPU_RECIBE_OK_DE_LECTURA,
     CPU_RECIBE_OK_DE_ESCRITURA,
-    CPU_RECIBE_OK_ACTUALIZAR_CONTEXTO,
     CPU_PIDE_ESCRIBIR_MEMORIA,
     CPU_PIDE_LEER_MEMORIA,
     CPU_PIDE_CONTEXTO,
-    RECIBIR_PID_KERNEL,
+    GUARDAR_PROCESO_EN_MEMORIA,
     RESPUESTA_KERNEL_TPN,
     CREAR_PID_OK,
-    CHEQUEAR_SI_HAY_MEMORIA_LIBRE,
+    
     NO_HAY_MEMORIA
 
     
@@ -106,6 +106,8 @@ t_paquete *crear_super_paquete(op_code code_op);
 void cargar_string_al_super_paquete(t_paquete *paquete, char *string);
 
 void cargar_uint32_t_al_super_paquete(t_paquete *paquete, uint32_t numero);
+
+void cargar_int64_t_al_super_paquete(t_paquete* paquete,int64_t numero);
 
 void cargar_int_al_super_paquete(t_paquete *paquete, int numero);
 

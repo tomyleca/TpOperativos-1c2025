@@ -1,7 +1,5 @@
 #include "conexion-memoria.h"
 
-
-
 void server_escucha(int* fd_escucha_servidor)
 {
     log_info(logger_memoria, "MEMORIA lista para recibir peticiones de KERNEL");
@@ -33,6 +31,8 @@ int atender_cliente(int *fd_conexion)
     int cliente_fd = *fd_conexion;
     t_paquete* paquete;
     int pid;
+    int direccion_fisica;
+    int tamanio;
     printf("Si llegue aca, es porque tengo un cliente de kernel o cpu");
 
     while (1) {
@@ -42,35 +42,8 @@ int atender_cliente(int *fd_conexion)
             case MENSAJE:
                 //recibir_mensaje(cliente_fd);
                 break;
-            case CPU_PIDE_CONTEXTO: 
-                //usleep(retardo_memoria * 1000); // Convertir milisegundos a microsegundos
-                nuevo_contexto_provisorio = malloc(sizeof(t_contexto));
-                unBuffer = recibiendo_super_paquete(cliente_fd);
-                pid = recibir_int_del_buffer(unBuffer);
-                nuevo_contexto_provisorio->datos_pid.pc = recibir_int_del_buffer(unBuffer);
-                if(pid >= 0)
-                {
-                    nuevo_contexto_provisorio = buscar_contexto_por_pid(pid);                   
-                    enviar_contexto(nuevo_contexto_provisorio, cliente_fd); 
-                }
-                else
-                {
-                    log_error(logger_memoria, "PID invalido");                   
-                }
-                free(unBuffer);
-            break;
-
-            case CHEQUEAR_SI_HAY_MEMORIA_LIBRE:
-                unBuffer = recibiendo_super_paquete(cliente_fd);
-                uint32_t tam = recibir_uint32_t_del_buffer(unBuffer);
-                //TODO chequear si hay que mandar el OK
-                t_paquete* paquete = crear_super_paquete(OK);
-                enviar_paquete(paquete,cliente_fd);
-                free(paquete);
-
-            break;
-
-            case RECIBIR_PID_KERNEL:
+        
+            case GUARDAR_PROCESO_EN_MEMORIA:
                 t_info_kernel datos_kernel; 
                 datos_kernel.pid = 0;
                 datos_kernel.tamanio_proceso = 0;
@@ -82,25 +55,66 @@ int atender_cliente(int *fd_conexion)
                 printf("PID LLEGADO DE KERNEL %d\n", datos_kernel.pid);
                 printf("Tamano LLEGADO DE KERNEL %d\n", datos_kernel.tamanio_proceso);
                 mostrar_bitmap();
-                guardarProcesoYReservar(datos_kernel.pid,datos_kernel.tamanio_proceso,datos_kernel.archivo_pseudocodigo);
-
-                // Respuesta a KERNEL-----
-                //paquete = crear_super_paquete(RESPUESTA_KERNEL_OK);
-                //cargar_string_al_super_paquete(paquete, "OK");
-                //enviar_paquete(paquete, cliente_fd);
-                enviar_paquete(crear_super_paquete(OK),cliente_fd);
+                if(guardarProcesoYReservar(datos_kernel.pid,datos_kernel.tamanio_proceso,datos_kernel.archivo_pseudocodigo) == -1)
+                    enviar_paquete(crear_super_paquete(NO_HAY_MEMORIA),cliente_fd);
+                else 
+                    enviar_paquete(crear_super_paquete(OK),cliente_fd);
                 free(unBuffer);
                 free(datos_kernel.archivo_pseudocodigo);
                 //TODO revisar esto
-            break;    
-
-            case CPU_PIDE_INSTRUCCION_A_MEMORIA: //PARA INICIAR DECODE ESTO!!
+            break;   
+             case CPU_PIDE_INSTRUCCION_A_MEMORIA: //PARA INICIAR DECODE ESTO!!
                 usleep(retardo_memoria * 1000);
+                paquete = crear_super_paquete(RECIBIR_TAMANO_PAG);
+                cargar_int_al_super_paquete(paquete, TAM_PAGINA);
+                cargar_int_al_super_paquete(paquete, CANTIDAD_NIVELES);
+                cargar_int_al_super_paquete(paquete, ENTRADAS_POR_TABLA);
+                enviar_paquete(paquete, cliente_fd);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 buscar_y_mandar_instruccion(unBuffer,cliente_fd);
                 free(unBuffer);
+                free(paquete);
             break;
-            
+            case CPU_PIDE_LEER_MEMORIA:
+                usleep(retardo_memoria* 1000);
+                printf("en CPU_PIDE_LEER_MEMORIA------------------------------------------------------------------\n");
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                pid = recibir_int_del_buffer(unBuffer);
+                direccion_fisica = recibir_int_del_buffer(unBuffer);
+                tamanio = recibir_int_del_buffer(unBuffer);
+                printf("Direccion fisica en leer memoria: %d --------------------------------------------------------\n", direccion_fisica);
+                free(unBuffer);
+                //TODO ver que pasa aca con el tema de la direc fisica en memoria
+                // Respuesta a CPU
+                paquete = crear_super_paquete(CPU_RECIBE_OK_DE_LECTURA);
+                cargar_int_al_super_paquete(paquete, pid);
+                cargar_string_al_super_paquete(paquete, "OK");
+                cargar_int_al_super_paquete(paquete, tamanio);
+                enviar_paquete(paquete, cliente_fd);
+                free(paquete);
+                break;
+
+            case CPU_PIDE_ESCRIBIR_MEMORIA:
+                usleep(retardo_memoria * 1000);
+                printf("en CPU_PIDE_ESCRIBIR_MEMORIA------------------------------------------------------------------\n");
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                pid = recibir_int_del_buffer(unBuffer);
+                direccion_fisica = recibir_int_del_buffer(unBuffer);
+                uint32_t valor_registro = recibir_uint32_t_del_buffer(unBuffer);
+                log_info(logger_memoria, "Valor del dato a ecribir en memoria: %d", valor_registro);
+                free(unBuffer);
+                
+                // escribir_memoria(pid, direccion_fisica, valor_registro); //TODO hacer esto
+
+                // Respuesta a CPU
+                paquete = crear_super_paquete(CPU_RECIBE_OK_DE_ESCRITURA);
+                cargar_int_al_super_paquete(paquete, pid);
+                cargar_int_al_super_paquete(paquete, direccion_fisica);
+                enviar_paquete(paquete, cliente_fd);
+                free(paquete);
+                printf("despues de mandar el paquete a cpu de CPU_PIDE_ESCRIBIR_MEMORIA\n");
+                break;
+             
             case -1:
                  log_error(logger_memoria, "El cliente se desconectó. Terminando servidor.");
                 pthread_exit(NULL);  

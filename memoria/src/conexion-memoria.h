@@ -26,4 +26,6 @@ bool crear_estructuras_proceso(int pid, int paginas_necesarias);
 void server_escucha(int* fd_escucha_servidor);
 int atender_cliente(int *fd_conexion);
 
+
+
 #endif

@@ -16,7 +16,9 @@ int main(int argc, char* argv[]) {
     // INICIO HILOS
     inicializar_hilos(config_cpu);
 
-
+    pthread_join(hilo_escuchar_memoria,NULL);
+    pthread_join(hilo_escuchar_kernel,NULL);
+    pthread_join(hilo_escuchar_kernel_interrupcion,NULL);
 
 
     return 0;
@@ -39,22 +41,17 @@ void leerConfigCpu(t_config* config_cpu) {
 
 void inicializar_hilos(t_config* config_cpu)
 {
-    //socket_cpu_memoria = crear_conexion(logger_cpu, ip_memoria, puerto_memoria);
-    //hilo_escuchar_memoria = escuchar_memoria();
-    //pthread_detach(hilo_escuchar_memoria);
+    socket_cpu_memoria = crear_conexion(logger_cpu, ip_memoria, puerto_memoria);
+    hilo_escuchar_memoria = escuchar_memoria();
 
     socket_cpu_kernel_dispatch = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_dispatch);
     crear_handshake_cpu_kernel_dispatch(socket_cpu_kernel_dispatch);
     hilo_escuchar_kernel = escuchar_kernel();
-    pthread_detach(hilo_escuchar_kernel);
 
     socket_cpu_kernel_interrupt = crear_conexion(logger_cpu,ip_kernel, puerto_kernel_interrupt); // CPU SERVIDOR DE KERNEL INTERRUPT -> envia a kernel el estado actual
     crear_handshake_cpu_kernel_interrupt(socket_cpu_kernel_interrupt);
 	hilo_escuchar_kernel_interrupcion = escuchar_interrupcion_kernel();
-    pthread_detach(hilo_escuchar_kernel_interrupcion);
 
-    hilo_interpretar_instruccion = crear_hilo_interpretar_instruccion();
-    pthread_join(hilo_interpretar_instruccion, NULL);
     //ESTE SI LO DESCOMENTO, TIRA SEG FAULT PORQUE INICIA EL HILO EN DECODE, HABRIA QUE PONER SEMAFORO SUPONGO!!
 }
 
@@ -65,9 +62,9 @@ void inicializar_recursos()
     sem_init(&sem_pid, 0, 1);
     sem_init(&sem_contexto, 0, 1);
     sem_init(&sem_interrupcion, 0, 1);
-    sem_init(&sem_nueva_instruccion, 0, 1);
 
-
+    iniciar_diccionario_instrucciones();
+    
     pthread_mutex_init(&mutex_motivo_interrupcion, NULL);
 
 

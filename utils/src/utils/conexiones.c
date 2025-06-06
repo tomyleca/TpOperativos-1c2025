@@ -113,37 +113,7 @@ int esperar_cliente(int socket_servidor) {
     return socket_cliente;
 }
 
-void recibir_handshake(int socket) {
-	int32_t handshake;
-	int32_t resultOk = 0;
-	int32_t resultError = -1;
 
-	recv(socket, &handshake, sizeof(int32_t), MSG_WAITALL);
-	
-	if (handshake == 1) 
-		send(socket, &resultOk, sizeof(int32_t), 0);
-	else 
-		send(socket, &resultError, sizeof(int32_t), 0);
-}
-
-/*void realizar_handshake(op_code module, int server)
- {
-     int *handshake = malloc(sizeof(int));
-     if (handshake == NULL)
- 	{
-       log_info(logger,"Failed to allocate memory for handshake");
-        return;
-    }
-
-    *handshake = module;
-     ssize_t bytes_sent = send(server, handshake, sizeof(int), 0);
-     if (bytes_sent == -1)
- 	{
-         log_info(logger,"Failed to send handshake");
-     }
-
-     free(handshake);
- }*/
 
 void enviarOK(int fdConexion)
 {
@@ -155,4 +125,18 @@ bool esperarOK(int fdConexion)
 {
     uint32_t OK;
     return recv(fdConexion,OK,sizeof(uint32_t),0);
+}
+
+void enviarOK2(int conexion)
+{
+    enviar_paquete(crear_super_paquete(OK),conexion);
+}
+
+bool esperarOK2(int fdConexion)
+{
+    if(recibir_operacion(fdConexion)== OK)
+        return 1;
+    else
+        return 0;
+
 }

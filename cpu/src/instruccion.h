@@ -13,12 +13,14 @@
 
 typedef enum
 {
+    I_WRITE_MEM,
 	I_READ_MEM,
-	I_WRITE_MEM,
     I_DUMP_MEMORY,
     I_IO,
     I_NOOP,
-    I_GOTO
+    I_GOTO,
+    I_INIT_PROCESS,
+    I_EXIT
 }enum_instrucciones;
 
 void iniciar_diccionario_instrucciones();
@@ -40,6 +42,16 @@ void instruccion_leer_memoria();
 
 void instruccion_goto();
 
+//-------------SYSCALLS --------------//
+
+void syscall_IO(char** parte);
+
+void syscallDUMP_MEMORY(char** parte);
+
+void syscallEXIT(char** parte);
+
+void syscallINIT_PROC(char** parte);
+
 //-------------SYSCALLS MEMORIA FUNCIONES--------------//
 
 void peticion_lectura_a_memoria(int direccion_fisica, int tamanio);
@@ -49,6 +61,8 @@ void peticion_escritura_a_memoria(int direccion_fisica, char* valor_registro_dat
 void instruccion_escribir_memoria(char** parte);
 
 //-----------CICLO DE INSTRUCCION---------------------//
+
+void ciclo_instruccion(int socket_cpu_memoria);
 
 void fetch(int socket_cpu_memoria);
 

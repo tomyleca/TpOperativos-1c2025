@@ -9,9 +9,9 @@ t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo)
 
     char* filepath = string_new(); // Creo un string para almacenar la ruta del archivo
 
-    string_append(&filepath, "/home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo.txt");
+    //string_append(&filepath, "/home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo.txt");
 
-    //string_append(&filepath, archivo_pseudocodigo);
+    string_append(&filepath, archivo_pseudocodigo);
 
     printf("Ruta del archivo: %s\n", filepath);
 
@@ -100,26 +100,11 @@ t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo)
     return instrucciones;
 }
 
-void crear_pid(t_contexto* nuevo_contexto, t_info_kernel info_kernel)
-{  
 
-     // Inicializar el contexto principal del proceso
-    nuevo_contexto->pid = info_kernel.pid;  
-    nuevo_contexto->datos_pid.pc = 0;
-    nuevo_contexto->tamanio_proceso = info_kernel.tamanio_proceso;
 
-    printf("Ruta recibida: '%s'\n", info_kernel.archivo_pseudocodigo);
-
-    nuevo_contexto->datos_pid.pseudocodigo = strdup(info_kernel.archivo_pseudocodigo);
-    nuevo_contexto->datos_pid.instrucciones = leer_archivo_y_cargar_instrucciones(nuevo_contexto->datos_pid.pseudocodigo);
-    list_add(lista_contextos, nuevo_contexto);
-    // Crear la tabla de primer nivel y guardar el ID en el contexto
-    //nuevo_contexto->id_tabla_primer_nivel = crear_tabla_nivel(1)
-}
-
-t_contexto* buscar_contexto_por_pid(int pid)
+Proceso* buscar_contexto_por_pid(int pid)
 {
-    t_contexto* contexto_actual;
+    Proceso* contexto_actual;
     // Recorrer la lista de contextos
     for (int i = 0; i < list_size(lista_contextos); i++) 
     {
@@ -140,23 +125,23 @@ t_contexto* buscar_contexto_por_pid(int pid)
 
 void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
 {
-    int pid = recibir_int_del_buffer(buffer);
-    int pc = recibir_int_del_buffer(buffer);
+    uint32_t pid = recibir_uint32_t_del_buffer(buffer);
+    uint32_t pc = recibir_uint32_t_del_buffer(buffer);
     
-    t_contexto* nuevo_context = buscar_contexto_por_pid(pid); 
-    char* instruccion = obtener_instruccion_por_indice(nuevo_context->datos_pid.instrucciones, pc++);
+    Proceso* nuevo_contexto = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid)); 
+    char* instruccion = obtener_instruccion_por_indice(nuevo_contexto->lista_instrucciones, pc);
     
     printf("Indice: %d -- INSTRUCCION: %s \n", pc, instruccion);
     
     t_paquete* paquete_contexto = crear_super_paquete(CPU_RECIBE_INSTRUCCION_MEMORIA);
-    cargar_int_al_super_paquete(paquete_contexto, nuevo_context->pid);
+    cargar_uint32_t_al_super_paquete(paquete_contexto, nuevo_contexto->pid);
     cargar_string_al_super_paquete(paquete_contexto, instruccion);
     
     char** partes = string_split(instruccion, " ");
     
     enviar_paquete(paquete_contexto, socket_cpu);
-    free(paquete_contexto);  
-    
+    free(paquete_contexto);
+        
     // Liberar memoria usada por el string_split
     liberar_array_strings(partes);   
 }
@@ -174,24 +159,4 @@ char* obtener_instruccion_por_indice(t_list* instrucciones, uint32_t indice_inst
  		log_error(logger_memoria, "Numero de Instruccion <%d> NO VALIDA", indice_instruccion);
  		return NULL;
  	}
-}
-
-void enviar_contexto(t_contexto* contexto_proceso, int socket_cpu)
-{   
-    // Verificar que ambos contextos no sean NULL
-    if (contexto_proceso == NULL || contexto_proceso->pid == NULL) 
-    {
-        log_error(logger_memoria, "Error al enviar contexto: Contexto o PID son NULL");
-        return;
-    }
-    
-    // Enviamos contexto de ejecucion a CPU
-    t_paquete* paquete_contexto = crear_super_paquete(CPU_RECIBE_CONTEXTO);
-    
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->pid);
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->datos_pid.pc);
-   
-    enviar_paquete(paquete_contexto, socket_cpu);
-
-    free(paquete_contexto);
 }

@@ -14,8 +14,9 @@ int main(int argc, char* argv[]) {
 
     //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
     crearEstructuras();
+
     
-   
+    
     pthread_t* hiloAtenderDispatch = malloc(sizeof(pthread_t));
     pthread_t* hiloAtenderInterrupt = malloc(sizeof(pthread_t));
     pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
@@ -25,8 +26,19 @@ int main(int argc, char* argv[]) {
     pthread_create(hiloAtenderIO,NULL,esperarClientesIO,NULL);
     pthread_create(hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
 
+    
+    if(argc == 3)
+    {
+        INIT_PROC(argv[1], (uint32_t) strtoul(argv[2], NULL, 10)); // Paso el char a uint32_t
+    }
+    else
+    {
+        log_error(loggerKernel,"## (<%u>) ERROR. No se pasaron los parámetros suficientes para iniciar el primer proceso",0);
+        exit(1);
+    }
 
-    prueba1();
+
+    //prueba1();
     
     //pruebaConCPU();
     
@@ -59,6 +71,7 @@ void leerConfigKernel(t_config* config_kernel) {
     alfa = config_get_int_value(config_kernel, "ALFA");
     tiempo_suspension = config_get_int_value(config_kernel, "TIEMPO_SUSPENSION");
     log_level = log_level_from_string(config_get_string_value(config_kernel, "LOG_LEVEL"));
+    estimacion_inicial = config_get_int_value(config_kernel,"ESTIMACION_INICIAL");
     
 }
 
