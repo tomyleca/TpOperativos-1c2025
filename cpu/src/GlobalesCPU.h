@@ -69,7 +69,6 @@ extern sem_t sem_hay_instruccion;
 extern sem_t sem_pid;
 extern sem_t sem_contexto;
 extern sem_t sem_interrupcion;
-extern sem_t sem_nueva_instruccion;
 
 
 

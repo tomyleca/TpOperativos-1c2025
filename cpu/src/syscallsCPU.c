@@ -37,4 +37,5 @@ void syscallEXIT(char** parte)
     cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     esperarOK2(socket_cpu_kernel_dispatch);
+    
 }

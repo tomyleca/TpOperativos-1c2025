@@ -59,16 +59,21 @@ int atender_cliente(int *fd_conexion)
                     enviar_paquete(crear_super_paquete(NO_HAY_MEMORIA),cliente_fd);
                 else 
                     enviar_paquete(crear_super_paquete(OK),cliente_fd);
-                
                 free(unBuffer);
                 free(datos_kernel.archivo_pseudocodigo);
                 //TODO revisar esto
             break;   
              case CPU_PIDE_INSTRUCCION_A_MEMORIA: //PARA INICIAR DECODE ESTO!!
                 usleep(retardo_memoria * 1000);
+                paquete = crear_super_paquete(RECIBIR_TAMANO_PAG);
+                cargar_int_al_super_paquete(paquete, TAM_PAGINA);
+                cargar_int_al_super_paquete(paquete, CANTIDAD_NIVELES);
+                cargar_int_al_super_paquete(paquete, ENTRADAS_POR_TABLA);
+                enviar_paquete(paquete, cliente_fd);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 buscar_y_mandar_instruccion(unBuffer,cliente_fd);
                 free(unBuffer);
+                free(paquete);
             break;
             case CPU_PIDE_LEER_MEMORIA:
                 usleep(retardo_memoria* 1000);

@@ -12,7 +12,6 @@ void instruccion_noop(char** parte)
     {
         perror("Error al ejecutar NOOP");
     }
-    contexto->registros.PC++;
 
     check_interrupt();
 }
@@ -53,11 +52,8 @@ void instruccion_escribir_memoria(char** parte)
 
 
     // Aumento el PC para que lea la proxima instruccion
-    contexto->registros.PC++;
 
     liberar_array_strings(parte);
-
-    check_interrupt();
 
     return;
 }
@@ -94,11 +90,7 @@ void instruccion_leer_memoria(char** parte)
 
     peticion_lectura_a_memoria(direccion_fisica, tamanio);
     
-    contexto->registros.PC++;
-
     liberar_array_strings(parte);
-
-    check_interrupt();
 }
 
 void instruccion_goto(char** parte)
@@ -261,8 +253,6 @@ void fetch(int socket_cpu_memoria)
 
 void decode()
 {     
-    while(1)
-    {
         printf("Antes de el semaforo hay instruccion\n");
         sem_wait(&sem_hay_instruccion); 
         printf("Despues de el semaforo hay instruccion\n");
@@ -305,9 +295,9 @@ void decode()
                 log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
                 break;
             }
-        }
-        return;
 }
+     
+
 
 void check_interrupt()
 {   
@@ -341,7 +331,7 @@ void check_interrupt()
         printf("ADENTRO del mutex check instruccion 2/n");
         free(instruccion_recibida);
         instruccion_recibida = NULL; 
-        
+
     } else {
 
         free(instruccion_recibida);
@@ -355,14 +345,20 @@ void check_interrupt()
         }
         printf("despues de motivo de interrupcion = -1 \n");
         pthread_mutex_unlock(&mutex_motivo_interrupcion);
-
-        fetch(socket_cpu_memoria); // Aca vuelvo a pedirle una instruccion a memoria
-        
-        sem_post(&sem_nueva_instruccion);
+        contexto->registros.PC++;
+        ciclo_instruccion(socket_cpu_memoria); // Aca vuelvo a pedirle una instruccion a memoria
     }
 }
 
+void ciclo_instruccion(int socket_cpu_memoria)
+{
+    fetch(socket_cpu_memoria);
 
+    decode();
+
+    check_interrupt(); 
+
+}
 // **********************************  
 
 void iniciar_diccionario_instrucciones()
@@ -406,8 +402,6 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
             cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
             
         break;
-
-
         default:
             log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
             break;
@@ -421,7 +415,6 @@ void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_d
     free(paquete_memoria);
      
     // KERNEL
-    //sem_wait(&sem_ok_actualizar_contexto);
     printf("Mando paquete a kenrel para comprobar algo xd --------------------\n");
     enviar_paquete(paquete_kernel_dispatch, socket_cpu_kernel_dispatch);
     free(paquete_kernel_dispatch);

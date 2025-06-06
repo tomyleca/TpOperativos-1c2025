@@ -16,14 +16,6 @@ void crear_handshake_cpu_kernel_interrupt(int conexion_cpu_kernel)
     free(paquete);
 }
 
-pthread_t crear_hilo_interpretar_instruccion()
-{
-    pthread_t hilo_decode;
-    iniciar_diccionario_instrucciones();
-    pthread_create(&hilo_decode, NULL, (void*)decode, NULL);
-    return hilo_decode;
-}
-
 pthread_t escuchar_interrupcion_kernel()
 {
     pthread_t hilo_interrupcion_kernel;
@@ -56,9 +48,14 @@ void atender_memoria()
         cod_op = recibir_operacion(socket_cpu_memoria);
         switch (cod_op) 
         {
+            case RECIBIR_TAMANO_PAG:
+                buffer = recibiendo_super_paquete(socket_cpu_memoria);
+                tamanio_pagina = recibir_uint32_t_del_buffer(buffer);
+                cant_niveles = recibir_uint32_t_del_buffer(buffer);
+                cant_entradas_tabla = recibir_uint32_t_del_buffer(buffer);
+                break;
             case CPU_RECIBE_INSTRUCCION_MEMORIA: 
                 //ACA LLEGA LA SOLICITUD DE LA INSTRUCCION DE MEMORIA
-                sem_wait(&sem_nueva_instruccion);
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 contexto->pid = recibir_int_del_buffer(buffer);
                 instruccion_recibida = recibir_string_del_buffer(buffer); // instruccion_recibida se usa en instruccion.c
@@ -162,7 +159,7 @@ void atender_dispatch_kernel()
                 contexto->registros.PC = recibir_int_del_buffer(buffer);
                 enviarOK(socket_cpu_kernel_dispatch);
                 // ACA HAY QUE SOLICITAR A MEMORIA LA PRIMER INSTRUCCION CON EL PID RECIBIMOS DE KERNEL
-                fetch(socket_cpu_memoria); 
+                ciclo_instruccion(socket_cpu_memoria); 
                 free(buffer);
                 break;
                 

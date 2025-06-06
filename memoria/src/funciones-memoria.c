@@ -156,8 +156,7 @@ void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
     
     enviar_paquete(paquete_contexto, socket_cpu);
     free(paquete_contexto);
-    free(nuevo_contexto);
-    
+        
     // Liberar memoria usada por el string_split
     liberar_array_strings(partes);   
 }
@@ -176,23 +175,3 @@ char* obtener_instruccion_por_indice(t_list* instrucciones, uint32_t indice_inst
  		return NULL;
  	}
 }
-
-/*void enviar_contexto(Proceso* contexto_proceso, int socket_cpu)
-{   
-    // Verificar que ambos contextos no sean NULL
-    if (contexto_proceso == NULL || contexto_proceso->pid == NULL) 
-    {
-        log_error(logger_memoria, "Error al enviar contexto: Contexto o PID son NULL");
-        return;
-    }
-    
-    // Enviamos contexto de ejecucion a CPU
-    t_paquete* paquete_contexto = crear_super_paquete(CPU_RECIBE_CONTEXTO);
-    
-    cargar_int_al_super_paquete(paquete_contexto, contexto_proceso->pid);
-    cargar_string_al_super_paquete(paquete, contexto_proceso->lista_instrucciones)
-   
-    enviar_paquete(paquete_contexto, socket_cpu);
-
-    free(paquete_contexto);
-}*/

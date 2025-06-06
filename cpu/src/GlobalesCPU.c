@@ -36,7 +36,6 @@ sem_t sem_hay_instruccion;
 sem_t sem_pid;
 sem_t sem_contexto;
 sem_t sem_interrupcion;
-sem_t sem_nueva_instruccion;
 
 
 

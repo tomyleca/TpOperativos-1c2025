@@ -45,12 +45,14 @@ void atender_dispatch_cpu(void* conexion)
                 char* nombreIO = recibir_string_del_buffer(buffer);
                 int64_t tiempoEnIO = recibir_int64_t_del_buffer(buffer);
                 syscall_IO(PID,nombreIO,tiempoEnIO);
+                enviarOK2(fdConexion);               
                 break;
             case DUMP_MEMORY:
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
                 PC = recibir_uint32_t_del_buffer(buffer);
                 dump_memory(PID);
+                enviarOK2(fdConexion);
                 break;
             case INIT_PROCCESS:
                 buffer = recibiendo_super_paquete(fdConexion);
@@ -58,12 +60,14 @@ void atender_dispatch_cpu(void* conexion)
                 char* nombrePseudocodigo = recibir_string_del_buffer(buffer);
                 uint32_t tam = recibir_uint32_t_del_buffer(buffer);
                 INIT_PROC(nombrePseudocodigo,tam);
+                enviarOK2(fdConexion);
                 break;
             case SYSCALL_EXIT:
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
                 PC = recibir_uint32_t_del_buffer(buffer);
                 syscallExit(PID);
+                enviarOK2(fdConexion);             
                 break;
             
             case -1:

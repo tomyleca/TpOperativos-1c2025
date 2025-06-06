@@ -62,6 +62,8 @@ void instruccion_escribir_memoria(char** parte);
 
 //-----------CICLO DE INSTRUCCION---------------------//
 
+void ciclo_instruccion(int socket_cpu_memoria);
+
 void fetch(int socket_cpu_memoria);
 
 void decode();
