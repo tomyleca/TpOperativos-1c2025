@@ -57,7 +57,7 @@ void atender_memoria()
             case CPU_RECIBE_INSTRUCCION_MEMORIA: 
                 //ACA LLEGA LA SOLICITUD DE LA INSTRUCCION DE MEMORIA
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
-                contexto->pid = recibir_int_del_buffer(buffer);
+                contexto->pid = recibir_uint32_t_del_buffer(buffer);
                 instruccion_recibida = recibir_string_del_buffer(buffer); // instruccion_recibida se usa en instruccion.c
                 sem_post(&sem_hay_instruccion);
                 free(buffer);

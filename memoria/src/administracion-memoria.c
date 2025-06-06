@@ -214,7 +214,7 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
     exit(EXIT_FAILURE);
   }
   p->pid = PID;  
-  p->tamanio_reservado = 0;
+  p->tamanio_reservado = tam;
   agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
   p->pseudocodigo = pseudocodigo;
   p->lista_instrucciones = leer_archivo_y_cargar_instrucciones(p->pseudocodigo);

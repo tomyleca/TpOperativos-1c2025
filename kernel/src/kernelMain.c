@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
     //ME FIJO CUALES SON LOS ALGORITMOS DE PLANIFICACION/ CREO LAS LISTAS PARA MANEJAR PROCESOS/ INICIALIZO LOS SEMAFOROS
     crearEstructuras();
 
-
+    
     
     pthread_t* hiloAtenderDispatch = malloc(sizeof(pthread_t));
     pthread_t* hiloAtenderInterrupt = malloc(sizeof(pthread_t));
@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     
     if(argc == 3)
     {
-        INIT_PROC(argv[0], (uint32_t) strtoul(argv[1], NULL, 10)); // Paso el char a uint32_t
+        INIT_PROC(argv[1], (uint32_t) strtoul(argv[2], NULL, 10)); // Paso el char a uint32_t
     }
     else
     {

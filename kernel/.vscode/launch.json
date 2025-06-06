@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/${workspaceFolderBasename}",
-      "args": ["/home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo.txt","0"],
+      "args": ["/home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo.txt","4"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
