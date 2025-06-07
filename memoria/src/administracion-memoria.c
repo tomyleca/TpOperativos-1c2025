@@ -9,9 +9,6 @@ char *memoria_real = NULL;
 // Mutexes
 t_diccionarioConSemaforos* diccionarioProcesos;
 
-
-static t_swap* swap = NULL;
-
 void leerConfigMemoria(t_config* config_memoria) 
 {
     puerto_escucha = config_get_string_value(config_memoria, "PUERTO_ESCUCHA");
@@ -65,11 +62,11 @@ TablaPagina *crear_tabla_nivel(int nivel_actual) {
   } else {
     tabla->frames = NULL;
     tabla->entradas = calloc(ENTRADAS_POR_TABLA, sizeof(TablaPagina *));
-    }
-  
+  }
 
   return tabla;
 }
+
 int traducir_direccion(Proceso *p, int direccion_virtual) {
   int nro_pagina = direccion_virtual / TAM_PAGINA;
   int desplazamiento = direccion_virtual % TAM_PAGINA;
@@ -107,28 +104,28 @@ int traducir_direccion(Proceso *p, int direccion_virtual) {
 }
 
 void asignar_frames_en_tabla(TablaPagina *tabla, int paginas_a_reservar, int *frames, int *pagina_logica_actual, int nivel_actual, Proceso *p) {
-  if (*pagina_logica_actual >= paginas_a_reservar)
-    return;
+    if (*pagina_logica_actual >= paginas_a_reservar)
+        return;
 
-  p->metricas.accesos_tabla_paginas++;
+    p->metricas.accesos_tabla_paginas++;
 
-  for (int i = 0;
-       i < ENTRADAS_POR_TABLA && *pagina_logica_actual < paginas_a_reservar;
-       i++) {
-    if (tabla->es_hoja) {
-      if (tabla->frames[i] == -1) {
-        tabla->frames[i] = frames[*pagina_logica_actual];
-        (*pagina_logica_actual)++;
-      }
-    } else {
-      if (*pagina_logica_actual < paginas_a_reservar) {
-      if (tabla->entradas[i] == NULL) {
-        tabla->entradas[i] = crear_tabla_nivel(nivel_actual + 1);
-      }
-      asignar_frames_en_tabla(tabla->entradas[i], paginas_a_reservar, frames, pagina_logica_actual, nivel_actual + 1, p);
-      }
+    for (int i = 0;
+         i < ENTRADAS_POR_TABLA && *pagina_logica_actual < paginas_a_reservar;
+         i++) {
+        if (tabla->es_hoja) {
+            if (tabla->frames[i] == -1) {
+                tabla->frames[i] = frames[*pagina_logica_actual];
+                (*pagina_logica_actual)++;
+            }
+        } else {
+            if (*pagina_logica_actual < paginas_a_reservar) {
+                if (tabla->entradas[i] == NULL) {
+                    tabla->entradas[i] = crear_tabla_nivel(nivel_actual + 1);
+                }
+                asignar_frames_en_tabla(tabla->entradas[i], paginas_a_reservar, frames, pagina_logica_actual, nivel_actual + 1, p);
+            }
+        }
     }
-  }
 }
 
 void imprimir_tabla(TablaPagina *tabla, int nivel_actual, int indent) {

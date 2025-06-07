@@ -4,25 +4,41 @@
 
 void server_escucha(int* fd_escucha_servidor)
 {
+    if (!fd_escucha_servidor) {
+        log_error(logger_memoria, "Socket de escucha inválido");
+        return;
+    }
+
     log_info(logger_memoria, "MEMORIA lista para recibir peticiones de KERNEL");
 
     while (1) {
         // Espera a un cliente en el bucle principal
-        int fd_conexion_2 = *fd_escucha_servidor;
-        int fd_conexion = esperar_cliente(fd_conexion_2);
-        log_info(logger_memoria, "Cliente conectado y en espera.\n");
-        if (fd_conexion != -1) {
-            pthread_t hilo_conexion;
-            // Reservamos memoria para pasar el socket conexion al hilo
-            int* nueva_conexion = malloc(sizeof(int));
-            *nueva_conexion = fd_conexion;
-
-            //Responde al handshake del cliente que espera que se conecte.
-			//responder_handshake(fd_conexion);
-            // Crea un hilo para manejar la conexión del cliente
-            pthread_create(&hilo_conexion, NULL,(void*) atender_cliente, nueva_conexion);
-			pthread_detach(hilo_conexion);  // Detach para que no necesites un join más tarde
+        int fd_conexion = esperar_cliente(*fd_escucha_servidor);
+        if (fd_conexion == -1) {
+            log_error(logger_memoria, "Error al esperar cliente");
+            continue;
         }
+
+        log_info(logger_memoria, "Cliente conectado y en espera.\n");
+        
+        pthread_t hilo_conexion;
+        // Reservamos memoria para pasar el socket conexion al hilo
+        int* nueva_conexion = malloc(sizeof(int));
+        if (!nueva_conexion) {
+            log_error(logger_memoria, "Error al asignar memoria para nueva conexión");
+            close(fd_conexion);
+            continue;
+        }
+        *nueva_conexion = fd_conexion;
+
+        // Crea un hilo para manejar la conexión del cliente
+        if (pthread_create(&hilo_conexion, NULL, (void*)atender_cliente, nueva_conexion) != 0) {
+            log_error(logger_memoria, "Error al crear hilo para nueva conexión");
+            free(nueva_conexion);
+            close(fd_conexion);
+            continue;
+        }
+        pthread_detach(hilo_conexion);  // Detach para que no necesites un join más tarde
     }
 }
 

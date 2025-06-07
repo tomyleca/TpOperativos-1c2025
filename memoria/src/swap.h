@@ -26,8 +26,8 @@ typedef struct {
 // Variables globales
 extern t_swap* swap_system;
 extern char* path_swapfile;
-extern int tam_pagina;
-extern int entradas_por_tabla;
+extern int TAM_PAGINA;
+extern int ENTRADAS_POR_TABLA;
 extern char* memoria_real;
 extern bool* bitmap_frames;
 extern t_log* logger_memoria;

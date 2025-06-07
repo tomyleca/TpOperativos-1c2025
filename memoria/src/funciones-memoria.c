@@ -3,95 +3,67 @@
 //********** LEE EL ARCHIVO Y CARGA LAS INSTRUCCIONES EN UNA LISTA (LAS INSTRUCCIONES LAS DEJA DEL TIPO "t_instruccion_codigo")
 t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo)
 {
-    // Abro el archivo en modo lectura
-
-    // POR AHORA DEJO LA LINEA DE ABAJO
-
-    char* filepath = string_new(); // Creo un string para almacenar la ruta del archivo
-
-    string_append(&filepath, "/home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo.txt");
-
-    //string_append(&filepath, archivo_pseudocodigo);
-
-    printf("Ruta del archivo: %s\n", filepath);
-
-    FILE* archivo = fopen(filepath, "r"); // abre el archivo en modo lectura
-
-    t_list* instrucciones = list_create(); // Creo una lista para almacenar todas las instrucciones 
-    
-    char* instruccion_formateada = NULL;
-    int i = 0;
-    if (archivo == NULL) {
-        log_error(logger_memoria, "No se puede abrir el archivo_pseudocodigo para leer instrucciones.");  
-        return instrucciones;
+    char* filepath = string_from_format("%s", archivo_pseudocodigo);
+    FILE* archivo = fopen(filepath, "r");
+    if (!archivo) {
+        log_error(logger_memoria, "No se pudo abrir el archivo de pseudocódigo: %s", filepath);
+        free(filepath);
+        return NULL;
     }
 
-    char* linea_instruccion = malloc(256);
+    t_list* instrucciones = list_create();
+    char* linea_instruccion = malloc(256 * sizeof(char));
+    int i = 0;
+    char* instruccion_formateada;
 
-    while (fgets(linea_instruccion, 256, archivo)) 
-    {
-    	int size_linea_actual = strlen(linea_instruccion);
-    	if(size_linea_actual > 2)
-        {
-    		if(linea_instruccion[size_linea_actual - 1] == '\n')
-            {
-                // Aca se elimina el salto de linea \n
-				char* linea_limpia = string_new();
-				string_n_append(&linea_limpia, linea_instruccion, size_linea_actual - 1);
-				free(linea_instruccion);
-				linea_instruccion = malloc(256 * sizeof(int));
-				strcpy(linea_instruccion, linea_limpia);
-                free(linea_limpia);
-    		}
-    	}
+    while (fgets(linea_instruccion, 256, archivo)) {
+        int size_linea_actual = strlen(linea_instruccion);
+        if(size_linea_actual > 2) {
+            if(linea_instruccion[size_linea_actual - 1] == '\n') {
+                // Eliminar el salto de línea
+                linea_instruccion[size_linea_actual - 1] = '\0';
+            }
+        }
         
-    	//------------------------------------------------------------------------------------------------------------------------------------------
-
-        char** l_instrucciones = string_split(linea_instruccion, " ");  // Separamos la instruccion y parametros por " "
-        while (l_instrucciones[i]) 
-        {
-        	i++;
+        char** l_instrucciones = string_split(linea_instruccion, " ");
+        i = 0;
+        while (l_instrucciones[i]) {
+            i++;
         }
 
-        // if (!es_instruccion_valida(l_instrucciones[0])) {
-        //     log_error(logger_memoria, "Instrucción no válida en pseudocódigo: %s", l_instrucciones[0]);
-        //     return NULL;
-        // }
-
         t_instruccion_codigo* pseudo_cod = malloc(sizeof(t_instruccion_codigo));
-        pseudo_cod->mnemonico = strdup(l_instrucciones[0]); // Mnemonico es la instruccion 
-
+        pseudo_cod->mnemonico = strdup(l_instrucciones[0]);
         pseudo_cod->primero_parametro = (i > 1) ? strdup(l_instrucciones[1]) : NULL;
         pseudo_cod->segundo_parametro = (i > 2) ? strdup(l_instrucciones[2]) : NULL;
         pseudo_cod->tercero_parametro = (i > 3) ? strdup(l_instrucciones[3]) : NULL;
 
-        if(i == 3){
-            instruccion_formateada = string_from_format("%s %s %s", pseudo_cod->mnemonico, pseudo_cod->primero_parametro, pseudo_cod->segundo_parametro);
-
+        if(i == 3) {
+            instruccion_formateada = string_from_format("%s %s %s", 
+                pseudo_cod->mnemonico, 
+                pseudo_cod->primero_parametro, 
+                pseudo_cod->segundo_parametro);
         } else if (i == 2) {
-            instruccion_formateada = string_from_format("%s %s", pseudo_cod->mnemonico, pseudo_cod->primero_parametro);
-
+            instruccion_formateada = string_from_format("%s %s", 
+                pseudo_cod->mnemonico, 
+                pseudo_cod->primero_parametro);
         } else {
             instruccion_formateada = strdup(pseudo_cod->mnemonico);
         }
 
         printf("Instruccion leida y cargada %s\n", instruccion_formateada);
-        list_add(instrucciones, instruccion_formateada); // Obtenemos una instruccion
-        // free(instruccion_formateada);
+        list_add(instrucciones, instruccion_formateada);
 
+        // Liberar memoria
         for (int j = 0; j < i; j++) {
             free(l_instrucciones[j]);
         }
-
         free(l_instrucciones);
         
         free(pseudo_cod->mnemonico);
-		if(pseudo_cod->primero_parametro) free(pseudo_cod->primero_parametro);
-		if(pseudo_cod->segundo_parametro) free(pseudo_cod->segundo_parametro);
+        if(pseudo_cod->primero_parametro) free(pseudo_cod->primero_parametro);
+        if(pseudo_cod->segundo_parametro) free(pseudo_cod->segundo_parametro);
         if(pseudo_cod->tercero_parametro) free(pseudo_cod->tercero_parametro);
-
-		free(pseudo_cod);
-        i = 0; // Restablece la cuenta para la próxima iteración
+        free(pseudo_cod);
     }
 
     fclose(archivo);
@@ -119,7 +91,7 @@ void crear_pid(t_contexto* nuevo_contexto, t_info_kernel info_kernel)
 
 Proceso* buscar_contexto_por_pid(int pid)
 {
-    Proceso* contexto_actual;
+    Proceso* contexto_actual = NULL; // Inicializamos a NULL
     // Recorrer la lista de contextos
     for (int i = 0; i < list_size(lista_contextos); i++) 
     {
@@ -134,8 +106,7 @@ Proceso* buscar_contexto_por_pid(int pid)
     }
 
     log_error(logger_memoria, "No se encontró el contexto para el PID %d", pid);
-    //exit(1); // Si no se encuentra, devolver NULL
-    return contexto_actual;
+    return NULL; // Retornamos NULL si no se encuentra
 }
 
 void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
@@ -144,7 +115,16 @@ void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
     uint32_t pc = recibir_uint32_t_del_buffer(buffer);
     
     Proceso* nuevo_contexto = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid)); 
+    if (!nuevo_contexto) {
+        log_error(logger_memoria, "No se encontró el proceso con PID %d", pid);
+        return;
+    }
+
     char* instruccion = obtener_instruccion_por_indice(nuevo_contexto->lista_instrucciones, pc++);
+    if (!instruccion) {
+        log_error(logger_memoria, "No se pudo obtener la instrucción para el proceso %d en PC %d", pid, pc);
+        return;
+    }
     
     printf("Indice: %d -- INSTRUCCION: %s \n", pc, instruccion);
     
@@ -156,7 +136,6 @@ void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
     
     enviar_paquete(paquete_contexto, socket_cpu);
     free(paquete_contexto);
-    free(nuevo_contexto);
     
     // Liberar memoria usada por el string_split
     liberar_array_strings(partes);   
