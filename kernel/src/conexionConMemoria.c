@@ -59,3 +59,65 @@ bool suspender_proceso_memoria(uint32_t pid) {
     return respuesta == SUSPENDER_PROCESO;
 }
 
+bool des_suspender_proceso_memoria(uint32_t pid) {
+    int socket_memoria = crear_conexion_memoria();
+    if (socket_memoria == -1) return false;
+
+    t_paquete* paquete = crear_super_paquete(DES_SUSPENDER_PROCESO);
+    if (paquete == NULL) {
+        log_error(loggerKernel, "Error al crear paquete para des-suspender proceso");
+        cerrar_conexion_memoria(socket_memoria);
+        return false;
+    }
+
+    cargar_uint32_t_al_super_paquete(paquete, pid);
+    enviar_paquete(paquete, socket_memoria);
+    eliminar_paquete(paquete);
+
+    op_code_memoria respuesta = recibir_operacion(socket_memoria);
+    cerrar_conexion_memoria(socket_memoria);
+
+    return respuesta == DES_SUSPENDER_PROCESO;
+}
+
+bool finalizar_proceso_memoria(uint32_t pid) {
+    int socket_memoria = crear_conexion_memoria();
+    if (socket_memoria == -1) return false;
+
+    t_paquete* paquete = crear_super_paquete(FINALIZAR_PROCESO);
+    if (paquete == NULL) {
+        log_error(loggerKernel, "Error al crear paquete para finalizar proceso");
+        cerrar_conexion_memoria(socket_memoria);
+        return false;
+    }
+
+    cargar_uint32_t_al_super_paquete(paquete, pid);
+    enviar_paquete(paquete, socket_memoria);
+    eliminar_paquete(paquete);
+
+    op_code_memoria respuesta = recibir_operacion(socket_memoria);
+    cerrar_conexion_memoria(socket_memoria);
+
+    return respuesta == FINALIZAR_PROCESO;
+}
+
+bool solicitar_dump_memoria(uint32_t pid) {
+    int socket_memoria = crear_conexion_memoria();
+    if (socket_memoria == -1) return false;
+
+    t_paquete* paquete = crear_super_paquete(DUMP_MEMORY);
+    if (paquete == NULL) {
+        log_error(loggerKernel, "Error al crear paquete para dump memory");
+        cerrar_conexion_memoria(socket_memoria);
+        return false;
+    }
+
+    cargar_uint32_t_al_super_paquete(paquete, pid);
+    enviar_paquete(paquete, socket_memoria);
+    eliminar_paquete(paquete);
+
+    op_code_memoria respuesta = recibir_operacion(socket_memoria);
+    cerrar_conexion_memoria(socket_memoria);
+
+    return respuesta == DUMP_MEMORY_OK;
+} 
