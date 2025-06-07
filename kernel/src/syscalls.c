@@ -48,7 +48,7 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
             char* input = readline("Apriete ENTER para empezar a planificar procesos.\n");  
 
             if (*input == '\0') {  
-                sleep(1); // PARA DARLE TIEMPO A CONECTARSE BIEN A LOS OTROS MODULOS
+                sleep(2); // PARA DARLE TIEMPO A CONECTARSE BIEN A LOS OTROS MODULOS
                 break;
             }
             
@@ -141,9 +141,10 @@ void syscallExit(uint32_t pid)
         exit(1);
     }
 
-    terminarEjecucion(proceso);
+    
 
     pasarAExit(proceso);
+    terminarEjecucion(proceso);
 
 }
 PCB* buscarPCBEjecutando(uint32_t pid) {

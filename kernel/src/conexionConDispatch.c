@@ -73,7 +73,6 @@ void atender_dispatch_cpu(void* conexion)
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
                 PC = recibir_uint32_t_del_buffer(buffer);
-                actualizarPC(PID,PC);
                 syscallExit(PID);
                 enviarOK(fdConexion);             
                 break;

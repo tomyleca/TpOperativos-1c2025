@@ -338,7 +338,7 @@ void ciclo_instruccion(int socket_cpu_memoria)
 
     decode();
 
-    contexto->registros.PC++;
+    contexto->registros.PC = contexto->registros.PC + 1;
 
     check_interrupt(); 
 
