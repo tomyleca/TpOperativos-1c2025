@@ -153,10 +153,21 @@ void pasarASwapReady(PCB* proceso)
     inicializarProceso();
 }
 
-void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO)
+void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)
 {
+    bool _esInstancia(InstanciaIO* instanciaIO)
+    {
+        return instanciaIO->fdConexion == fdConexion;  //Busco la instancia por conexixón, que es lo que las diferencia
+    };
+    
     DispositivoIO* dispositivoIOLiberado = leerDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
-    sem_post(dispositivoIOLiberado->semaforoDispositivoOcupado);
+    InstanciaIO* instanciaIO = leerDeListaSegunCondicion(dispositivoIOLiberado->listaInstancias,_esInstancia);
+
+    sem_wait(instanciaIO->semaforoMutex);
+        instanciaIO->estaLibre=true;
+    sem_post(instanciaIO->semaforoMutex);
+
+    
     
     if(!list_is_empty(dispositivoIOLiberado->colaEsperandoIO->lista)) //Si la cola de procesos en espera no esta vacía, empiezo el IO del proceso esperando
         empezarIODelProximoEnEspera(dispositivoIOLiberado);

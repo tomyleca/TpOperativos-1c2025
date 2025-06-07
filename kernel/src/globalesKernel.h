@@ -66,10 +66,19 @@ typedef enum{
 typedef struct
 {
     char* nombre;
-    sem_t* semaforoDispositivoOcupado;
+    t_listaConSemaforos* listaInstancias;
     t_listaConSemaforos* colaEsperandoIO;
-    int fdConexion;
+    
+    
 } DispositivoIO;
+
+typedef struct 
+{
+    bool estaLibre;
+    sem_t* semaforoMutex;
+    int fdConexion;
+} InstanciaIO;
+
 
 typedef struct{
     PCB* proceso;

@@ -48,7 +48,7 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
             char* input = readline("Apriete ENTER para empezar a planificar procesos.\n");  
 
             if (*input == '\0') {  
-                sleep(2); // PARA DARLE TIEMPO A CONECTARSE BIEN A LOS OTROS MODULOS
+                //sleep(4); // PARA DARLE TIEMPO A CONECTARSE BIEN A LOS OTROS MODULOS
                 break;
             }
             
@@ -113,6 +113,7 @@ void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
     
     
    
+
 
 
     DispositivoIO* dispositivo = NULL;

@@ -6,7 +6,9 @@
 extern void pasarAReady(PCB* proceso);
 extern void pasarABLoqueado(PCB* proceso,int64_t tiempo,char* nombreIO);
 extern void* manejarProcesoBloqueado(procesoEnEsperaIO* procesoEnEsperaIO);
-extern void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO);
+extern bool dispositivoOcupado (DispositivoIO* dispositivoIO);
+extern bool instanciaLibre(InstanciaIO* instanciaIO);
+extern void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion);
 extern void empezarIODelProximoEnEspera(DispositivoIO* dispositivoIO);
 extern void contadorParaSwap (procesoEnEsperaIO* procesoEnEsperaIO);
 extern void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO);
