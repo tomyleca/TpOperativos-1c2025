@@ -150,7 +150,7 @@ void atender_dispatch_kernel()
                 break;
                 case PID_KERNEL_A_CPU:
                 printf("ANTES DE RECIBIR OTRO PROCESO\n");
-                sem_wait(&sem_pid);
+                
                 contexto = malloc(sizeof(t_contexto_cpu));
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
                 contexto->pid = recibir_uint32_t_del_buffer(buffer);

@@ -1,4 +1,4 @@
-INIT_PROC proceso1 256
+INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo2.txt 4
 WRITE 0 EJEMPLO_DE_ENUNCIADO
 READ 0 20
 IO IMPRESORA 25000

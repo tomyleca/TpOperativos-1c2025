@@ -316,7 +316,7 @@ void check_interrupt()
         flag_interrupcion = false;  // Leer flag
         pthread_mutex_unlock(&mutex_motivo_interrupcion); 
         
-        contexto->registros.PC++;
+        
         
         
 
@@ -327,7 +327,7 @@ void check_interrupt()
         
         printf("--------------No hay interrupcion \n");
         
-        contexto->registros.PC++;
+        
         ciclo_instruccion(socket_cpu_memoria); // Aca vuelvo a pedirle una instruccion a memoria
     }
 }
@@ -337,6 +337,8 @@ void ciclo_instruccion(int socket_cpu_memoria)
     fetch(socket_cpu_memoria);
 
     decode();
+
+    contexto->registros.PC++;
 
     check_interrupt(); 
 
