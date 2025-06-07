@@ -154,6 +154,13 @@ extern bool menorEstimadoRafagaRestante(nucleoCPU* CPU1,nucleoCPU* CPU2);
 extern void terminarEjecucion(PCB* proceso);
 extern void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion);
 
+/**
+ * @brief Loggea las métricas de estado antes de finalizar el proceso
+*/
+extern void loggearMetricas(PCB* proceso);
+
+extern void hacerFreeDeCronometros(PCB* proceso);
+
 extern t_listaConSemaforos* listaProcesosNew;
 extern t_listaConSemaforos* listaProcesosReady;
 extern t_listaConSemaforos* listaProcesosSwapReady;

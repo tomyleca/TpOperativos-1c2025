@@ -8,10 +8,6 @@
 */
 extern  nucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion);
 
-/**
- * @brief Loggea las métricas de estado antes de finalizar el proceso
-*/
-extern void loggearMetricas(PCB* proceso);
 
 extern void* esperarClientesDispatch(void* arg);
 

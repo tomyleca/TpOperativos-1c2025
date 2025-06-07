@@ -138,7 +138,7 @@ void pasarAExit(PCB* proceso){
     proceso->ME[EXIT]++;
     loggearMetricas(proceso);
     inicializarProceso();
-    //TODO liberar cronometros
+    hacerFreeDeCronometros(proceso);
     free(proceso->archivoPseudocodigo);
     free(proceso);
 }
@@ -156,7 +156,13 @@ void loggearMetricas(PCB* proceso)
     proceso->ME[EXIT],proceso->MT[EXIT]);
 }
 
-
+void hacerFreeDeCronometros(PCB* proceso)
+{
+    for(int i = 0; i<7; i++)
+    {
+        temporal_destroy(proceso->cronometros[i]);
+    }
+}
 
 void mandarContextoACPU(uint32_t PID,uint32_t PC,int fdConexion)
 {

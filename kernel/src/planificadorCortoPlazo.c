@@ -84,8 +84,7 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 
     temporal_stop(procesoDespuesDeEjecucion->cronometroEjecucionActual);
     
-    //TODO arreglar esto con valgrind
-    //temporal_destroy(procesoDespuesDeEjecucion->cronometroEjecucionActual);
+    temporal_destroy(procesoDespuesDeEjecucion->cronometroEjecucionActual);
 
 }
 
