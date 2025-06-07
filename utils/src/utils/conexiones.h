@@ -27,7 +27,7 @@ void recibir_handshake(int socket);
 extern void enviarOK(int fdConexion);
 extern bool esperarOK(int fdConexion);
 extern void enviarOK2(int fdConexion);
-extern bool esperarOK2(int fdConexion);
+extern void esperarOK2(int fdConexion);
 
 
 

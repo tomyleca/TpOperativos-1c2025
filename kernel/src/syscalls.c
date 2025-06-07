@@ -109,6 +109,7 @@ void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
         exit(1);
     }
     
+    
     terminarEjecucion(proceso);
    
 

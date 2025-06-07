@@ -102,21 +102,19 @@ void atender_interrupcion_kernel()
             case MENSAJE:
                 //recibir_mensaje(socket_cpu_kernel_interrupt, logger_cpu);
                 break;    
-            case INTERRUPCION_PID:
-                sem_wait(&sem_interrupcion);
-
+            case INTERRUPCION:
+                
                 log_info(logger_cpu, " ## Llega interrupción al puerto Interrupt.");
                 
                 pthread_mutex_lock(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;
                 printf("Adentro de lmutex interrup \n");
-                motivo_interrupcion = INTERRUPCION_PID;
+                motivo_interrupcion = INTERRUPCION;
                 pthread_mutex_unlock(&mutex_motivo_interrupcion);
 
-                buffer = recibiendo_super_paquete(socket_cpu_kernel_interrupt);     
+                enviarOK(socket_cpu_kernel_interrupt);
+                
 
-                int pid = recibir_int_del_buffer(buffer);
-                int pc = recibir_int_del_buffer(buffer);
 
                 free(buffer);
                 break;
@@ -155,8 +153,8 @@ void atender_dispatch_kernel()
                 sem_wait(&sem_pid);
                 contexto = malloc(sizeof(t_contexto_cpu));
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
-                contexto->pid = recibir_int_del_buffer(buffer);
-                contexto->registros.PC = recibir_int_del_buffer(buffer);
+                contexto->pid = recibir_uint32_t_del_buffer(buffer);
+                contexto->registros.PC = recibir_uint32_t_del_buffer(buffer);
                 enviarOK(socket_cpu_kernel_dispatch);
                 // ACA HAY QUE SOLICITAR A MEMORIA LA PRIMER INSTRUCCION CON EL PID RECIBIMOS DE KERNEL
                 ciclo_instruccion(socket_cpu_memoria); 

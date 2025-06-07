@@ -124,7 +124,7 @@ void enviarOK(int fdConexion)
 bool esperarOK(int fdConexion)
 {
     uint32_t OK;
-    return recv(fdConexion,OK,sizeof(uint32_t),0);
+    return recv(fdConexion,&OK,sizeof(uint32_t),0);
 }
 
 void enviarOK2(int conexion)
@@ -132,11 +132,14 @@ void enviarOK2(int conexion)
     enviar_paquete(crear_super_paquete(OK),conexion);
 }
 
-bool esperarOK2(int fdConexion)
+void esperarOK2(int fdConexion)
 {
-    if(recibir_operacion(fdConexion)== OK)
+    while(1)
+    {
+    op_code opCode = recibir_operacion(fdConexion);
+    
+    if(opCode == OK)
         return 1;
-    else
-        return 0;
+    }
 
 }

@@ -138,6 +138,7 @@ void terminarEjecucion(PCB* proceso)
 
     nucleoCPU* nucleoCPU = sacarDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
     nucleoCPU->ejecutando=false;
+    mandarInterrupcion(nucleoCPU);
     agregarALista(listaCPUsLibres,nucleoCPU);
     PCB* procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
     guardarDatosDeEjecucion(procesoPostEjecucion);

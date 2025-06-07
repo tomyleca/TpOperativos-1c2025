@@ -29,7 +29,7 @@ void esperarDatosInterrupt(void* conexion)
     buffer = recibiendo_super_paquete(fdConexion);
     char* identificador = recibir_string_del_buffer(buffer);
     guardarDatosCPUInterrupt(identificador,fdConexion);
-
+    pthread_exit(NULL);
 }
 
 nucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)
@@ -58,4 +58,10 @@ nucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)
 
     return nucleoCPU;
 
+}
+
+void mandarInterrupcion(nucleoCPU* nucleoCPU)
+{
+    enviar_paquete(crear_super_paquete(INTERRUPCION),nucleoCPU->fdConexionInterrupt);
+    esperarOK(nucleoCPU->fdConexionInterrupt);
 }

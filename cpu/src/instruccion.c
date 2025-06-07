@@ -240,9 +240,9 @@ void fetch(int socket_cpu_memoria)
     // CASO EN EL QUE SE EJECUTA  SOLAMENTE UNA INSTRUCCION COMUN Y SE VUELVE A SOLICITAR OTRA
     paquete = crear_super_paquete(CPU_PIDE_INSTRUCCION_A_MEMORIA);
     
-    cargar_int_al_super_paquete(paquete, contexto->pid);
+    cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
 
-    cargar_int_al_super_paquete(paquete, contexto->registros.PC);
+    cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC);
 
     log_info(logger_cpu, "## PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
 
@@ -308,43 +308,25 @@ void check_interrupt()
 
     if(hay_interrupcion) // hay una interrupcion
     {   
-        pthread_mutex_lock(&mutex_motivo_interrupcion);
-        int motivo = motivo_interrupcion;  // Leer motivo
-        pthread_mutex_unlock(&mutex_motivo_interrupcion);
-
-        if(motivo == INTERRUPCION_PID) // le envio el contexto a memoria 
-        {
-            printf("antes de enviar motivo de interrupcion\n");
-            enviar_interrupcion_a_kernel_y_memoria(parte, motivo_interrupcion);
-            printf("despues de enviar motivo de interrupcion\n");
-            pthread_mutex_lock(&mutex_motivo_interrupcion);
-            flag_interrupcion = false;
-            motivo_interrupcion = -1;
-            pthread_mutex_unlock(&mutex_motivo_interrupcion);
-            
-            sem_post(&sem_interrupcion);
-            
-        } else {
-            log_error(logger_cpu, "Motivo de interrupcion inesperado: %d", motivo);
-        }
-
-        printf("ADENTRO del mutex check instruccion 2/n");
+        
         free(instruccion_recibida);
-        instruccion_recibida = NULL; 
+        instruccion_recibida = NULL;
+        
+        pthread_mutex_lock(&mutex_motivo_interrupcion);
+        flag_interrupcion = false;  // Leer flag
+        pthread_mutex_unlock(&mutex_motivo_interrupcion); 
+        
+        contexto->registros.PC++;
+        
+        
 
     } else {
 
         free(instruccion_recibida);
         instruccion_recibida = NULL;
+        
         printf("--------------No hay interrupcion \n");
         
-        pthread_mutex_lock(&mutex_motivo_interrupcion);
-        if(motivo_interrupcion != INTERRUPCION_PID)
-        {
-            motivo_interrupcion = -1;
-        }
-        printf("despues de motivo de interrupcion = -1 \n");
-        pthread_mutex_unlock(&mutex_motivo_interrupcion);
         contexto->registros.PC++;
         ciclo_instruccion(socket_cpu_memoria); // Aca vuelvo a pedirle una instruccion a memoria
     }
