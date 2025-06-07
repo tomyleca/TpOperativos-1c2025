@@ -1,5 +1,6 @@
-#include <syscalls.h>
+#include "syscalls.h"
 #include "conexionConMemoria.h"
+
 
 void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     //Creo un nuevo proceso
@@ -31,54 +32,41 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     nuevoProceso->duracionRafagaAnterior=0;
     nuevoProceso->estimadoSiguienteRafaga=0;
 
-    // Intentar inicializar el proceso en memoria
-    if (inicializar_proceso_memoria(nuevoProceso->PID, tam)) {
-        if(algoritmoColaNewEnFIFO)
-            agregarALista(listaProcesosNew, nuevoProceso);
-        else
-            agregarAListaOrdenada(listaProcesosNew, nuevoProceso, menorTam);
+    
+   
+    if(algoritmoColaNewEnFIFO)
+        agregarALista(listaProcesosNew,nuevoProceso);
+    else
+        agregarAListaOrdenada(listaProcesosNew,nuevoProceso,menorTam);
 
-        temporal_resume(nuevoProceso->cronometros[NEW]);
-        nuevoProceso->ME[NEW]++; 
+    temporal_resume(nuevoProceso->cronometros[NEW]);
+    nuevoProceso->ME[NEW]++; 
 
-        log_info(loggerKernel, "## (<%u>) Se crea el proceso - Estado: NEW", nuevoProceso->PID);
-        
-        if(nuevoProceso->PID == 0) { // Si es el primer proceso, espero el ENTER
-            while (1) {
-                char* input = readline("Apriete ENTER para empezar a planificar procesos.\n");  
-                if (*input == '\0') {  
-                    break;
-                }
+    log_info(loggerKernel, "## (<%u>) Se crea el proceso - Estado: NEW",nuevoProceso->PID);
+    
+    if(nuevoProceso->PID==0) //Si es el primer proceso, espero el ENTER
+    {
+        while (1) {
+            char* input = readline("Apriete ENTER para empezar a planificar procesos.\n");  
+
+            if (*input == '\0') {  
+                sleep(2); // PARA DARLE TIEMPO A CONECTARSE BIEN A LOS OTROS MODULOS
+                break;
             }
-        }    
-        
-        inicializarProceso();
-    } else {
-        log_error(loggerKernel, "## (<%u>) - Error al inicializar proceso en memoria", nuevoProceso->PID);
-        // Liberar recursos del proceso que no pudo inicializarse
-        for (int i = 0; i < 7; i++) {
-            temporal_destroy(nuevoProceso->cronometros[i]);
+            
         }
-        free(nuevoProceso->archivoPseudocodigo);
-        free(nuevoProceso);
-    }
+    }    
+    
+    inicializarProceso();
 }
 
 void dump_memory(uint32_t pid) {
-    log_info(loggerKernel, "## (<%d>) - Solicitó syscall: DUMP_MEMORY", pid);
-
-    PCB* proceso = buscarPCBEjecutando(pid);
-    if (proceso == NULL) {
-        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para DUMP_MEMORY", pid);
-        exit(1);
-    }
-
+    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: DUMP_MEMORY", pid);
+    
     if (solicitar_dump_memoria(pid)) {
-        log_info(loggerKernel, "## (<%u>) - Finalizó correctamente DUMP_MEMORY", pid);
-        pasarAReady(proceso);
+        log_info(loggerKernel, "## (<%u>) - Memory Dump solicitado", pid);
     } else {
-        log_error(loggerKernel, "## (<%u>) - Error en DUMP_MEMORY. Finalizando proceso", pid);
-        pasarAExit(proceso);
+        log_error(loggerKernel, "## (<%u>) - Error al solicitar Memory Dump", pid);
     }
 }
 
@@ -137,5 +125,4 @@ PCB* buscarPCBEjecutando(uint32_t pid) {
     else
         return NULL;
 }
-
 

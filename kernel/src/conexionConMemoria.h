@@ -14,7 +14,7 @@ typedef enum {
     SUSPENDER_PROCESO,
     DES_SUSPENDER_PROCESO,
     FINALIZAR_PROCESO,
-    DUMP_MEMORY,
+
     DUMP_MEMORY_OK,
     DUMP_MEMORY_ERROR
 } op_code_memoria;

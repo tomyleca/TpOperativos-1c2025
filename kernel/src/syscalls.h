@@ -13,6 +13,7 @@
 #include"../../utils/src/utils/shared.h"
 #include "cambiarDeEstado.h"
 #include"../../utils/src/utils/conexiones.h"
+#include <commons/temporal.h>
 
 extern void dump_memory(uint32_t pid);
 extern void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo);
