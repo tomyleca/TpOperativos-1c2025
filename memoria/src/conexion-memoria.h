@@ -20,14 +20,6 @@
 #include "administracion-memoria.h"
 
 
-typedef enum {
-    INICIALIZAR_PROCESO,
-    SUSPENDER_PROCESO,
-    DES_SUSPENDER_PROCESO,
-    FINALIZAR_PROCESO,
-    DUMP_MEMORY_OK,
-    DUMP_MEMORY_ERROR
-} op_code_kernel;
 
 extern t_log* memoria_logger;
 
