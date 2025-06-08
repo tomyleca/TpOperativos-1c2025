@@ -60,8 +60,7 @@ int atender_cliente(int *fd_conexion)
                 else 
                     enviar_paquete(crear_super_paquete(OK),cliente_fd);
                 free(unBuffer);
-                free(datos_kernel.archivo_pseudocodigo);
-                //TODO revisar esto
+                
             break;   
              case CPU_PIDE_INSTRUCCION_A_MEMORIA: //PARA INICIAR DECODE ESTO!!
                 usleep(retardo_memoria * 1000);
@@ -72,8 +71,7 @@ int atender_cliente(int *fd_conexion)
                 enviar_paquete(paquete, cliente_fd);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 buscar_y_mandar_instruccion(unBuffer,cliente_fd);
-                free(unBuffer);
-                free(paquete);
+                eliminar_paquete(paquete);
             break;
             case CPU_PIDE_LEER_MEMORIA:
                 usleep(retardo_memoria* 1000);
@@ -91,7 +89,7 @@ int atender_cliente(int *fd_conexion)
                 cargar_string_al_super_paquete(paquete, "OK");
                 cargar_int_al_super_paquete(paquete, tamanio);
                 enviar_paquete(paquete, cliente_fd);
-                free(paquete);
+                eliminar_paquete(paquete);
                 break;
 
             case CPU_PIDE_ESCRIBIR_MEMORIA:
@@ -111,7 +109,7 @@ int atender_cliente(int *fd_conexion)
                 cargar_int_al_super_paquete(paquete, pid);
                 cargar_int_al_super_paquete(paquete, direccion_fisica);
                 enviar_paquete(paquete, cliente_fd);
-                free(paquete);
+                eliminar_paquete(paquete);
                 printf("despues de mandar el paquete a cpu de CPU_PIDE_ESCRIBIR_MEMORIA\n");
                 break;
              

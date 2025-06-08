@@ -113,7 +113,7 @@ void peticion_escritura_a_memoria(int direccion_fisica, char* valor_registro_dat
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_string_al_super_paquete(paquete, valor_registro_dato);
     enviar_paquete(paquete, socket_cpu_memoria);
-    free(paquete);
+    eliminar_paquete(paquete);
 }
 
 
@@ -224,7 +224,7 @@ void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_int_al_super_paquete(paquete, tamanio);
     enviar_paquete(paquete, socket_cpu_memoria);
-    free(paquete);
+    eliminar_paquete(paquete);
 }
 
 
@@ -248,7 +248,7 @@ void fetch(int socket_cpu_memoria)
 
     // Envio el paquete a memoria
     enviar_paquete(paquete, socket_cpu_memoria);
-    free(paquete);
+    eliminar_paquete(paquete);
 }
 
 void decode()
@@ -257,7 +257,10 @@ void decode()
         sem_wait(&sem_hay_instruccion); 
         printf("Despues de el semaforo hay instruccion\n");
         
-        char** parte = string_split(instruccion_recibida, " "); // Divido la instrucción (que es un string) en partes  (decode)
+
+        char* instruccionRecibidaLocal = strdup(instruccion_recibida);
+        char** parte = string_split(instruccionRecibidaLocal, " "); // Divido la instrucción (que es un string) en partes  (decode)
+
 
         int instruccion_enum = (int)(intptr_t)dictionary_get(instrucciones, parte[0]); // Aca se obtiene la instrucción (el enum) a partir del diccionario
 
@@ -282,7 +285,9 @@ void decode()
                 syscallDUMP_MEMORY(parte);
                 break;
             case I_INIT_PROCESS:
+                printf("Llego hasta aca");
                 syscallINIT_PROC(parte);
+                 printf("Llego hasta aca");
                 break;
             case I_EXIT:
                 syscallEXIT(parte);
@@ -548,3 +553,49 @@ int algoritmo_clock()
 
 
 
+
+void syscall_IO(char** parte){
+    t_paquete* paquete = crear_super_paquete(IO);
+    cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
+    cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC + 1);
+    cargar_string_al_super_paquete(paquete,parte[1]);
+    int64_t tiempo = (int64_t) strtoll(parte[2], NULL, 10);
+    cargar_int64_t_al_super_paquete(paquete,tiempo);
+    enviar_paquete(paquete,socket_cpu_kernel_dispatch);
+    eliminar_paquete(paquete);
+    esperarOK(socket_cpu_kernel_dispatch);
+}
+
+void syscallINIT_PROC(char** parte)
+{
+    printf("Llego hasta aca");
+    t_paquete* paquete = crear_super_paquete(INIT_PROCCESS);
+    cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
+    cargar_string_al_super_paquete(paquete, parte[1]);
+    cargar_uint32_t_al_super_paquete(paquete,(uint32_t) strtoul(parte[2], NULL, 10));
+    enviar_paquete(paquete, socket_cpu_kernel_dispatch);
+    eliminar_paquete(paquete);
+     printf("Llego hasta aca");
+    esperarOK(socket_cpu_kernel_dispatch);
+}
+
+void syscallDUMP_MEMORY(char** parte)
+{
+    t_paquete* paquete = crear_super_paquete(DUMP_MEMORY);
+    cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
+    cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC + 1);
+    enviar_paquete(paquete, socket_cpu_kernel_dispatch);
+    eliminar_paquete(paquete);
+    esperarOK(socket_cpu_kernel_dispatch);
+}
+
+void syscallEXIT(char** parte)
+{
+    t_paquete* paquete = crear_super_paquete(SYSCALL_EXIT);
+    cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
+    cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC + 1);
+    enviar_paquete(paquete, socket_cpu_kernel_dispatch);
+    eliminar_paquete(paquete);
+    esperarOK(socket_cpu_kernel_dispatch);
+    
+}

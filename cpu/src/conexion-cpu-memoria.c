@@ -5,7 +5,7 @@ void crear_handshake_cpu_kernel_dispatch(int conexion_cpu_kernel)
     t_paquete* paquete = crear_super_paquete(HANDSHAKE_CPU_KERNEL_D);
     cargar_string_al_super_paquete(paquete, identificador_cpu);
     enviar_paquete(paquete,conexion_cpu_kernel);
-    free(paquete);
+    eliminar_paquete(paquete);
 }
 
 void crear_handshake_cpu_kernel_interrupt(int conexion_cpu_kernel)
@@ -13,7 +13,7 @@ void crear_handshake_cpu_kernel_interrupt(int conexion_cpu_kernel)
     t_paquete* paquete = crear_super_paquete(HANDSHAKE_CPU_KERNEL_I);
     cargar_string_al_super_paquete(paquete, identificador_cpu);
     enviar_paquete(paquete,conexion_cpu_kernel);
-    free(paquete);
+    eliminar_paquete(paquete);
 }
 
 pthread_t escuchar_interrupcion_kernel()
@@ -50,9 +50,9 @@ void atender_memoria()
         {
             case RECIBIR_TAMANO_PAG:
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
-                tamanio_pagina = recibir_uint32_t_del_buffer(buffer);
-                cant_niveles = recibir_uint32_t_del_buffer(buffer);
-                cant_entradas_tabla = recibir_uint32_t_del_buffer(buffer);
+                tamanio_pagina = recibir_int_del_buffer(buffer);
+                cant_niveles = recibir_int_del_buffer(buffer);
+                cant_entradas_tabla = recibir_int_del_buffer(buffer);
                 break;
             case CPU_RECIBE_INSTRUCCION_MEMORIA: 
                 //ACA LLEGA LA SOLICITUD DE LA INSTRUCCION DE MEMORIA

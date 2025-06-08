@@ -105,7 +105,7 @@ void avisarInicioIO(procesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t 
     cargar_uint32_t_al_super_paquete(paquete,procesoEnEsperaIO->proceso->PID);
     cargar_uint32_t_al_super_paquete(paquete,tiempo);
     enviar_paquete(paquete,instanciaIO->fdConexion);
-    free(paquete);
+    eliminar_paquete(paquete);
     }
 
     

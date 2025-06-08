@@ -59,7 +59,7 @@ int mandarDatosProcesoAMemoria(PCB* proceso)
         log_error(loggerKernel,"## <%u> No hay suficiente memoria para alojar el proceso",proceso->PID);
     }
 
-    free(paquete);
+    eliminar_paquete(paquete);
     close(socketKernelMemoria);
 
     return respuesta;

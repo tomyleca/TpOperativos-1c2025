@@ -171,7 +171,7 @@ void mandarContextoACPU(uint32_t PID,uint32_t PC,int fdConexion)
     cargar_uint32_t_al_super_paquete(paquete,PC);
     enviar_paquete(paquete,fdConexion);
     esperarOK(fdConexion);
-    free(paquete);
+    eliminar_paquete(paquete);
 }
 
 void actualizarPC(uint32_t pid, uint32_t PCActualizado)
