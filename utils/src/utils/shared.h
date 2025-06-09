@@ -99,6 +99,8 @@ void recibir_mensaje(int socket_cliente, t_log *logger);
 
 void *recibir_buffer(int *size, int socket_cliente);
 
+void limpiarBuffer(t_buffer* buffer);
+
 int recibir_operacion(int socket_cliente);
 
 t_list *recibir_paquete(int socket_cliente);

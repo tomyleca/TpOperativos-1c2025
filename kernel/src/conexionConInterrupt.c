@@ -33,6 +33,7 @@ void esperarDatosInterrupt(void* conexion)
             buffer = recibiendo_super_paquete(fdConexion);
             char* identificador = recibir_string_del_buffer(buffer);
             guardarDatosCPUInterrupt(identificador,fdConexion);
+            limpiarBuffer(buffer);
             break;
         
         case -1:

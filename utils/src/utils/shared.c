@@ -306,7 +306,11 @@ int64_t recibir_int64_t_del_buffer(t_buffer *coso)
 	return valor_a_devolver;
 }
 
-
+void limpiarBuffer(t_buffer* buffer)
+{
+free(buffer->stream);
+free(buffer);
+}
 
 t_paquete *crear_super_paquete(op_code code_op)
 {

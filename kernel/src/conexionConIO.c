@@ -79,7 +79,7 @@ void* atenderInstanciaIO(void* conexion)
                 
 
         }
-
+    limpiarBuffer(buffer);
         
 
 }

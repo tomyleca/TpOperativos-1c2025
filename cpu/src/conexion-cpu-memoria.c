@@ -61,7 +61,7 @@ void atender_memoria()
                 instruccion_recibida = recibir_string_del_buffer(buffer); // instruccion_recibida se usa en instruccion.c
                 log_info(logger_cpu,"# Llega instrucción de memoria: %s", instruccion_recibida);
                 sem_post(&sem_hay_instruccion);
-                //free(buffer);
+                //limpiarBuffer(buffer);
                 break;
 
             case CPU_RECIBE_OK_DE_LECTURA:
@@ -69,7 +69,7 @@ void atender_memoria()
                 contexto->pid = recibir_int_del_buffer(buffer);
                 direccion_fisica = recibir_int_del_buffer(buffer); // POR EL MOMENTO TRATAMOS A LA DIRECCION FISICA COMO INT 
                 //valor_leido_de_memoria_32 = recibir_int_del_buffer(buffer);
-                free(buffer);
+                limpiarBuffer(buffer);
                 break;
 
             case CPU_RECIBE_OK_DE_ESCRITURA:
@@ -77,7 +77,7 @@ void atender_memoria()
                 contexto->pid = recibir_int_del_buffer(buffer);
                 direccion_fisica = recibir_int_del_buffer(buffer);
                             
-                free(buffer); 
+                limpiarBuffer(buffer); 
                 break;
             case -1:
                 log_error(logger_cpu, "MEMORIA se desconecto. Terminando servidor");
@@ -114,12 +114,8 @@ void atender_interrupcion_kernel()
                 printf("Adentro de lmutex interrup \n");
                 motivo_interrupcion = INTERRUPCION;
                 pthread_mutex_unlock(&mutex_motivo_interrupcion);
-
                 enviarOK(socket_cpu_kernel_interrupt);
                 
-
-
-                free(buffer);
                 break;
             case -1:
                 log_error(logger_cpu, "KERNEL INTERRUPT se desconecto. Terminando servidor");
@@ -163,7 +159,7 @@ void atender_dispatch_kernel()
                 enviarOK(socket_cpu_kernel_dispatch);
                 // ACA HAY QUE SOLICITAR A MEMORIA LA PRIMER INSTRUCCION CON EL PID RECIBIMOS DE KERNEL
                 ciclo_instruccion(socket_cpu_memoria); 
-                free(buffer);
+                limpiarBuffer(buffer);
                 break;
                 
             case -1:

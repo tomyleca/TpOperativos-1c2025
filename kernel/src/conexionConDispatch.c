@@ -38,8 +38,7 @@ void atender_dispatch_cpu(void* conexion)
                 buffer = recibiendo_super_paquete(fdConexion);
                 char* identificador = recibir_string_del_buffer(buffer);    
                 nucleoCPU = guardarDatosCPUDispatch(identificador,fdConexion);
-                free(buffer->stream);
-                free(buffer);
+                limpiarBuffer(buffer);
                 break;
             
             case IO:
@@ -51,7 +50,7 @@ void atender_dispatch_cpu(void* conexion)
                 actualizarPC(PID,PC);
                 syscall_IO(PID,nombreIO,tiempoEnIO);
                 enviarOK(fdConexion); 
-                free(buffer);              
+                limpiarBuffer(buffer);              
                 break;
             
             case DUMP_MEMORY:
@@ -61,7 +60,7 @@ void atender_dispatch_cpu(void* conexion)
                 actualizarPC(PID,PC);
                 dump_memory(PID);
                 enviarOK(fdConexion);
-                free(buffer);
+                limpiarBuffer(buffer);
                 break;
             
             case INIT_PROCCESS:
@@ -71,7 +70,7 @@ void atender_dispatch_cpu(void* conexion)
                 uint32_t tam = recibir_uint32_t_del_buffer(buffer);
                 INIT_PROC(nombrePseudocodigo,tam);
                 enviarOK(fdConexion);
-                free(buffer);
+                limpiarBuffer(buffer);
                 break;
             
             case SYSCALL_EXIT:
@@ -80,7 +79,7 @@ void atender_dispatch_cpu(void* conexion)
                 PC = recibir_uint32_t_del_buffer(buffer);
                 syscallExit(PID);
                 enviarOK(fdConexion);        
-                free(buffer);     
+                limpiarBuffer(buffer);     
                 break;
             
             case -1:

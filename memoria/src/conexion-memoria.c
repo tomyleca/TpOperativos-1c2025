@@ -59,7 +59,7 @@ int atender_cliente(int *fd_conexion)
                     enviar_paquete(crear_super_paquete(NO_HAY_MEMORIA),cliente_fd);
                 else 
                     enviar_paquete(crear_super_paquete(OK),cliente_fd);
-                free(unBuffer);
+                limpiarBuffer(unBuffer);
                 break;   
              
              case CPU_PIDE_INSTRUCCION_A_MEMORIA: //PARA INICIAR DECODE ESTO!!
@@ -81,7 +81,7 @@ int atender_cliente(int *fd_conexion)
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
                 tamanio = recibir_int_del_buffer(unBuffer);
                 printf("Direccion fisica en leer memoria: %d --------------------------------------------------------\n", direccion_fisica);
-                free(unBuffer);
+                limpiarBuffer(unBuffer);
                 //TODO ver que pasa aca con el tema de la direc fisica en memoria
                 // Respuesta a CPU
                 paquete = crear_super_paquete(CPU_RECIBE_OK_DE_LECTURA);
@@ -100,7 +100,7 @@ int atender_cliente(int *fd_conexion)
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
                 uint32_t valor_registro = recibir_uint32_t_del_buffer(unBuffer);
                 log_info(logger_memoria, "Valor del dato a ecribir en memoria: %d", valor_registro);
-                free(unBuffer);
+                limpiarBuffer(unBuffer);
                 
                 // escribir_memoria(pid, direccion_fisica, valor_registro); //TODO hacer esto
 
