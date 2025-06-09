@@ -129,8 +129,9 @@ void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
 
     log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",pid,nombreIO);
 
-    pasarABLoqueado(proceso, tiempo, nombreIO);
     terminarEjecucion(proceso);
+    pasarABLoqueado(proceso, tiempo, nombreIO);
+    
 }
 
 void syscallExit(uint32_t pid)
@@ -144,9 +145,9 @@ void syscallExit(uint32_t pid)
     }
 
     
-    
-    pasarAExit(proceso);
     terminarEjecucion(proceso);
+    pasarAExit(proceso);
+    
     
 
 }

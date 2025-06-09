@@ -1,6 +1,8 @@
 #include <cpu.h>
 
 int main(int argc, char* argv[]) {
+    signal(SIGINT,liberarRecursos);
+    
     saludar("cpu");
 
     //INICIO Y LEO CONFIG
@@ -59,8 +61,6 @@ void inicializar_recursos()
 {
     // Inicializar semaforos
     sem_init(&sem_hay_instruccion, 0, 0);
-    sem_init(&sem_pid, 0, 1);
-    sem_init(&sem_contexto, 0, 1);
     sem_init(&sem_interrupcion, 0, 1);
 
     iniciar_diccionario_instrucciones();
@@ -69,4 +69,18 @@ void inicializar_recursos()
 
 
     lista_tlb = list_create();
+}
+
+
+
+
+void liberarRecursos(int signal)
+{
+    if(signal != SIGINT)
+        return;
+    
+    close(socket_cpu_kernel_dispatch);
+    close(socket_cpu_kernel_interrupt);
+    close(socket_cpu_memoria);
+    exit(1);
 }

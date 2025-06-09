@@ -16,11 +16,12 @@ void atender_dispatch_cpu(void* conexion)
 {
     int fdConexion = *(int*)conexion;
     
-    t_buffer* buffer;
+    
     int cod_op;
     nucleoCPU* nucleoCPU;
     uint32_t PID;
     uint32_t PC;
+    t_buffer* buffer;
     
     
    
@@ -30,10 +31,14 @@ void atender_dispatch_cpu(void* conexion)
         cod_op = recibir_operacion(fdConexion);
         switch (cod_op) 
         {
+            case 1:
+                sem_post(semaforoEsperarOKDispatch);
+                break;
             case HANDSHAKE_CPU_KERNEL_D:
                 buffer = recibiendo_super_paquete(fdConexion);
                 char* identificador = recibir_string_del_buffer(buffer);    
                 nucleoCPU = guardarDatosCPUDispatch(identificador,fdConexion);
+                free(buffer->stream);
                 free(buffer);
                 break;
             
@@ -80,11 +85,11 @@ void atender_dispatch_cpu(void* conexion)
             
             case -1:
                 log_info(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
-                shutdown(fdConexion, SHUT_RDWR);
+                //shutdown(fdConexion, SHUT_RDWR);
                 close(fdConexion);
                 pthread_exit(NULL);
             default:
-                //log_warning(loggerKernel, "Operacion desconocida. No quieras meter la pata");
+                log_warning(loggerKernel, "Operacion desconocida. No quieras meter la pata");
                 break;
         }
     }
@@ -173,7 +178,7 @@ void mandarContextoACPU(uint32_t PID,uint32_t PC,int fdConexion)
     cargar_uint32_t_al_super_paquete(paquete,PID);
     cargar_uint32_t_al_super_paquete(paquete,PC);
     enviar_paquete(paquete,fdConexion);
-    esperarOK(fdConexion);
+    sem_wait(semaforoEsperarOKDispatch);
     eliminar_paquete(paquete);
 }
 

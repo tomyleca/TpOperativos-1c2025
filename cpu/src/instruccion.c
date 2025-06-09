@@ -42,7 +42,7 @@ void instruccion_escribir_memoria(char** parte)
 
     if (direccion_fisica < 0) {
         log_error(logger_cpu, "Segmentation Fault al traducir la dirección lógica %d", direccion_logica);
-        enviar_interrupcion_a_kernel_y_memoria(parte, SEGMENTATION_FAULT);
+        //enviar_interrupcion_a_kernel_y_memoria(parte, SEGMENTATION_FAULT);
         return;
     }
 
@@ -82,7 +82,7 @@ void instruccion_leer_memoria(char** parte)
 
     if (direccion_fisica < 0) {
         log_error(logger_cpu, "Segmentation Fault al traducir la dirección lógica %d", direccion_logica);
-        enviar_interrupcion_a_kernel_y_memoria(parte, SEGMENTATION_FAULT);
+        //enviar_interrupcion_a_kernel_y_memoria(parte, SEGMENTATION_FAULT);
         return;
     }
 
@@ -253,18 +253,16 @@ void fetch(int socket_cpu_memoria)
 
 void decode()
 {     
-        printf("Antes de el semaforo hay instruccion\n");
-        sem_wait(&sem_hay_instruccion); 
-        printf("Despues de el semaforo hay instruccion\n");
         
-        fflush(stdout);
-        printf("0");
+        sem_wait(&sem_hay_instruccion); 
+        
+       
        
         char* instruccionRecibidaLocal = strdup(instruccion_recibida);
        
         char** parte = string_split(instruccionRecibidaLocal, " "); // Divido la instrucción (que es un string) en partes  (decode)
         
-        
+       
 
         int instruccion_enum = (int)(intptr_t)dictionary_get(instrucciones, parte[0]); // Aca se obtiene la instrucción (el enum) a partir del diccionario
 
@@ -289,16 +287,14 @@ void decode()
                 syscallDUMP_MEMORY(parte);
                 break;
             case I_INIT_PROCESS:
-                printf("llego hasta aca");
                 syscallINIT_PROC(parte);
-                 
                 break;
             case I_EXIT:
                 syscallEXIT(parte);
                 break;
             case -1:
                 log_warning(logger_cpu, "Algo paso en el interpretar instruccion!!!");
-                destruir_diccionarios();
+                //destruir_diccionarios();
                     return;
             default:
                 log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
@@ -375,44 +371,6 @@ void destruir_diccionarios()
 	dictionary_destroy(instrucciones);
 }
 
-void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_de_interrupcion)
-{
-    t_paquete *paquete_kernel_dispatch;
-    t_paquete *paquete_memoria;
-    
-    
-    paquete_kernel_dispatch = crear_super_paquete(motivo_de_interrupcion);
-    cargar_int_al_super_paquete(paquete_kernel_dispatch, contexto->pid);
-
-    switch (motivo_de_interrupcion)
-    {    
-        case SEGMENTATION_FAULT: //TODO esto va en otro lado
-        //MEMORIA
-            contexto->registros.PC++;
-            paquete_kernel_dispatch->codigo_operacion=SEGMENTATION_FAULT;
-            paquete_memoria = crear_super_paquete(SEGMENTATION_FAULT);
-            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
-            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
-            
-        break;
-        default:
-            log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
-            break;
-    }
-    liberar_array_strings(instruccion); // instruccion es la variable parte
-    free(instruccion_recibida);
-    instruccion_recibida = NULL;
-    
-    // MEMORIA
-    enviar_paquete(paquete_memoria, socket_cpu_memoria);
-    free(paquete_memoria);
-     
-    // KERNEL
-    printf("Mando paquete a kenrel para comprobar algo xd --------------------\n");
-    enviar_paquete(paquete_kernel_dispatch, socket_cpu_kernel_dispatch);
-    free(paquete_kernel_dispatch);
-    //sem_post(&sem_pid); 
-}
 
 void log_instruccion(char** parte) {
     if (parte == NULL || parte[0] == NULL) {

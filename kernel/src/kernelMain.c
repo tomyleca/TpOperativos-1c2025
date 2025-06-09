@@ -2,6 +2,8 @@
 
 int main(int argc, char* argv[]) {
 
+    signal(SIGINT,liberarRecursos);
+
     //INICIO Y LEO CONFIG
     config_kernel = iniciar_config("kernel.config");
     leerConfigKernel(config_kernel);
@@ -98,6 +100,8 @@ void crearEstructuras()
     diccionarioProcesosBloqueados = crearDiccionarioConSemaforos();
 
     
+    semaforoEsperarOKDispatch = malloc(sizeof(sem_t));
+    sem_init(semaforoEsperarOKDispatch,1,0);
     semaforoIntentarPlanificar = malloc(sizeof(sem_t));
     sem_init(semaforoIntentarPlanificar,1,0);
     semaforoHayCPULibre = malloc(sizeof(sem_t));
@@ -145,4 +149,16 @@ void cargarCronometro(PCB* proceso,ESTADO estado)
     
     temporal_stop(proceso->cronometros[estado]);
     proceso->MT[estado]=temporal_gettime(proceso->cronometros[estado]);
+}
+
+void liberarRecursos(int signal)
+{
+    if(signal != SIGINT)
+        return;
+    
+    close(socket_kernel_cpu_dispatch);
+    close(socket_kernel_cpu_interrupt);
+    close(socket_kernel_io);
+    
+    exit(1);
 }

@@ -78,9 +78,10 @@ void* leerDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion)
 bool chequearListaVacia(t_listaConSemaforos* listaConSemaforos)
 {
     bool vacia = false;
+    t_list* lista = listaConSemaforos->lista;
     
     sem_wait(listaConSemaforos->semaforoMutex);
-    vacia = list_is_empty(listaConSemaforos->lista);
+        vacia = list_is_empty(lista);
     sem_post(listaConSemaforos->semaforoMutex);
     
     return vacia;

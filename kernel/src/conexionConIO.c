@@ -68,7 +68,7 @@ void* atenderInstanciaIO(void* conexion)
             //case 0:
             case -1:
                 log_info(loggerKernel,"# Se desconectó IO: ");
-                shutdown(*fdConexion, SHUT_RDWR);
+                //shutdown(*fdConexion, SHUT_RDWR);
                 close(*fdConexion);
                 pthread_exit(NULL);
                 break;

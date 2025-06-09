@@ -16,6 +16,7 @@
 #include "pruebas.h"
 #include "syscalls.h"
 #include "pruebas.h"
+#include <signal.h>
 
 void leerConfigKernel(t_config* config_kernel);
 void crearEstructuras();
@@ -35,7 +36,7 @@ extern void cargarCronometro(PCB* proceso, ESTADO estado);
 
 
 void inicializar_hilos_kernel(t_config* config_kernel);
-
+void liberarRecursos(int signal);
 
 
 

@@ -60,19 +60,19 @@ int atender_cliente(int *fd_conexion)
                 else 
                     enviar_paquete(crear_super_paquete(OK),cliente_fd);
                 free(unBuffer);
-                
-            break;   
+                break;   
+             
              case CPU_PIDE_INSTRUCCION_A_MEMORIA: //PARA INICIAR DECODE ESTO!!
                 usleep(retardo_memoria * 1000);
-                paquete = crear_super_paquete(RECIBIR_TAMANO_PAG);
-                cargar_int_al_super_paquete(paquete, TAM_PAGINA);
-                cargar_int_al_super_paquete(paquete, CANTIDAD_NIVELES);
-                cargar_int_al_super_paquete(paquete, ENTRADAS_POR_TABLA);
-                enviar_paquete(paquete, cliente_fd);
+                //paquete = crear_super_paquete(RECIBIR_TAMANO_PAG);
+                //cargar_int_al_super_paquete(paquete, TAM_PAGINA);
+                //cargar_int_al_super_paquete(paquete, CANTIDAD_NIVELES);
+                //cargar_int_al_super_paquete(paquete, ENTRADAS_POR_TABLA);
+                //enviar_paquete(paquete, cliente_fd);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 buscar_y_mandar_instruccion(unBuffer,cliente_fd);
-                eliminar_paquete(paquete);
-            break;
+                //eliminar_paquete(paquete);
+                break;
             case CPU_PIDE_LEER_MEMORIA:
                 usleep(retardo_memoria* 1000);
                 printf("en CPU_PIDE_LEER_MEMORIA------------------------------------------------------------------\n");
@@ -115,7 +115,7 @@ int atender_cliente(int *fd_conexion)
              
             case -1:
                 log_error(logger_memoria, "El cliente se desconectó. Terminando servidor.");
-                shutdown(cliente_fd, SHUT_RDWR);
+                //shutdown(cliente_fd, SHUT_RDWR);
                 close(cliente_fd);
                 pthread_exit(NULL);  
                 break;

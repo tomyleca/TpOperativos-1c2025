@@ -79,27 +79,9 @@ void enviar_paquete(t_paquete* paquete, int fdConexion)
 	int bytes = paquete->buffer->size + 2*sizeof(int);
 	void* a_enviar = serializar_paquete(paquete, bytes);
 
-	enviar_todo(fdConexion,a_enviar,bytes);
-	
+	send(fdConexion, a_enviar, bytes, 0);
 
 	free(a_enviar);
-}
-
-int enviar_todo(int socket, void* buffer, int total_bytes) {
-    int bytes_enviados = 0;
-
-    while (bytes_enviados < total_bytes) {
-        int enviados = send(socket, buffer + bytes_enviados, total_bytes - bytes_enviados, 0);
-
-        if (enviados == -1) {
-            perror("send");
-            return -1;  // Error
-        }
-
-        bytes_enviados += enviados;
-    }
-
-    return 0;  // Todo OK
 }
 
 void eliminar_paquete(t_paquete* paquete)
@@ -202,7 +184,7 @@ int recibir_int_del_buffer(t_buffer *coso)
 {
 	if (coso->size == 0)
 	{
-		printf("\n[ERROR] \n\n");
+		printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -244,7 +226,7 @@ uint32_t recibir_uint32_t_del_buffer(t_buffer *coso)
 {
 	if (coso->size == 0)
 	{
-		printf("\n[ERROR] Al intentar extraer un UINT32_T de un t_buffer vacio\n\n");
+		printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -287,7 +269,7 @@ int64_t recibir_int64_t_del_buffer(t_buffer *coso)
 {
 	if (coso->size == 0)
 	{
-		printf("\n[ERROR] Al intentar extraer un INT64_T de un t_buffer vacio\n\n");
+		printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
 		exit(EXIT_FAILURE);
 	}
 

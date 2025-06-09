@@ -34,7 +34,7 @@ void esperarDatosInterrupt(void* conexion)
         
         case -1:
         log_info(loggerKernel,"# Se desconectó Interrupt");
-        shutdown(fdConexion, SHUT_RDWR);
+        //shutdown(fdConexion, SHUT_RDWR);
         close(fdConexion);
         pthread_exit(NULL);
         break;

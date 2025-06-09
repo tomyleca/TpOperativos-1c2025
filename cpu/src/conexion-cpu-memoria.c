@@ -59,6 +59,7 @@ void atender_memoria()
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 contexto->pid = recibir_uint32_t_del_buffer(buffer);
                 instruccion_recibida = recibir_string_del_buffer(buffer); // instruccion_recibida se usa en instruccion.c
+                log_info(logger_cpu,"# Llega instrucción de memoria: %s", instruccion_recibida);
                 sem_post(&sem_hay_instruccion);
                 //free(buffer);
                 break;
@@ -80,7 +81,7 @@ void atender_memoria()
                 break;
             case -1:
                 log_error(logger_cpu, "MEMORIA se desconecto. Terminando servidor");
-                shutdown(socket_cpu_memoria, SHUT_RDWR);
+                //shutdown(socket_cpu_memoria, SHUT_RDWR);
                 close(socket_cpu_memoria);
                 pthread_exit(NULL);
             default:
@@ -122,7 +123,7 @@ void atender_interrupcion_kernel()
                 break;
             case -1:
                 log_error(logger_cpu, "KERNEL INTERRUPT se desconecto. Terminando servidor");
-                shutdown(socket_cpu_kernel_interrupt, SHUT_RDWR);
+                //shutdown(socket_cpu_kernel_interrupt, SHUT_RDWR);
                 close(socket_cpu_kernel_interrupt);
                 pthread_exit(NULL);
             default:
@@ -167,7 +168,7 @@ void atender_dispatch_kernel()
                 
             case -1:
                 log_error(logger_cpu, "KERNEL DISPATCH se desconecto. Terminando servidor");
-                shutdown(socket_cpu_kernel_dispatch, SHUT_RDWR);
+                //shutdown(socket_cpu_kernel_dispatch, SHUT_RDWR);
                 close(socket_cpu_kernel_dispatch);
                 pthread_exit(NULL);
                 break;

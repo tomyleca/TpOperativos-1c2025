@@ -61,7 +61,7 @@ int mandarDatosProcesoAMemoria(PCB* proceso)
     }
 
     eliminar_paquete(paquete);
-    shutdown(socketKernelMemoria, SHUT_RDWR);
+    //shutdown(socketKernelMemoria, SHUT_RDWR);
     close(socketKernelMemoria);
 
     return respuesta;
@@ -82,6 +82,6 @@ void pasarAReady(PCB* proceso){
     temporal_resume(proceso->cronometros[READY]);
     proceso->ME[READY]++;
 
-    sem_post(semaforoIntentarPlanificar);
+    
     
 }
