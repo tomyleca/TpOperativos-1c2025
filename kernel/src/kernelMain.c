@@ -102,8 +102,10 @@ void crearEstructuras()
     
     semaforoEsperarOKDispatch = malloc(sizeof(sem_t));
     sem_init(semaforoEsperarOKDispatch,1,0);
+    semaforoEsperarOKInterrupt = malloc(sizeof(sem_t));
+    sem_init(semaforoEsperarOKInterrupt,1,0);
     semaforoIntentarPlanificar = malloc(sizeof(sem_t));
-    sem_init(semaforoIntentarPlanificar,1,0);
+    sem_init(semaforoIntentarPlanificar,1,1);
     semaforoHayCPULibre = malloc(sizeof(sem_t));
     sem_init(semaforoHayCPULibre,1,0);
     semaforoPIDDisponible = malloc(sizeof(sem_t));

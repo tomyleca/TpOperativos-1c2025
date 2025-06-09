@@ -26,18 +26,25 @@ void esperarDatosInterrupt(void* conexion)
     cod_op = recibir_operacion(fdConexion);
     switch(cod_op)    
     {
+        case 1:
+            sem_post(semaforoEsperarOKInterrupt);
+            break;
         case HANDSHAKE_CPU_KERNEL_I:
-        buffer = recibiendo_super_paquete(fdConexion);
-        char* identificador = recibir_string_del_buffer(buffer);
-        guardarDatosCPUInterrupt(identificador,fdConexion);
-        break;
+            buffer = recibiendo_super_paquete(fdConexion);
+            char* identificador = recibir_string_del_buffer(buffer);
+            guardarDatosCPUInterrupt(identificador,fdConexion);
+            break;
         
         case -1:
-        log_info(loggerKernel,"# Se desconectó Interrupt");
-        //shutdown(fdConexion, SHUT_RDWR);
-        close(fdConexion);
-        pthread_exit(NULL);
-        break;
+            log_info(loggerKernel,"# Se desconectó Interrupt");
+            //shutdown(fdConexion, SHUT_RDWR);
+            close(fdConexion);
+            pthread_exit(NULL);
+            break;
+        default:
+            log_info(loggerKernel,"# Operación desconocida en Interrupt");
+            break;
+
     
     }
     }
@@ -74,5 +81,5 @@ nucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)
 void mandarInterrupcion(nucleoCPU* nucleoCPU)
 {
     enviar_paquete(crear_super_paquete(INTERRUPCION),nucleoCPU->fdConexionInterrupt);
-    esperarOK(nucleoCPU->fdConexionInterrupt);
+    sem_wait(semaforoEsperarOKInterrupt);
 }

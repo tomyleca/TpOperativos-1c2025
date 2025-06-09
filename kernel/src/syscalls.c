@@ -122,8 +122,8 @@ void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
 
     if (dispositivo == NULL) {
         log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", pid, nombreIO);
-        pasarAExit(proceso);
         terminarEjecucion(proceso);
+        pasarAExit(proceso);
         return;
     }
 
@@ -147,6 +147,7 @@ void syscallExit(uint32_t pid)
     
     terminarEjecucion(proceso);
     pasarAExit(proceso);
+    
     
     
 

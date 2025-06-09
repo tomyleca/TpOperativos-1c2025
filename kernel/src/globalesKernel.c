@@ -58,3 +58,4 @@ sem_t* semaforoIntentarPlanificar;
 sem_t* semaforoHayCPULibre;
 sem_t* semaforoEsperarOKDispatch;
 sem_t* semaforoGuardarDatosCPU;
+sem_t* semaforoEsperarOKInterrupt;

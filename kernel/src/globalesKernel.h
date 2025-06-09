@@ -196,6 +196,7 @@ extern sem_t* semaforoIntentarPlanificar;
 extern sem_t* semaforoHayCPULibre;
 extern sem_t* semaforoEsperarOKDispatch;
 extern sem_t* semaforoGuardarDatosCPU;
+extern sem_t* semaforoEsperarOKInterrupt;
 
 //MEMORIA
 extern int mandarDatosProcesoAMemoria(PCB* proceso);
