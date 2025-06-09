@@ -184,7 +184,7 @@ int recibir_int_del_buffer(t_buffer *coso)
 {
 	if (coso->size == 0)
 	{
-		printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
+		printf("\n[ERROR] \n\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -226,7 +226,7 @@ uint32_t recibir_uint32_t_del_buffer(t_buffer *coso)
 {
 	if (coso->size == 0)
 	{
-		printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
+		printf("\n[ERROR] Al intentar extraer un UINT32_T de un t_buffer vacio\n\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -269,7 +269,7 @@ int64_t recibir_int64_t_del_buffer(t_buffer *coso)
 {
 	if (coso->size == 0)
 	{
-		printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
+		printf("\n[ERROR] Al intentar extraer un INT64_T de un t_buffer vacio\n\n");
 		exit(EXIT_FAILURE);
 	}
 

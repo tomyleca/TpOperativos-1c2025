@@ -5,8 +5,10 @@ void* planificadorCortoPlazo(void* arg)
     PCB* procesoAEjecutar= NULL;
     while(1)
     {
-        sem_wait(semaforoIntentarPlanificar);
         
+        sem_wait(semaforoHayCPULibre);
+        
+
         switch(algoritmoDePlanificacionInt){
             
             
@@ -141,7 +143,8 @@ void terminarEjecucion(PCB* proceso)
     agregarALista(listaCPUsLibres,nucleoCPU);
     PCB* procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
     guardarDatosDeEjecucion(procesoPostEjecucion);
-    sem_post(semaforoIntentarPlanificar);
+    
+    sem_post(semaforoHayCPULibre);
     
 }
 

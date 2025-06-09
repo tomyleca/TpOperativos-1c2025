@@ -45,10 +45,11 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     if(nuevoProceso->PID==0) //Si es el primer proceso, espero el ENTER
     {
         while (1) {
+
             char* input = readline("Apriete ENTER para empezar a planificar procesos.\n");  
 
             if (*input == '\0') {  
-                //sleep(4); // PARA DARLE TIEMPO A CONECTARSE BIEN A LOS OTROS MODULOS
+                //sleep(10); // PARA DARLE TIEMPO A CONECTARSE BIEN A LOS OTROS MODULOS
                 break;
             }
             
@@ -106,7 +107,7 @@ void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
     proceso  = buscarPCBEjecutando(pid);
 
     if (proceso == NULL) {
-        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", pid);
+        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall DUMP Memory", pid);
         exit(1);
     }
     
@@ -138,14 +139,14 @@ void syscallExit(uint32_t pid)
     proceso = buscarPCBEjecutando(pid);
 
     if (proceso == NULL) {
-        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", pid);
+        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall Exit", pid);
         exit(1);
     }
 
     
-
-    pasarAExit(proceso);
     terminarEjecucion(proceso);
+    pasarAExit(proceso);
+    
 
 }
 PCB* buscarPCBEjecutando(uint32_t pid) {

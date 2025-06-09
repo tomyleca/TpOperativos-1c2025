@@ -55,5 +55,6 @@ t_diccionarioConSemaforos* diccionarioDispositivosIO;
 
 //CPU
 sem_t* semaforoIntentarPlanificar;
+sem_t* semaforoHayCPULibre;
 
 sem_t* semaforoGuardarDatosCPU;

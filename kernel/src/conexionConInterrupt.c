@@ -20,16 +20,26 @@ void esperarDatosInterrupt(void* conexion)
     t_buffer* buffer;
     op_code cod_op;
     
-    cod_op = recibir_operacion(fdConexion);
-    while(cod_op != HANDSHAKE_CPU_KERNEL_I)
-    {
-        cod_op = recibir_operacion(fdConexion);
-    }//ESPERO QUE ME MANDE EL COD OP CORRECTO
     
-    buffer = recibiendo_super_paquete(fdConexion);
-    char* identificador = recibir_string_del_buffer(buffer);
-    guardarDatosCPUInterrupt(identificador,fdConexion);
-    pthread_exit(NULL);
+    while(1)
+    {
+    cod_op = recibir_operacion(fdConexion);
+    switch(cod_op)    
+    {
+        case HANDSHAKE_CPU_KERNEL_I:
+        buffer = recibiendo_super_paquete(fdConexion);
+        char* identificador = recibir_string_del_buffer(buffer);
+        guardarDatosCPUInterrupt(identificador,fdConexion);
+        break;
+        
+        case -1:
+        log_info(loggerKernel,"# Se desconectó Interrupt");
+        close(fdConexion);
+        pthread_exit(NULL);
+        break;
+    
+    }
+    }
 }
 
 nucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)
@@ -51,7 +61,7 @@ nucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)
         sacarElementoDeLista(listaCPUsAInicializar,nucleoCPU);
         agregarALista(listaCPUsLibres,nucleoCPU);
         nucleoCPU->fdConexionInterrupt = fdConexion;
-        sem_post(semaforoIntentarPlanificar);
+        sem_post(semaforoHayCPULibre);
     }
 
     sem_post(semaforoGuardarDatosCPU);

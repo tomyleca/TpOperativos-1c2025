@@ -30,14 +30,11 @@ void atender_dispatch_cpu(void* conexion)
         cod_op = recibir_operacion(fdConexion);
         switch (cod_op) 
         {
-            case MENSAJE:
-                //recibir_mensaje(*fdConexion, loggerKernel);
-                break;
-            
             case HANDSHAKE_CPU_KERNEL_D:
                 buffer = recibiendo_super_paquete(fdConexion);
                 char* identificador = recibir_string_del_buffer(buffer);    
                 nucleoCPU = guardarDatosCPUDispatch(identificador,fdConexion);
+                free(buffer);
                 break;
             
             case IO:
@@ -48,7 +45,8 @@ void atender_dispatch_cpu(void* conexion)
                 int64_t tiempoEnIO = recibir_int64_t_del_buffer(buffer);
                 actualizarPC(PID,PC);
                 syscall_IO(PID,nombreIO,tiempoEnIO);
-                enviarOK(fdConexion);               
+                enviarOK(fdConexion); 
+                free(buffer);              
                 break;
             
             case DUMP_MEMORY:
@@ -58,6 +56,7 @@ void atender_dispatch_cpu(void* conexion)
                 actualizarPC(PID,PC);
                 dump_memory(PID);
                 enviarOK(fdConexion);
+                free(buffer);
                 break;
             
             case INIT_PROCCESS:
@@ -67,6 +66,7 @@ void atender_dispatch_cpu(void* conexion)
                 uint32_t tam = recibir_uint32_t_del_buffer(buffer);
                 INIT_PROC(nombrePseudocodigo,tam);
                 enviarOK(fdConexion);
+                free(buffer);
                 break;
             
             case SYSCALL_EXIT:
@@ -74,11 +74,13 @@ void atender_dispatch_cpu(void* conexion)
                 PID = recibir_uint32_t_del_buffer(buffer);
                 PC = recibir_uint32_t_del_buffer(buffer);
                 syscallExit(PID);
-                enviarOK(fdConexion);             
+                enviarOK(fdConexion);        
+                free(buffer);     
                 break;
             
             case -1:
-                log_error(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
+                log_info(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
+                close(fdConexion);
                 pthread_exit(NULL);
             default:
                 //log_warning(loggerKernel, "Operacion desconocida. No quieras meter la pata");
@@ -108,7 +110,7 @@ nucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion)
         sacarElementoDeLista(listaCPUsAInicializar,nucleoCPU);
         agregarALista(listaCPUsLibres,nucleoCPU);
         nucleoCPU->fdConexionDispatch = fdConexion;
-        sem_post(semaforoIntentarPlanificar);
+        sem_post(semaforoHayCPULibre);
     }
 
     sem_post(semaforoGuardarDatosCPU);

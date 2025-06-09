@@ -193,6 +193,7 @@ extern t_diccionarioConSemaforos* diccionarioDispositivosIO;
 
 //CPU
 extern sem_t* semaforoIntentarPlanificar;
+extern sem_t* semaforoHayCPULibre;
 
 extern sem_t* semaforoGuardarDatosCPU;
 

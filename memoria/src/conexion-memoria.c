@@ -114,8 +114,10 @@ int atender_cliente(int *fd_conexion)
                 break;
              
             case -1:
-                 log_error(logger_memoria, "El cliente se desconectó. Terminando servidor.");
+                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor.");
+                close(cliente_fd);
                 pthread_exit(NULL);  
+                break;
          
             
             default:

@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     pthread_create(hiloAtenderDispatch,NULL,esperarClientesDispatch,NULL);
     pthread_create(hiloAtenderInterrupt,NULL,esperarClientesInterrupt,NULL);
     pthread_create(hiloAtenderIO,NULL,esperarClientesIO,NULL);
-    pthread_create(hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
+    
 
 
 
@@ -38,6 +38,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
+    pthread_create(hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
 
     //prueba1();
     
@@ -96,8 +97,9 @@ void crearEstructuras()
     diccionarioDispositivosIO = crearDiccionarioConSemaforos();
     diccionarioProcesosBloqueados = crearDiccionarioConSemaforos();
 
-    semaforoIntentarPlanificar = malloc(sizeof(sem_t));
-    sem_init(semaforoIntentarPlanificar,1,0);
+ 
+    semaforoHayCPULibre = malloc(sizeof(sem_t));
+    sem_init(semaforoHayCPULibre,1,0);
     semaforoPIDDisponible = malloc(sizeof(sem_t));
     sem_init(semaforoPIDDisponible,1,1);
     semaforoGuardarDatosCPU = malloc(sizeof(sem_t));
