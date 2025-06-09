@@ -18,20 +18,20 @@ void* planificadorCortoPlazo(void* arg)
                 break;
         case SJF:
                 ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
-                procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
+                procesoAEjecutar = sacarDeLista(listaProcesosReady,0); //Si la lista esta vacía se queda esperando
                 break;
                 
         case SRT: 
                 if(!chequearListaVacia(listaCPUsLibres))
                 {   
                     ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
-                    procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
+                    procesoAEjecutar = sacarDeLista(listaProcesosReady,0); //Si la lista esta vacía se queda esperando
                     break;
                 }
                 else 
                 {
                     ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
-                    procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
+                    procesoAEjecutar = sacarDeLista(listaProcesosReady,0); //Si la lista esta vacía se queda esperando
                     if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == false)
                         procesoAEjecutar = NULL;
                     
