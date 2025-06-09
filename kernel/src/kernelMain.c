@@ -97,7 +97,9 @@ void crearEstructuras()
     diccionarioDispositivosIO = crearDiccionarioConSemaforos();
     diccionarioProcesosBloqueados = crearDiccionarioConSemaforos();
 
- 
+    
+    semaforoIntentarPlanificar = malloc(sizeof(sem_t));
+    sem_init(semaforoIntentarPlanificar,1,0);
     semaforoHayCPULibre = malloc(sizeof(sem_t));
     sem_init(semaforoHayCPULibre,1,0);
     semaforoPIDDisponible = malloc(sizeof(sem_t));

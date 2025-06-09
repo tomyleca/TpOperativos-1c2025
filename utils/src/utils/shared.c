@@ -79,9 +79,27 @@ void enviar_paquete(t_paquete* paquete, int fdConexion)
 	int bytes = paquete->buffer->size + 2*sizeof(int);
 	void* a_enviar = serializar_paquete(paquete, bytes);
 
-	send(fdConexion, a_enviar, bytes, 0);
+	enviar_todo(fdConexion,a_enviar,bytes);
+	
 
 	free(a_enviar);
+}
+
+int enviar_todo(int socket, void* buffer, int total_bytes) {
+    int bytes_enviados = 0;
+
+    while (bytes_enviados < total_bytes) {
+        int enviados = send(socket, buffer + bytes_enviados, total_bytes - bytes_enviados, 0);
+
+        if (enviados == -1) {
+            perror("send");
+            return -1;  // Error
+        }
+
+        bytes_enviados += enviados;
+    }
+
+    return 0;  // Todo OK
 }
 
 void eliminar_paquete(t_paquete* paquete)

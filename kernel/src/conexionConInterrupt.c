@@ -18,7 +18,7 @@ void esperarDatosInterrupt(void* conexion)
     int fdConexion = *(int*) conexion;
     
     t_buffer* buffer;
-    op_code cod_op;
+    int cod_op;
     
     
     while(1)
@@ -34,6 +34,7 @@ void esperarDatosInterrupt(void* conexion)
         
         case -1:
         log_info(loggerKernel,"# Se desconectó Interrupt");
+        shutdown(fdConexion, SHUT_RDWR);
         close(fdConexion);
         pthread_exit(NULL);
         break;

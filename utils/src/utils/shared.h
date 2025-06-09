@@ -85,6 +85,8 @@ void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
 
 void enviar_paquete(t_paquete* paquete, int socket_cliente);
 
+int enviar_todo(int socket, void* buffer, int total_bytes);
+
 void eliminar_paquete(t_paquete* paquete);
 
 void liberar_conexion(int socket_cliente);

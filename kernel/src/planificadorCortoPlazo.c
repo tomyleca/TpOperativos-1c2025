@@ -6,24 +6,22 @@ void* planificadorCortoPlazo(void* arg)
     while(1)
     {
         
-        sem_wait(semaforoHayCPULibre);
-        
+    sem_wait(semaforoIntentarPlanificar);
 
-        switch(algoritmoDePlanificacionInt){
-            
-            
-            
-
-
-        case FIFO:
+    if(sem_trywait(semaforoHayCPULibre) == 0) 
+    {    
+            switch(algoritmoDePlanificacionInt){
+                
+                
+            case FIFO:
                 procesoAEjecutar  = sacarDeLista(listaProcesosReady,0);
                 break;
-        case SJF:
+            case SJF:
                 ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
                 procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
                 break;
-                
-        case SRT: 
+                    
+            case SRT: 
                 if(!chequearListaVacia(listaCPUsLibres))
                 {   
                     ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
@@ -39,10 +37,11 @@ void* planificadorCortoPlazo(void* arg)
                     
                     break;
                 }
+            }
+    
 
-                
-                
-        }
+            
+        
 
 
         if(procesoAEjecutar != NULL && procesoAEjecutar->PID >= 0) //Lo del PID es un chequeo de que estoy apuntando a un struct de tipo PCB
@@ -52,6 +51,8 @@ void* planificadorCortoPlazo(void* arg)
             pasarAExecute(procesoAEjecutar);
            
         }
+        
+    }
     }
 
 }
@@ -145,6 +146,7 @@ void terminarEjecucion(PCB* proceso)
     guardarDatosDeEjecucion(procesoPostEjecucion);
     
     sem_post(semaforoHayCPULibre);
+    sem_post(semaforoIntentarPlanificar);
     
 }
 

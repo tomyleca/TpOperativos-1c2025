@@ -80,6 +80,7 @@ void atender_dispatch_cpu(void* conexion)
             
             case -1:
                 log_info(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
+                shutdown(fdConexion, SHUT_RDWR);
                 close(fdConexion);
                 pthread_exit(NULL);
             default:

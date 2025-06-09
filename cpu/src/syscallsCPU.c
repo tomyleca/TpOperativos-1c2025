@@ -9,7 +9,7 @@ void syscall_IO(char** parte){
     int64_t tiempo = (int64_t) strtoll(parte[2], NULL, 10);
     cargar_int64_t_al_super_paquete(paquete,tiempo);
     enviar_paquete(paquete,socket_cpu_kernel_dispatch);
-    eliminar_paquete(paquete);
+    //eliminar_paquete(paquete);
     esperarOK(socket_cpu_kernel_dispatch);
 }
 
@@ -22,6 +22,7 @@ void syscallINIT_PROC(char** parte)
     cargar_string_al_super_paquete(paquete, parte[1]);
     cargar_uint32_t_al_super_paquete(paquete,(uint32_t) strtoul(parte[2], NULL, 10));
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
+    
     //eliminar_paquete(paquete);
     esperarOK(socket_cpu_kernel_dispatch);
 }

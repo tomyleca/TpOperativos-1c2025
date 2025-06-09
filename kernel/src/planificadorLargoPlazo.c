@@ -17,6 +17,7 @@ void inicializarProceso(){
             mandarDatosProcesoAMemoria(procesoAInicializar);
             pasarAReady(procesoAInicializar);
             inicializarProceso(); // Mientras la respuesta sea OK sigo intentando inicializar procesos
+            
            
         }
         }
@@ -60,6 +61,7 @@ int mandarDatosProcesoAMemoria(PCB* proceso)
     }
 
     eliminar_paquete(paquete);
+    shutdown(socketKernelMemoria, SHUT_RDWR);
     close(socketKernelMemoria);
 
     return respuesta;
@@ -79,5 +81,7 @@ void pasarAReady(PCB* proceso){
     agregarALista(listaProcesosReady,proceso);
     temporal_resume(proceso->cronometros[READY]);
     proceso->ME[READY]++;
+
+    sem_post(semaforoIntentarPlanificar);
     
 }

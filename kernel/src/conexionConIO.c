@@ -20,7 +20,7 @@ void* atenderInstanciaIO(void* conexion)
     InstanciaIO* instanciaIO = NULL;
     while(1)
     {
-        opCodesKernelIO opCode = recibir_operacion(*fdConexion);
+        int opCode = recibir_operacion(*fdConexion);
         t_buffer* buffer = recibiendo_super_paquete(*fdConexion); 
         
 
@@ -68,7 +68,8 @@ void* atenderInstanciaIO(void* conexion)
             //case 0:
             case -1:
                 log_info(loggerKernel,"# Se desconectó IO: ");
-                close(fdConexion);
+                shutdown(*fdConexion, SHUT_RDWR);
+                close(*fdConexion);
                 pthread_exit(NULL);
                 break;
             
