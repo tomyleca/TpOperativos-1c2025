@@ -51,11 +51,11 @@ void esperarDatosInterrupt(void* conexion)
     }
 }
 
-nucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)
+NucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)
 {
-    sem_wait(semaforoGuardarDatosCPU);
+    sem_wait(semaforoMutexGuardarDatosCPU);
     
-    nucleoCPU* nucleoCPU = chequearSiCPUYaPuedeInicializarse(identificador);
+    NucleoCPU* nucleoCPU = chequearSiCPUYaPuedeInicializarse(identificador);
     if(nucleoCPU == NULL)//Si esta en NULL quiere decir que la otra conexion todavía no llego
     {
         nucleoCPU = malloc(sizeof(*nucleoCPU));
@@ -70,16 +70,16 @@ nucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)
         sacarElementoDeLista(listaCPUsAInicializar,nucleoCPU);
         agregarALista(listaCPUsLibres,nucleoCPU);
         nucleoCPU->fdConexionInterrupt = fdConexion;
-        sem_post(semaforoHayCPULibre);
+        sem_post(semaforoIntentarPlanificar);
     }
 
-    sem_post(semaforoGuardarDatosCPU);
+    sem_post(semaforoMutexGuardarDatosCPU);
 
     return nucleoCPU;
 
 }
 
-void mandarInterrupcion(nucleoCPU* nucleoCPU)
+void mandarInterrupcion(NucleoCPU* nucleoCPU)
 {
     enviar_paquete(crear_super_paquete(INTERRUPCION),nucleoCPU->fdConexionInterrupt);
     sem_wait(semaforoEsperarOKInterrupt);

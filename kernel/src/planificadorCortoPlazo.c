@@ -56,7 +56,7 @@ void* planificadorCortoPlazo(void* arg)
 
 void pasarAExecute(PCB* proceso)
 {
-    nucleoCPU* nucleoCPULibre =  sacarDeLista(listaCPUsLibres,0);
+    NucleoCPU* nucleoCPULibre =  sacarDeLista(listaCPUsLibres,0);
     nucleoCPULibre->ejecutando=true;
     nucleoCPULibre->procesoEnEjecucion=proceso;
     agregarALista(listaCPUsEnUso,nucleoCPULibre);
@@ -92,7 +92,7 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
  bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera)
 {
     
-    bool _menorRafaga(nucleoCPU* CPU)
+    bool _menorRafaga(NucleoCPU* CPU)
     {
         return estimadoRafagaProcesoEnEspera < temporal_gettime(CPU->procesoEnEjecucion->cronometroEjecucionActual);
     };
@@ -100,7 +100,7 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
     sem_wait(listaCPUsEnUso->semaforoMutex);
         t_list* listaCPUsOrdenadaPorRafagaRestante = list_sorted(listaCPUsEnUso->lista,menorEstimadoRafagaRestante);
     sem_post(listaCPUsEnUso->semaforoMutex);
-    nucleoCPU* nucleoConMenorRafagaRestante = NULL;
+    NucleoCPU* nucleoConMenorRafagaRestante = NULL;
     
 
     nucleoConMenorRafagaRestante = list_remove_by_condition(listaCPUsOrdenadaPorRafagaRestante,_menorRafaga);
@@ -130,16 +130,16 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 
 void terminarEjecucion(PCB* proceso)
 {
-    bool _ejecutandoProceso(nucleoCPU* nucleoCPU)
+    bool _ejecutandoProceso(NucleoCPU* NucleoCPU)
     {
-        return nucleoCPU->procesoEnEjecucion == proceso;
+        return NucleoCPU->procesoEnEjecucion == proceso;
     };
 
-    nucleoCPU* nucleoCPU = sacarDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
-    nucleoCPU->ejecutando=false;
-    mandarInterrupcion(nucleoCPU);
-    agregarALista(listaCPUsLibres,nucleoCPU);
-    PCB* procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
+    NucleoCPU* NucleoCPU = sacarDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
+    NucleoCPU->ejecutando=false;
+    mandarInterrupcion(NucleoCPU);
+    agregarALista(listaCPUsLibres,NucleoCPU);
+    PCB* procesoPostEjecucion = NucleoCPU->procesoEnEjecucion;
     guardarDatosDeEjecucion(procesoPostEjecucion);
     
     sem_post(semaforoIntentarPlanificar);
@@ -147,7 +147,7 @@ void terminarEjecucion(PCB* proceso)
     
 }
 
-bool menorEstimadoRafagaRestante(nucleoCPU* CPU1,nucleoCPU* CPU2)
+bool menorEstimadoRafagaRestante(NucleoCPU* CPU1,NucleoCPU* CPU2)
 {
     return temporal_gettime(CPU1->procesoEnEjecucion->cronometroEjecucionActual) >= temporal_gettime(CPU2->procesoEnEjecucion->cronometroEjecucionActual);
 }

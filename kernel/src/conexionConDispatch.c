@@ -18,7 +18,7 @@ void atender_dispatch_cpu(void* conexion)
     
     
     int cod_op;
-    nucleoCPU* nucleoCPU;
+    NucleoCPU* NucleoCPU;
     uint32_t PID;
     uint32_t PC;
     t_buffer* buffer;
@@ -37,7 +37,7 @@ void atender_dispatch_cpu(void* conexion)
             case HANDSHAKE_CPU_KERNEL_D:
                 buffer = recibiendo_super_paquete(fdConexion);
                 char* identificador = recibir_string_del_buffer(buffer);    
-                nucleoCPU = guardarDatosCPUDispatch(identificador,fdConexion);
+                NucleoCPU = guardarDatosCPUDispatch(identificador,fdConexion);
                 limpiarBuffer(buffer);
                 break;
             
@@ -96,41 +96,41 @@ void atender_dispatch_cpu(void* conexion)
 
 
 
-nucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion)
+NucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion)
 {
-    sem_wait(semaforoGuardarDatosCPU);
+    sem_wait(semaforoMutexGuardarDatosCPU);
     
-    nucleoCPU* nucleoCPU = chequearSiCPUYaPuedeInicializarse(identificador);
-    if(nucleoCPU == NULL)//Si esta en NULL quiere decir que la otra conexion todavía no llego
+    NucleoCPU* NucleoCPU = chequearSiCPUYaPuedeInicializarse(identificador);
+    if(NucleoCPU == NULL)//Si esta en NULL quiere decir que la otra conexion todavía no llego
     {
-        nucleoCPU = malloc(sizeof(*nucleoCPU));
-        nucleoCPU->identificador= malloc(strlen(identificador)+1);
-        strcpy(nucleoCPU->identificador,identificador);
-       nucleoCPU->procesoEnEjecucion=NULL;
-        nucleoCPU->fdConexionDispatch = fdConexion;
-        agregarALista(listaCPUsAInicializar,nucleoCPU);
+        NucleoCPU = malloc(sizeof(*NucleoCPU));
+        NucleoCPU->identificador= malloc(strlen(identificador)+1);
+        strcpy(NucleoCPU->identificador,identificador);
+       NucleoCPU->procesoEnEjecucion=NULL;
+        NucleoCPU->fdConexionDispatch = fdConexion;
+        agregarALista(listaCPUsAInicializar,NucleoCPU);
     }
     else 
     {
-        sacarElementoDeLista(listaCPUsAInicializar,nucleoCPU);
-        agregarALista(listaCPUsLibres,nucleoCPU);
-        nucleoCPU->fdConexionDispatch = fdConexion;
-        sem_post(semaforoHayCPULibre);
+        sacarElementoDeLista(listaCPUsAInicializar,NucleoCPU);
+        agregarALista(listaCPUsLibres,NucleoCPU);
+        NucleoCPU->fdConexionDispatch = fdConexion;
+        sem_post(semaforoIntentarPlanificar);
     }
 
-    sem_post(semaforoGuardarDatosCPU);
+    sem_post(semaforoMutexGuardarDatosCPU);
 
-    return nucleoCPU;
+    return NucleoCPU;
 }
 
 
 
 
-nucleoCPU* chequearSiCPUYaPuedeInicializarse(char* identificador)
+NucleoCPU* chequearSiCPUYaPuedeInicializarse(char* identificador)
 {
-bool _mismoIdentificador(nucleoCPU* nucleoCPU)
+bool _mismoIdentificador(NucleoCPU* NucleoCPU)
 {
-    return (strcmp(nucleoCPU->identificador,identificador) == 0);
+    return (strcmp(NucleoCPU->identificador,identificador) == 0);
 };
 
 return sacarDeListaSegunCondicion(listaCPUsAInicializar,_mismoIdentificador);

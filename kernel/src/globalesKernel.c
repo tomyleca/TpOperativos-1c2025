@@ -1,6 +1,6 @@
 #include "globalesKernel.h"
 
-sem_t* semaforoPIDDisponible;
+sem_t* semaforoMutexPIDDisponible;
 
 //CONFIG Y LOGGER
 int socket_kernel_io;
@@ -57,5 +57,5 @@ t_diccionarioConSemaforos* diccionarioDispositivosIO;
 sem_t* semaforoIntentarPlanificar;
 sem_t* semaforoHayCPULibre;
 sem_t* semaforoEsperarOKDispatch;
-sem_t* semaforoGuardarDatosCPU;
+sem_t* semaforoMutexGuardarDatosCPU;
 sem_t* semaforoEsperarOKInterrupt;

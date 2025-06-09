@@ -105,13 +105,13 @@ void crearEstructuras()
     semaforoEsperarOKInterrupt = malloc(sizeof(sem_t));
     sem_init(semaforoEsperarOKInterrupt,1,0);
     semaforoIntentarPlanificar = malloc(sizeof(sem_t));
-    sem_init(semaforoIntentarPlanificar,1,1);
+    sem_init(semaforoIntentarPlanificar,1,0);
     semaforoHayCPULibre = malloc(sizeof(sem_t));
     sem_init(semaforoHayCPULibre,1,0);
-    semaforoPIDDisponible = malloc(sizeof(sem_t));
-    sem_init(semaforoPIDDisponible,1,1);
-    semaforoGuardarDatosCPU = malloc(sizeof(sem_t));
-    sem_init(semaforoGuardarDatosCPU,1,1);
+    semaforoMutexPIDDisponible = malloc(sizeof(sem_t));
+    sem_init(semaforoMutexPIDDisponible,1,1);
+    semaforoMutexGuardarDatosCPU = malloc(sizeof(sem_t));
+    sem_init(semaforoMutexGuardarDatosCPU,1,1);
 
   
 
@@ -158,9 +158,32 @@ void liberarRecursos(int signal)
     if(signal != SIGINT)
         return;
     
+    //TODO probarlo
+
     close(socket_kernel_cpu_dispatch);
     close(socket_kernel_cpu_interrupt);
     close(socket_kernel_io);
-    
+
+    free(semaforoEsperarOKDispatch);
+    free(semaforoEsperarOKInterrupt);
+    free(semaforoMutexGuardarDatosCPU);
+    free(semaforoHayCPULibre);
+    free(semaforoIntentarPlanificar);
+    free(semaforoMutexPIDDisponible);
+
+    //TODO hacer los destroys
+    /*
+    borrarListaConSemaforos(listaCPUsAInicializar);
+
+    borrarListaConSemaforos(listaProcesosNew);
+    borrarListaConSemaforos(listaProcesosReady);
+    borrarListaConSemaforos(listaProcesosSwapReady);
+    */
+
+    destruirDiccionario(diccionarioDispositivosIO,dispositivoIODestroy);
+    destruirDiccionario(diccionarioProcesosBloqueados,procesoEnEsperaIODestroy);
+    borrarListaConSemaforos(listaCPUsEnUso,nucleoCPUDestroy);
+    borrarListaConSemaforos(listaCPUsLibres,nucleoCPUDestroy);
+
     exit(1);
 }

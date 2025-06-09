@@ -18,6 +18,7 @@ t_diccionarioConSemaforos* crearDiccionarioConSemaforos();
 extern void agregarADiccionario(t_diccionarioConSemaforos* diccionarioConSemaforos,char* clave, void* valor);
 extern void* leerDeDiccionario(t_diccionarioConSemaforos* dicionarioConSemaforos,char* clave);
 extern void* sacarDeDiccionario(t_diccionarioConSemaforos* diccionarioConSemaforos,char* clave);
+extern void* destruirDiccionario(t_diccionarioConSemaforos* diccionario,void(*element_destroyer)(void*));
 
 
 

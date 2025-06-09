@@ -86,7 +86,7 @@ void* atenderInstanciaIO(void* conexion)
 
 }
 
-void avisarInicioIO(procesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo)
+void avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo)
 {
     DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
     InstanciaIO* instanciaIO = leerDeListaSegunCondicion(dispositivoIO->listaInstancias,instanciaLibre);

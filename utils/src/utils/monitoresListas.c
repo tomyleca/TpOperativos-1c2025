@@ -112,11 +112,11 @@ void* leerDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,bool (*co
     return elem;
 }
 
-void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos)
+void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos,void(*element_destroyer)(void*))
 {
-    list_clean(listaConSemaforos->lista);
-    free(listaConSemaforos->lista);
+    list_destroy_and_destroy_elements(listaConSemaforos->lista,element_destroyer);
     free(listaConSemaforos->semaforoCantElementos);
     free(listaConSemaforos->semaforoMutex);
+    free(listaConSemaforos);
 }
 

@@ -39,7 +39,7 @@ int MT[7];
 
 } PCB;
 
-extern sem_t* semaforoPIDDisponible;
+extern sem_t* semaforoMutexPIDDisponible;
 
 typedef enum{
     NEW,
@@ -87,7 +87,7 @@ typedef struct{
     bool estaENSwap;
     int64_t tiempo;
     
-} procesoEnEsperaIO;
+} ProcesoEnEsperaIO;
 
 
 typedef struct{
@@ -99,7 +99,7 @@ typedef struct{
     
     
 }
-nucleoCPU;
+NucleoCPU;
 
 
 
@@ -158,7 +158,7 @@ extern void* planificadorCortoPlazo(void* arg);
  * @brief Chequea si en alguno de los CPUs en ejecución hay un proceso con una rafaga estimada restante menor a la rafaga estimada más baja de los procesos en ready. De ser así, libera el CPU y retorna true, de otra forma retorna false.
 */
 extern bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera);
-extern bool menorEstimadoRafagaRestante(nucleoCPU* CPU1,nucleoCPU* CPU2);
+extern bool menorEstimadoRafagaRestante(NucleoCPU* CPU1,NucleoCPU* CPU2);
 
 extern void terminarEjecucion(PCB* proceso);
 extern void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion);
@@ -195,7 +195,7 @@ extern t_diccionarioConSemaforos* diccionarioDispositivosIO;
 extern sem_t* semaforoIntentarPlanificar;
 extern sem_t* semaforoHayCPULibre;
 extern sem_t* semaforoEsperarOKDispatch;
-extern sem_t* semaforoGuardarDatosCPU;
+extern sem_t* semaforoMutexGuardarDatosCPU;
 extern sem_t* semaforoEsperarOKInterrupt;
 
 //MEMORIA
@@ -205,6 +205,12 @@ extern int mandarDatosProcesoAMemoria(PCB* proceso);
 //OTRAS
 extern void esperarCancelacionDeHilo(pthread_t hiloACancelar);;
 
+
+//DESTROY
+void nucleoCPUDestroy(void* ptr);
+void dispositivoIODestroy(void* ptr);
+void instanciaIODestroy(void* ptr);
+void procesoEnEsperaIODestroy(void* ptr);
 
  
 

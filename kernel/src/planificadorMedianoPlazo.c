@@ -10,7 +10,7 @@ void pasarABLoqueado(PCB* proceso,int64_t tiempo,char* nombreIO){
     
    
     
-    procesoEnEsperaIO* procesoEsperando=malloc(sizeof(procesoEnEsperaIO));
+    ProcesoEnEsperaIO* procesoEsperando=malloc(sizeof(ProcesoEnEsperaIO));
     procesoEsperando->proceso=proceso;
     procesoEsperando->estaENSwap=0;
     procesoEsperando->tiempo=tiempo;
@@ -38,51 +38,51 @@ void pasarABLoqueado(PCB* proceso,int64_t tiempo,char* nombreIO){
 }
 
 
-void* manejarProcesoBloqueado(procesoEnEsperaIO* procesoEnEsperaIO){
+void* manejarProcesoBloqueado(ProcesoEnEsperaIO* ProcesoEnEsperaIO){
     
 
     
-    char* PID = pasarUnsignedAChar(procesoEnEsperaIO->proceso->PID);
+    char* PID = pasarUnsignedAChar(ProcesoEnEsperaIO->proceso->PID);
     t_temporal* cronometroBloqueadoActual = temporal_create();
     temporal_resume(cronometroBloqueadoActual);
 
-    temporal_resume(procesoEnEsperaIO->proceso->cronometros[BLOCKED]);
-    procesoEnEsperaIO->proceso->ME[BLOCKED]++;
+    temporal_resume(ProcesoEnEsperaIO->proceso->cronometros[BLOCKED]);
+    ProcesoEnEsperaIO->proceso->ME[BLOCKED]++;
 
     pthread_t hiloContadorSwap;
-    pthread_create(&hiloContadorSwap,NULL,(void *)contadorParaSwap,procesoEnEsperaIO);
+    pthread_create(&hiloContadorSwap,NULL,(void *)contadorParaSwap,ProcesoEnEsperaIO);
 
-    sem_wait(procesoEnEsperaIO->semaforoIOFinalizada);
+    sem_wait(ProcesoEnEsperaIO->semaforoIOFinalizada);
     
     
     
     sacarDeDiccionario(diccionarioProcesosBloqueados,PID);  //Desbloqueo el proceso
     
-    sem_wait(procesoEnEsperaIO->semaforoMutex); //Mutex para chequear que el otro hilo no este en medio de un proceso
+    sem_wait(ProcesoEnEsperaIO->semaforoMutex); //Mutex para chequear que el otro hilo no este en medio de un proceso
     esperarCancelacionDeHilo(hiloContadorSwap); //Cancelo el hilo contadorSwap, para que no tire seg fault cuando haga free del semaforoMutex
     
-    if(procesoEnEsperaIO->estaENSwap == 0) //Chequeo que no se haya pasado a swap
+    if(ProcesoEnEsperaIO->estaENSwap == 0) //Chequeo que no se haya pasado a swap
     {
 
-        log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoEnEsperaIO->proceso->PID,"BLOCKED","READY");
-        cargarCronometro(procesoEnEsperaIO->proceso,BLOCKED);
-        pasarAReady(procesoEnEsperaIO->proceso);
+        log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",ProcesoEnEsperaIO->proceso->PID,"BLOCKED","READY");
+        cargarCronometro(ProcesoEnEsperaIO->proceso,BLOCKED);
+        pasarAReady(ProcesoEnEsperaIO->proceso);
         
         
-        free(procesoEnEsperaIO->semaforoIOFinalizada);
-        free(procesoEnEsperaIO->semaforoMutex);
-        free(procesoEnEsperaIO);
+        free(ProcesoEnEsperaIO->semaforoIOFinalizada);
+        free(ProcesoEnEsperaIO->semaforoMutex);
+        free(ProcesoEnEsperaIO);
         
     }
-    else if(procesoEnEsperaIO->estaENSwap == 1)
+    else if(ProcesoEnEsperaIO->estaENSwap == 1)
     {
-        log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoEnEsperaIO->proceso->PID,"SWAP_BLOCKED","SWAP_READY");
-        cargarCronometro(procesoEnEsperaIO->proceso,SWAP_BLOCKED);
-        pasarASwapReady(procesoEnEsperaIO->proceso);
+        log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",ProcesoEnEsperaIO->proceso->PID,"SWAP_BLOCKED","SWAP_READY");
+        cargarCronometro(ProcesoEnEsperaIO->proceso,SWAP_BLOCKED);
+        pasarASwapReady(ProcesoEnEsperaIO->proceso);
     }
     else
     {
-        log_info(loggerKernel,"## (<%u>) ERROR. PROCESO EN ESTADO INCONSISTENTE",procesoEnEsperaIO->proceso->PID);
+        log_info(loggerKernel,"## (<%u>) ERROR. PROCESO EN ESTADO INCONSISTENTE",ProcesoEnEsperaIO->proceso->PID);
         exit(1);
     }
     
@@ -103,17 +103,17 @@ void esperarCancelacionDeHilo(pthread_t hiloACancelar)
     pthread_join(hiloACancelar,NULL);
 }
 
-void contadorParaSwap (procesoEnEsperaIO* procesoEnEsperaIO)
+void contadorParaSwap (ProcesoEnEsperaIO* ProcesoEnEsperaIO)
 {
     
     usleep(tiempo_suspension*1000); //  *1000 para pasar de milisegundos a microsegundos //TODO ver si hay que pasarlo a microsegundos o como es
     
     //Paso el proceso a Swap
-    sem_wait(procesoEnEsperaIO->semaforoMutex); 
-    pasarASwapBlocked(procesoEnEsperaIO);
-    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoEnEsperaIO->proceso->PID,"BLOCKED","SWAP_BLOCKED");
-    cargarCronometro(procesoEnEsperaIO->proceso,BLOCKED);
-    sem_post(procesoEnEsperaIO->semaforoMutex);
+    sem_wait(ProcesoEnEsperaIO->semaforoMutex); 
+    pasarASwapBlocked(ProcesoEnEsperaIO);
+    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",ProcesoEnEsperaIO->proceso->PID,"BLOCKED","SWAP_BLOCKED");
+    cargarCronometro(ProcesoEnEsperaIO->proceso,BLOCKED);
+    sem_post(ProcesoEnEsperaIO->semaforoMutex);
       
 
                 
@@ -122,7 +122,7 @@ void contadorParaSwap (procesoEnEsperaIO* procesoEnEsperaIO)
 
 
 
-void pasarASwapBlocked(procesoEnEsperaIO* procesoEsperandoIO)
+void pasarASwapBlocked(ProcesoEnEsperaIO* procesoEsperandoIO)
 {
     //TODO Le aviso a la memoria que el proceso paso a disco.
     
@@ -173,7 +173,7 @@ void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)
         empezarIODelProximoEnEspera(dispositivoIOLiberado);
     
     char* PIDComoChar = pasarUnsignedAChar(PID);
-    procesoEnEsperaIO* procesoADesbloquear = leerDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
+    ProcesoEnEsperaIO* procesoADesbloquear = leerDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
     sem_post(procesoADesbloquear->semaforoIOFinalizada);
 
     log_info(loggerKernel, "## (<%u>) finalizó IO y pasa a READY",PID);
@@ -184,6 +184,6 @@ void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)
 //TODO probarlo
 void empezarIODelProximoEnEspera(DispositivoIO* dispositivoIO)
 {
-    procesoEnEsperaIO* procesoEnEsperaIO = sacarDeLista(dispositivoIO->colaEsperandoIO,0);
-    avisarInicioIO(procesoEnEsperaIO,dispositivoIO->nombre,procesoEnEsperaIO->tiempo);
+    ProcesoEnEsperaIO* ProcesoEnEsperaIO = sacarDeLista(dispositivoIO->colaEsperandoIO,0);
+    avisarInicioIO(ProcesoEnEsperaIO,dispositivoIO->nombre,ProcesoEnEsperaIO->tiempo);
 }

@@ -50,3 +50,9 @@ char* pasarUnsignedAChar(uint32_t unsigned_)
     return buffer;
 }
 
+void* destruirDiccionario(t_diccionarioConSemaforos* diccionario,void(*element_destroyer)(void*))
+{
+    dictionary_destroy_and_destroy_elements(diccionario->diccionario,element_destroyer);
+
+    return NULL;
+}

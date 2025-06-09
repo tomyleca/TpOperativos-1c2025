@@ -29,7 +29,7 @@ void setearAlgoritmosDePlanificacion();
 extern void* esperarClientesIO(void* arg);
 extern void* atenderInstanciaIO(void* conexion);
 
-extern void avisarInicioIO(procesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo);
+extern void avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo);
 extern DispositivoIO* buscarIOSegunNombre(char* nombreIO);
 
 extern void cargarCronometro(PCB* proceso, ESTADO estado);

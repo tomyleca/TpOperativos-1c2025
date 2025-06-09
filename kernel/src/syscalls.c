@@ -9,9 +9,9 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     
     nuevoProceso->PID=pidDisponible;
     
-    sem_wait(semaforoPIDDisponible);
+    sem_wait(semaforoMutexPIDDisponible);
         pidDisponible++;
-    sem_post(semaforoPIDDisponible);
+    sem_post(semaforoMutexPIDDisponible);
 
     
 
@@ -84,18 +84,19 @@ void dump_memory(uint32_t pid) {
         log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para DUMP_MEMORY", pid);
         exit(1);
     }
-
-    //TODO conexion con memoria
     /*
+    int respuesta = recibir_operacion(socket_memoria_particular);
     if (respuesta == DUMP_MEMORY_OK) {
         log_info(loggerKernel, "## (<%u>) - Finalizó correctamente DUMP_MEMORY", pid);
         pasarAReady(proceso);
     }
-    */ 
-    else {
+    */
+     
+    else { //TODO esto lo arreglo cuando haga dumpMemory en memoria
         log_error(loggerKernel, "## (<%u>) - Error en DUMP_MEMORY. Finalizando proceso", pid);
         pasarAExit(proceso);
     }
+    
 
     liberar_conexion(socket_memoria_particular);
 }
@@ -153,13 +154,13 @@ void syscallExit(uint32_t pid)
 
 }
 PCB* buscarPCBEjecutando(uint32_t pid) {
-    bool _mismoPID(nucleoCPU* nucleoEnEjecucion) {
+    bool _mismoPID(NucleoCPU* nucleoEnEjecucion) {
         return nucleoEnEjecucion->procesoEnEjecucion->PID == pid;
     };
 
-    nucleoCPU* nucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_mismoPID);
-    if(nucleoCPU!= NULL)
-        return nucleoCPU->procesoEnEjecucion;
+    NucleoCPU* NucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_mismoPID);
+    if(NucleoCPU!= NULL)
+        return NucleoCPU->procesoEnEjecucion;
     else
         return NULL;
 }
