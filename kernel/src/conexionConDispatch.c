@@ -177,7 +177,7 @@ void mandarContextoACPU(uint32_t PID,uint32_t PC,int fdConexion)
     cargar_uint32_t_al_super_paquete(paquete,PID);
     cargar_uint32_t_al_super_paquete(paquete,PC);
     enviar_paquete(paquete,fdConexion);
-    sem_wait(semaforoEsperarOKDispatch);
+    sem_wait(semaforoEsperarOKDispatch); //Para saber que cpu recibio el contexto
     eliminar_paquete(paquete);
 }
 

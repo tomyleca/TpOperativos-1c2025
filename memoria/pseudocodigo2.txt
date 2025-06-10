@@ -1,2 +1,2 @@
-IO Prueba 1000
+INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo3.txt 4
 EXIT

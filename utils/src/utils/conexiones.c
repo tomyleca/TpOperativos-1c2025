@@ -117,14 +117,14 @@ int esperar_cliente(int socket_servidor) {
 
 void enviarOK(int fdConexion)
 {
-    uint32_t OK = 1;
-    send(fdConexion,&OK,sizeof(uint32_t),0);
+    int OK = 1;
+    send(fdConexion,&OK,sizeof(int),0);
 }
 
 bool esperarOK(int fdConexion)
 {
-    uint32_t OK;
-    return recv(fdConexion,&OK,sizeof(uint32_t),0);
+    int OK;
+    return recv(fdConexion,&OK,sizeof(int),0);
 }
 
 void enviarOK2(int conexion)

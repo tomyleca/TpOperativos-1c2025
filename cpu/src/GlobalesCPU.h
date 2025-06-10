@@ -66,9 +66,12 @@ extern t_contexto_cpu* contexto;
 
 //SEMAFOROS
 extern sem_t sem_hay_instruccion;
-extern sem_t sem_pid;
-extern sem_t sem_contexto;
+extern sem_t semContextoCargado;
+extern sem_t semFetch;
+extern sem_t semOKDispatch;
 extern sem_t sem_interrupcion;
+extern sem_t semMutexPC; //Creo que no es necesario
+
 
 
 

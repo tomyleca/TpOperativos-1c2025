@@ -18,6 +18,11 @@ int main(int argc, char* argv[]) {
     // INICIO HILOS
     inicializar_hilos(config_cpu);
 
+    while(1)
+    {
+        ciclo_instruccion(socket_cpu_memoria);
+    }
+
     pthread_join(hilo_escuchar_memoria,NULL);
     pthread_join(hilo_escuchar_kernel,NULL);
     pthread_join(hilo_escuchar_kernel_interrupcion,NULL);
@@ -62,6 +67,10 @@ void inicializar_recursos()
     // Inicializar semaforos
     sem_init(&sem_hay_instruccion, 0, 0);
     sem_init(&sem_interrupcion, 0, 1);
+    sem_init(&semFetch,0,1);
+    sem_init(&semOKDispatch,0,0);
+    sem_init(&semContextoCargado,0,0);
+    sem_init(&semMutexPC,0,1);
 
     iniciar_diccionario_instrucciones();
     

@@ -33,9 +33,12 @@ t_contexto_cpu* contexto;
 
 //SEMAFOROS
 sem_t sem_hay_instruccion;
-sem_t sem_pid;
-sem_t sem_contexto;
+sem_t semContextoCargado;
+sem_t semFetch;
+sem_t semOKDispatch;
 sem_t sem_interrupcion;
+sem_t semMutexPC;
+
 
 
 

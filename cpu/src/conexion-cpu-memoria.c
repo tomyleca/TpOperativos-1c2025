@@ -102,9 +102,7 @@ void atender_interrupcion_kernel()
         cod_op = recibir_operacion(socket_cpu_kernel_interrupt);
         switch (cod_op) 
         {
-            case MENSAJE:
-                //recibir_mensaje(socket_cpu_kernel_interrupt, logger_cpu);
-                break;    
+      
             case INTERRUPCION:
                 
                 log_info(logger_cpu, " ## Llega interrupción al puerto Interrupt.");
@@ -142,24 +140,23 @@ void atender_dispatch_kernel()
         cod_op = recibir_operacion(socket_cpu_kernel_dispatch);
         switch (cod_op) 
         {
-            case MENSAJE:
-                /*recibir_mensaje(socket_cpu_kernel_dispatch, logger_cpu);
-                int valor = 5;
-                crear_paquete()
-                enviar_paquete(paquete, socket_cpu_kernel_dispatch); 
-                eliminar_paquete(paquete);*/
+            case 1:
+                log_info(logger_cpu,"LLEGA OK");
+                sem_post(&semOKDispatch);
                 break;
+                
                 case PID_KERNEL_A_CPU:
                 printf("ANTES DE RECIBIR OTRO PROCESO\n");
-                
                 contexto = malloc(sizeof(t_contexto_cpu));
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
                 contexto->pid = recibir_uint32_t_del_buffer(buffer);
+                sem_wait(&semMutexPC);
                 contexto->registros.PC = recibir_uint32_t_del_buffer(buffer);
+                sem_post(&semMutexPC);
                 enviarOK(socket_cpu_kernel_dispatch);
                 // ACA HAY QUE SOLICITAR A MEMORIA LA PRIMER INSTRUCCION CON EL PID RECIBIMOS DE KERNEL
-                ciclo_instruccion(socket_cpu_memoria); 
-                limpiarBuffer(buffer);
+                sem_post(&semContextoCargado);
+                //limpiarBuffer(buffer);
                 break;
                 
             case -1:

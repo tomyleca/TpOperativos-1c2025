@@ -235,6 +235,10 @@ void fetch(int socket_cpu_memoria)
     // Obtener instrucción
     // Deberemos devolverle la instrucción correspondiente pid y al Program Counter recibido. 
     
+    sem_wait(&semFetch);
+
+    sem_wait(&semContextoCargado);
+
     t_paquete* paquete;
 
     // CASO EN EL QUE SE EJECUTA  SOLAMENTE UNA INSTRUCCION COMUN Y SE VUELVE A SOLICITAR OTRA
@@ -242,9 +246,10 @@ void fetch(int socket_cpu_memoria)
     
     cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
 
+    sem_wait(&semMutexPC);
     cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC);
-
     log_info(logger_cpu, "## PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
+    sem_post(&semMutexPC);
 
     // Envio el paquete a memoria
     enviar_paquete(paquete, socket_cpu_memoria);
@@ -306,7 +311,7 @@ void decode()
 
 void check_interrupt()
 {   
-    char** parte = NULL;
+    //El semaforo de recibir interrupcion no es necesario pq la validacion de que ya llego una posible interrupcion para este punto la ahce kernel antes de mandar el OK en las syscalls
     pthread_mutex_lock(&mutex_motivo_interrupcion);
     bool hay_interrupcion = flag_interrupcion;  // Leer flag
     pthread_mutex_unlock(&mutex_motivo_interrupcion);
@@ -320,6 +325,9 @@ void check_interrupt()
         pthread_mutex_lock(&mutex_motivo_interrupcion);
         flag_interrupcion = false;  // Leer flag
         pthread_mutex_unlock(&mutex_motivo_interrupcion); 
+
+        sem_post(&semFetch); //Si todavia no se recibio el nuevo PID a ejecutar , solo hay 1/2 semaforos necerios para volver a arrancar el ciclo de instrucion
+
         
         
         
@@ -333,17 +341,22 @@ void check_interrupt()
         printf("--------------No hay interrupcion \n");
         
         
-        ciclo_instruccion(socket_cpu_memoria); // Aca vuelvo a pedirle una instruccion a memoria
+        sem_post(&semFetch); // 1/2 semaforos necesarios para que vuelva a empezar el ciclo de instruccion
+        sem_post(&semContextoCargado); // 2/2 semaforos para que vuelva a empezar el ciclo de instruccion
     }
 }
 
 void ciclo_instruccion(int socket_cpu_memoria)
 {
     fetch(socket_cpu_memoria);
+    
+    sem_wait(&semMutexPC);
+        contexto->registros.PC = contexto->registros.PC + 1;
+    sem_post(&semMutexPC);
 
     decode();
 
-    contexto->registros.PC = contexto->registros.PC + 1;
+
 
     check_interrupt(); 
 

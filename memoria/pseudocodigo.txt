@@ -1,4 +1,4 @@
 INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo2.txt 4
-IO Prueba 40000
+IO Prueba 1000
 DUMP_MEMORY
 EXIT
