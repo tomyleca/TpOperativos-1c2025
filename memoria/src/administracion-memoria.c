@@ -500,7 +500,7 @@ bool suspender_proceso(int pid) {
         return false;
     }
     
-    proceso->suspendido = true;
+    // proceso->suspendido = true;
     
     // TODO: Implementar lógica de suspensión específica
     // Por ahora solo marcamos como suspendido
@@ -514,7 +514,7 @@ bool des_suspender_proceso(int pid) {
         return false;
     }
     
-    proceso->suspendido = false;
+    // proceso->suspendido = false;
     
     // TODO: Implementar lógica de des-suspensión específica
     // Por ahora solo marcamos como no suspendido
