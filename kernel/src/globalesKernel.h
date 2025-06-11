@@ -37,7 +37,7 @@ int ME[7];
 int MT[7];
 
 
-} PCB;
+}PCB;
 
 extern sem_t* semaforoMutexPIDDisponible;
 
@@ -201,6 +201,11 @@ extern sem_t* semaforoEsperarOKInterrupt;
 //MEMORIA
 extern int mandarDatosProcesoAMemoria(PCB* proceso);
 
+//HILOS
+extern pthread_t hiloAtenderDispatch;
+extern pthread_t hiloAtenderInterrupt;
+extern pthread_t hiloAtenderIO;
+extern pthread_t hiloPlanificadorCortoPlazo;
 
 //OTRAS
 extern void esperarCancelacionDeHilo(pthread_t hiloACancelar);;

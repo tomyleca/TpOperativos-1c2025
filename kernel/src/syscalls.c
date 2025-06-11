@@ -49,9 +49,11 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
             char* input = readline("Apriete ENTER para empezar a planificar procesos.\n");  
 
             if (*input == '\0') {  
-                sleep(4); // PARA DARLE TIEMPO A CONECTARSE BIEN A LOS OTROS MODULOS
+                //sleep(4); // PARA DARLE TIEMPO A CONECTARSE BIEN A LOS OTROS MODULOS
                 break;
             }
+
+            free(input);
             
         }
     }    
@@ -94,6 +96,7 @@ void dump_memory(uint32_t pid) {
      
     else { //TODO esto lo arreglo cuando haga dumpMemory en memoria
         log_error(loggerKernel, "## (<%u>) - Error en DUMP_MEMORY. Finalizando proceso", pid);
+        terminarEjecucion(proceso);
         pasarAExit(proceso);
     }
     

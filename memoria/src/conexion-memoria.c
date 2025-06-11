@@ -50,15 +50,16 @@ int atender_cliente(int *fd_conexion)
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 datos_kernel.pid = recibir_uint32_t_del_buffer(unBuffer);
                 datos_kernel.tamanio_proceso = recibir_uint32_t_del_buffer(unBuffer); 
+
                 datos_kernel.archivo_pseudocodigo = recibir_string_del_buffer(unBuffer);
                 printf("---------------------------------------------\n");
                 printf("PID LLEGADO DE KERNEL %d\n", datos_kernel.pid);
                 printf("Tamano LLEGADO DE KERNEL %d\n", datos_kernel.tamanio_proceso);
                 mostrar_bitmap();
                 if(guardarProcesoYReservar(datos_kernel.pid,datos_kernel.tamanio_proceso,datos_kernel.archivo_pseudocodigo) == -1)
-                    enviar_paquete(crear_super_paquete(NO_HAY_MEMORIA),cliente_fd);
+                    enviarOpCode(cliente_fd,NO_HAY_MEMORIA);
                 else 
-                    enviar_paquete(crear_super_paquete(OK),cliente_fd);
+                    enviarOpCode(cliente_fd,OK);
                 limpiarBuffer(unBuffer);
                 break;   
              

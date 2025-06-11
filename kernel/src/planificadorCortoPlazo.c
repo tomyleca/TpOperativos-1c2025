@@ -77,12 +77,12 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
      
     cargarCronometro(procesoDespuesDeEjecucion,EXECUTE);
     
-
+    temporal_stop(procesoDespuesDeEjecucion->cronometroEjecucionActual);
     procesoDespuesDeEjecucion->duracionRafagaAnterior=temporal_gettime(procesoDespuesDeEjecucion->cronometroEjecucionActual);
     procesoDespuesDeEjecucion->estimadoRafagaAnterior=procesoDespuesDeEjecucion->estimadoSiguienteRafaga;
     estimarSiguienteRafaga(procesoDespuesDeEjecucion);
 
-    temporal_stop(procesoDespuesDeEjecucion->cronometroEjecucionActual);
+    
     
     temporal_destroy(procesoDespuesDeEjecucion->cronometroEjecucionActual);
 

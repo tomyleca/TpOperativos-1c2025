@@ -49,6 +49,7 @@ void atender_dispatch_cpu(void* conexion)
                 int64_t tiempoEnIO = recibir_int64_t_del_buffer(buffer);
                 actualizarPC(PID,PC);
                 syscall_IO(PID,nombreIO,tiempoEnIO);
+                free(nombreIO);
                 enviarOK(fdConexion); 
                 limpiarBuffer(buffer);              
                 break;
@@ -69,6 +70,7 @@ void atender_dispatch_cpu(void* conexion)
                 char* nombrePseudocodigo = recibir_string_del_buffer(buffer);
                 uint32_t tam = recibir_uint32_t_del_buffer(buffer);
                 INIT_PROC(nombrePseudocodigo,tam);
+                free(nombrePseudocodigo);
                 enviarOK(fdConexion);
                 limpiarBuffer(buffer);
                 break;
@@ -106,6 +108,7 @@ NucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion)
         NucleoCPU = malloc(sizeof(*NucleoCPU));
         NucleoCPU->identificador= malloc(strlen(identificador)+1);
         strcpy(NucleoCPU->identificador,identificador);
+        free(identificador);
        NucleoCPU->procesoEnEjecucion=NULL;
         NucleoCPU->fdConexionDispatch = fdConexion;
         agregarALista(listaCPUsAInicializar,NucleoCPU);

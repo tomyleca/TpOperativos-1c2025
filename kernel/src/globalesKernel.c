@@ -59,3 +59,9 @@ sem_t* semaforoHayCPULibre;
 sem_t* semaforoEsperarOKDispatch;
 sem_t* semaforoMutexGuardarDatosCPU;
 sem_t* semaforoEsperarOKInterrupt;
+
+//HILOS
+pthread_t hiloAtenderDispatch;
+pthread_t hiloAtenderInterrupt;
+pthread_t hiloAtenderIO;
+pthread_t hiloPlanificadorCortoPlazo;

@@ -62,6 +62,7 @@ NucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)
         nucleoCPU = malloc(sizeof(*nucleoCPU));
         nucleoCPU->identificador= malloc(strlen(identificador) + 1);
         strcpy(nucleoCPU->identificador,identificador);
+        free(identificador);
         nucleoCPU->procesoEnEjecucion=NULL;
         nucleoCPU->fdConexionInterrupt = fdConexion;
         agregarALista(listaCPUsAInicializar,nucleoCPU);

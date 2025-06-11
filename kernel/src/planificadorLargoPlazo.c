@@ -14,12 +14,12 @@ void inicializarProceso(){
             sacarDeLista(listaProcesosSwapReady,0);
             log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"SWAP_READY","READY");
             cargarCronometro(procesoAInicializar,SWAP_READY);
-            mandarDatosProcesoAMemoria(procesoAInicializar);
             pasarAReady(procesoAInicializar);
             inicializarProceso(); // Mientras la respuesta sea OK sigo intentando inicializar procesos
             
            
         }
+  
         }
     else if (!list_is_empty(listaProcesosNew->lista))
         {
@@ -54,6 +54,7 @@ int mandarDatosProcesoAMemoria(PCB* proceso)
     cargar_string_al_super_paquete(paquete,proceso->archivoPseudocodigo);
     enviar_paquete(paquete,socketKernelMemoria);
     int respuesta = recibir_operacion(socketKernelMemoria);
+    
     
     if(respuesta == NO_HAY_MEMORIA)
     {

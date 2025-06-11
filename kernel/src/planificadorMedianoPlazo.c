@@ -21,6 +21,7 @@ void pasarABLoqueado(PCB* proceso,int64_t tiempo,char* nombreIO){
 
     char* PIDComoChar = pasarUnsignedAChar(proceso->PID);
     agregarADiccionario(diccionarioProcesosBloqueados,PIDComoChar,procesoEsperando);
+    free(PIDComoChar);
     
 
 
@@ -40,12 +41,8 @@ void pasarABLoqueado(PCB* proceso,int64_t tiempo,char* nombreIO){
 
 void* manejarProcesoBloqueado(ProcesoEnEsperaIO* ProcesoEnEsperaIO){
     
-
-    
     char* PID = pasarUnsignedAChar(ProcesoEnEsperaIO->proceso->PID);
-    t_temporal* cronometroBloqueadoActual = temporal_create();
-    temporal_resume(cronometroBloqueadoActual);
-
+ 
     temporal_resume(ProcesoEnEsperaIO->proceso->cronometros[BLOCKED]);
     ProcesoEnEsperaIO->proceso->ME[BLOCKED]++;
 
@@ -54,9 +51,9 @@ void* manejarProcesoBloqueado(ProcesoEnEsperaIO* ProcesoEnEsperaIO){
 
     sem_wait(ProcesoEnEsperaIO->semaforoIOFinalizada);
     
-    
-    
     sacarDeDiccionario(diccionarioProcesosBloqueados,PID);  //Desbloqueo el proceso
+
+    free(PID);
     
     sem_wait(ProcesoEnEsperaIO->semaforoMutex); //Mutex para chequear que el otro hilo no este en medio de un proceso
     esperarCancelacionDeHilo(hiloContadorSwap); //Cancelo el hilo contadorSwap, para que no tire seg fault cuando haga free del semaforoMutex
@@ -174,6 +171,7 @@ void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)
     
     char* PIDComoChar = pasarUnsignedAChar(PID);
     ProcesoEnEsperaIO* procesoADesbloquear = leerDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
+    free(PIDComoChar);
     sem_post(procesoADesbloquear->semaforoIOFinalizada);
 
     log_info(loggerKernel, "## (<%u>) finalizó IO y pasa a READY",PID);

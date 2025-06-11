@@ -219,6 +219,8 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   p->pseudocodigo = pseudocodigo;
   p->lista_instrucciones = leer_archivo_y_cargar_instrucciones(p->pseudocodigo);
 
+  log_info(logger_memoria,"## PID: <%u> - Proceso Creado - Tamaño: <%u>",p->pid,p->tamanio_reservado);
+
   return p;
 }
 
@@ -392,6 +394,7 @@ int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
     return -1;
   }
   
+
   memset(&p->metricas, 0, sizeof(MetricaProceso));
 
   dump_memory(p);

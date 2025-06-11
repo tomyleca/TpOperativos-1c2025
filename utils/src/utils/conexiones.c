@@ -113,7 +113,11 @@ int esperar_cliente(int socket_servidor) {
     return socket_cliente;
 }
 
-
+void enviarOpCode(int fdConexion, op_code opCode)
+{
+    op_code codigo = opCode;
+    send(fdConexion,&codigo,sizeof(int),0);
+}
 
 void enviarOK(int fdConexion)
 {

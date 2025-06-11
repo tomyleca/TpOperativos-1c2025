@@ -2,6 +2,9 @@
 
 void nucleoCPUDestroy(void* ptr)
 {
+    if(ptr==NULL)
+        return;
+    
     NucleoCPU* nucleoCPU = (NucleoCPU*) ptr;
     free(nucleoCPU->identificador);
     free(nucleoCPU);
@@ -9,6 +12,9 @@ void nucleoCPUDestroy(void* ptr)
 
 void dispositivoIODestroy(void* ptr)
 {
+    if(ptr==NULL)
+        return;
+    
     DispositivoIO* dispositivoIO = (DispositivoIO*) ptr;
     free(dispositivoIO->nombre);
     list_destroy(dispositivoIO->colaEsperandoIO);
@@ -18,6 +24,9 @@ void dispositivoIODestroy(void* ptr)
 
 void instanciaIODestroy(void* ptr)
 {
+    if(ptr==NULL)
+        return;
+
     InstanciaIO* instanciaIO = (InstanciaIO*) ptr;
     free(instanciaIO->semaforoMutex);
     free(instanciaIO);
@@ -25,6 +34,9 @@ void instanciaIODestroy(void* ptr)
 
 void procesoEnEsperaIODestroy(void* ptr)
 {
+    if(ptr==NULL)
+        return;
+
     ProcesoEnEsperaIO* procesoEnEsperaIO = (ProcesoEnEsperaIO*) ptr;
     free(procesoEnEsperaIO->proceso);
     free(procesoEnEsperaIO->semaforoIOFinalizada);

@@ -83,7 +83,7 @@ void atender_memoria()
                 log_error(logger_cpu, "MEMORIA se desconecto. Terminando servidor");
                 //shutdown(socket_cpu_memoria, SHUT_RDWR);
                 close(socket_cpu_memoria);
-                pthread_exit(NULL);
+                exit(1);
             default:
                 log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
                 break;
@@ -119,7 +119,7 @@ void atender_interrupcion_kernel()
                 log_error(logger_cpu, "KERNEL INTERRUPT se desconecto. Terminando servidor");
                 //shutdown(socket_cpu_kernel_interrupt, SHUT_RDWR);
                 close(socket_cpu_kernel_interrupt);
-                pthread_exit(NULL);
+                exit(1);
             default:
                 log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
                 break;
@@ -163,7 +163,8 @@ void atender_dispatch_kernel()
                 log_error(logger_cpu, "KERNEL DISPATCH se desconecto. Terminando servidor");
                 //shutdown(socket_cpu_kernel_dispatch, SHUT_RDWR);
                 close(socket_cpu_kernel_dispatch);
-                pthread_exit(NULL);
+                exit(1);
+                //TODO revisar esto
                 break;
             default:
                 log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata. Estoy en kernel dispatch");

@@ -18,14 +18,10 @@ int main(int argc, char* argv[]) {
     crearEstructuras();
 
     
-    
-    pthread_t* hiloAtenderDispatch = malloc(sizeof(pthread_t));
-    pthread_t* hiloAtenderInterrupt = malloc(sizeof(pthread_t));
-    pthread_t* hiloAtenderIO = malloc(sizeof(pthread_t));
-    pthread_t* hiloPlanificadorCortoPlazo = malloc(sizeof(pthread_t));
-    pthread_create(hiloAtenderDispatch,NULL,esperarClientesDispatch,NULL);
-    pthread_create(hiloAtenderInterrupt,NULL,esperarClientesInterrupt,NULL);
-    pthread_create(hiloAtenderIO,NULL,esperarClientesIO,NULL);
+
+    pthread_create(&hiloAtenderDispatch,NULL,esperarClientesDispatch,NULL);
+    pthread_create(&hiloAtenderInterrupt,NULL,esperarClientesInterrupt,NULL);
+    pthread_create(&hiloAtenderIO,NULL,esperarClientesIO,NULL);
     
 
 
@@ -40,7 +36,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    pthread_create(hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
+    pthread_create(&hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
 
     //prueba1();
     
@@ -56,10 +52,10 @@ int main(int argc, char* argv[]) {
     
 
 
-    pthread_join(*hiloAtenderIO,NULL);
-    pthread_join(*hiloPlanificadorCortoPlazo,NULL);
-    pthread_join(*hiloAtenderDispatch,NULL);
-    pthread_join(*hiloAtenderInterrupt,NULL);
+    pthread_join(hiloAtenderIO,NULL);
+    pthread_join(hiloPlanificadorCortoPlazo,NULL);
+    pthread_join(hiloAtenderDispatch,NULL);
+    pthread_join(hiloAtenderInterrupt,NULL);
     return 0;
 }
 
@@ -158,6 +154,7 @@ void liberarRecursos(int signal)
     if(signal != SIGINT)
         return;
     
+    printf("Cerrando");
     //TODO probarlo
 
     close(socket_kernel_cpu_dispatch);
@@ -170,6 +167,12 @@ void liberarRecursos(int signal)
     free(semaforoHayCPULibre);
     free(semaforoIntentarPlanificar);
     free(semaforoMutexPIDDisponible);
+
+    pthread_cancel(hiloAtenderDispatch);
+    pthread_cancel(hiloAtenderInterrupt);
+    pthread_cancel(hiloAtenderIO);
+    pthread_cancel(hiloPlanificadorCortoPlazo);
+
 
     //TODO hacer los destroys
     /*
