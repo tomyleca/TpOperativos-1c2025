@@ -32,7 +32,7 @@ bool inicializar_proceso_memoria(uint32_t pid, uint32_t tam) {
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 
-    op_code_memoria respuesta = recibir_operacion(socket_memoria);
+    op_code respuesta = recibir_operacion(socket_memoria);
     cerrar_conexion_memoria(socket_memoria);
 
     return respuesta == INICIALIZAR_PROCESO;
@@ -53,7 +53,7 @@ bool suspender_proceso_memoria(uint32_t pid) {
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 
-    op_code_memoria respuesta = recibir_operacion(socket_memoria);
+    op_code respuesta = recibir_operacion(socket_memoria);
     cerrar_conexion_memoria(socket_memoria);
 
     return respuesta == SUSPENDER_PROCESO;
@@ -74,7 +74,7 @@ bool des_suspender_proceso_memoria(uint32_t pid) {
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 
-    op_code_memoria respuesta = recibir_operacion(socket_memoria);
+    op_code respuesta = recibir_operacion(socket_memoria);
     cerrar_conexion_memoria(socket_memoria);
 
     return respuesta == DES_SUSPENDER_PROCESO;
@@ -95,7 +95,7 @@ bool finalizar_proceso_memoria(uint32_t pid) {
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 
-    op_code_memoria respuesta = recibir_operacion(socket_memoria);
+    op_code respuesta = recibir_operacion(socket_memoria);
     cerrar_conexion_memoria(socket_memoria);
 
     return respuesta == FINALIZAR_PROCESO;
@@ -116,7 +116,7 @@ bool solicitar_dump_memoria(uint32_t pid) {
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
 
-    op_code_memoria respuesta = recibir_operacion(socket_memoria);
+    op_code respuesta = recibir_operacion(socket_memoria);
     cerrar_conexion_memoria(socket_memoria);
 
     return respuesta == DUMP_MEMORY_OK;

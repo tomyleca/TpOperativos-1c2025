@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <sys/stat.h>
 
 
 bool *bitmap_frames = NULL;
@@ -379,9 +381,58 @@ void destruir_proceso(Proceso *p) {
 }
 
 void dump_memory(Proceso *p) {
-  mostrar_bitmap();
-  imprimir_tabla(p->tabla_raiz, 1, 0);
-  mostrar_procesos_activos();
+    // Obtiene el timestamp actual
+    time_t timestamp = time(NULL);
+    struct tm *tm_info = localtime(&timestamp);
+    
+    char filename[256];
+    strftime(filename, sizeof(filename), "%Y%m%d-%H%M%S", tm_info);
+    char full_filename[512];
+    snprintf(full_filename, sizeof(full_filename), "%s%d-%s.dmp", dump_path, p->pid, filename);
+    
+    // Crear directorio si no existe
+    char dir_path[512];
+    strncpy(dir_path, dump_path, sizeof(dir_path) - 1);
+    dir_path[sizeof(dir_path) - 1] = '\0';
+    
+    char *last_slash = strrchr(dir_path, '/');
+    if (last_slash) {
+        *last_slash = '\0';
+        mkdir(dir_path, 0755);
+    }
+    
+    FILE *dump_file = fopen(full_filename, "wb");
+    if (!dump_file) {
+        log_error(logger_memoria, "Error al crear archivo de dump: %s", full_filename);
+        return;
+    }
+    
+    log_info(logger_memoria, "## PID: <%d> - Memory Dump - Creando archivo: %s", p->pid, full_filename);
+    
+    int bytes_escritos = 0;
+    
+    for (int direccion_virtual = 0; direccion_virtual < p->tamanio_reservado; direccion_virtual++) {
+        int direccion_fisica = traducir_direccion(p, direccion_virtual);
+        
+        if (direccion_fisica >= 0 && direccion_fisica < TAM_MEMORIA) {
+            char byte = memoria_real[direccion_fisica];
+            fwrite(&byte, 1, 1, dump_file);
+            bytes_escritos++;
+        } else {
+            char zero_byte = 0;
+            fwrite(&zero_byte, 1, 1, dump_file);
+            bytes_escritos++;
+        }
+    }
+    
+    fclose(dump_file);
+    
+    log_info(logger_memoria, "## PID: <%d> - Memory Dump completado - %d bytes escritos en %s", 
+             p->pid, bytes_escritos, full_filename);
+    
+    mostrar_bitmap();
+    imprimir_tabla(p->tabla_raiz, 1, 0);
+    mostrar_procesos_activos();
 }
 
 int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
@@ -423,4 +474,72 @@ char **leer_instrucciones(const char *ruta, int *cantidad) {
   fclose(archivo);
   *cantidad = count;
   return lineas;
+}
+
+
+bool crear_estructuras_proceso(int pid, int paginas_necesarias) {
+    uint32_t tamanio = paginas_necesarias * TAM_PAGINA;
+    char* pseudocodigo = "test.pseudocodigo"; // Archivo de prueba
+    
+    Proceso* proceso = guardarProceso(pid, tamanio, pseudocodigo);
+    if (!proceso) {
+        return false;
+    }
+    
+    if (reservar_memoria(proceso, tamanio) < 0) {
+        destruir_proceso(proceso);
+        return false;
+    }
+    
+    return true;
+}
+
+bool suspender_proceso(int pid) {
+    Proceso* proceso = buscar_contexto_por_pid(pid);
+    if (!proceso) {
+        return false;
+    }
+    
+    proceso->suspendido = true;
+    
+    // TODO: Implementar lógica de suspensión específica
+    // Por ahora solo marcamos como suspendido
+    
+    return true;
+}
+
+bool des_suspender_proceso(int pid) {
+    Proceso* proceso = buscar_contexto_por_pid(pid);
+    if (!proceso) {
+        return false;
+    }
+    
+    proceso->suspendido = false;
+    
+    // TODO: Implementar lógica de des-suspensión específica
+    // Por ahora solo marcamos como no suspendido
+    
+    return true;
+}
+
+bool realizar_dump_memoria(int pid) {
+    Proceso* proceso = buscar_contexto_por_pid(pid);
+    if (!proceso) {
+        return false;
+    }
+    
+    dump_memory(proceso);
+    
+    return true;
+}
+
+bool finalizar_proceso(int pid) {
+    Proceso* proceso = buscar_contexto_por_pid(pid);
+    if (!proceso) {
+        return false;
+    }
+    
+    destruir_proceso(proceso);
+    
+    return true;
 }

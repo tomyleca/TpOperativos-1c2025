@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
 	log_info(logger_memoria, "Servidor listo para recibir clientes"); 
     fd_escucha_servidor = iniciar_servidor(logger_memoria, puerto_escucha);
 
-	pthread_create(&hilo_memoria,NULL, (void*)server_escucha,&fd_escucha_servidor);
+    pthread_create(&hilo_memoria,NULL, (void*)server_escucha,&fd_escucha_servidor);
 
     pthread_join(hilo_memoria,NULL);
 

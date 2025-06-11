@@ -63,5 +63,12 @@ void interpretar_instruccion(char *linea);
 
 void dump_memory (Proceso *p);
 
+
+bool crear_estructuras_proceso(int pid, int paginas_necesarias);
+bool suspender_proceso(int pid);
+bool des_suspender_proceso(int pid);
+bool realizar_dump_memoria(int pid);
+bool finalizar_proceso(int pid);
+
 #endif
 
