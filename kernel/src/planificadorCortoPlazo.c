@@ -84,6 +84,7 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 
     
     
+
     temporal_destroy(procesoDespuesDeEjecucion->cronometroEjecucionActual);
 
 }
@@ -162,4 +163,5 @@ bool menorEstimadoSiguienteRafaga(PCB* PCB1,PCB* PCB2)
 void estimarSiguienteRafaga(PCB* proceso)
 {
     proceso->estimadoSiguienteRafaga= alfa * proceso->duracionRafagaAnterior + (1- alfa) * proceso->estimadoRafagaAnterior;
+
 }

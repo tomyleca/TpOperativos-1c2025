@@ -16,7 +16,7 @@ int tiempo_suspension;
 char* puerto_escucha_dispatch;
 char* puerto_escucha_interrupt;
 char* puerto_escucha_IO;
-int alfa;
+double alfa;
 int64_t estimacion_inicial;
 
 char* algoritmo_cola_new;

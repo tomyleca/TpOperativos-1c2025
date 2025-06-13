@@ -34,7 +34,7 @@ void pasarABLoqueado(PCB* proceso,int64_t tiempo,char* nombreIO){
     
     
 
-    free(PIDComoChar);
+    
 
 }
 

@@ -387,6 +387,7 @@ void dump_memory(Proceso *p) {
 }
 
 int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
+
   Proceso *p = guardarProceso(PID,tam,pseudocodigo);
   if (reservar_memoria(p, tam) < 0) {
     fprintf(stderr, "Error: no se pudo asignar memoria al proceso\n");
