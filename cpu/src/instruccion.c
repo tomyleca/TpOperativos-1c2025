@@ -404,19 +404,6 @@ void log_instruccion(char** parte) {
 
 // *********CACHE**********
 
-typedef struct 
-{
-    int pid;                    
-    int nro_pagina;            
-    int nro_marco;             
-    char* contenido;           
-    bool bit_referencia;       
-    bool bit_modificacion;  //para el CLOCK modificado   
-    bool bit_validez;           
-} EntradaCache;
-
-EntradaCache* cache_paginas;
-int puntero_clock;  
 
 void inicializar_cache() 
 {
@@ -468,9 +455,9 @@ char leer_byte_con_cache(int direccion_logica)
             return 0;
         }
     
-        
-
-
+        // Leer directamente de memoria
+        peticion_lectura_a_memoria(direccion_fisica, 1);
+        // return recibir_char_de_memoria(); **************************************
     }
     
     //CACHÉ HABILITADA
@@ -526,5 +513,54 @@ int algoritmo_clock()
     return victima;
 }
 
+int algoritmo_clock_modificado() {
+    int inicio = puntero_clock;
+    int primera_vuelta = true;
+    
+    //Primera vuelta:buscar (0,0)
+    do {
+        if (cache_paginas[puntero_clock].bit_referencia == NULL && 
+            cache_paginas[puntero_clock].bit_modificacion == NULL) {
+            int victima = puntero_clock;
+            puntero_clock = (puntero_clock + 1) % entradas_cache;
+            return victima;
+        }
+        puntero_clock = (puntero_clock + 1) % entradas_cache;
+    } while (puntero_clock != inicio);
+    
+    //Segunda vuelta:buscar (0,1)
+    do {
+        if (cache_paginas[puntero_clock].bit_referencia == NULL) {
+            int victima = puntero_clock;
+            puntero_clock = (puntero_clock + 1) % entradas_cache;
+            return victima;
+        }
+        cache_paginas[puntero_clock].bit_referencia = false;
+        puntero_clock = (puntero_clock + 1) % entradas_cache;
+    } while (puntero_clock != inicio);
+    
+    // Si llega acá, usa la posición actual
+    int victima = puntero_clock;
+    puntero_clock = (puntero_clock + 1) % entradas_cache;
+    return victima;
+}
+
+int seleccionar_victima() {
+    // Buscar entrada libre 
+    for (int i = 0; i < entradas_cache; i++) {
+        if (!cache_paginas[i].es_valida) {
+            return i;
+        }
+    }
+
+    // No hay entradas libres, aplico algoritmo 
+    if (strcmp(reemplazo_cache, "CLOCK") == 0) {
+        return algoritmo_clock();
+    } else if (strcmp(reemplazo_cache, "CLOCK-M") == 0) {
+        return algoritmo_clock_modificado();
+    } else {
+        return 0; 
+    }
+}
 
 
