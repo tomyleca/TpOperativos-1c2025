@@ -13,7 +13,8 @@ void instruccion_noop(char** parte)
         perror("Error al ejecutar NOOP");
     }
 
-    check_interrupt();
+    string_array_destroy(parte);
+
 }
 
 void instruccion_escribir_memoria(char** parte)
@@ -53,7 +54,7 @@ void instruccion_escribir_memoria(char** parte)
 
     // Aumento el PC para que lea la proxima instruccion
 
-    liberar_array_strings(parte);
+    string_array_destroy(parte);
 
     return;
 }
@@ -90,7 +91,7 @@ void instruccion_leer_memoria(char** parte)
 
     peticion_lectura_a_memoria(direccion_fisica, tamanio);
     
-    liberar_array_strings(parte);
+    string_array_destroy(parte);
 }
 
 void instruccion_goto(char** parte)
@@ -104,6 +105,9 @@ void instruccion_goto(char** parte)
 
     int nuevo_pc = atoi(parte[1]);
     contexto->registros.PC = nuevo_pc;
+
+    string_array_destroy(parte);
+
 }
 
 void peticion_escritura_a_memoria(int direccion_fisica, char* valor_registro_dato)
@@ -266,8 +270,8 @@ void decode()
         char* instruccionRecibidaLocal = strdup(instruccion_recibida);
        
         char** parte = string_split(instruccionRecibidaLocal, " "); // Divido la instrucción (que es un string) en partes  (decode)
-        
-       
+    
+        free(instruccionRecibidaLocal);
 
         int instruccion_enum = (int)(intptr_t)dictionary_get(instrucciones, parte[0]); // Aca se obtiene la instrucción (el enum) a partir del diccionario
 
@@ -358,7 +362,7 @@ void ciclo_instruccion(int socket_cpu_memoria)
 
 
 
-    check_interrupt(); 
+    check_interrupt();
 
 }
 // **********************************  
@@ -405,7 +409,7 @@ void log_instruccion(char** parte) {
 // *********CACHE**********
 
 
-void inicializar_cache() 
+/*void inicializar_cache() 
 {
     if (entradas_cache <= 0) {
         cache_paginas = NULL;
@@ -561,6 +565,6 @@ int seleccionar_victima() {
     } else {
         return 0; 
     }
-}
+}*/
 
 

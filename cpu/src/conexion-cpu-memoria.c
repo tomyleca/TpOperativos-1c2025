@@ -53,6 +53,7 @@ void atender_memoria()
                 tamanio_pagina = recibir_int_del_buffer(buffer);
                 cant_niveles = recibir_int_del_buffer(buffer);
                 cant_entradas_tabla = recibir_int_del_buffer(buffer);
+                limpiarBuffer(buffer);
                 break;
             case CPU_RECIBE_INSTRUCCION_MEMORIA: 
                 //ACA LLEGA LA SOLICITUD DE LA INSTRUCCION DE MEMORIA
@@ -60,8 +61,9 @@ void atender_memoria()
                 contexto->pid = recibir_uint32_t_del_buffer(buffer);
                 instruccion_recibida = recibir_string_del_buffer(buffer); // instruccion_recibida se usa en instruccion.c
                 log_info(logger_cpu,"# Llega instrucción de memoria: %s", instruccion_recibida);
+                limpiarBuffer(buffer);
                 sem_post(&sem_hay_instruccion);
-                //limpiarBuffer(buffer);
+                
                 break;
 
             case CPU_RECIBE_OK_DE_LECTURA:
@@ -155,8 +157,9 @@ void atender_dispatch_kernel()
                 sem_post(&semMutexPC);
                 enviarOK(socket_cpu_kernel_dispatch);
                 // ACA HAY QUE SOLICITAR A MEMORIA LA PRIMER INSTRUCCION CON EL PID RECIBIMOS DE KERNEL
+                //Falta liberar contexto, pero como lo usamos en el ciclo y todo cpu, a lo mejor conviene liberarlo al final del todo.
+                limpiarBuffer(buffer);
                 sem_post(&semContextoCargado);
-                //limpiarBuffer(buffer);
                 break;
                 
             case -1:

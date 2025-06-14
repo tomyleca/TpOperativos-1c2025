@@ -10,6 +10,7 @@ void syscall_IO(char** parte){
     cargar_int64_t_al_super_paquete(paquete,tiempo);
     enviar_paquete(paquete,socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    string_array_destroy(parte);
     sem_wait(&semOKDispatch);
 }
 
@@ -22,6 +23,7 @@ void syscallINIT_PROC(char** parte)
     cargar_uint32_t_al_super_paquete(paquete,(uint32_t) strtoul(parte[2], NULL, 10));
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    string_array_destroy(parte);
     sem_wait(&semOKDispatch);
   
 }
@@ -33,6 +35,7 @@ void syscallDUMP_MEMORY(char** parte)
     cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    string_array_destroy(parte);
     sem_wait(&semOKDispatch);
 }
 
@@ -43,7 +46,7 @@ void syscallEXIT(char** parte)
     cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC);
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
+    string_array_destroy(parte);
     sem_wait(&semOKDispatch);
     
-
 }

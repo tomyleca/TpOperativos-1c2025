@@ -1,7 +1,6 @@
 #include <cpu.h>
 
 int main(int argc, char* argv[]) {
-    signal(SIGINT,liberarRecursos);
     
     saludar("cpu");
 
@@ -21,6 +20,7 @@ int main(int argc, char* argv[]) {
     while(1)
     {
         ciclo_instruccion(socket_cpu_memoria);
+        signal(SIGINT,liberarRecursos);
     }
 
     pthread_join(hilo_escuchar_memoria,NULL);
@@ -87,7 +87,11 @@ void liberarRecursos(int signal)
 {
     if(signal != SIGINT)
         return;
-    
+
+    config_destroy(config_cpu);
+    log_destroy(logger_cpu);
+    destruir_diccionarios();
+    list_destroy(lista_tlb);
     close(socket_cpu_kernel_dispatch);
     close(socket_cpu_kernel_interrupt);
     close(socket_cpu_memoria);
