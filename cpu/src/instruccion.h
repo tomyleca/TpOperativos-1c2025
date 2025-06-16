@@ -103,6 +103,8 @@ char leer_byte_con_cache(int direccion_logica);
 int algoritmo_clock();
 int algoritmo_clock_modificado();
 int seleccionar_victima();
+void solicitar_marco_a_memoria(int* entradas_de_nivel);
+void solicitar_tabla_a_memoria();
 
 
 #endif

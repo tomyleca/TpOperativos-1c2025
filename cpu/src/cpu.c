@@ -71,6 +71,7 @@ void inicializar_recursos()
     sem_init(&semOKDispatch,0,0);
     sem_init(&semContextoCargado,0,0);
     sem_init(&semMutexPC,0,1);
+    sem_init(&semLlegoPeticionMMU,0,0);
 
     iniciar_diccionario_instrucciones();
     

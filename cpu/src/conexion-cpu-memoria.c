@@ -65,6 +65,17 @@ void atender_memoria()
                 sem_post(&sem_hay_instruccion);
                 
                 break;
+            case RESPUESTA_SOLICITUD_TABLA:
+                sem_post(&semLlegoPeticionMMU);
+                break;
+
+            case RESPUESTA_SOLICITUD_FRAME:
+                buffer = recibiendo_super_paquete(socket_cpu_memoria);
+                nro_marco = recibir_int_del_buffer(buffer);
+                sem_post(&semLlegoPeticionMMU);
+
+
+
 
             case CPU_RECIBE_OK_DE_LECTURA:
                buffer = recibiendo_super_paquete(socket_cpu_memoria);

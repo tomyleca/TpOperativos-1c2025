@@ -71,6 +71,7 @@ extern sem_t semFetch;
 extern sem_t semOKDispatch;
 extern sem_t sem_interrupcion;
 extern sem_t semMutexPC; //Creo que no es necesario
+extern sem_t semLlegoPeticionMMU;
 
 
 
@@ -91,6 +92,7 @@ extern int valor_inicial;
 extern int cant_entradas_tabla; 
 extern int tamanio_pagina;              
 extern int cant_niveles;
+extern int nro_marco;
 
 // TLB
 extern int entradas_tlb;

@@ -39,6 +39,7 @@ void instruccion_escribir_memoria(char** parte)
 
     //ACA HAY ALGO RARO, YA QUE NO DEBERIA COMPARAR CON AX BX CX PORQUE LLEGAN NUMEROS!! NO NOMBRES DE REGISTROS
 
+
     int direccion_fisica = mmu_traducir_direccion_logica(direccion_logica);
 
     if (direccion_fisica < 0) {
@@ -192,25 +193,29 @@ int mmu_traducir_direccion_logica(int direccion_logica) {
 
     int nro_pagina = direccion_logica / tamanio_pagina;
     int desplazamiento = direccion_logica % tamanio_pagina;
-    int tabla_actual = contexto->pid;  // Empezamos con la tabla de primer nivel asociada al proceso
+    //int tabla_nivel_X = contexto->pid;  // Empezamos con la tabla de primer nivel asociada al proceso
     int entrada_nivel_X;
-    int nro_marco = -1;
+    nro_marco = -1;
+    int* entradas_de_nivel = malloc(sizeof(int)* cant_niveles);
 
     for (int nivel = 1; nivel <= cant_niveles; nivel++) {
         int potencia = (int) pow(cant_entradas_tabla, cant_niveles - nivel);
-        entrada_nivel_X = (nro_pagina / potencia) % cant_entradas_tabla;
+        entrada_nivel_X = ((nro_pagina / potencia) % cant_entradas_tabla);
 
         if (nivel < cant_niveles) {
-            //TODO HACER TODO ESTO
-            //tabla_actual = solicitar_tabla_a_memoria(tabla_actual, entrada_nivel_X);
+            entradas_de_nivel[nivel] = entrada_nivel_X;
+            solicitar_tabla_a_memoria(); //SIMULO LA SOLICITUD DE TABLA, ENREALIDAD LE SOLICITO TODAS AL FINAL
         } else {
-           // nro_marco = solicitar_marco_a_memoria(tabla_actual, entrada_nivel_X);
+            entradas_de_nivel[nivel] = entrada_nivel_X;
+            solicitar_marco_a_memoria(entradas_de_nivel); 
         }
     }
 
+    free(entradas_de_nivel);
+
     if (nro_marco == -1) {
         // Si no estaba en memoria, podriamos necesitar pedir a swap
-        //nro_marco = solicitar_pagina_a_swap(tabla_actual, entrada_nivel_X);//TODO hacer esta funcion
+        //nro_marco = solicitar_pagina_a_swap(tabla_nivel_X, entrada_nivel_X);//TODO hacer esta funcion
         //agregar_a_tlb(contexto->pid, nro_pagina, nro_marco); // TODO esto a verificar dsp
     }
 
@@ -220,6 +225,27 @@ int mmu_traducir_direccion_logica(int direccion_logica) {
     return direccion_fisica;
 }
 
+void solicitar_tabla_a_memoria()
+{
+    //TODAVIA NO LE MANDO LA ENTRADA_X PQ CUANDO LE PIDA LA DIRECCION FISICA LE MANDO TODAS LAS ENTRADAS JUNTAS, LO UNICO LE MANDO EL OPCODE PARA SIMULAR EL RETARDO DE LA MEMORIA
+    enviarOpCode(socket_cpu_memoria,SOLICITUD_TABLA);
+    sem_wait(&semLlegoPeticionMMU);
+    
+}
+
+void solicitar_marco_a_memoria(int* entradas_de_nivel)
+{
+    t_paquete* paquete = crear_super_paquete(SOLICITUD_FRAME);
+    cargar_uint32_t_al_super_paquete(paquete,contexto->pid);
+    
+    for (int nivel = 1; nivel <= cant_niveles; nivel++)
+    {
+        cargar_int_al_super_paquete(paquete,entradas_de_nivel[nivel]); //Cargo todas las entradas de nivel previamente calculadas
+    }
+    enviar_paquete(paquete,socket_cpu_memoria);
+    eliminar_paquete(paquete);
+    sem_wait(&semLlegoPeticionMMU); //Quiere decir que ya cargo el marco que le llego
+}
 
 void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
 {

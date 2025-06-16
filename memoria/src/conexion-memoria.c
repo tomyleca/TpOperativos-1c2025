@@ -45,8 +45,7 @@ int atender_cliente(int *fd_conexion)
         
             case GUARDAR_PROCESO_EN_MEMORIA:
                 t_info_kernel datos_kernel; 
-                datos_kernel.pid = 0;
-                datos_kernel.tamanio_proceso = 0;
+                
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 datos_kernel.pid = recibir_uint32_t_del_buffer(unBuffer);
                 datos_kernel.tamanio_proceso = recibir_uint32_t_del_buffer(unBuffer); 
@@ -74,6 +73,48 @@ int atender_cliente(int *fd_conexion)
                 buscar_y_mandar_instruccion(unBuffer,cliente_fd);
                 eliminar_paquete(paquete);
                 break;
+
+            case SOLICITUD_TABLA:
+                usleep(retardo_memoria * 1000);
+                enviarOpCode(cliente_fd,RESPUESTA_SOLICITUD_TABLA); //SIMULO BUSCAR LA ENTRADA EN EL NIVEL, NO ES NECESARIO
+                break;
+
+
+            case SOLICITUD_FRAME:
+                usleep(retardo_memoria * 1000);
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+
+                uint32_t pid = recibir_uint32_t_del_buffer(unBuffer);
+                Proceso* proceso = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
+                TablaPagina* tabla_nivel_X = proceso->tabla_raiz;
+                int marco;
+                
+
+                for(int nivel = 1;nivel <= CANTIDAD_NIVELES; nivel++)
+                {
+                    int entrada_nivel_X = recibir_int_del_buffer(unBuffer);
+                    
+                    
+                    if(nivel < CANTIDAD_NIVELES)
+                    {
+                        tabla_nivel_X = tabla_nivel_X->entradas[entrada_nivel_X]; 
+                    }
+                    else
+                    {
+                        marco = tabla_nivel_X->frames[entrada_nivel_X];
+                        
+                            //TODO manejo de errores en cpu, seg fault
+                    }
+                }
+
+                t_paquete* paquete = crear_super_paquete(RESPUESTA_SOLICITUD_FRAME);
+                cargar_int_al_super_paquete(paquete,marco);
+                enviar_paquete(paquete,cliente_fd);
+                eliminar_paquete(paquete);
+                limpiarBuffer(unBuffer);
+
+                break;
+
             case CPU_PIDE_LEER_MEMORIA:
                 usleep(retardo_memoria* 1000);
                 printf("en CPU_PIDE_LEER_MEMORIA------------------------------------------------------------------\n");
