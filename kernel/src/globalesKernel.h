@@ -192,11 +192,4 @@ extern void esperarCancelacionDeHilo(pthread_t hiloACancelar);;
 
 
 
-
-
-
-
-
-
-
 #endif

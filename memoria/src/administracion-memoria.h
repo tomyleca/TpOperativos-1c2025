@@ -34,6 +34,7 @@ extern t_diccionarioConSemaforos* diccionarioProcesos;
 
 extern int cantidad_Procesos;
 
+extern t_list* tabla_swap;
 // =====================
 // Prototipos
 // =====================
@@ -50,10 +51,8 @@ void asignar_frames_hojas(TablaPagina *tabla);
 Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo);
 int *reservar_frames(int cantidad);
 int reservar_memoria(Proceso *p, int bytes);
-void escribir_byte(Proceso *p, int direccion_virtual, char valor);
-void escribir_memoria(Proceso *p, int direccion_virtual, char valor);
-char leer_byte(Proceso *p, int direccion_virtual);
-void leer_memoria(Proceso *p, int direccion_virtual);
+void escribir_memoria(Proceso *p, int dir_fisica, char* valor);
+void leer_memoria(Proceso *p, int dir_fisica);
 int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo);
 void mostrar_procesos_activos();
 void liberar_memoria(Proceso *p);
@@ -63,5 +62,7 @@ void interpretar_instruccion(char *linea);
 
 void dump_memory (Proceso *p);
 
+void suspender_proceso(Proceso* p, int dir_fisica);
+void restaurar_proceso(Proceso* p);
 #endif
 

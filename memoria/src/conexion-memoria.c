@@ -114,6 +114,55 @@ int atender_cliente(int *fd_conexion)
                 free(paquete);
                 printf("despues de mandar el paquete a cpu de CPU_PIDE_ESCRIBIR_MEMORIA\n");
                 break;
+
+            case SWAP_SUSPENDER_PROCESO:
+                usleep(retardo_swap * 1000);
+                printf("en CPU_PIDE_SUSPENDER_MEMORIA ------------------------------------------------------------------\n");
+            
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                pid = recibir_int_del_buffer(unBuffer);
+                direccion_fisica = recibir_int_del_buffer(unBuffer);
+                free(unBuffer);
+            
+                Proceso* p_suspend = leerDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(pid));
+
+                if (!p_suspend) {
+                    log_error(logger_memoria, "No se encontró el proceso PID %d para suspender.", pid);
+                    break;
+                }
+            
+                suspender_proceso(p_suspend, direccion_fisica);
+
+                paquete = crear_super_paquete(SWAP_OK);
+                cargar_int_al_super_paquete(paquete, pid);
+                enviar_paquete(paquete, cliente_fd);
+                free(paquete);
+                break;
+            
+            case SWAP_RESTAURAR_PROCESO:
+                usleep(retardo_swap * 1000);
+                printf("en CPU_PIDE_RESTAURAR_MEMORIA ------------------------------------------------------------------\n");
+            
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                pid = recibir_int_del_buffer(unBuffer);
+                direccion_fisica = recibir_int_del_buffer(unBuffer);
+                free(unBuffer);
+            
+                Proceso* p_restaurar = leerDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(pid));
+                if (!p_restaurar) {
+                    log_error(logger_memoria, "No se encontró el proceso PID %d para restaurar.", pid);
+                
+                    break;
+                }
+            
+                restaurar_proceso(p_restaurar);
+            
+    
+                paquete = crear_super_paquete(SWAP_OK);
+                cargar_int_al_super_paquete(paquete, pid);
+                enviar_paquete(paquete, cliente_fd);
+                free(paquete);
+                break;
              
             case -1:
                  log_error(logger_memoria, "El cliente se desconectó. Terminando servidor.");
