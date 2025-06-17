@@ -68,4 +68,4 @@ extern bool sacarElementoDeLista(t_listaConSemaforos* listaConSemaforos,void* el
 /**
 *@brief Hace clean de una lista con semaforos y borra sus semaforos, sin borrar los elementos referenciados en la lista. 
 */
-extern void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos,void(*element_destroyer)(void*));
+extern void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos);

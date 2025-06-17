@@ -141,9 +141,9 @@ return sacarDeListaSegunCondicion(listaCPUsAInicializar,_mismoIdentificador);
 
 
 
-void pasarAExit(PCB* proceso){
+void pasarAExit(PCB* proceso,char* estadoActual){
     log_info(loggerKernel,"## (<%u>) - Finaliza el proceso",proceso->PID);
-    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","EXIT");
+    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,estadoActual,"EXIT");
     //TODO avisar a memoria 
     proceso->ME[EXIT]++;
     loggearMetricas(proceso);

@@ -18,6 +18,7 @@ void* atenderInstanciaIO(void* conexion)
 {
     int* fdConexion = (int*)conexion;
     InstanciaIO* instanciaIO = NULL;
+    char* nombreIO;
     while(1)
     {
         int opCode = recibir_operacion(*fdConexion);
@@ -28,7 +29,7 @@ void* atenderInstanciaIO(void* conexion)
         switch(opCode)
         {
             case HANDSHAKE_IO_KERNEL:
-                char* nombreIO = recibir_string_del_buffer(buffer);
+                nombreIO = recibir_string_del_buffer(buffer);
                 if(leerDeDiccionario(diccionarioDispositivosIO,nombreIO) != NULL) // Si el IO ya existe, osea ya hay una instancia e este
                 {
                     DispositivoIO* dispositivoIO= leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
@@ -68,6 +69,7 @@ void* atenderInstanciaIO(void* conexion)
             //case 0:
             case -1:
                 log_info(loggerKernel,"# Se desconectó IO: ");
+                manejarDesconexionDeIO(nombreIO,*fdConexion);
                 //shutdown(*fdConexion, SHUT_RDWR);
                 close(*fdConexion);
                 pthread_exit(NULL);
@@ -89,17 +91,18 @@ void* atenderInstanciaIO(void* conexion)
 void avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo)
 {
     DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
-    InstanciaIO* instanciaIO = leerDeListaSegunCondicion(dispositivoIO->listaInstancias,instanciaLibre);
+    InstanciaIO* instanciaIO = leerDeListaSegunCondicion(dispositivoIO->listaInstancias,instanciaLibre); //Busco la primer instancia libre
     
     if(instanciaIO == NULL) // No hay instancias libres
     {
         agregarALista(dispositivoIO->colaEsperandoIO,procesoEnEsperaIO); // Si el dispositivo ya esta ocupado entra acá
-        log_info(loggerKernel,"## <%u> Dispositivo IO: %s ocupado. Se agrega el PID a la Cola de Espera del dispositivo",procesoEnEsperaIO->proceso->PID,dispositivoIO->nombre);
+        log_info(loggerKernel,"## (<%u>) Dispositivo IO: %s ocupado. Se agrega el PID a la Cola de Espera del dispositivo",procesoEnEsperaIO->proceso->PID,dispositivoIO->nombre);
         
     }
     else
     {
     sem_wait(instanciaIO->semaforoMutex),
+        instanciaIO->PIDEnIO= procesoEnEsperaIO->proceso->PID;
         instanciaIO->estaLibre=false;
     sem_post(instanciaIO->semaforoMutex);
 
@@ -128,4 +131,54 @@ bool instanciaLibre(InstanciaIO* instanciaIO)
 
     return estaLibre;
 
+}
+
+void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
+{
+    bool _esInstancia(InstanciaIO* instanciaIO)
+    {
+        return instanciaIO->fdConexion == fdConexion;  //Busco la instancia por conexixón, que es lo que las diferencia
+    };
+    
+    DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
+    InstanciaIO* instanciaIO = leerDeListaSegunCondicion(dispositivoIO->listaInstancias,_esInstancia);
+    ProcesoEnEsperaIO* procesoEnEsperaIO = leerDeDiccionario(diccionarioProcesosBloqueados,pasarUnsignedAChar(instanciaIO->PIDEnIO));
+    exitDeProcesoBLoqueadoPorIO(procesoEnEsperaIO);
+
+    sacarElementoDeLista(dispositivoIO->listaInstancias,instanciaIO);
+
+    if(chequearListaVacia(dispositivoIO->listaInstancias)) //Si despues de sacar la instancia no quedan más paso a exit todos los proceso esperando el dispositivo
+    {
+        list_iterate(dispositivoIO->colaEsperandoIO->lista,exitDeProcesoBLoqueadoPorIO);
+        
+        borrarListaConSemaforos(dispositivoIO->listaInstancias);
+        borrarListaConSemaforos(dispositivoIO->colaEsperandoIO);
+        sacarDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
+        free(dispositivoIO->nombre);
+    }
+    
+}
+
+
+void exitDeProcesoBLoqueadoPorIO(ProcesoEnEsperaIO* procesoEnEsperaIO)
+{
+    
+    
+    
+    sem_wait(procesoEnEsperaIO->semaforoMutex); //Para no interrumpir manejarProcesoBloqueado o hiloContadorSwap a la mitad 
+        esperarCancelacionDeHilo(procesoEnEsperaIO->hiloContadorSwap); //Cancelo el hilo contadorSwap, para que no tire seg fault cuando haga free del semaforoMutex
+        esperarCancelacionDeHilo(procesoEnEsperaIO->hiloManejoBloqueado); //Cancelo este hilo que esta esperando el fin de IO
+        sacarDeDiccionario(diccionarioProcesosBloqueados,pasarUnsignedAChar(procesoEnEsperaIO->proceso->PID));
+        if(procesoEnEsperaIO->estaENSwap)
+            pasarAExit(procesoEnEsperaIO->proceso,"SWAP_BLOCKED");
+        else
+            pasarAExit(procesoEnEsperaIO->proceso,"BLOCKED");
+        
+        free(procesoEnEsperaIO->semaforoMutex);
+        free(procesoEnEsperaIO->semaforoIOFinalizada);
+        free(procesoEnEsperaIO);
+    
+    
+        
+       
 }

@@ -74,6 +74,7 @@ typedef struct
 
 typedef struct 
 {
+    uint32_t PIDEnIO;
     bool estaLibre;
     sem_t* semaforoMutex;
     int fdConexion;
@@ -85,6 +86,8 @@ typedef struct{
     sem_t* semaforoIOFinalizada;
     sem_t* semaforoMutex;
     bool estaENSwap;
+    pthread_t hiloContadorSwap;
+    pthread_t hiloManejoBloqueado;
     int64_t tiempo;
     
 } ProcesoEnEsperaIO;
@@ -187,7 +190,8 @@ extern void iniciarServidores();
 extern void cerrarConexiones();
 
 //IO
-
+extern void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion);
+extern void exitDeProcesoBLoqueadoPorIO(ProcesoEnEsperaIO* procesoEnEsperaIO);
 
 extern t_diccionarioConSemaforos* diccionarioDispositivosIO;
 
@@ -208,7 +212,7 @@ extern pthread_t hiloAtenderIO;
 extern pthread_t hiloPlanificadorCortoPlazo;
 
 //OTRAS
-extern void esperarCancelacionDeHilo(pthread_t hiloACancelar);;
+void esperarCancelacionDeHilo(pthread_t hiloACancelar);
 
 
 //DESTROY

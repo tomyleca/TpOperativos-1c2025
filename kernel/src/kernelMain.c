@@ -182,8 +182,8 @@ void liberarRecursos(int signal)
 
     destruirDiccionario(diccionarioDispositivosIO,dispositivoIODestroy);
     destruirDiccionario(diccionarioProcesosBloqueados,procesoEnEsperaIODestroy);
-    borrarListaConSemaforos(listaCPUsEnUso,nucleoCPUDestroy);
-    borrarListaConSemaforos(listaCPUsLibres,nucleoCPUDestroy);
+    //borrarListaConSemaforos(listaCPUsEnUso,nucleoCPUDestroy); //TODO implementar otra funcion con element destroyer
+    //borrarListaConSemaforos(listaCPUsLibres,nucleoCPUDestroy);
 
     exit(1);
 }

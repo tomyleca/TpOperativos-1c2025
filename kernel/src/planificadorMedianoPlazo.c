@@ -1,6 +1,6 @@
 #include "kernel.h"
 
-void pasarABLoqueado(PCB* proceso,int64_t tiempo,char* nombreIO){
+void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
     
     log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"READY","BLOCKED");
     cargarCronometro(proceso,READY);
@@ -25,10 +25,14 @@ void pasarABLoqueado(PCB* proceso,int64_t tiempo,char* nombreIO){
     
 
 
-    avisarInicioIO(procesoEsperando,nombreIO,tiempo);
+    
     
     pthread_t hiloManejoBloqueado;
-    pthread_create(&hiloManejoBloqueado,NULL,(void *)manejarProcesoBloqueado,procesoEsperando);
+    pthread_create(&hiloManejoBloqueado,NULL,(void *)manejarProcesoBloqueadoPorIO,procesoEsperando);
+    procesoEsperando->hiloManejoBloqueado= hiloManejoBloqueado;
+
+    avisarInicioIO(procesoEsperando,nombreIO,tiempo);
+
     
 
     
@@ -39,7 +43,7 @@ void pasarABLoqueado(PCB* proceso,int64_t tiempo,char* nombreIO){
 }
 
 
-void* manejarProcesoBloqueado(ProcesoEnEsperaIO* ProcesoEnEsperaIO){
+void* manejarProcesoBloqueadoPorIO(ProcesoEnEsperaIO* ProcesoEnEsperaIO){
     
     char* PID = pasarUnsignedAChar(ProcesoEnEsperaIO->proceso->PID);
  
@@ -48,6 +52,8 @@ void* manejarProcesoBloqueado(ProcesoEnEsperaIO* ProcesoEnEsperaIO){
 
     pthread_t hiloContadorSwap;
     pthread_create(&hiloContadorSwap,NULL,(void *)contadorParaSwap,ProcesoEnEsperaIO);
+    ProcesoEnEsperaIO->hiloContadorSwap = hiloContadorSwap;
+
 
     sem_wait(ProcesoEnEsperaIO->semaforoIOFinalizada);
     

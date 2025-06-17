@@ -89,16 +89,16 @@ void dump_memory(uint32_t pid) {
     int respuesta = recibir_operacion(socket_memoria_particular);
     if (respuesta == DUMP_MEMORY_OK) {
         log_info(loggerKernel, "## (<%u>) - Finalizó correctamente DUMP_MEMORY", pid);
-        pasarAReady(proceso);
+        pasarAEXECUTE(proceso);
     }
     */
      
     else { //TODO esto lo arreglo cuando haga dumpMemory en memoria
         log_error(loggerKernel, "## (<%u>) - Error en DUMP_MEMORY. Finalizando proceso", pid);
         terminarEjecucion(proceso);
-        pasarAExit(proceso);
+        pasarAExit(proceso,"EXECUTE");
     }
-    
+    //TODO hacer bloqueo para dumpMemory
 
     liberar_conexion(socket_memoria_particular);
 }
@@ -126,14 +126,14 @@ void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
     if (dispositivo == NULL) {
         log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", pid, nombreIO);
         terminarEjecucion(proceso);
-        pasarAExit(proceso);
+        pasarAExit(proceso,"EXECUTE");
         return;
     }
 
     log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",pid,nombreIO);
 
     terminarEjecucion(proceso);
-    pasarABLoqueado(proceso, tiempo, nombreIO);
+    pasarABLoqueadoPorIO(proceso, tiempo, nombreIO);
     
 }
 
@@ -149,7 +149,7 @@ void syscallExit(uint32_t pid)
 
     
     terminarEjecucion(proceso);
-    pasarAExit(proceso);
+    pasarAExit(proceso,"EXECUTE");
     
     
     
