@@ -1,3 +1,4 @@
-IO Prueba 1700
-IO Prueba 4000
+WRITE 1 cualquierCosa
+IO Prueba 4
+IO Prueba 100
 EXIT

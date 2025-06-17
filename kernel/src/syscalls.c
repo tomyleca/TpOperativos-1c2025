@@ -26,9 +26,8 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
 
     
 
-    nuevoProceso->estimadoRafagaAnterior=estimacion_inicial;
-    nuevoProceso->duracionRafagaAnterior=0;
-    nuevoProceso->estimadoSiguienteRafaga=0;
+    
+    nuevoProceso->estimadoSiguienteRafaga=estimacion_inicial;
 
     
    

@@ -150,14 +150,14 @@ void terminarEjecucion(PCB* proceso)
 
 bool menorEstimadoRafagaRestante(NucleoCPU* CPU1,NucleoCPU* CPU2)
 {
-    return temporal_gettime(CPU1->procesoEnEjecucion->cronometroEjecucionActual) >= temporal_gettime(CPU2->procesoEnEjecucion->cronometroEjecucionActual);
+    return temporal_gettime(CPU1->procesoEnEjecucion->cronometroEjecucionActual) <= temporal_gettime(CPU2->procesoEnEjecucion->cronometroEjecucionActual);
 }
 
 
 
 bool menorEstimadoSiguienteRafaga(PCB* PCB1,PCB* PCB2)
 {
-    return PCB1->estimadoSiguienteRafaga >= PCB2->estimadoSiguienteRafaga;
+    return PCB1->estimadoSiguienteRafaga <= PCB2->estimadoSiguienteRafaga;
 }
 
 void estimarSiguienteRafaga(PCB* proceso)
