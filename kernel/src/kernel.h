@@ -39,7 +39,4 @@ void inicializar_hilos_kernel(t_config* config_kernel);
 void liberarRecursos(int signal);
 
 
-
-
-
 #endif
