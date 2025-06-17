@@ -33,6 +33,7 @@ int atender_cliente(int *fd_conexion)
     int pid;
     int direccion_fisica;
     int tamanio;
+    Proceso* p;
     printf("Si llegue aca, es porque tengo un cliente de kernel o cpu");
 
     while (1) {
@@ -124,13 +125,16 @@ int atender_cliente(int *fd_conexion)
                 tamanio = recibir_int_del_buffer(unBuffer);
                 printf("Direccion fisica en leer memoria: %d --------------------------------------------------------\n", direccion_fisica);
                 limpiarBuffer(unBuffer);
-                //TODO ver que pasa aca con el tema de la direc fisica en memoria
+                p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
+                leer_memoria(p,direccion_fisica,tamanio);
                 // Respuesta a CPU
                 paquete = crear_super_paquete(CPU_RECIBE_OK_DE_LECTURA);
                 cargar_int_al_super_paquete(paquete, pid);
                 cargar_string_al_super_paquete(paquete, "OK");
                 cargar_int_al_super_paquete(paquete, tamanio);
                 enviar_paquete(paquete, cliente_fd);
+
+
                 eliminar_paquete(paquete);
                 break;
 
@@ -140,12 +144,13 @@ int atender_cliente(int *fd_conexion)
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_int_del_buffer(unBuffer);
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
-                uint32_t valor_registro = recibir_uint32_t_del_buffer(unBuffer);
+                char* valor_registro = recibir_string_del_buffer(unBuffer);
                 log_info(logger_memoria, "Valor del dato a ecribir en memoria: %d", valor_registro);
                 limpiarBuffer(unBuffer);
                 
-                // escribir_memoria(pid, direccion_fisica, valor_registro); //TODO hacer esto
-
+                p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
+                escribir_memoria(p, direccion_fisica, valor_registro); //TODO hacer esto
+                
                 // Respuesta a CPU
                 paquete = crear_super_paquete(CPU_RECIBE_OK_DE_ESCRITURA);
                 cargar_int_al_super_paquete(paquete, pid);
@@ -153,6 +158,9 @@ int atender_cliente(int *fd_conexion)
                 enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
                 printf("despues de mandar el paquete a cpu de CPU_PIDE_ESCRIBIR_MEMORIA\n");
+
+
+
                 break;
 
             case SWAP_SUSPENDER_PROCESO:

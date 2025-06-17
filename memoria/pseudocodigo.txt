@@ -1,3 +1,5 @@
+WRITE 1 cualquierCosa
+READ 1 12
 INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo2.txt 4
 INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo3.txt 4
 IO Prueba 4100

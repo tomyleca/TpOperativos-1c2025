@@ -292,7 +292,7 @@ void escribir_memoria(Proceso *p,  int dir_fisica, char *texto) {
       return;
     }
 
-    memoria_real[dir_fisica] = texto[i];
+    memoria_real[dir_fisica + i] = texto[i];
     p->metricas.escrituras_memoria++;
 
     printf("## PID: %d - Escritura - Dir. Física: %d - Valor: '%c'", p->pid,
@@ -312,14 +312,18 @@ char leer_byte(Proceso *p, int dir_fisica) {
   return memoria_real[dir_fisica];
 }
 
-void leer_memoria(Proceso *p, int dir_fisica) {
-  char val = leer_byte(p, dir_fisica);
+void leer_memoria(Proceso *p, int dir_fisica,int tamanio) {
+  
+  char* val= malloc(tamanio);
+  for(int i= 0;i < tamanio;i++)
+    val[i] = leer_byte(p, dir_fisica + i);
 
-  if (val == -1) return;
+  if (*val == -1) return;
 
   p->metricas.lecturas_memoria++;
 
-  printf("Proceso %d leyó '%c' en dir física %d\n", p->pid, val, dir_fisica);
+  log_info(logger_memoria,"Proceso %d leyó '%s' en dir física %d\n", p->pid, val, dir_fisica);
+  free(val);
 }
 
 

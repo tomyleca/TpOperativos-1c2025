@@ -52,7 +52,7 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo);
 int *reservar_frames(int cantidad);
 int reservar_memoria(Proceso *p, int bytes);
 void escribir_memoria(Proceso *p, int dir_fisica, char* valor);
-void leer_memoria(Proceso *p, int dir_fisica);
+void leer_memoria(Proceso *p, int dir_fisica,int tamanio);
 int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo);
 void mostrar_procesos_activos();
 void liberar_memoria(Proceso *p);
