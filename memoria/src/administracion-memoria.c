@@ -459,6 +459,7 @@ char **leer_instrucciones(const char *ruta, int *cantidad) {
   *cantidad = count;
   return lineas;
 }
+
 void suspender_proceso(Proceso *p, int dir_fisica) {
 
   if (!p || !p->tabla_raiz) {

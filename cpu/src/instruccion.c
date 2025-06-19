@@ -215,14 +215,27 @@ int mmu_traducir_direccion_logica(int direccion_logica) {
 
     if (nro_marco == -1) {
         // Si no estaba en memoria, podriamos necesitar pedir a swap
-        //nro_marco = solicitar_pagina_a_swap(tabla_nivel_X, entrada_nivel_X);//TODO hacer esta funcion
-        //agregar_a_tlb(contexto->pid, nro_pagina, nro_marco); // TODO esto a verificar dsp
+        nro_marco = solicitar_pagina_a_swap(entrada_nivel_X);//Es la misma que pedir marco, pero es mas expresiva ponerle su nombre
     }
 
     // Calculamos dirección física
     int direccion_fisica = nro_marco * tamanio_pagina + desplazamiento;
     agregar_a_tlb(contexto->pid, nro_pagina, nro_marco);
     return direccion_fisica;
+}
+
+int solicitar_pagina_a_swap(int* entradas_de_nivel)
+{
+    t_paquete* paquete = crear_super_paquete(SOLICITUD_PAGINA_SWAP);
+    cargar_uint32_t_al_super_paquete(paquete,contexto->pid);
+
+    for (int nivel = 1; nivel <= cant_niveles; nivel++)
+    {
+        cargar_int_al_super_paquete(paquete,entradas_de_nivel[nivel]); //Cargo todas las entradas de nivel previamente calculadas
+    }
+    enviar_paquete(paquete,socket_cpu_memoria);
+    eliminar_paquete(paquete);
+    sem_wait(&semLlegoPeticionMMU);
 }
 
 void solicitar_tabla_a_memoria()

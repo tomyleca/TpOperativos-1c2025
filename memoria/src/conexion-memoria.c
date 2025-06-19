@@ -184,7 +184,7 @@ int atender_cliente(int *fd_conexion)
                 paquete = crear_super_paquete(SWAP_OK);
                 cargar_int_al_super_paquete(paquete, pid);
                 enviar_paquete(paquete, cliente_fd);
-                free(paquete);
+                eliminar_paquete(paquete);
                 break;
             
             case SWAP_RESTAURAR_PROCESO:
@@ -209,9 +209,28 @@ int atender_cliente(int *fd_conexion)
                 paquete = crear_super_paquete(SWAP_OK);
                 cargar_int_al_super_paquete(paquete, pid);
                 enviar_paquete(paquete, cliente_fd);
-                free(paquete);
+                eliminar_paquete(paquete);
                 break;
-             
+
+            case SOLICITUD_PAGINA_SWAP:{
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                pid = recibir_uint32_t_del_buffer(unBuffer);
+                int entradas[CANTIDAD_NIVELES];
+
+                for (int i = 0; i < CANTIDAD_NIVELES; i++) {
+                    entradas[i] = recibir_int_del_buffer(unBuffer);
+                }
+
+                //atender_solicitud_swap(unBuffer);
+                int nro_marco = 0; //TODO esto se cambia dsp en la implementacion de atender_solicitud_swap
+                paquete = crear_super_paquete(RESPUESTA_SOLICITUD_FRAME);
+                cargar_int_al_super_paquete(paquete,nro_marco);
+                enviar_paquete(paquete, cliente_fd);
+                limpiarBuffer(unBuffer);
+                eliminar_paquete(paquete);
+                //TODO revisar, falta hacer atender_solicitud_swap
+                break;}
+
             case -1:
                 log_error(logger_memoria, "El cliente se desconectó. Terminando servidor.");
                 //shutdown(cliente_fd, SHUT_RDWR);
@@ -226,3 +245,5 @@ int atender_cliente(int *fd_conexion)
             }
         }
 }
+
+
