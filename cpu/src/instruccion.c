@@ -213,11 +213,6 @@ int mmu_traducir_direccion_logica(int direccion_logica) {
 
     free(entradas_de_nivel);
 
-    if (nro_marco == -1) {
-        // Si no estaba en memoria, podriamos necesitar pedir a swap
-        //TODO SEGMENTATION FAULT hay que hacer
-    }
-
     // Calculamos dirección física
     int direccion_fisica = nro_marco * tamanio_pagina + desplazamiento;
     agregar_a_tlb(contexto->pid, nro_pagina, nro_marco);
