@@ -43,6 +43,15 @@ int atender_cliente(int *fd_conexion)
             case MENSAJE:
                 //recibir_mensaje(cliente_fd);
                 break;
+
+            case SOLICITUD_ESTRUCTURA_MEMORIA:
+                paquete = crear_super_paquete(RESPUESTA_ESTRUCTURA_MEMORIA);
+                cargar_int_al_super_paquete(paquete, TAM_PAGINA);
+                cargar_int_al_super_paquete(paquete, CANTIDAD_NIVELES);
+                cargar_int_al_super_paquete(paquete, ENTRADAS_POR_TABLA);
+                enviar_paquete(paquete, cliente_fd);
+                eliminar_paquete(paquete);
+                break;
         
             case GUARDAR_PROCESO_EN_MEMORIA:
                 t_info_kernel datos_kernel; 
@@ -65,14 +74,8 @@ int atender_cliente(int *fd_conexion)
              
              case CPU_PIDE_INSTRUCCION_A_MEMORIA: //PARA INICIAR DECODE ESTO!!
                 usleep(retardo_memoria * 1000);
-                paquete = crear_super_paquete(RECIBIR_TAMANO_PAG);
-                cargar_int_al_super_paquete(paquete, TAM_PAGINA);
-                cargar_int_al_super_paquete(paquete, CANTIDAD_NIVELES);
-                cargar_int_al_super_paquete(paquete, ENTRADAS_POR_TABLA);
-                enviar_paquete(paquete, cliente_fd);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 buscar_y_mandar_instruccion(unBuffer,cliente_fd);
-                eliminar_paquete(paquete);
                 break;
 
             case SOLICITUD_TABLA:

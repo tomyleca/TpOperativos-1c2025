@@ -48,7 +48,7 @@ void atender_memoria()
         cod_op = recibir_operacion(socket_cpu_memoria);
         switch (cod_op) 
         {
-            case RECIBIR_TAMANO_PAG:
+            case RESPUESTA_ESTRUCTURA_MEMORIA:
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 tamanio_pagina = recibir_int_del_buffer(buffer);
                 cant_niveles = recibir_int_del_buffer(buffer);
@@ -73,6 +73,7 @@ void atender_memoria()
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 nro_marco = recibir_int_del_buffer(buffer);
                 sem_post(&semLlegoPeticionMMU);
+                break;
 
 
 
