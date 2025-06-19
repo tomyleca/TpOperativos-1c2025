@@ -50,6 +50,7 @@ void inicializar_hilos(t_config* config_cpu)
 {
     socket_cpu_memoria = crear_conexion(logger_cpu, ip_memoria, puerto_memoria);
     hilo_escuchar_memoria = escuchar_memoria();
+    enviarOpCode(socket_cpu_memoria,SOLICITUD_ESTRUCTURA_MEMORIA);
 
     socket_cpu_kernel_dispatch = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_dispatch);
     crear_handshake_cpu_kernel_dispatch(socket_cpu_kernel_dispatch);
