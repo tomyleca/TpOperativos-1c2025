@@ -27,7 +27,6 @@ void esperarDatosInterrupt(void* conexion)
     switch(cod_op)    
     {
         case 1:
-            printf("Llega OK interrupt");
             sem_post(semaforoEsperarOKInterrupt);
             break;
         case HANDSHAKE_CPU_KERNEL_I:
@@ -81,9 +80,16 @@ NucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)
 
 }
 
-void mandarInterrupcion(NucleoCPU* nucleoCPU)
+void mandarInterrupcion(NucleoCPU* nucleoCPU,op_code tipoInterrupcion)
 {
-    int Interrupcion = INTERRUPCION;
+    int Interrupcion = tipoInterrupcion;
+    if(tipoInterrupcion == INTERRUPCION_ASINCRONICA)  
+        agregarALista(listaProcesosEsperandoPC,nucleoCPU->procesoEnEjecucion);
+
     send(nucleoCPU->fdConexionInterrupt,&Interrupcion,sizeof(int),0);   
+    
     sem_wait(semaforoEsperarOKInterrupt);
+
+    if(tipoInterrupcion == INTERRUPCION_ASINCRONICA)    
+        sem_wait(semaforoPCActualizado);
 }

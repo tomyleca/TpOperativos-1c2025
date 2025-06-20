@@ -149,7 +149,8 @@ void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
 
     if(chequearListaVacia(dispositivoIO->listaInstancias)) //Si despues de sacar la instancia no quedan más paso a exit todos los proceso esperando el dispositivo
     {
-        list_iterate(dispositivoIO->colaEsperandoIO->lista,exitDeProcesoBLoqueadoPorIO);
+        if(!chequearListaVacia(dispositivoIO->colaEsperandoIO)) //Chequeo que no este vacia tampoco
+            list_iterate(dispositivoIO->colaEsperandoIO->lista,exitDeProcesoBLoqueadoPorIO);
         
         borrarListaConSemaforos(dispositivoIO->listaInstancias);
         borrarListaConSemaforos(dispositivoIO->colaEsperandoIO);

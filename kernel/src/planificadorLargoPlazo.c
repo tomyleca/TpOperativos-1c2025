@@ -82,7 +82,8 @@ void pasarAReady(PCB* proceso){
     agregarALista(listaProcesosReady,proceso);
     temporal_resume(proceso->cronometros[READY]);
     proceso->ME[READY]++;
-
     
+    if(algoritmoDePlanificacionInt == SRT)
+        sem_post(semaforoIntentarPlanificar);
     
 }

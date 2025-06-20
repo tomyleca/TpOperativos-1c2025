@@ -95,7 +95,7 @@ void dump_memory(uint32_t pid) {
      
     else { //TODO esto lo arreglo cuando haga dumpMemory en memoria
         log_error(loggerKernel, "## (<%u>) - Error en DUMP_MEMORY. Finalizando proceso", pid);
-        terminarEjecucion(proceso);
+        terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
         pasarAExit(proceso,"EXECUTE");
     }
     //TODO hacer bloqueo para dumpMemory
@@ -125,14 +125,14 @@ void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
 
     if (dispositivo == NULL) {
         log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", pid, nombreIO);
-        terminarEjecucion(proceso);
+        terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
         pasarAExit(proceso,"EXECUTE");
         return;
     }
 
     log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",pid,nombreIO);
 
-    terminarEjecucion(proceso);
+    terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
     pasarABLoqueadoPorIO(proceso, tiempo, nombreIO);
     
 }
@@ -148,7 +148,7 @@ void syscallExit(uint32_t pid)
     }
 
     
-    terminarEjecucion(proceso);
+    terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
     pasarAExit(proceso,"EXECUTE");
     
     
