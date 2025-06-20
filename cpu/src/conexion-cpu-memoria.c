@@ -119,8 +119,7 @@ void atender_interrupcion_kernel()
       
             case INTERRUPCION_SINCRONICA:
                 
-                log_info(logger_cpu, " ## Llega interrupción al puerto Interrupt.");
-                
+                log_info(logger_cpu, " ## Llega interrupción sincrónica al puerto Interrupt.");
                 pthread_mutex_lock(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;
                 printf("Adentro de lmutex interrup \n");
@@ -128,21 +127,17 @@ void atender_interrupcion_kernel()
                 pthread_mutex_unlock(&mutex_motivo_interrupcion);
                 enviarOK(socket_cpu_kernel_interrupt);
                 
+                
                 break;
 
             case INTERRUPCION_ASINCRONICA:
-                log_info(logger_cpu, " ## Llega interrupción al puerto Interrupt.");
+                log_info(logger_cpu, " ## Llega interrupción asincrónica al puerto Interrupt.");
                 
                 pthread_mutex_lock(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;
                 printf("Adentro de lmutex interrup \n");
                 motivo_interrupcion = INTERRUPCION_ASINCRONICA;
                 pthread_mutex_unlock(&mutex_motivo_interrupcion);
-                t_paquete* paquete = crear_super_paquete(PC_INTERRUPCION_ASINCRONICA);
-                cargar_uint32_t_al_super_paquete(paquete,contexto->pid);
-                cargar_uint32_t_al_super_paquete(paquete,contexto->registros.PC);
-                enviar_paquete(paquete,socket_cpu_kernel_dispatch);
-                eliminar_paquete(paquete);
                 enviarOK(socket_cpu_kernel_interrupt);
                 break;
             case -1:
