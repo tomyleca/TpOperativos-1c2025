@@ -27,10 +27,6 @@ bool crear_estructuras_proceso(int pid, int paginas_necesarias);
 void server_escucha(int* fd_escucha_servidor);
 int atender_cliente(int *fd_conexion);
 
-bool manejar_inicializacion_proceso(int cliente_fd, t_buffer* buffer);
-bool manejar_suspension_proceso(int cliente_fd, t_buffer* buffer);
-bool manejar_des_suspension_proceso(int cliente_fd, t_buffer* buffer);
-bool manejar_finalizacion_proceso(int cliente_fd, t_buffer* buffer);
 bool manejar_dump_memory(int cliente_fd, t_buffer* buffer);
 
 

@@ -61,7 +61,7 @@ char **leer_instrucciones(const char *ruta, int *cantidad);
 void interpretar_instruccion(char *linea);
 
 void dump_memory (Proceso *p);
-
+bool realizar_dump_memoria(int pid);
 
 void suspender_proceso(Proceso* p, int dir_fisica);
 void restaurar_proceso(Proceso* p);

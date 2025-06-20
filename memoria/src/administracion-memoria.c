@@ -405,6 +405,17 @@ void destruir_proceso(Proceso *p) {
 
 }
 
+bool realizar_dump_memoria(int pid) {
+    Proceso* proceso = buscar_contexto_por_pid(pid);
+    if (!proceso) {
+        return false;
+    }
+    
+    dump_memory(proceso);
+    
+    return true;
+}
+
 void dump_memory(Proceso *p) {
     // Obtiene el timestamp actual
     time_t timestamp = time(NULL);

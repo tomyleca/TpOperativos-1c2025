@@ -24,80 +24,6 @@ void server_escucha(int* fd_escucha_servidor)
     }
 }
 
-bool manejar_inicializacion_proceso(int cliente_fd, t_buffer* buffer) {
-    uint32_t pid = recibir_uint32_t_del_buffer(buffer);
-    uint32_t tam = recibir_uint32_t_del_buffer(buffer);
-    
-    log_info(logger_memoria, "## PID: <%u> - Proceso Creado - Tamaño: <%u>", pid, tam);
-    
-    // Calcular páginas necesarias
-    int paginas_necesarias = (tam + TAM_PAGINA - 1) / TAM_PAGINA;
-    
-    if (crear_estructuras_proceso(pid, paginas_necesarias)) {
-        enviar_paquete(crear_super_paquete(INICIALIZAR_PROCESO), cliente_fd);
-        return true;
-    }
-    
-    enviar_paquete(crear_super_paquete(NO_HAY_MEMORIA), cliente_fd);
-    return false;
-}
-
-bool manejar_suspension_proceso(int cliente_fd, t_buffer* buffer) {
-    uint32_t pid = recibir_uint32_t_del_buffer(buffer);
-    
-    log_info(logger_memoria, "## PID: <%u> - Suspender Proceso", pid);
-    
-    if (suspender_proceso(pid)) {
-        enviar_paquete(crear_super_paquete(SUSPENDER_PROCESO), cliente_fd);
-        return true;
-    }
-    
-    enviar_paquete(crear_super_paquete(ERROR), cliente_fd);
-    return false;
-}
-
-bool manejar_des_suspension_proceso(int cliente_fd, t_buffer* buffer) {
-    uint32_t pid = recibir_uint32_t_del_buffer(buffer);
-    
-    log_info(logger_memoria, "## PID: <%u> - Des-suspender Proceso", pid);
-    
-    if (des_suspender_proceso(pid)) {
-        enviar_paquete(crear_super_paquete(DES_SUSPENDER_PROCESO), cliente_fd);
-        return true;
-    }
-    
-    enviar_paquete(crear_super_paquete(ERROR), cliente_fd);
-    return false;
-}
-
-bool manejar_finalizacion_proceso(int cliente_fd, t_buffer* buffer) {
-    uint32_t pid = recibir_uint32_t_del_buffer(buffer);
-    
-    log_info(logger_memoria, "## PID: <%u> - Finalizar Proceso", pid);
-    
-    if (finalizar_proceso(pid)) {
-        enviar_paquete(crear_super_paquete(FINALIZAR_PROCESO), cliente_fd);
-        return true;
-    }
-    
-    enviar_paquete(crear_super_paquete(ERROR), cliente_fd);
-    return false;
-}
-
-bool manejar_dump_memory(int cliente_fd, t_buffer* buffer) {
-    uint32_t pid = recibir_uint32_t_del_buffer(buffer);
-    
-    log_info(logger_memoria, "## PID: <%u> - Memory Dump solicitado", pid);
-    
-    if (realizar_dump_memoria(pid)) {
-        enviar_paquete(crear_super_paquete(DUMP_MEMORY_OK), cliente_fd);
-        return true;
-    }
-    
-    enviar_paquete(crear_super_paquete(DUMP_MEMORY_ERROR), cliente_fd);
-    return false;
-}
-
 int atender_cliente(int *fd_conexion)
 {    
     /*lista_particiones = inicializar_lista_particiones(PARTICIONES);*/
@@ -113,37 +39,6 @@ int atender_cliente(int *fd_conexion)
     while (1) {
         int cod_op = recibir_operacion(cliente_fd);
         switch (cod_op) {
-            // Operaciones del Kernel
-            case INICIALIZAR_PROCESO:
-                unBuffer = recibiendo_super_paquete(cliente_fd);
-                manejar_inicializacion_proceso(cliente_fd, unBuffer);
-                free(unBuffer);
-                break;
-
-            case SUSPENDER_PROCESO:
-                unBuffer = recibiendo_super_paquete(cliente_fd);
-                manejar_suspension_proceso(cliente_fd, unBuffer);
-                free(unBuffer);
-                break;
-
-            case DES_SUSPENDER_PROCESO:
-                unBuffer = recibiendo_super_paquete(cliente_fd);
-                manejar_des_suspension_proceso(cliente_fd, unBuffer);
-                free(unBuffer);
-                break;
-
-            case FINALIZAR_PROCESO:
-                unBuffer = recibiendo_super_paquete(cliente_fd);
-                manejar_finalizacion_proceso(cliente_fd, unBuffer);
-                free(unBuffer);
-                break;
-
-            case DUMP_MEMORY:
-                unBuffer = recibiendo_super_paquete(cliente_fd);
-                manejar_dump_memory(cliente_fd, unBuffer);
-                free(unBuffer);
-                break;
-
             // ! KERNEL
             case MENSAJE:
                 //recibir_mensaje(cliente_fd);
@@ -319,6 +214,11 @@ int atender_cliente(int *fd_conexion)
                 enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
                 break;
+            case DUMP_MEMORY:
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                manejar_dump_memory(cliente_fd, unBuffer);
+                free(unBuffer);
+                break;
 
             case -1:
                 log_error(logger_memoria, "El cliente se desconectó. Terminando servidor.");
@@ -335,4 +235,17 @@ int atender_cliente(int *fd_conexion)
         }
 }
 
+bool manejar_dump_memory(int cliente_fd, t_buffer* buffer) {
+    uint32_t pid = recibir_uint32_t_del_buffer(buffer);
+    
+    log_info(logger_memoria, "## PID: <%u> - Memory Dump solicitado", pid);
+    
+    if (realizar_dump_memoria(pid)) {
+        enviar_paquete(crear_super_paquete(DUMP_MEMORY_OK), cliente_fd);
+        return true;
+    }
+    
+    enviar_paquete(crear_super_paquete(DUMP_MEMORY_ERROR), cliente_fd);
+    return false;
+}
 
