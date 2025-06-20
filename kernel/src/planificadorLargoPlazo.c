@@ -14,11 +14,12 @@ void inicializarProceso(){
             sacarDeLista(listaProcesosSwapReady,0);
             log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"SWAP_READY","READY");
             cargarCronometro(procesoAInicializar,SWAP_READY);
-            mandarDatosProcesoAMemoria(procesoAInicializar);
             pasarAReady(procesoAInicializar);
             inicializarProceso(); // Mientras la respuesta sea OK sigo intentando inicializar procesos
+            
            
         }
+  
         }
     else if (!list_is_empty(listaProcesosNew->lista))
         {
@@ -54,12 +55,14 @@ int mandarDatosProcesoAMemoria(PCB* proceso)
     enviar_paquete(paquete,socketKernelMemoria);
     int respuesta = recibir_operacion(socketKernelMemoria);
     
+    
     if(respuesta == NO_HAY_MEMORIA)
     {
         log_error(loggerKernel,"## <%u> No hay suficiente memoria para alojar el proceso",proceso->PID);
     }
 
-    free(paquete);
+    eliminar_paquete(paquete);
+    //shutdown(socketKernelMemoria, SHUT_RDWR);
     close(socketKernelMemoria);
 
     return respuesta;
@@ -79,4 +82,7 @@ void pasarAReady(PCB* proceso){
     agregarALista(listaProcesosReady,proceso);
     temporal_resume(proceso->cronometros[READY]);
     proceso->ME[READY]++;
+
+    
+    
 }

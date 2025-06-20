@@ -1,6 +1,6 @@
 #include "globalesKernel.h"
 
-sem_t* semaforoPIDDisponible;
+sem_t* semaforoMutexPIDDisponible;
 
 //CONFIG Y LOGGER
 int socket_kernel_io;
@@ -16,7 +16,7 @@ int tiempo_suspension;
 char* puerto_escucha_dispatch;
 char* puerto_escucha_interrupt;
 char* puerto_escucha_IO;
-int alfa;
+double alfa;
 int64_t estimacion_inicial;
 
 char* algoritmo_cola_new;
@@ -54,5 +54,13 @@ t_diccionarioConSemaforos* diccionarioDispositivosIO;
 
 //CPU
 sem_t* semaforoIntentarPlanificar;
+sem_t* semaforoHayCPULibre;
+sem_t* semaforoEsperarOKDispatch;
+sem_t* semaforoMutexGuardarDatosCPU;
+sem_t* semaforoEsperarOKInterrupt;
 
-sem_t* semaforoGuardarDatosCPU;
+//HILOS
+pthread_t hiloAtenderDispatch;
+pthread_t hiloAtenderInterrupt;
+pthread_t hiloAtenderIO;
+pthread_t hiloPlanificadorCortoPlazo;

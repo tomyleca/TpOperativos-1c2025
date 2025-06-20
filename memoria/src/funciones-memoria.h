@@ -23,7 +23,7 @@ Proceso* buscar_contexto_por_pid(int pid);
 
 char* obtener_instruccion_por_indice(t_list* instrucciones, uint32_t indice_instruccion);
 
-void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu);
+extern void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu);
 
 void enviar_contexto(Proceso* contexto_proceso, int socket_cpu);
 

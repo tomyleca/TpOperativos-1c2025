@@ -37,9 +37,9 @@ int ME[7];
 int MT[7];
 
 
-} PCB;
+}PCB;
 
-extern sem_t* semaforoPIDDisponible;
+extern sem_t* semaforoMutexPIDDisponible;
 
 typedef enum{
     NEW,
@@ -66,19 +66,31 @@ typedef enum{
 typedef struct
 {
     char* nombre;
-    sem_t* semaforoDispositivoOcupado;
+    t_listaConSemaforos* listaInstancias;
     t_listaConSemaforos* colaEsperandoIO;
-    int fdConexion;
+    
+    
 } DispositivoIO;
+
+typedef struct 
+{
+    uint32_t PIDEnIO;
+    bool estaLibre;
+    sem_t* semaforoMutex;
+    int fdConexion;
+} InstanciaIO;
+
 
 typedef struct{
     PCB* proceso;
     sem_t* semaforoIOFinalizada;
     sem_t* semaforoMutex;
     bool estaENSwap;
+    pthread_t hiloContadorSwap;
+    pthread_t hiloManejoBloqueado;
     int64_t tiempo;
     
-} procesoEnEsperaIO;
+} ProcesoEnEsperaIO;
 
 
 typedef struct{
@@ -90,7 +102,7 @@ typedef struct{
     
     
 }
-nucleoCPU;
+NucleoCPU;
 
 
 
@@ -110,7 +122,7 @@ extern int tiempo_suspension;
 extern char* puerto_escucha_dispatch;
 extern char* puerto_escucha_interrupt;
 extern char* puerto_escucha_IO;
-extern int alfa;
+extern double alfa;
 extern int64_t estimacion_inicial;
 extern char*  algoritmo_cola_new;
 
@@ -149,10 +161,17 @@ extern void* planificadorCortoPlazo(void* arg);
  * @brief Chequea si en alguno de los CPUs en ejecución hay un proceso con una rafaga estimada restante menor a la rafaga estimada más baja de los procesos en ready. De ser así, libera el CPU y retorna true, de otra forma retorna false.
 */
 extern bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera);
-extern bool menorEstimadoRafagaRestante(nucleoCPU* CPU1,nucleoCPU* CPU2);
+extern bool menorEstimadoRafagaRestante(NucleoCPU* CPU1,NucleoCPU* CPU2);
 
 extern void terminarEjecucion(PCB* proceso);
 extern void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion);
+
+/**
+ * @brief Loggea las métricas de estado antes de finalizar el proceso
+*/
+extern void loggearMetricas(PCB* proceso);
+
+extern void hacerFreeDeCronometros(PCB* proceso);
 
 extern t_listaConSemaforos* listaProcesosNew;
 extern t_listaConSemaforos* listaProcesosReady;
@@ -171,31 +190,38 @@ extern void iniciarServidores();
 extern void cerrarConexiones();
 
 //IO
-
+extern void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion);
+extern void exitDeProcesoBLoqueadoPorIO(ProcesoEnEsperaIO* procesoEnEsperaIO);
 
 extern t_diccionarioConSemaforos* diccionarioDispositivosIO;
 
 //CPU
 extern sem_t* semaforoIntentarPlanificar;
-
-extern sem_t* semaforoGuardarDatosCPU;
+extern sem_t* semaforoHayCPULibre;
+extern sem_t* semaforoEsperarOKDispatch;
+extern sem_t* semaforoMutexGuardarDatosCPU;
+extern sem_t* semaforoEsperarOKInterrupt;
 
 //MEMORIA
 extern int mandarDatosProcesoAMemoria(PCB* proceso);
 
+//HILOS
+extern pthread_t hiloAtenderDispatch;
+extern pthread_t hiloAtenderInterrupt;
+extern pthread_t hiloAtenderIO;
+extern pthread_t hiloPlanificadorCortoPlazo;
 
 //OTRAS
-extern void esperarCancelacionDeHilo(pthread_t hiloACancelar);;
+void esperarCancelacionDeHilo(pthread_t hiloACancelar);
 
+
+//DESTROY
+void nucleoCPUDestroy(void* ptr);
+void dispositivoIODestroy(void* ptr);
+void instanciaIODestroy(void* ptr);
+void procesoEnEsperaIODestroy(void* ptr);
 
  
-
-
-
-
-
-
-
 
 
 

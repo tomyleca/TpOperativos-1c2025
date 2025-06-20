@@ -24,10 +24,11 @@ int iniciar_servidor(t_log* logger, char* puerto);
 void recibir_handshake(int socket);
 
 //GENERALES
+extern void enviarOpCode(int fdConexion, op_code opCode);
 extern void enviarOK(int fdConexion);
 extern bool esperarOK(int fdConexion);
 extern void enviarOK2(int fdConexion);
-extern bool esperarOK2(int fdConexion);
+extern void esperarOK2(int fdConexion);
 
 
 

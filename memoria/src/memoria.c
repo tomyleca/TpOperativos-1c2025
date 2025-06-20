@@ -6,10 +6,15 @@ int main(int argc, char* argv[]) {
     // INICIO Y LEO CONFIG
     config_memoria = iniciar_config("memoria.config");
     leerConfigMemoria(config_memoria); 
-    inicializar_memoria();// inicializa la memoria con los datos de memoria.config
+
+    //INICIO LOGGER 
+    logger_memoria = iniciar_logger("memoriaLogger.log","Logger de memoria",log_level);
+
+    //INICIO MEMORIA
+    inicializar_memoria();
+
+
     diccionarioProcesos = crearDiccionarioConSemaforos();
-     //INICIO LOGGER 
-    logger_memoria = iniciar_logger("memoriaLogger.log","memoriaLogger",log_level);
 	log_info(logger_memoria, "Servidor listo para recibir clientes"); 
     fd_escucha_servidor = iniciar_servidor(logger_memoria, puerto_escucha);
 
@@ -17,10 +22,11 @@ int main(int argc, char* argv[]) {
 
     pthread_join(hilo_memoria,NULL);
 
-   //! ACA SE LIBRERA TODA LA MEMORIA OJO 
+   //LIBRERA TODA LA MEMORIA 
     free(memoria_real);
-     free(bitmap_frames);
+    free(bitmap_frames);
  
-     return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 
 }
+

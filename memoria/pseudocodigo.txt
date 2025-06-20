@@ -1,6 +1,9 @@
-INIT_PROC proceso1 256
-WRITE 0 EJEMPLO_DE_ENUNCIADO
-READ 0 20
-IO IMPRESORA 25000
+WRITE 1 cualquierCosa
+NOOP
+NOOP
+READ 1 13
+INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo2.txt 4
+INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo3.txt 4
+IO Prueba 3
 DUMP_MEMORY
 EXIT

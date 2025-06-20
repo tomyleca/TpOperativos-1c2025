@@ -16,11 +16,12 @@ void atender_dispatch_cpu(void* conexion)
 {
     int fdConexion = *(int*)conexion;
     
-    t_buffer* buffer;
+    
     int cod_op;
-    nucleoCPU* nucleoCPU;
+    NucleoCPU* NucleoCPU;
     uint32_t PID;
     uint32_t PC;
+    t_buffer* buffer;
     
     
    
@@ -30,51 +31,66 @@ void atender_dispatch_cpu(void* conexion)
         cod_op = recibir_operacion(fdConexion);
         switch (cod_op) 
         {
-            case MENSAJE:
-                //recibir_mensaje(*fdConexion, loggerKernel);
+            case 1:
+                sem_post(semaforoEsperarOKDispatch);
                 break;
             case HANDSHAKE_CPU_KERNEL_D:
                 buffer = recibiendo_super_paquete(fdConexion);
                 char* identificador = recibir_string_del_buffer(buffer);    
-                nucleoCPU = guardarDatosCPUDispatch(identificador,fdConexion);
+                NucleoCPU = guardarDatosCPUDispatch(identificador,fdConexion);
+                limpiarBuffer(buffer);
                 break;
+            
             case IO:
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
                 PC = recibir_uint32_t_del_buffer(buffer);
                 char* nombreIO = recibir_string_del_buffer(buffer);
                 int64_t tiempoEnIO = recibir_int64_t_del_buffer(buffer);
+                actualizarPC(PID,PC);
                 syscall_IO(PID,nombreIO,tiempoEnIO);
-                enviarOK2(fdConexion);               
+                free(nombreIO);
+                enviarOK(fdConexion); 
+                limpiarBuffer(buffer);              
                 break;
+            
             case DUMP_MEMORY:
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
                 PC = recibir_uint32_t_del_buffer(buffer);
+                actualizarPC(PID,PC);
                 dump_memory(PID);
-                enviarOK2(fdConexion);
+                enviarOK(fdConexion);
+                limpiarBuffer(buffer);
                 break;
+            
             case INIT_PROCCESS:
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
                 char* nombrePseudocodigo = recibir_string_del_buffer(buffer);
                 uint32_t tam = recibir_uint32_t_del_buffer(buffer);
                 INIT_PROC(nombrePseudocodigo,tam);
-                enviarOK2(fdConexion);
+                free(nombrePseudocodigo);
+                enviarOK(fdConexion);
+                limpiarBuffer(buffer);
                 break;
+            
             case SYSCALL_EXIT:
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
                 PC = recibir_uint32_t_del_buffer(buffer);
                 syscallExit(PID);
-                enviarOK2(fdConexion);             
+                enviarOK(fdConexion);        
+                limpiarBuffer(buffer);     
                 break;
             
             case -1:
-                log_error(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
+                log_info(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
+                //shutdown(fdConexion, SHUT_RDWR);
+                close(fdConexion);
                 pthread_exit(NULL);
             default:
-                //log_warning(loggerKernel, "Operacion desconocida. No quieras meter la pata");
+                log_warning(loggerKernel, "Operacion desconocida. No quieras meter la pata");
                 break;
         }
     }
@@ -82,41 +98,42 @@ void atender_dispatch_cpu(void* conexion)
 
 
 
-nucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion)
+NucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion)
 {
-    sem_wait(semaforoGuardarDatosCPU);
+    sem_wait(semaforoMutexGuardarDatosCPU);
     
-    nucleoCPU* nucleoCPU = chequearSiCPUYaPuedeInicializarse(identificador);
-    if(nucleoCPU == NULL)//Si esta en NULL quiere decir que la otra conexion todavía no llego
+    NucleoCPU* NucleoCPU = chequearSiCPUYaPuedeInicializarse(identificador);
+    if(NucleoCPU == NULL)//Si esta en NULL quiere decir que la otra conexion todavía no llego
     {
-        nucleoCPU = malloc(sizeof(*nucleoCPU));
-        nucleoCPU->identificador= malloc(strlen(identificador)+1);
-        strcpy(nucleoCPU->identificador,identificador);
-       nucleoCPU->procesoEnEjecucion=NULL;
-        nucleoCPU->fdConexionDispatch = fdConexion;
-        agregarALista(listaCPUsAInicializar,nucleoCPU);
+        NucleoCPU = malloc(sizeof(*NucleoCPU));
+        NucleoCPU->identificador= malloc(strlen(identificador)+1);
+        strcpy(NucleoCPU->identificador,identificador);
+        free(identificador);
+       NucleoCPU->procesoEnEjecucion=NULL;
+        NucleoCPU->fdConexionDispatch = fdConexion;
+        agregarALista(listaCPUsAInicializar,NucleoCPU);
     }
     else 
     {
-        sacarElementoDeLista(listaCPUsAInicializar,nucleoCPU);
-        agregarALista(listaCPUsLibres,nucleoCPU);
-        nucleoCPU->fdConexionDispatch = fdConexion;
+        sacarElementoDeLista(listaCPUsAInicializar,NucleoCPU);
+        agregarALista(listaCPUsLibres,NucleoCPU);
+        NucleoCPU->fdConexionDispatch = fdConexion;
         sem_post(semaforoIntentarPlanificar);
     }
 
-    sem_post(semaforoGuardarDatosCPU);
+    sem_post(semaforoMutexGuardarDatosCPU);
 
-    return nucleoCPU;
+    return NucleoCPU;
 }
 
 
 
 
-nucleoCPU* chequearSiCPUYaPuedeInicializarse(char* identificador)
+NucleoCPU* chequearSiCPUYaPuedeInicializarse(char* identificador)
 {
-bool _mismoIdentificador(nucleoCPU* nucleoCPU)
+bool _mismoIdentificador(NucleoCPU* NucleoCPU)
 {
-    return (strcmp(nucleoCPU->identificador,identificador) == 0);
+    return (strcmp(NucleoCPU->identificador,identificador) == 0);
 };
 
 return sacarDeListaSegunCondicion(listaCPUsAInicializar,_mismoIdentificador);
@@ -124,14 +141,14 @@ return sacarDeListaSegunCondicion(listaCPUsAInicializar,_mismoIdentificador);
 
 
 
-void pasarAExit(PCB* proceso){
+void pasarAExit(PCB* proceso,char* estadoActual){
     log_info(loggerKernel,"## (<%u>) - Finaliza el proceso",proceso->PID);
-    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","EXIT");
+    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,estadoActual,"EXIT");
     //TODO avisar a memoria 
     proceso->ME[EXIT]++;
     loggearMetricas(proceso);
     inicializarProceso();
-    //TODO liberar cronometros
+    hacerFreeDeCronometros(proceso);
     free(proceso->archivoPseudocodigo);
     free(proceso);
 }
@@ -149,7 +166,13 @@ void loggearMetricas(PCB* proceso)
     proceso->ME[EXIT],proceso->MT[EXIT]);
 }
 
-
+void hacerFreeDeCronometros(PCB* proceso)
+{
+    for(int i = 0; i<7; i++)
+    {
+        temporal_destroy(proceso->cronometros[i]);
+    }
+}
 
 void mandarContextoACPU(uint32_t PID,uint32_t PC,int fdConexion)
 {
@@ -157,6 +180,13 @@ void mandarContextoACPU(uint32_t PID,uint32_t PC,int fdConexion)
     cargar_uint32_t_al_super_paquete(paquete,PID);
     cargar_uint32_t_al_super_paquete(paquete,PC);
     enviar_paquete(paquete,fdConexion);
-    esperarOK2(fdConexion);
-    free(paquete);
+    sem_wait(semaforoEsperarOKDispatch); //Para saber que cpu recibio el contexto
+    eliminar_paquete(paquete);
+}
+
+void actualizarPC(uint32_t pid, uint32_t PCActualizado)
+{
+    PCB* proceso = buscarPCBEjecutando(pid);
+    proceso->PC = PCActualizado;
+
 }

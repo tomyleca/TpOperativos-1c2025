@@ -22,7 +22,7 @@ extern t_listaConSemaforos* crearListaConSemaforos();
 extern void agregarALista(t_listaConSemaforos* listaConSemaforos,void* elemento);
 
 /**
-*@brief Saca el elemento que se encuentra en la posición dada de la lista. Utiliza semáforos para evitar condiciones de carrera.
+*@brief Saca el elemento que se encuentra en la posición dada de la lista. Utiliza semáforos para evitar condiciones de carrera. Se queda esperando si la lista esta vacía.
 */
 extern void* sacarDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion);
 
@@ -44,7 +44,7 @@ extern void* sacarDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,b
 
 
 /**
-*@brief Devuelve el elemento que se encuentra en la posición dada de la lista. Utiliza semáforos para evitar condiciones de carrera.
+*@brief Devuelve el elemento que se encuentra en la posición dada de la lista. Utiliza semáforos para evitar condiciones de carrera. Se queda esperando si la lista esta vacía.
 */
 extern void* leerDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion);
 
@@ -54,7 +54,7 @@ extern void* leerDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int pos
 void* leerDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,bool (*condicion) (void*));
 
 /**
-*@brief Chequea si la lista esta vacia. Utiliza semáforos para evitar condiciones de carrera.
+*@brief Chequea si la lista esta vacia. Utiliza semáforos para evitar condiciones de carrera. 
 */
 extern bool chequearListaVacia(t_listaConSemaforos* listaConSemaforos);
 

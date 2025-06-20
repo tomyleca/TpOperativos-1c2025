@@ -11,6 +11,13 @@ char *memoria_real = NULL;
 // Mutexes
 t_diccionarioConSemaforos* diccionarioProcesos;
 
+typedef struct {
+  uint32_t pid;
+  uint32_t offset;
+  uint32_t cantidad_paginas;
+} EntradaSwap;
+
+t_list* tabla_swap;
 
 
 void leerConfigMemoria(t_config* config_memoria) 
@@ -32,18 +39,15 @@ void leerConfigMemoria(t_config* config_memoria)
 void inicializar_memoria() {
   CANT_FRAMES = TAM_MEMORIA / TAM_PAGINA;
 
-  printf("Cantidad de frames: %d\n", CANT_FRAMES);
-  printf("Tamaño de pagina: %d\n", TAM_PAGINA);
-
   memoria_real = malloc(TAM_MEMORIA);
   if (!memoria_real) {
-    fprintf(stderr, "ERROR: No se pudo asignar memoria simulada\n");
+    log_error(logger_memoria, "No se pudo asignar memoria simulada\n");
     exit(EXIT_FAILURE);
   }
 
   bitmap_frames = malloc(sizeof(bool) * CANT_FRAMES);
   if (!bitmap_frames) {
-    fprintf(stderr, "ERROR: No se pudo asignar bitmap de frames\n");
+    log_error(logger_memoria, "No se pudo asignar bitmap de frames\n");
     free(memoria_real);
     exit(EXIT_FAILURE);
   }
@@ -51,6 +55,16 @@ void inicializar_memoria() {
   for (int i = 0; i < CANT_FRAMES; i++) {
     bitmap_frames[i] = false; // false indica frame libre
   }
+
+  tabla_swap = list_create();
+  if (!tabla_swap) {
+    log_error(logger_memoria, "No se pudo crear la lista de swap\n");
+  }
+
+  log_info(logger_memoria, "Memoria inicializada - Lista de swap inicializada");
+  log_info(logger_memoria,  "Cantidad de frames: %d",  CANT_FRAMES);
+  log_info(logger_memoria,"Tamaño de página: %d",  TAM_PAGINA);
+
 }
 
 // Crea tabla multinivel recursivamente
@@ -68,7 +82,6 @@ TablaPagina *crear_tabla_nivel(int nivel_actual) {
     tabla->entradas = calloc(ENTRADAS_POR_TABLA, sizeof(TablaPagina *));
     }
   
-
   return tabla;
 }
 int traducir_direccion(Proceso *p, int direccion_virtual) {
@@ -90,14 +103,14 @@ int traducir_direccion(Proceso *p, int direccion_virtual) {
     if (nivel == CANTIDAD_NIVELES) {
       int frame = tabla->frames[entrada];
       if (frame == -1) {
-        fprintf(stderr, "Error: página no asignada\n");
+     log_error(logger_memoria,"Página no asignada\n");
         return -1;
       }
       return frame * TAM_PAGINA + desplazamiento;
     } else {
       tabla = tabla->entradas[entrada];
       if (!tabla) {
-        fprintf(stderr, "Error: tabla intermedia nula\n");
+        log_error(logger_memoria,"Tabla intermedia nula\n");
         return -1;
       }
       divisor /= ENTRADAS_POR_TABLA;
@@ -198,7 +211,7 @@ void asignar_frames_hojas(TablaPagina *tabla) {
         if (frame != -1)
           tabla->frames[i] = frame;
         else {
-            printf("No hay más frames disponibles\n");
+            log_error(logger_memoria,"No hay más frames disponibles\n");
         }
       }
     }
@@ -212,7 +225,7 @@ void asignar_frames_hojas(TablaPagina *tabla) {
 Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   Proceso *p = malloc(sizeof(Proceso));
   if (!p) {
-    fprintf(stderr, "Error al crear proceso\n");
+    log_error(logger_memoria, "Error al crear proceso\n");
     exit(EXIT_FAILURE);
   }
   p->pid = PID;  
@@ -220,6 +233,8 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
   p->pseudocodigo = pseudocodigo;
   p->lista_instrucciones = leer_archivo_y_cargar_instrucciones(p->pseudocodigo);
+
+  log_info(logger_memoria,"## PID: <%u> - Proceso Creado - Tamaño: <%u>",p->pid,p->tamanio_reservado);
 
   return p;
 }
@@ -251,8 +266,6 @@ int *reservar_frames(int cantidad) {
 
 int reservar_memoria(Proceso *p, int bytes) {
 
-
-
   int paginas_necesarias = (bytes + TAM_PAGINA - 1) / TAM_PAGINA;
   int *frames = reservar_frames(paginas_necesarias);
   if (!frames) {
@@ -269,38 +282,53 @@ int reservar_memoria(Proceso *p, int bytes) {
   return 0;
 }
 
-void escribir_byte(Proceso *p, int direccion_virtual, char valor) {
-  int direccion_fisica = traducir_direccion(p, direccion_virtual);
-  if (direccion_fisica == -1) {  return;}
-  
 
-  memoria_real[direccion_fisica]= valor;
+
+void escribir_memoria(Proceso *p,  int dir_fisica, char *texto) {
+  int len = strlen(texto);
+
+  for (int i = 0; i < len; i++) {
+    if (dir_fisica == -1) {
+      printf("## PID: %d  - ERROR: Dirección inválida %d", p->pid,
+        dir_fisica + i);
+      return;
+    }
+
+    memoria_real[dir_fisica + i] = texto[i];
+    p->metricas.escrituras_memoria++;
+
+    printf("## PID: %d - Escritura - Dir. Física: %d - Valor: '%c'", p->pid,
+           dir_fisica, texto[i]);
+  }
+  log_info(logger_memoria, "Escritura en memoria del proceso %d: '%s' en dir física %d", p->pid, texto, dir_fisica);
+  printf("\n");
 }
 
-void escribir_memoria(Proceso *p, int direccion_virtual, char valor) {
-  escribir_byte(p, direccion_virtual, valor);
-  p->metricas.escrituras_memoria++;
 
-  printf("→ Proceso %d escribió '%c' en dir virtual %d\n", p->pid, valor,
-         direccion_virtual);
-}
-
-char leer_byte(Proceso *p, int direccion_virtual) {
-  int direccion_fisica = traducir_direccion(p, direccion_virtual);
-
-  if (direccion_fisica == -1) {
+char leer_byte(Proceso *p, int dir_fisica) {
+  if (dir_fisica < 0 || dir_fisica >= CANT_FRAMES * TAM_PAGINA) {
+    printf("## PID: %d - ERROR: Lectura fuera de límites físicos\n", p->pid);
     return -1;
   }
 
-  return memoria_real[direccion_fisica];
+  return memoria_real[dir_fisica];
 }
 
-void leer_memoria(Proceso *p, int direccion_virtual) {
-  char val = leer_byte(p, direccion_virtual);
+void leer_memoria(Proceso *p, int dir_fisica,int tamanio) {
+  
+  char* val= malloc(tamanio);
+  for(int i= 0;i < tamanio;i++)
+    val[i] = leer_byte(p, dir_fisica + i);
+
+  if (*val == -1) return;
+
   p->metricas.lecturas_memoria++;
 
-  printf("Proceso %d leyó '%c' en dir virtual %d\n", p->pid, val, direccion_virtual);
+  log_info(logger_memoria,"Proceso %d leyó '%s' en dir física %d\n", p->pid, val, dir_fisica);
+  free(val);
 }
+
+
 
 void mostrar_procesos_activos() {
   printf("\n=== Procesos Activos ===\n");
@@ -358,12 +386,10 @@ void liberar_frames_en_tabla(TablaPagina *tabla, int nivel_actual) {
 
 void liberar_memoria(Proceso *p) {
 
-
     if (!p || !p->tabla_raiz){
         return;
     }
   
-
   liberar_frames_en_tabla(p->tabla_raiz, 1);
   liberar_tabla(p->tabla_raiz);
   p->tabla_raiz = NULL;
@@ -376,7 +402,6 @@ void destruir_proceso(Proceso *p) {
   sacarDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(p->pid));
     free(p);
 
-    
 
 }
 
@@ -431,18 +456,29 @@ void dump_memory(Proceso *p) {
              p->pid, bytes_escritos, full_filename);
     
     mostrar_bitmap();
-    imprimir_tabla(p->tabla_raiz, 1, 0);
     mostrar_procesos_activos();
+
+
+  if (!p || !p->tabla_raiz) {
+    log_error(logger_memoria, "No se puede mostrar la tabla raíz del Proceso PID %d: no existe o no tiene páginas.\n ", p ? p->pid : -1);
+    return;
+  } else {
+    printf("## PID: %d\n", p->pid);
+    imprimir_tabla(p->tabla_raiz, 1, 0);
+  }
+
 }
 
 int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
+
   Proceso *p = guardarProceso(PID,tam,pseudocodigo);
   if (reservar_memoria(p, tam) < 0) {
-    fprintf(stderr, "Error: no se pudo asignar memoria al proceso\n");
+   log_error(logger_memoria, "No se pudo asignar memoria al proceso\n");
     free(p);
     return -1;
   }
-  
+
+
   memset(&p->metricas, 0, sizeof(MetricaProceso));
 
   dump_memory(p);
@@ -453,11 +489,11 @@ return 0;
 
 char **leer_instrucciones(const char *ruta, int *cantidad) {
 
-  printf("Ruta recibida: %s\n", ruta);
+  log_info(logger_memoria,"Ruta recibida: %s\n", ruta);
   FILE *archivo = fopen(ruta, "r");
 
   if (!archivo) {
-    perror("No se pudo abrir el archivo de instrucciones");
+      log_error(logger_memoria, "No se pudo abrir el archivo de instrucciones");
     return NULL;
   }
 
@@ -476,70 +512,101 @@ char **leer_instrucciones(const char *ruta, int *cantidad) {
   return lineas;
 }
 
+void suspender_proceso(Proceso *p, int dir_fisica) {
 
-bool crear_estructuras_proceso(int pid, int paginas_necesarias) {
-    uint32_t tamanio = paginas_necesarias * TAM_PAGINA;
-    char* pseudocodigo = "test.pseudocodigo"; // Archivo de prueba
-    
-    Proceso* proceso = guardarProceso(pid, tamanio, pseudocodigo);
-    if (!proceso) {
-        return false;
+  if (!p || !p->tabla_raiz) {
+    log_error(logger_memoria, "No se puede suspender el proceso %u: no existe o no tiene tabla de páginas", p->pid);
+    return;
+  }
+
+  FILE *archivo_swap = fopen(path_swapfile, "ab");
+
+  if (!archivo_swap) {
+   log_error(logger_memoria,"No se pudo abrir swapfile.bin para suspender el proceso %u", p->pid);
+    return;
+  }
+
+  int paginas = (p->tamanio_reservado + TAM_PAGINA - 1) / TAM_PAGINA;
+
+  uint32_t offset = ftell(archivo_swap);
+
+  EntradaSwap *entrada = malloc(sizeof(EntradaSwap));
+  entrada->pid = p->pid;
+  entrada->offset = offset;
+  entrada->cantidad_paginas = paginas;
+
+  list_add(tabla_swap, entrada);
+
+  for (int i = 0; i < paginas; i++) {
+    if (dir_fisica != -1) {
+      fwrite(memoria_real + dir_fisica, 1, TAM_PAGINA, archivo_swap);
+    } else {
+      char *vacio = calloc(TAM_PAGINA, 1);
+      fwrite(vacio, 1, TAM_PAGINA, archivo_swap);
+      free(vacio);
     }
-    
-    if (reservar_memoria(proceso, tamanio) < 0) {
-        destruir_proceso(proceso);
-        return false;
-    }
-    
-    return true;
+  }
+
+  fclose(archivo_swap);
+  liberar_memoria(p);
+  log_info(logger_memoria, "PID: %u - Proceso suspendido correctamente en swapfile", p->pid);
 }
 
-bool suspender_proceso(int pid) {
-    Proceso* proceso = buscar_contexto_por_pid(pid);
-    if (!proceso) {
-        return false;
-    }
-    
-    // proceso->suspendido = true;
-    
-    // TODO: Implementar lógica de suspensión específica
-    // Por ahora solo marcamos como suspendido
-    
-    return true;
-}
+void restaurar_proceso(Proceso *p ) {
+  if (!p) {
+    log_error(logger_memoria,"No se puede restaurar el proceso %u: no existe", p->pid);
+    return;
+  }
 
-bool des_suspender_proceso(int pid) {
-    Proceso* proceso = buscar_contexto_por_pid(pid);
-    if (!proceso) {
-        return false;
+  EntradaSwap *entrada = NULL;
+  for (int i = 0; i < list_size(tabla_swap); i++) {
+    EntradaSwap *e = list_get(tabla_swap, i);
+    if (e->pid == p->pid) {
+      entrada = e;
+      break;
     }
-    
-    // proceso->suspendido = false;
-    
-    // TODO: Implementar lógica de des-suspensión específica
-    // Por ahora solo marcamos como no suspendido
-    
-    return true;
-}
+  }
 
-bool realizar_dump_memoria(int pid) {
-    Proceso* proceso = buscar_contexto_por_pid(pid);
-    if (!proceso) {
-        return false;
-    }
-    
-    dump_memory(proceso);
-    
-    return true;
-}
+  if (!entrada) {
+    log_error(logger_memoria, "PID %u no está en swap", p->pid);
+    return;
+  }
 
-bool finalizar_proceso(int pid) {
-    Proceso* proceso = buscar_contexto_por_pid(pid);
-    if (!proceso) {
-        return false;
+  FILE *archivo_swap = fopen(path_swapfile, "rb");
+  if (!archivo_swap) {
+    log_error(logger_memoria, "No se pudo abrir swapfile.bin para restauración");
+    return;
+  }
+
+  fseek(archivo_swap, entrada->offset, SEEK_SET);
+
+  int *frames = reservar_frames(entrada->cantidad_paginas);
+
+  if (!frames) {
+   log_error(logger_memoria, "No hay frames disponibles para restaurar PID: %u", p->pid);
+    fclose(archivo_swap);
+    return;
+  }
+
+  p->tabla_raiz = crear_tabla_nivel(1);
+  int pagina_logica_actual = 0;
+  asignar_frames_en_tabla(p->tabla_raiz, entrada->cantidad_paginas, frames,
+                          &pagina_logica_actual, 1, p);
+
+  for (int i = 0; i < entrada->cantidad_paginas; i++) {
+    fread(memoria_real + frames[i] * TAM_PAGINA, 1, TAM_PAGINA, archivo_swap);
+  }
+
+  fclose(archivo_swap);
+  free(frames);
+
+  for (int i = 0; i < list_size(tabla_swap); i++) {
+    EntradaSwap *e = list_get(tabla_swap, i);
+    if (e->pid == p->pid) {
+      list_remove_and_destroy_element(tabla_swap, i, free);
+      break;
     }
-    
-    destruir_proceso(proceso);
-    
-    return true;
+  }
+
+  log_info(logger_memoria," PID: %u - Restaurado exitosamente desde swapfile", p->pid);
 }

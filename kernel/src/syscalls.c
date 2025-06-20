@@ -11,9 +11,9 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     
     nuevoProceso->PID=pidDisponible;
     
-    sem_wait(semaforoPIDDisponible);
+    sem_wait(semaforoMutexPIDDisponible);
         pidDisponible++;
-    sem_post(semaforoPIDDisponible);
+    sem_post(semaforoMutexPIDDisponible);
 
     
 
@@ -28,9 +28,8 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
 
     
 
-    nuevoProceso->estimadoRafagaAnterior=estimacion_inicial;
-    nuevoProceso->duracionRafagaAnterior=0;
-    nuevoProceso->estimadoSiguienteRafaga=0;
+    
+    nuevoProceso->estimadoSiguienteRafaga=estimacion_inicial;
 
     
    
@@ -47,12 +46,15 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     if(nuevoProceso->PID==0) //Si es el primer proceso, espero el ENTER
     {
         while (1) {
+
             char* input = readline("Apriete ENTER para empezar a planificar procesos.\n");  
 
             if (*input == '\0') {  
-                sleep(2); // PARA DARLE TIEMPO A CONECTARSE BIEN A LOS OTROS MODULOS
+                //sleep(4); // PARA DARLE TIEMPO A CONECTARSE BIEN A LOS OTROS MODULOS
                 break;
             }
+
+            free(input);
             
         }
     }    
@@ -81,8 +83,10 @@ void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
         exit(1);
     }
     
-    terminarEjecucion(proceso);
+    
+    
    
+
 
 
     DispositivoIO* dispositivo = NULL;
@@ -90,13 +94,16 @@ void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
 
     if (dispositivo == NULL) {
         log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", pid, nombreIO);
-        pasarAExit(proceso);
+        terminarEjecucion(proceso);
+        pasarAExit(proceso,"EXECUTE");
         return;
     }
 
     log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",pid,nombreIO);
 
-    pasarABLoqueado(proceso, tiempo, nombreIO);
+    terminarEjecucion(proceso);
+    pasarABLoqueadoPorIO(proceso, tiempo, nombreIO);
+    
 }
 
 void syscallExit(uint32_t pid)
@@ -105,23 +112,26 @@ void syscallExit(uint32_t pid)
     proceso = buscarPCBEjecutando(pid);
 
     if (proceso == NULL) {
-        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", pid);
+        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall Exit", pid);
         exit(1);
     }
 
+    
     terminarEjecucion(proceso);
-
-    pasarAExit(proceso);
+    pasarAExit(proceso,"EXECUTE");
+    
+    
+    
 
 }
 PCB* buscarPCBEjecutando(uint32_t pid) {
-    bool _mismoPID(nucleoCPU* nucleoEnEjecucion) {
+    bool _mismoPID(NucleoCPU* nucleoEnEjecucion) {
         return nucleoEnEjecucion->procesoEnEjecucion->PID == pid;
     };
 
-    nucleoCPU* nucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_mismoPID);
-    if(nucleoCPU!= NULL)
-        return nucleoCPU->procesoEnEjecucion;
+    NucleoCPU* NucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_mismoPID);
+    if(NucleoCPU!= NULL)
+        return NucleoCPU->procesoEnEjecucion;
     else
         return NULL;
 }

@@ -78,9 +78,10 @@ void* leerDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion)
 bool chequearListaVacia(t_listaConSemaforos* listaConSemaforos)
 {
     bool vacia = false;
+    t_list* lista = listaConSemaforos->lista;
     
     sem_wait(listaConSemaforos->semaforoMutex);
-    vacia = list_is_empty(listaConSemaforos->lista);
+        vacia = list_is_empty(lista);
     sem_post(listaConSemaforos->semaforoMutex);
     
     return vacia;
@@ -113,9 +114,9 @@ void* leerDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,bool (*co
 
 void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos)
 {
-    list_clean(listaConSemaforos->lista);
-    free(listaConSemaforos->lista);
+    list_destroy(listaConSemaforos->lista);
     free(listaConSemaforos->semaforoCantElementos);
     free(listaConSemaforos->semaforoMutex);
+    free(listaConSemaforos);
 }
 

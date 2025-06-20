@@ -16,6 +16,7 @@
 #include "pruebas.h"
 #include "syscalls.h"
 #include "pruebas.h"
+#include <signal.h>
 
 void leerConfigKernel(t_config* config_kernel);
 void crearEstructuras();
@@ -26,19 +27,16 @@ void setearAlgoritmosDePlanificacion();
  * @brief Para cada nuevo dispositivo IO que se ejecuta se crea una nueva conexion(mediante esperar_cliente),luego se le crea un hilo donde se atienden todas las peticiones de esa conexión.
 */
 extern void* esperarClientesIO(void* arg);
-extern void* atenderIO(void* conexion);
+extern void* atenderInstanciaIO(void* conexion);
 
-extern void avisarInicioIO(procesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo);
+extern void avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo);
 extern DispositivoIO* buscarIOSegunNombre(char* nombreIO);
 
 extern void cargarCronometro(PCB* proceso, ESTADO estado);
 
 
 void inicializar_hilos_kernel(t_config* config_kernel);
-
-
-
-
+void liberarRecursos(int signal);
 
 
 #endif

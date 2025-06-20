@@ -1,6 +1,7 @@
 #include <cpu.h>
 
 int main(int argc, char* argv[]) {
+    
     saludar("cpu");
 
     //INICIO Y LEO CONFIG
@@ -15,6 +16,12 @@ int main(int argc, char* argv[]) {
     identificador_cpu = argv[1];  
     // INICIO HILOS
     inicializar_hilos(config_cpu);
+
+    while(1)
+    {
+        ciclo_instruccion(socket_cpu_memoria);
+        signal(SIGINT,liberarRecursos);
+    }
 
     pthread_join(hilo_escuchar_memoria,NULL);
     pthread_join(hilo_escuchar_kernel,NULL);
@@ -43,6 +50,7 @@ void inicializar_hilos(t_config* config_cpu)
 {
     socket_cpu_memoria = crear_conexion(logger_cpu, ip_memoria, puerto_memoria);
     hilo_escuchar_memoria = escuchar_memoria();
+    enviarOpCode(socket_cpu_memoria,SOLICITUD_ESTRUCTURA_MEMORIA);
 
     socket_cpu_kernel_dispatch = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_dispatch);
     crear_handshake_cpu_kernel_dispatch(socket_cpu_kernel_dispatch);
@@ -59,9 +67,12 @@ void inicializar_recursos()
 {
     // Inicializar semaforos
     sem_init(&sem_hay_instruccion, 0, 0);
-    sem_init(&sem_pid, 0, 1);
-    sem_init(&sem_contexto, 0, 1);
     sem_init(&sem_interrupcion, 0, 1);
+    sem_init(&semFetch,0,1);
+    sem_init(&semOKDispatch,0,0);
+    sem_init(&semContextoCargado,0,0);
+    sem_init(&semMutexPC,0,1);
+    sem_init(&semLlegoPeticionMMU,0,0);
 
     iniciar_diccionario_instrucciones();
     
@@ -69,4 +80,22 @@ void inicializar_recursos()
 
 
     lista_tlb = list_create();
+}
+
+
+
+
+void liberarRecursos(int signal)
+{
+    if(signal != SIGINT)
+        return;
+
+    config_destroy(config_cpu);
+    log_destroy(logger_cpu);
+    destruir_diccionarios();
+    list_destroy(lista_tlb);
+    close(socket_cpu_kernel_dispatch);
+    close(socket_cpu_kernel_interrupt);
+    close(socket_cpu_memoria);
+    exit(1);
 }

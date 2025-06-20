@@ -5,7 +5,7 @@ void crear_handshake_cpu_kernel_dispatch(int conexion_cpu_kernel)
     t_paquete* paquete = crear_super_paquete(HANDSHAKE_CPU_KERNEL_D);
     cargar_string_al_super_paquete(paquete, identificador_cpu);
     enviar_paquete(paquete,conexion_cpu_kernel);
-    free(paquete);
+    eliminar_paquete(paquete);
 }
 
 void crear_handshake_cpu_kernel_interrupt(int conexion_cpu_kernel)
@@ -13,7 +13,7 @@ void crear_handshake_cpu_kernel_interrupt(int conexion_cpu_kernel)
     t_paquete* paquete = crear_super_paquete(HANDSHAKE_CPU_KERNEL_I);
     cargar_string_al_super_paquete(paquete, identificador_cpu);
     enviar_paquete(paquete,conexion_cpu_kernel);
-    free(paquete);
+    eliminar_paquete(paquete);
 }
 
 pthread_t escuchar_interrupcion_kernel()
@@ -48,27 +48,42 @@ void atender_memoria()
         cod_op = recibir_operacion(socket_cpu_memoria);
         switch (cod_op) 
         {
-            case RECIBIR_TAMANO_PAG:
+            case RESPUESTA_ESTRUCTURA_MEMORIA:
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
-                tamanio_pagina = recibir_uint32_t_del_buffer(buffer);
-                cant_niveles = recibir_uint32_t_del_buffer(buffer);
-                cant_entradas_tabla = recibir_uint32_t_del_buffer(buffer);
+                tamanio_pagina = recibir_int_del_buffer(buffer);
+                cant_niveles = recibir_int_del_buffer(buffer);
+                cant_entradas_tabla = recibir_int_del_buffer(buffer);
+                limpiarBuffer(buffer);
                 break;
             case CPU_RECIBE_INSTRUCCION_MEMORIA: 
                 //ACA LLEGA LA SOLICITUD DE LA INSTRUCCION DE MEMORIA
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 contexto->pid = recibir_uint32_t_del_buffer(buffer);
                 instruccion_recibida = recibir_string_del_buffer(buffer); // instruccion_recibida se usa en instruccion.c
+                log_info(logger_cpu,"# Llega instrucción de memoria: %s", instruccion_recibida);
+                limpiarBuffer(buffer);
                 sem_post(&sem_hay_instruccion);
-                free(buffer);
+                
                 break;
+            case RESPUESTA_SOLICITUD_TABLA:
+                sem_post(&semLlegoPeticionMMU);
+                break;
+
+            case RESPUESTA_SOLICITUD_FRAME:
+                buffer = recibiendo_super_paquete(socket_cpu_memoria);
+                nro_marco = recibir_int_del_buffer(buffer);
+                sem_post(&semLlegoPeticionMMU);
+                break;
+
+
+
 
             case CPU_RECIBE_OK_DE_LECTURA:
                buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 contexto->pid = recibir_int_del_buffer(buffer);
                 direccion_fisica = recibir_int_del_buffer(buffer); // POR EL MOMENTO TRATAMOS A LA DIRECCION FISICA COMO INT 
                 //valor_leido_de_memoria_32 = recibir_int_del_buffer(buffer);
-                free(buffer);
+                limpiarBuffer(buffer);
                 break;
 
             case CPU_RECIBE_OK_DE_ESCRITURA:
@@ -76,11 +91,13 @@ void atender_memoria()
                 contexto->pid = recibir_int_del_buffer(buffer);
                 direccion_fisica = recibir_int_del_buffer(buffer);
                             
-                free(buffer); 
+                limpiarBuffer(buffer); 
                 break;
             case -1:
                 log_error(logger_cpu, "MEMORIA se desconecto. Terminando servidor");
-                pthread_exit(NULL);
+                //shutdown(socket_cpu_memoria, SHUT_RDWR);
+                close(socket_cpu_memoria);
+                exit(1);
             default:
                 log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
                 break;
@@ -99,30 +116,24 @@ void atender_interrupcion_kernel()
         cod_op = recibir_operacion(socket_cpu_kernel_interrupt);
         switch (cod_op) 
         {
-            case MENSAJE:
-                //recibir_mensaje(socket_cpu_kernel_interrupt, logger_cpu);
-                break;    
-            case INTERRUPCION_PID:
-                sem_wait(&sem_interrupcion);
-
+      
+            case INTERRUPCION:
+                
                 log_info(logger_cpu, " ## Llega interrupción al puerto Interrupt.");
                 
                 pthread_mutex_lock(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;
                 printf("Adentro de lmutex interrup \n");
-                motivo_interrupcion = INTERRUPCION_PID;
+                motivo_interrupcion = INTERRUPCION;
                 pthread_mutex_unlock(&mutex_motivo_interrupcion);
-
-                buffer = recibiendo_super_paquete(socket_cpu_kernel_interrupt);     
-
-                int pid = recibir_int_del_buffer(buffer);
-                int pc = recibir_int_del_buffer(buffer);
-
-                free(buffer);
+                enviarOK(socket_cpu_kernel_interrupt);
+                
                 break;
             case -1:
                 log_error(logger_cpu, "KERNEL INTERRUPT se desconecto. Terminando servidor");
-                pthread_exit(NULL);
+                //shutdown(socket_cpu_kernel_interrupt, SHUT_RDWR);
+                close(socket_cpu_kernel_interrupt);
+                exit(1);
             default:
                 log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
                 break;
@@ -143,29 +154,33 @@ void atender_dispatch_kernel()
         cod_op = recibir_operacion(socket_cpu_kernel_dispatch);
         switch (cod_op) 
         {
-            case MENSAJE:
-                /*recibir_mensaje(socket_cpu_kernel_dispatch, logger_cpu);
-                int valor = 5;
-                crear_paquete()
-                enviar_paquete(paquete, socket_cpu_kernel_dispatch); 
-                eliminar_paquete(paquete);*/
+            case 1:
+                log_info(logger_cpu,"LLEGA OK");
+                sem_post(&semOKDispatch);
                 break;
+                
                 case PID_KERNEL_A_CPU:
                 printf("ANTES DE RECIBIR OTRO PROCESO\n");
-                sem_wait(&sem_pid);
                 contexto = malloc(sizeof(t_contexto_cpu));
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
-                contexto->pid = recibir_int_del_buffer(buffer);
-                contexto->registros.PC = recibir_int_del_buffer(buffer);
+                contexto->pid = recibir_uint32_t_del_buffer(buffer);
+                sem_wait(&semMutexPC);
+                contexto->registros.PC = recibir_uint32_t_del_buffer(buffer);
+                sem_post(&semMutexPC);
                 enviarOK(socket_cpu_kernel_dispatch);
                 // ACA HAY QUE SOLICITAR A MEMORIA LA PRIMER INSTRUCCION CON EL PID RECIBIMOS DE KERNEL
-                ciclo_instruccion(socket_cpu_memoria); 
-                free(buffer);
+                //Falta liberar contexto, pero como lo usamos en el ciclo y todo cpu, a lo mejor conviene liberarlo al final del todo.
+                limpiarBuffer(buffer);
+                sem_post(&semContextoCargado);
                 break;
                 
             case -1:
                 log_error(logger_cpu, "KERNEL DISPATCH se desconecto. Terminando servidor");
-                pthread_exit(NULL);
+                //shutdown(socket_cpu_kernel_dispatch, SHUT_RDWR);
+                close(socket_cpu_kernel_dispatch);
+                exit(1);
+                //TODO revisar esto
+                break;
             default:
                 log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata. Estoy en kernel dispatch");
                 break;

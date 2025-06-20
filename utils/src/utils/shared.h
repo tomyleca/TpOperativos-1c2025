@@ -23,16 +23,17 @@ typedef enum
     HANDSHAKE_CPU_KERNEL_I,
     HANDSHAKE_CPU_KERNEL_D,
     IO,
-    DUMP_MEMORY,
     INIT_PROCCESS,
+    DUMP_MEMORY,
     SYSCALL_EXIT,
     SEGMENTATION_FAULT,
     CPU_PIDE_INSTRUCCION_A_MEMORIA,
     ENVIAR_A_MEMORIA_UN_AVISO_DE_SYSCALL,
-    INTERRUPCION_PID,
+    INTERRUPCION,
     PID_KERNEL_A_CPU,
     CPU_RECIBE_INSTRUCCION_MEMORIA,
-    RECIBIR_TAMANO_PAG,
+    SOLICITUD_ESTRUCTURA_MEMORIA,
+    RESPUESTA_ESTRUCTURA_MEMORIA,
     CPU_RECIBE_CONTEXTO,
     CPU_RECIBE_OK_DE_LECTURA,
     CPU_RECIBE_OK_DE_ESCRITURA,
@@ -42,15 +43,17 @@ typedef enum
     GUARDAR_PROCESO_EN_MEMORIA,
     RESPUESTA_KERNEL_TPN,
     CREAR_PID_OK,
-    
+    SOLICITUD_TABLA,
+    SOLICITUD_FRAME,
+    RESPUESTA_SOLICITUD_TABLA,
+    RESPUESTA_SOLICITUD_FRAME,
     NO_HAY_MEMORIA,
-
-    INICIALIZAR_PROCESO,
-    SUSPENDER_PROCESO,
-    DES_SUSPENDER_PROCESO,
-    FINALIZAR_PROCESO,
+    SWAP_RESTAURAR_PROCESO,
+    SWAP_SUSPENDER_PROCESO,
+    SWAP_OK
     DUMP_MEMORY_OK,
     DUMP_MEMORY_ERROR
+
 
     
 } op_code; 
@@ -92,6 +95,8 @@ void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
 
 void enviar_paquete(t_paquete* paquete, int socket_cliente);
 
+int enviar_todo(int socket, void* buffer, int total_bytes);
+
 void eliminar_paquete(t_paquete* paquete);
 
 void liberar_conexion(int socket_cliente);
@@ -103,6 +108,8 @@ void *serializar_paquete(t_paquete *paquete, int bytes);
 void recibir_mensaje(int socket_cliente, t_log *logger);
 
 void *recibir_buffer(int *size, int socket_cliente);
+
+void limpiarBuffer(t_buffer* buffer);
 
 int recibir_operacion(int socket_cliente);
 

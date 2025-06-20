@@ -12,10 +12,12 @@
 #include "utils/conexiones.h"
 #include "GlobalesCPU.h"
 #include "conexion-cpu-memoria.h"
+#include "signal.h"
 
 void leerConfigCpu(t_config* config_cpu);
 void inicializar_hilos(t_config* config_cpu);
 void inicializar_recursos();
+void liberarRecursos(int signal);
 
 
 

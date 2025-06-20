@@ -113,18 +113,22 @@ int esperar_cliente(int socket_servidor) {
     return socket_cliente;
 }
 
-
+void enviarOpCode(int fdConexion, op_code opCode)
+{
+    op_code codigo = opCode;
+    send(fdConexion,&codigo,sizeof(int),0);
+}
 
 void enviarOK(int fdConexion)
 {
-    uint32_t OK = 1;
-    send(fdConexion,&OK,sizeof(uint32_t),0);
+    int OK = 1;
+    send(fdConexion,&OK,sizeof(int),0);
 }
 
 bool esperarOK(int fdConexion)
 {
-    uint32_t OK;
-    return recv(fdConexion,OK,sizeof(uint32_t),0);
+    int OK;
+    return recv(fdConexion,&OK,sizeof(int),0);
 }
 
 void enviarOK2(int conexion)
@@ -132,11 +136,14 @@ void enviarOK2(int conexion)
     enviar_paquete(crear_super_paquete(OK),conexion);
 }
 
-bool esperarOK2(int fdConexion)
+void esperarOK2(int fdConexion)
 {
-    if(recibir_operacion(fdConexion)== OK)
+    while(1)
+    {
+    op_code opCode = recibir_operacion(fdConexion);
+    
+    if(opCode == OK)
         return 1;
-    else
-        return 0;
+    }
 
 }

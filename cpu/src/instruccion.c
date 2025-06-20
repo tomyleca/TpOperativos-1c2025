@@ -13,7 +13,8 @@ void instruccion_noop(char** parte)
         perror("Error al ejecutar NOOP");
     }
 
-    check_interrupt();
+    string_array_destroy(parte);
+
 }
 
 void instruccion_escribir_memoria(char** parte)
@@ -38,11 +39,12 @@ void instruccion_escribir_memoria(char** parte)
 
     //ACA HAY ALGO RARO, YA QUE NO DEBERIA COMPARAR CON AX BX CX PORQUE LLEGAN NUMEROS!! NO NOMBRES DE REGISTROS
 
+
     int direccion_fisica = mmu_traducir_direccion_logica(direccion_logica);
 
     if (direccion_fisica < 0) {
         log_error(logger_cpu, "Segmentation Fault al traducir la dirección lógica %d", direccion_logica);
-        enviar_interrupcion_a_kernel_y_memoria(parte, SEGMENTATION_FAULT);
+        //enviar_interrupcion_a_kernel_y_memoria(parte, SEGMENTATION_FAULT);
         return;
     }
 
@@ -53,7 +55,7 @@ void instruccion_escribir_memoria(char** parte)
 
     // Aumento el PC para que lea la proxima instruccion
 
-    liberar_array_strings(parte);
+    string_array_destroy(parte);
 
     return;
 }
@@ -82,7 +84,7 @@ void instruccion_leer_memoria(char** parte)
 
     if (direccion_fisica < 0) {
         log_error(logger_cpu, "Segmentation Fault al traducir la dirección lógica %d", direccion_logica);
-        enviar_interrupcion_a_kernel_y_memoria(parte, SEGMENTATION_FAULT);
+        //enviar_interrupcion_a_kernel_y_memoria(parte, SEGMENTATION_FAULT);
         return;
     }
 
@@ -90,7 +92,7 @@ void instruccion_leer_memoria(char** parte)
 
     peticion_lectura_a_memoria(direccion_fisica, tamanio);
     
-    liberar_array_strings(parte);
+    string_array_destroy(parte);
 }
 
 void instruccion_goto(char** parte)
@@ -104,6 +106,9 @@ void instruccion_goto(char** parte)
 
     int nuevo_pc = atoi(parte[1]);
     contexto->registros.PC = nuevo_pc;
+
+    string_array_destroy(parte);
+
 }
 
 void peticion_escritura_a_memoria(int direccion_fisica, char* valor_registro_dato)
@@ -113,7 +118,7 @@ void peticion_escritura_a_memoria(int direccion_fisica, char* valor_registro_dat
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_string_al_super_paquete(paquete, valor_registro_dato);
     enviar_paquete(paquete, socket_cpu_memoria);
-    free(paquete);
+    eliminar_paquete(paquete);
 }
 
 
@@ -188,27 +193,25 @@ int mmu_traducir_direccion_logica(int direccion_logica) {
 
     int nro_pagina = direccion_logica / tamanio_pagina;
     int desplazamiento = direccion_logica % tamanio_pagina;
-    int tabla_actual = contexto->pid;  // Empezamos con la tabla de primer nivel asociada al proceso
+    //int tabla_nivel_X = contexto->pid;  // Empezamos con la tabla de primer nivel asociada al proceso
     int entrada_nivel_X;
-    int nro_marco = -1;
+    nro_marco = -1;
+    int* entradas_de_nivel = malloc(sizeof(int)* cant_niveles);
 
     for (int nivel = 1; nivel <= cant_niveles; nivel++) {
         int potencia = (int) pow(cant_entradas_tabla, cant_niveles - nivel);
-        entrada_nivel_X = (nro_pagina / potencia) % cant_entradas_tabla;
+        entrada_nivel_X = ((nro_pagina / potencia) % cant_entradas_tabla);
 
         if (nivel < cant_niveles) {
-            //TODO HACER TODO ESTO
-            //tabla_actual = solicitar_tabla_a_memoria(tabla_actual, entrada_nivel_X);
+            entradas_de_nivel[nivel] = entrada_nivel_X;
+            solicitar_tabla_a_memoria(); //SIMULO LA SOLICITUD DE TABLA, ENREALIDAD LE SOLICITO TODAS AL FINAL
         } else {
-           // nro_marco = solicitar_marco_a_memoria(tabla_actual, entrada_nivel_X);
+            entradas_de_nivel[nivel] = entrada_nivel_X;
+            solicitar_marco_a_memoria(entradas_de_nivel); 
         }
     }
 
-    if (nro_marco == -1) {
-        // Si no estaba en memoria, podriamos necesitar pedir a swap
-        //nro_marco = solicitar_pagina_a_swap(tabla_actual, entrada_nivel_X);//TODO hacer esta funcion
-        //agregar_a_tlb(contexto->pid, nro_pagina, nro_marco); // TODO esto a verificar dsp
-    }
+    free(entradas_de_nivel);
 
     // Calculamos dirección física
     int direccion_fisica = nro_marco * tamanio_pagina + desplazamiento;
@@ -217,6 +220,29 @@ int mmu_traducir_direccion_logica(int direccion_logica) {
 }
 
 
+
+void solicitar_tabla_a_memoria()
+{
+    //TODAVIA NO LE MANDO LA ENTRADA_X PQ CUANDO LE PIDA LA DIRECCION FISICA LE MANDO TODAS LAS ENTRADAS JUNTAS, LO UNICO LE MANDO EL OPCODE PARA SIMULAR EL RETARDO DE LA MEMORIA
+    enviarOpCode(socket_cpu_memoria,SOLICITUD_TABLA);
+    sem_wait(&semLlegoPeticionMMU);
+    
+}
+
+void solicitar_marco_a_memoria(int* entradas_de_nivel)
+{
+    t_paquete* paquete = crear_super_paquete(SOLICITUD_FRAME);
+    cargar_uint32_t_al_super_paquete(paquete,contexto->pid);
+    
+    for (int nivel = 1; nivel <= cant_niveles; nivel++)
+    {
+        cargar_int_al_super_paquete(paquete,entradas_de_nivel[nivel]); //Cargo todas las entradas de nivel previamente calculadas
+    }
+    enviar_paquete(paquete,socket_cpu_memoria);
+    eliminar_paquete(paquete);
+    sem_wait(&semLlegoPeticionMMU); //Quiere decir que ya cargo el marco que le llego
+}
+
 void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
 {
     t_paquete* paquete = crear_super_paquete(CPU_PIDE_LEER_MEMORIA);
@@ -224,7 +250,7 @@ void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_int_al_super_paquete(paquete, tamanio);
     enviar_paquete(paquete, socket_cpu_memoria);
-    free(paquete);
+    eliminar_paquete(paquete);
 }
 
 
@@ -235,29 +261,39 @@ void fetch(int socket_cpu_memoria)
     // Obtener instrucción
     // Deberemos devolverle la instrucción correspondiente pid y al Program Counter recibido. 
     
+    sem_wait(&semFetch);
+
+    sem_wait(&semContextoCargado);
+
     t_paquete* paquete;
 
     // CASO EN EL QUE SE EJECUTA  SOLAMENTE UNA INSTRUCCION COMUN Y SE VUELVE A SOLICITAR OTRA
     paquete = crear_super_paquete(CPU_PIDE_INSTRUCCION_A_MEMORIA);
     
-    cargar_int_al_super_paquete(paquete, contexto->pid);
+    cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
 
-    cargar_int_al_super_paquete(paquete, contexto->registros.PC);
-
+    sem_wait(&semMutexPC);
+    cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC);
     log_info(logger_cpu, "## PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
+    sem_post(&semMutexPC);
 
     // Envio el paquete a memoria
     enviar_paquete(paquete, socket_cpu_memoria);
-    free(paquete);
+    eliminar_paquete(paquete);
 }
 
 void decode()
 {     
-        printf("Antes de el semaforo hay instruccion\n");
-        sem_wait(&sem_hay_instruccion); 
-        printf("Despues de el semaforo hay instruccion\n");
         
-        char** parte = string_split(instruccion_recibida, " "); // Divido la instrucción (que es un string) en partes  (decode)
+        sem_wait(&sem_hay_instruccion); 
+        
+       
+       
+        char* instruccionRecibidaLocal = strdup(instruccion_recibida);
+       
+        char** parte = string_split(instruccionRecibidaLocal, " "); // Divido la instrucción (que es un string) en partes  (decode)
+    
+        free(instruccionRecibidaLocal);
 
         int instruccion_enum = (int)(intptr_t)dictionary_get(instrucciones, parte[0]); // Aca se obtiene la instrucción (el enum) a partir del diccionario
 
@@ -289,7 +325,7 @@ void decode()
                 break;
             case -1:
                 log_warning(logger_cpu, "Algo paso en el interpretar instruccion!!!");
-                destruir_diccionarios();
+                //destruir_diccionarios();
                     return;
             default:
                 log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
@@ -301,62 +337,54 @@ void decode()
 
 void check_interrupt()
 {   
-    char** parte = NULL;
+    //El semaforo de recibir interrupcion no es necesario pq la validacion de que ya llego una posible interrupcion para este punto la ahce kernel antes de mandar el OK en las syscalls
     pthread_mutex_lock(&mutex_motivo_interrupcion);
     bool hay_interrupcion = flag_interrupcion;  // Leer flag
     pthread_mutex_unlock(&mutex_motivo_interrupcion);
 
     if(hay_interrupcion) // hay una interrupcion
     {   
-        pthread_mutex_lock(&mutex_motivo_interrupcion);
-        int motivo = motivo_interrupcion;  // Leer motivo
-        pthread_mutex_unlock(&mutex_motivo_interrupcion);
-
-        if(motivo == INTERRUPCION_PID) // le envio el contexto a memoria 
-        {
-            printf("antes de enviar motivo de interrupcion\n");
-            enviar_interrupcion_a_kernel_y_memoria(parte, motivo_interrupcion);
-            printf("despues de enviar motivo de interrupcion\n");
-            pthread_mutex_lock(&mutex_motivo_interrupcion);
-            flag_interrupcion = false;
-            motivo_interrupcion = -1;
-            pthread_mutex_unlock(&mutex_motivo_interrupcion);
-            
-            sem_post(&sem_interrupcion);
-            
-        } else {
-            log_error(logger_cpu, "Motivo de interrupcion inesperado: %d", motivo);
-        }
-
-        printf("ADENTRO del mutex check instruccion 2/n");
+        
         free(instruccion_recibida);
-        instruccion_recibida = NULL; 
+        instruccion_recibida = NULL;
+        
+        pthread_mutex_lock(&mutex_motivo_interrupcion);
+        flag_interrupcion = false;  // Leer flag
+        pthread_mutex_unlock(&mutex_motivo_interrupcion); 
+
+        sem_post(&semFetch); //Si todavia no se recibio el nuevo PID a ejecutar , solo hay 1/2 semaforos necerios para volver a arrancar el ciclo de instrucion
+
+        
+        
+        
+        
 
     } else {
 
         free(instruccion_recibida);
         instruccion_recibida = NULL;
+        
         printf("--------------No hay interrupcion \n");
         
-        pthread_mutex_lock(&mutex_motivo_interrupcion);
-        if(motivo_interrupcion != INTERRUPCION_PID)
-        {
-            motivo_interrupcion = -1;
-        }
-        printf("despues de motivo de interrupcion = -1 \n");
-        pthread_mutex_unlock(&mutex_motivo_interrupcion);
-        contexto->registros.PC++;
-        ciclo_instruccion(socket_cpu_memoria); // Aca vuelvo a pedirle una instruccion a memoria
+        
+        sem_post(&semFetch); // 1/2 semaforos necesarios para que vuelva a empezar el ciclo de instruccion
+        sem_post(&semContextoCargado); // 2/2 semaforos para que vuelva a empezar el ciclo de instruccion
     }
 }
 
 void ciclo_instruccion(int socket_cpu_memoria)
 {
     fetch(socket_cpu_memoria);
+    
+    sem_wait(&semMutexPC);
+        contexto->registros.PC = contexto->registros.PC + 1;
+    sem_post(&semMutexPC);
 
     decode();
 
-    check_interrupt(); 
+
+
+    check_interrupt();
 
 }
 // **********************************  
@@ -382,44 +410,6 @@ void destruir_diccionarios()
 	dictionary_destroy(instrucciones);
 }
 
-void enviar_interrupcion_a_kernel_y_memoria(char** instruccion, op_code motivo_de_interrupcion)
-{
-    t_paquete *paquete_kernel_dispatch;
-    t_paquete *paquete_memoria;
-    
-    
-    paquete_kernel_dispatch = crear_super_paquete(motivo_de_interrupcion);
-    cargar_int_al_super_paquete(paquete_kernel_dispatch, contexto->pid);
-
-    switch (motivo_de_interrupcion)
-    {    
-        case SEGMENTATION_FAULT: //TODO esto va en otro lado
-        //MEMORIA
-            contexto->registros.PC++;
-            paquete_kernel_dispatch->codigo_operacion=SEGMENTATION_FAULT;
-            paquete_memoria = crear_super_paquete(SEGMENTATION_FAULT);
-            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->pid);
-            cargar_int_al_super_paquete(paquete_kernel_dispatch,contexto->registros.PC);
-            
-        break;
-        default:
-            log_warning(logger_cpu, "Operacion desconocida. No quieras meter la pata");
-            break;
-    }
-    liberar_array_strings(instruccion); // instruccion es la variable parte
-    free(instruccion_recibida);
-    instruccion_recibida = NULL;
-    
-    // MEMORIA
-    enviar_paquete(paquete_memoria, socket_cpu_memoria);
-    free(paquete_memoria);
-     
-    // KERNEL
-    printf("Mando paquete a kenrel para comprobar algo xd --------------------\n");
-    enviar_paquete(paquete_kernel_dispatch, socket_cpu_kernel_dispatch);
-    free(paquete_kernel_dispatch);
-    //sem_post(&sem_pid); 
-}
 
 void log_instruccion(char** parte) {
     if (parte == NULL || parte[0] == NULL) {
@@ -440,21 +430,8 @@ void log_instruccion(char** parte) {
 
 // *********CACHE**********
 
-typedef struct 
-{
-    int pid;                    
-    int nro_pagina;            
-    int nro_marco;             
-    char* contenido;           
-    bool bit_referencia;       
-    bool bit_modificacion;  //para el CLOCK modificado   
-    bool bit_validez;           
-} EntradaCache;
 
-EntradaCache* cache_paginas;
-int puntero_clock;  
-
-void inicializar_cache() 
+/*void inicializar_cache() 
 {
     if (entradas_cache <= 0) {
         cache_paginas = NULL;
@@ -504,9 +481,9 @@ char leer_byte_con_cache(int direccion_logica)
             return 0;
         }
     
-        
-
-
+        // Leer directamente de memoria
+        peticion_lectura_a_memoria(direccion_fisica, 1);
+        // return recibir_char_de_memoria(); **************************************
     }
     
     //CACHÉ HABILITADA
@@ -562,5 +539,54 @@ int algoritmo_clock()
     return victima;
 }
 
+int algoritmo_clock_modificado() {
+    int inicio = puntero_clock;
+    int primera_vuelta = true;
+    
+    //Primera vuelta:buscar (0,0)
+    do {
+        if (cache_paginas[puntero_clock].bit_referencia == NULL && 
+            cache_paginas[puntero_clock].bit_modificacion == NULL) {
+            int victima = puntero_clock;
+            puntero_clock = (puntero_clock + 1) % entradas_cache;
+            return victima;
+        }
+        puntero_clock = (puntero_clock + 1) % entradas_cache;
+    } while (puntero_clock != inicio);
+    
+    //Segunda vuelta:buscar (0,1)
+    do {
+        if (cache_paginas[puntero_clock].bit_referencia == NULL) {
+            int victima = puntero_clock;
+            puntero_clock = (puntero_clock + 1) % entradas_cache;
+            return victima;
+        }
+        cache_paginas[puntero_clock].bit_referencia = false;
+        puntero_clock = (puntero_clock + 1) % entradas_cache;
+    } while (puntero_clock != inicio);
+    
+    // Si llega acá, usa la posición actual
+    int victima = puntero_clock;
+    puntero_clock = (puntero_clock + 1) % entradas_cache;
+    return victima;
+}
+
+int seleccionar_victima() {
+    // Buscar entrada libre 
+    for (int i = 0; i < entradas_cache; i++) {
+        if (!cache_paginas[i].es_valida) {
+            return i;
+        }
+    }
+
+    // No hay entradas libres, aplico algoritmo 
+    if (strcmp(reemplazo_cache, "CLOCK") == 0) {
+        return algoritmo_clock();
+    } else if (strcmp(reemplazo_cache, "CLOCK-M") == 0) {
+        return algoritmo_clock_modificado();
+    } else {
+        return 0; 
+    }
+}*/
 
 
