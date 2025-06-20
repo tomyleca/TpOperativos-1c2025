@@ -97,26 +97,26 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
  bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera)
 {
     int64_t tiempoProcesoActualEnEjecucion;
-    bool _menorRafaga(NucleoCPU* CPU)
+    bool _menorRafagaQueProcesoEnReady(NucleoCPU* CPU)
     {
         tiempoProcesoActualEnEjecucion = temporal_gettime(CPU->procesoEnEjecucion->cronometroEjecucionActual);
         return estimadoRafagaProcesoEnEspera < tiempoProcesoActualEnEjecucion;
     };
     
 
-    NucleoCPU* nucleoConMenorRafagaRestante = NULL;
+    NucleoCPU* nucleoADesalojar = NULL;
     
 
-    nucleoConMenorRafagaRestante = leerDeListaSegunCondicion(listaCPUsEnUso,_menorRafaga); //Si la rafaga del proceso en ready es menor  a la del cpu con menor rafaga restante devuelve ese cpu, sino devuelve NULL
+    nucleoADesalojar = leerDeListaSegunCondicion(listaCPUsEnUso,_menorRafagaQueProcesoEnReady); //Si la rafaga del proceso en ready es menor  a la del cpu con menor rafaga restante devuelve ese cpu, sino devuelve NULL
     
     
             
-    if(nucleoConMenorRafagaRestante!=NULL)
+    if(nucleoADesalojar!=NULL && nucleoADesalojar->procesoEnEjecucion != NULL)
     {
         
-        if(terminarEjecucion(nucleoConMenorRafagaRestante->procesoEnEjecucion,INTERRUPCION_ASINCRONICA) == 1) //si es igual a 1 quiere decir que la ejecución termino por el desalojo y no por una syscall
+        if(terminarEjecucion(nucleoADesalojar->procesoEnEjecucion,INTERRUPCION_ASINCRONICA) == 1) //si es igual a 1 quiere decir que la ejecución termino por el desalojo y no por una syscall
             {
-            PCB* procesoDesalojado = nucleoConMenorRafagaRestante->procesoEnEjecucion;
+            PCB* procesoDesalojado = nucleoADesalojar->procesoEnEjecucion;
             log_info(loggerKernel, "## (<%u>) - Desalojado por algoritmo SJF/SRT",procesoDesalojado->PID);
             log_info(loggerKernel, "## (<%u>) Pasa del estado <%s> al estado <%s>",procesoDesalojado->PID,"EXECUTE","READY");
             pasarAReady(procesoDesalojado);
@@ -142,6 +142,10 @@ int terminarEjecucion(PCB* proceso,op_code tipoInterruccion)
         return nucleoCPU->procesoEnEjecucion == proceso;
     };
 
+    if(tipoInterruccion == INTERRUPCION_ASINCRONICA)
+        agregarAListaSinRepetidos(listaProcesosPorSerDesalojados,proceso);
+    
+    
     NucleoCPU* nucleoCPU = sacarDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
     
     if(nucleoCPU != NULL)

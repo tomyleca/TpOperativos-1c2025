@@ -7,9 +7,8 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     nuevoProceso->tam=tam;
     nuevoProceso->PC=0;
     
-    nuevoProceso->PID=pidDisponible;
-    
     sem_wait(semaforoMutexPIDDisponible);
+        nuevoProceso->PID=pidDisponible;
         pidDisponible++;
     sem_post(semaforoMutexPIDDisponible);
 
@@ -24,7 +23,8 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     }
 
 
-    
+    nuevoProceso->semMutex =malloc(sizeof(sem_t));
+    sem_init(nuevoProceso->semMutex,1,1);
 
     
     nuevoProceso->estimadoSiguienteRafaga=estimacion_inicial;
@@ -160,9 +160,17 @@ PCB* buscarPCBEjecutando(uint32_t pid) {
         return nucleoEnEjecucion->procesoEnEjecucion->PID == pid;
     };
 
+    bool _mismoPID2(PCB* procesoEnEjecucion) {
+        return procesoEnEjecucion->PID == pid;
+    };
+
     NucleoCPU* NucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_mismoPID);
+    PCB* procesoPorSerDesalojado = leerDeListaSegunCondicion(listaProcesosPorSerDesalojados,_mismoPID2);
+
     if(NucleoCPU!= NULL)
         return NucleoCPU->procesoEnEjecucion;
+    else if(procesoPorSerDesalojado!=NULL)
+        return procesoPorSerDesalojado;
     else
         return NULL;
 }

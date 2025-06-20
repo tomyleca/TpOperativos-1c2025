@@ -32,6 +32,8 @@ int64_t estimadoSiguienteRafaga;
 t_temporal* cronometros[7];
 t_temporal* cronometroEjecucionActual;
 
+sem_t* semMutex;
+
 
 int ME[7];
 int MT[7];
@@ -179,7 +181,7 @@ extern t_listaConSemaforos* listaProcesosSwapReady;
 extern t_listaConSemaforos* listaCPUsAInicializar;
 extern t_listaConSemaforos* listaCPUsLibres;
 extern t_listaConSemaforos* listaCPUsEnUso;
-extern t_listaConSemaforos* listaProcesosEsperandoPC;
+extern t_listaConSemaforos* listaProcesosPorSerDesalojados; //Procesos que el planificador de corto plazo los saco de lista de los qu estan en execute, pero que todavia estan ejecutando
 
 extern t_diccionarioConSemaforos* diccionarioProcesosBloqueados;
 

@@ -194,15 +194,17 @@ void mandarContextoACPU(uint32_t PID,uint32_t PC,int fdConexion)
 void actualizarPC(uint32_t pid, uint32_t PCActualizado)
 {
     PCB* proceso = buscarPCBEjecutando(pid);
-    proceso->PC = PCActualizado;
+    proceso->PC = PCActualizado; 
 
 }
 
-actualizarPCAsincronico(uint32_t PID,uint32_t PCActualizado)
+void actualizarPCAsincronico(uint32_t PID,uint32_t PCActualizado)
 {
      bool _mismoPID(PCB* procesoEsperandoPC) {
         return procesoEsperandoPC->PID == PID;
     };
-    PCB* proceso = sacarDeListaSegunCondicion(listaProcesosEsperandoPC,_mismoPID);
-    proceso->PC = PCActualizado;
+    
+    PCB* proceso = sacarDeListaSegunCondicion(listaProcesosPorSerDesalojados,_mismoPID);
+    if(proceso != NULL); // Puede ser que se este intentado desalojar un proceso que ya termino
+        proceso->PC = PCActualizado;
 }

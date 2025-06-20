@@ -699,3 +699,4 @@ char leer_byte_con_cache(int direccion_logica)
     return 0; 
 
 
+}

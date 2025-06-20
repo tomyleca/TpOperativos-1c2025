@@ -23,6 +23,27 @@ void agregarALista(t_listaConSemaforos* listaConSemaforos,void* elemento)
     sem_post(listaConSemaforos->semaforoCantElementos);
 }
 
+
+void agregarAListaSinRepetidos(t_listaConSemaforos* listaConSemaforos,void* nuevoElemento)
+{
+    bool _esIgualANuevoElemento(void* elementoEnLista)
+    {
+        return elementoEnLista == nuevoElemento;
+    };
+
+    sem_wait(listaConSemaforos->semaforoMutex);
+    
+    if(list_find(listaConSemaforos->lista,_esIgualANuevoElemento) == NULL) //Si ningún elemento es igual al elemento a agregar, lo agrego
+        {
+        list_add(listaConSemaforos->lista,nuevoElemento);
+        sem_post(listaConSemaforos->semaforoCantElementos);
+        }
+
+    sem_post(listaConSemaforos->semaforoMutex);
+    
+}
+
+
 void* sacarDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion)
 {
     void* elem;

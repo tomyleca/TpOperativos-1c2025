@@ -86,7 +86,7 @@ void crearEstructuras()
     listaCPUsLibres = crearListaConSemaforos();
     listaCPUsEnUso = crearListaConSemaforos();
 
-    listaProcesosEsperandoPC = crearListaConSemaforos();
+    listaProcesosPorSerDesalojados = crearListaConSemaforos();
 
     
     diccionarioDispositivosIO = crearDiccionarioConSemaforos();

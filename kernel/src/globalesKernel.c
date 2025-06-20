@@ -39,7 +39,7 @@ t_listaConSemaforos* listaProcesosSwapReady;
 t_listaConSemaforos* listaCPUsAInicializar;
 t_listaConSemaforos* listaCPUsLibres;
 t_listaConSemaforos* listaCPUsEnUso;
-t_listaConSemaforos* listaProcesosEsperandoPC;
+t_listaConSemaforos* listaProcesosPorSerDesalojados;
 
 t_diccionarioConSemaforos* diccionarioProcesosBloqueados;
 

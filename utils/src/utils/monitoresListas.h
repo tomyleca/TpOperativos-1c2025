@@ -26,6 +26,10 @@ extern void agregarALista(t_listaConSemaforos* listaConSemaforos,void* elemento)
 */
 extern void* sacarDeLista(t_listaConSemaforos* listaConSemaforos,unsigned int posicion);
 
+/**
+*@brief Agrega el elemento a la lista solo si este no se encuentra ya en la lista. Utiliza semáforos para evitar condiciones de carrera.
+*/
+extern void agregarAListaSinRepetidos(t_listaConSemaforos* listaConSemaforos,void* nuevoElemento);
 
 /**
 *@brief Agrega el elemento a una lista según un orden determinado(que se pasa como parámetro). Utiliza semáforos para evitar condiciones de carrera.

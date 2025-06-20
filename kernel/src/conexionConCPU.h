@@ -29,6 +29,8 @@ extern void mandarInterrupcion(NucleoCPU* nucleoCPU,op_code tipoInterrucion);
 
 extern void actualizarPC(uint32_t pid, uint32_t PCActualizado);
 
+extern void actualizarPCAsincronico(uint32_t PID,uint32_t PCActualizado);
+
 
 
 
