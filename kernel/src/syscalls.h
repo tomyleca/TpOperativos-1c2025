@@ -19,6 +19,8 @@ extern void dump_memory(uint32_t pid);
 extern void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo);
 extern void INIT_PROC(char* archivoPseudocodigo,uint32_t tam);
 extern void syscallExit(uint32_t pid);
+extern void suspender_proceso(uint32_t pid);
+extern void des_suspender_proceso_memoria(uint32_t pid);
 
 
 

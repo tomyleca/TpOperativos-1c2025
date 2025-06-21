@@ -72,6 +72,26 @@ void dump_memory(uint32_t pid) {
     }
 }
 
+void suspender_proceso(uint32_t pid) {
+    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: SWAP_SUSPENDER_PROCESO", pid);
+    
+    if (solicitar_suspender_proceso_memoria(pid)) {
+        log_info(loggerKernel, "## (<%u>) - Suspender proceso solicitado", pid);
+    } else {
+        log_error(loggerKernel, "## (<%u>) - Error al solicitar suspension proceso a memoria", pid);
+    }
+}
+
+void des_suspender_proceso_memoria(uint32_t pid) {
+    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: SWAP_RESTAURAR_PROCESO", pid);
+    
+    if (solicitar_restaurar_proceso_memoria(pid)) {
+        log_info(loggerKernel, "## (<%u>) - Restaurar proceso solicitado", pid);
+    } else {
+        log_error(loggerKernel, "## (<%u>) - Error al solicitar restaurar proceso a memoria", pid);
+    }
+}
+
 void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
     log_info(loggerKernel, "## (<%u>) - Solicitó syscall: IO", pid);
 

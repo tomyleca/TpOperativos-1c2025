@@ -15,7 +15,7 @@ void cerrar_conexion_memoria(int socket) {
     }
 }
 
-bool suspender_proceso_memoria(uint32_t pid) {
+bool solicitar_suspender_proceso_memoria(uint32_t pid) {
     int socket_memoria = crear_conexion_memoria();
     if (socket_memoria == -1) return false;
 
@@ -36,7 +36,7 @@ bool suspender_proceso_memoria(uint32_t pid) {
     return respuesta == SWAP_SUSPENDER_PROCESO;
 }
 
-bool des_suspender_proceso_memoria(uint32_t pid) {
+bool solicitar_restaurar_proceso_memoria(uint32_t pid) {
     int socket_memoria = crear_conexion_memoria();
     if (socket_memoria == -1) return false;
 

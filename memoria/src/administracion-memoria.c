@@ -275,8 +275,9 @@ int reservar_memoria(Proceso *p, int bytes) {
     p->tabla_raiz = crear_tabla_nivel(1);
     int pagina_logica_actual = 0;
     asignar_frames_en_tabla(p->tabla_raiz, paginas_necesarias, frames, &pagina_logica_actual, 1, p);
-
-    p->tamanio_reservado += paginas_necesarias * TAM_PAGINA;
+    //Se acumula?
+    //p->tamanio_reservado += paginas_necesarias * TAM_PAGINA;
+    p->tamanio_reservado = paginas_necesarias * TAM_PAGINA;
 
   free(frames);
   return 0;
