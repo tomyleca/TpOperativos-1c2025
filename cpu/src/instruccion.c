@@ -24,12 +24,6 @@ void instruccion_escribir_memoria(char** parte)
     // Le pasamos a memoria el contenido a escribir (que se encuentra en registro datos) y la direccion fisica (que se encuentra en registro direccion) 
     log_instruccion(parte);
 
-    char* accion;
-
-    if(strcmp(parte[0],"WRITE")==0)
-    {
-        accion = "ESCRIBIR";
-    }
 
     // Leo el tamaño que  tama
     char* datos_a_escribir = parte[2];         // parte[2] = Cadena sin espacios
@@ -37,23 +31,11 @@ void instruccion_escribir_memoria(char** parte)
     // Traducimos la direccion del registro direccion
     int direccion_logica = atoi(parte[1]); // parte[1] = "0"
 
-    //ACA HAY ALGO RARO, YA QUE NO DEBERIA COMPARAR CON AX BX CX PORQUE LLEGAN NUMEROS!! NO NOMBRES DE REGISTROS
-
-
-    int direccion_fisica = mmu_traducir_direccion_logica(direccion_logica);
-
-    if (direccion_fisica < 0) {
-        log_error(logger_cpu, "Segmentation Fault al traducir la dirección lógica %d", direccion_logica);
-        //enviar_interrupcion_a_kernel_y_memoria(parte, SEGMENTATION_FAULT);
-        return;
+    //OK, SI NO ENTENDI MAL, ESTO DEBERIA ESTAR BIEN, cada que quiere escribir un byte en memoria, llama a la MMU, y hace todo hasta que termina de escribir
+    for (int i = 0; i < strlen(datos_a_escribir); i++) {
+        escribir_byte(direccion_logica + i, datos_a_escribir[i]);
+        //TODO verificar porque hay problemas con el esperarOK y enviarOK de parte de memoria
     }
-
-    log_info(logger_cpu, "PID: <%d> - Acción: <%s> - Dirección Física: <%u> - Valor: <%s>", contexto->pid, accion ,direccion_fisica, datos_a_escribir);
-
-    peticion_escritura_a_memoria(direccion_fisica, datos_a_escribir);
-
-
-    // Aumento el PC para que lea la proxima instruccion
 
     string_array_destroy(parte);
 
@@ -66,34 +48,22 @@ void instruccion_leer_memoria(char** parte)
     // READ(Registro Direccion, Tamaño): 
     // Lee el valor de memoria correspondiente a la Dirección Lógica que se encuentra en el Registro Dirección y lo almacena en el Registro Datos
     log_instruccion(parte);
-    char* accion; 
-
-    if(strcmp(parte[0],"READ")==0)
-    {
-        accion = "LEER";
-    }
-    
 
      // Leo el tamaño que va a leer en memoria
-     int tamanio = atoi(parte[2]); // parte[2] = "20"
+    int tamanio = atoi(parte[2]); // parte[2] = "20"
 
     // Obtengo la direccion logica (registro direccion)
     int direccion_logica = atoi(parte[1]); // parte[1] = "0"
 
-    int direccion_fisica = buscar_en_tlb(direccion_logica);
+    int direccion_fisica = mmu_traducir_direccion_logica(direccion_logica);
 
-    if (direccion_fisica < 0) {
-        log_error(logger_cpu, "Segmentation Fault al traducir la dirección lógica %d", direccion_logica);
-        //enviar_interrupcion_a_kernel_y_memoria(parte, SEGMENTATION_FAULT);
-        return;
-    }
+    char* valor_leido = leer_byte_cache(direccion_fisica, tamanio);
 
-    log_info(logger_cpu, "PID: <%d> - Acción: <%s> - Dirección Física: <%u> - Valor: <%d>", contexto->pid, accion ,direccion_fisica, tamanio);
+    log_info(logger_cpu, "PID: <%d> - Acción: <LEER> - Dirección Física: <%d> - Valor: <%s>", contexto->pid, direccion_fisica, valor_leido);
 
-    peticion_lectura_a_memoria(direccion_fisica, tamanio);
-    
     string_array_destroy(parte);
 }
+
 
 void instruccion_goto(char** parte)
 {
@@ -119,6 +89,7 @@ void peticion_escritura_a_memoria(int direccion_fisica, char* valor_registro_dat
     cargar_string_al_super_paquete(paquete, valor_registro_dato);
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
+    esperarOK(socket_cpu_memoria);
 }
 
 
@@ -150,9 +121,8 @@ int buscar_en_tlb(int direccion_logica) {
     
     // TLB miss: consultar MMU y agregar la nueva entrada a la TLB
     log_info(logger_cpu, "PID: <%d> - TLB MISS - Pagina: <%d>", contexto->pid, nro_pagina);
-    int direccion_fisica = mmu_traducir_direccion_logica(direccion_logica);
     
-    return direccion_fisica;
+    return -1;
 }
 
 void agregar_a_tlb(int pid, int nro_pagina, int nro_marco) {
@@ -193,11 +163,29 @@ int mmu_traducir_direccion_logica(int direccion_logica) {
 
     int nro_pagina = direccion_logica / tamanio_pagina;
     int desplazamiento = direccion_logica % tamanio_pagina;
-    //int tabla_nivel_X = contexto->pid;  // Empezamos con la tabla de primer nivel asociada al proceso
     int entrada_nivel_X;
-    nro_marco = -1;
-    int* entradas_de_nivel = malloc(sizeof(int)* cant_niveles);
+    int direccion_fisica;
 
+    if (cache_paginas != NULL && entradas_cache == 0) {
+        int indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
+        if (indice_cache != -1) {
+            int marco = cache_paginas[indice_cache].nro_marco;
+            direccion_fisica = marco * tamanio_pagina + desplazamiento;
+            return direccion_fisica;
+        }
+    }
+
+    //Si tira el indice de cache -1, busca en la TLB
+        
+    direccion_fisica = buscar_en_tlb(direccion_logica);
+    if (direccion_fisica != -1) 
+    {
+        return direccion_fisica;// Si es HIT devuelve, y no sigue con la MMU
+    }
+
+    //Despues de buscar en la TLB, por tablas multinivel
+
+    int* entradas_de_nivel = malloc(sizeof(int)* cant_niveles);
     for (int nivel = 1; nivel <= cant_niveles; nivel++) {
         int potencia = (int) pow(cant_entradas_tabla, cant_niveles - nivel);
         entrada_nivel_X = ((nro_pagina / potencia) % cant_entradas_tabla);
@@ -214,9 +202,16 @@ int mmu_traducir_direccion_logica(int direccion_logica) {
     free(entradas_de_nivel);
 
     // Calculamos dirección física
-    int direccion_fisica = nro_marco * tamanio_pagina + desplazamiento;
+    direccion_fisica = nro_marco * tamanio_pagina + desplazamiento;
     log_info(logger_cpu, "## PID: <%d> - OBTENER MARCO - Página: <%d> - Marco: <%d>", contexto->pid, nro_pagina, nro_marco);
+    //Agregar a TLB
     agregar_a_tlb(contexto->pid, nro_pagina, nro_marco);
+
+    //Si esta habilitada la cache, cargar pagina en cache
+    if (cache_paginas != NULL) {
+        cargar_pagina_en_cache(contexto->pid, nro_pagina, nro_marco);
+    }
+
     return direccion_fisica;
 }
 
@@ -439,10 +434,6 @@ void log_instruccion(char** parte) {
 
 
 
-// *********CACHE**********
-EntradaCache* cache_paginas;
-int puntero_clock; 
-
 void inicializar_cache() 
 {
     if (entradas_cache <= 0) {
@@ -591,6 +582,8 @@ void cargar_pagina_en_cache(int pid, int nro_pagina, int nro_marco)
         escribir_pagina_a_memoria(indice_victima);
     }
     
+
+    
     // Cargo nueva página desde memoria
     int direccion_fisica = nro_marco * tamanio_pagina;
         
@@ -603,13 +596,13 @@ void cargar_pagina_en_cache(int pid, int nro_pagina, int nro_marco)
     
     
     sem_wait(&sem_pagina_recibida); // Espera a que el hilo de atender_memoria reciba la página
-    pthread_mutex_lock(&mutex_cache); // Proteger la entrada de caché al actualizarla
+    //pthread_mutex_lock(&mutex_cache); // Proteger la entrada de caché al actualizarla
 
     
     // Actualizo entrada de caché
-    cache_paginas[indice_victima].pid = pid;
-    cache_paginas[indice_victima].nro_pagina = nro_pagina;
-    cache_paginas[indice_victima].nro_marco = nro_marco;
+    cache_paginas[indice_victima].pid = pid_pagina;
+    cache_paginas[indice_victima].nro_pagina = nro_pagina_recibida;
+    cache_paginas[indice_victima].nro_marco = nro_marco_recibido;
 
 
 
@@ -629,103 +622,65 @@ void cargar_pagina_en_cache(int pid, int nro_pagina, int nro_marco)
     
 }
 
-void escribir_byte_con_cache(int direccion_logica, char valor) {
+void escribir_byte(int direccion_logica, char valor) {
+    int direccion_fisica = mmu_traducir_direccion_logica(direccion_logica);
 
-    // Si caché está deshabilitada, voy directo a memoria
+    if (direccion_fisica == -1) {
+        log_error(logger_cpu, "PID: <%d> - ERROR al traducir dirección lógica <%d>", contexto->pid, direccion_logica);
+        return;
+    }
+
+    int nro_pagina = direccion_logica / tamanio_pagina;
+    int desplazamiento = direccion_logica % tamanio_pagina;
+
     if (cache_paginas == NULL) {
-        int direccion_fisica = buscar_en_tlb(direccion_logica);
-        if (direccion_fisica == -1) { //ERROR Traduccion
-            return;
-        }
-        
+        // Sin caché: escribo directamente en memoria
         char valor_str[2] = {valor, '\0'};
         log_info(logger_cpu, "PID: <%d> - Acción: <ESCRIBIR> - Dirección Física: <%u> - Valor: <%s>", contexto->pid, direccion_fisica, valor_str);
         peticion_escritura_a_memoria(direccion_fisica, valor_str);
         return;
     }
-    
-    int nro_pagina = direccion_logica / tamanio_pagina;
-    int desplazamiento = direccion_logica % tamanio_pagina;
-    
-    // Buscar en caché primero
-    int indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
-    
-    if (indice_cache == -1) {
 
-        int direccion_fisica = buscar_en_tlb(direccion_logica);
-        if (direccion_fisica == -1) {
-            return;
-        }
-        
-        int nro_marco = direccion_fisica / tamanio_pagina;
-        cargar_pagina_en_cache(contexto->pid, nro_pagina, nro_marco);
-        indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
-    }
-    
+    // Con caché habilitada, ya debe estar cargada (la MMU la cargó si no estaba)
+    int indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
     if (indice_cache != -1) {
         cache_paginas[indice_cache].contenido[desplazamiento] = valor;
-        cache_paginas[indice_cache].bit_modificacion = true; // Marco como modificada
+        cache_paginas[indice_cache].bit_modificacion = true;
+
         int direccion_fisica_log = cache_paginas[indice_cache].nro_marco * tamanio_pagina + desplazamiento;
         char valor_str[2] = {valor, '\0'};
-        log_info(logger_cpu, "PID: <%d> - Acción: <ESCRIBIR> - Dirección Física: <%u> - Valor: <%s>", contexto->pid, direccion_fisica_log, valor_str);
+        log_info(logger_cpu, "PID: <%d> - Acción: <ESCRIBIR> - Dirección Física: <%u> - Valor: <%s>",
+                 contexto->pid, direccion_fisica_log, valor_str);
+    } else {
+        log_error(logger_cpu, "PID: <%d> - ERROR: No se encontró página en caché luego de MMU", contexto->pid);
     }
 }
 
-char leer_byte_con_cache(int direccion_logica) 
-{
-    // Si caché está deshabilitada, entonces voy directo a memoria
-    if (cache_paginas == NULL) {
-        int direccion_fisica = buscar_en_tlb(direccion_logica);
-        if (direccion_fisica == -1) {
-            return 0;
-        }
-    
-        // Leer directamente de memoria
-        peticion_lectura_a_memoria(direccion_fisica, 1);
-        
-        sem_wait(&sem_valor_leido); // Espera a que el hilo de atender_memoria reciba el valor
-        log_info(logger_cpu, "PID: <%d> - Acción: <LEER> - Dirección Física: <%u> - Valor: <%c>", contexto->pid, direccion_fisica, valor_leido_memoria[0]);
-        
-        return valor_leido_memoria[0]; // Retorna el primer byte leído
-    }
-    
-    //CACHÉ HABILITADA
 
-    //Descompongo direccion logica
-    int nro_pagina = direccion_logica / tamanio_pagina;
-    int desplazamiento = direccion_logica % tamanio_pagina;
-    
-    // Busco en caché 
+
+char* leer_byte_cache(int direccion_fisica, int tamanio) {
+    int nro_pagina = direccion_fisica / tamanio_pagina;
+    int desplazamiento = direccion_fisica % tamanio_pagina;
+
+    if(entradas_cache == 0)
+    {
     int indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
     if (indice_cache != -1) {
-        // CACHE HIT -> pagina encontrada
-        int direccion_fisica_log = cache_paginas[indice_cache].nro_marco * tamanio_pagina + desplazamiento;
-        log_info(logger_cpu, "PID: <%d> - Acción: <LEER> - Dirección Física: <%u> - Valor: <%c>", contexto->pid, direccion_fisica_log, cache_paginas[indice_cache].contenido[desplazamiento]);
-        return cache_paginas[indice_cache].contenido[desplazamiento];
+        return &(cache_paginas[indice_cache].contenido[desplazamiento]);
     }
-    
-    // CACHE MISS -> busco pagina en memoria fisica
-    int direccion_fisica = buscar_en_tlb(direccion_logica);
-    if (direccion_fisica == -1) {
-        return 0;
     }
-    
-    int nro_marco = direccion_fisica / tamanio_pagina;
-    cargar_pagina_en_cache(contexto->pid, nro_pagina, nro_marco); 
-    
-    // Busco de nuevo en caché
-    indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
-    if (indice_cache != -1) {
-        int direccion_fisica_log = cache_paginas[indice_cache].nro_marco * tamanio_pagina + desplazamiento;
-        log_info(logger_cpu, "PID: <%d> - Acción: <LEER> - Dirección Física: <%u> - Valor: <%c>", contexto->pid, direccion_fisica_log, cache_paginas[indice_cache].contenido[desplazamiento]);
-        return cache_paginas[indice_cache].contenido[desplazamiento];
-    }
+
+    // Si no esta en cache, la MMU ya la cargo (o la cache está deshabilitada).
+    // Pero si no esta aun, lee desde memoria.
+    // Esto puede pasar si la cache fue recién vaciada.
     
 
-    log_error(logger_cpu, "PID: <%d> - ERROR: No se pudo leer la dirección lógica <%d>", contexto->pid, direccion_logica);
+    peticion_lectura_a_memoria(direccion_fisica, tamanio);
+    sem_wait(&sem_valor_leido);
 
-    return 0;
+    return valor_leido_memoria; // Asumiendo que apunta al buffer de lectura
 }
+
 
 
 void escribir_paginas_modificadas_proceso(int pid) 

@@ -26,6 +26,19 @@ typedef struct {
     int timestamp; // para LRU
 } EntradaTLB;
 
+//-----------CACHE---------------------//
+typedef struct 
+{
+    int pid;                    
+    int nro_pagina;            
+    int nro_marco;             
+    char* contenido;           
+    bool bit_referencia;       
+    bool bit_modificacion;  //para el CLOCK modificado   
+    bool bit_validez;           
+} EntradaCache; 
+
+
 
 extern int socket_cpu_memoria;
 extern int socket_cpu_kernel_dispatch;
@@ -52,6 +65,12 @@ extern pthread_t hilo_escuchar_memoria;
 extern pthread_t hilo_interpretar_instruccion;
 
 extern EntradaTLB* TLB_proceso;
+extern EntradaCache* cache_paginas;
+extern int puntero_clock; 
+extern int pid_pagina;
+extern int nro_pagina_recibida ;
+extern int nro_marco_recibido;
+
 extern t_list* lista_tlb;
 
 extern pthread_mutex_t mutex_motivo_interrupcion;
@@ -93,6 +112,10 @@ extern int cant_entradas_tabla;
 extern int tamanio_pagina;              
 extern int cant_niveles;
 extern int nro_marco;
+
+extern int pid_lectura;
+extern int dir_fisica_lectura;
+extern char* valor_str_temp;
 
 // TLB
 extern int entradas_tlb;

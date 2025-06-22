@@ -80,26 +80,26 @@ int obtener_timestamp_actual();
 
 void log_instruccion(char** parte);
 
+//---------MMU--------------//
 
-//-----------CACHE---------------------//
-typedef struct 
-{
-    int pid;                    
-    int nro_pagina;            
-    int nro_marco;             
-    char* contenido;           
-    bool bit_referencia;       
-    bool bit_modificacion;  //para el CLOCK modificado   
-    bool bit_validez;           
-} EntradaCache; 
+void cargar_pagina_en_cache(int pid, int nro_pagina, int nro_marco);
+
+void escribir_byte(int direccion_logica, char valor);
 
 void inicializar_cache();
+
 int buscar_en_cache(int pid, int nro_pagina);
-char leer_byte_con_cache(int direccion_logica);
+
+char* leer_byte_cache(int direccion_fisica, int tamanio);
+
 int algoritmo_clock();
+
 int algoritmo_clock_modificado();
+
 int seleccionar_victima();
+
 void solicitar_marco_a_memoria(int* entradas_de_nivel);
+
 void solicitar_tabla_a_memoria();
 
 

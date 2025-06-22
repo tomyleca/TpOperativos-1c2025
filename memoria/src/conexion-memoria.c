@@ -135,9 +135,9 @@ int atender_cliente(int *fd_conexion)
                 valor_Leido = leer_memoria(p,direccion_fisica,tamanio);
                 printf("VALOR LEIDO: %s\n", valor_Leido);
                 // Respuesta a CPU
-                paquete = crear_super_paquete(CPU_RECIBE_OK_DE_LECTURA);
+                paquete = crear_super_paquete(RESPUESTA_VALOR_LEIDO_CPU);
                 cargar_int_al_super_paquete(paquete, pid);
-                cargar_int_al_super_paquete(paquete, tamanio);
+                cargar_int_al_super_paquete(paquete, direccion_fisica);
                 cargar_string_al_super_paquete(paquete, valor_Leido);  
                 enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
@@ -155,61 +155,15 @@ int atender_cliente(int *fd_conexion)
                 
                 p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
 
-                if ( escribir_memoria(p, direccion_fisica, valor_registro) == 1) {
-                    paquete = crear_super_paquete(CPU_RECIBE_OK_DE_ESCRITURA);
+                if (escribir_memoria(p, direccion_fisica, valor_registro) == 1) {
+                    enviarOK(cliente_fd);
                 } else {
-                    paquete = crear_super_paquete(CPU_RECIBE_OK_DE_ESCRITURA);// todo: que hacer si falla la escritura?
+                    enviarOK(cliente_fd);// todo: que hacer si falla la escritura?
                 }
-                // Respuesta a CPU
-                cargar_int_al_super_paquete(paquete, pid);
-                cargar_int_al_super_paquete(paquete, direccion_fisica);
-                enviar_paquete(paquete, cliente_fd);
-                eliminar_paquete(paquete);
                 break;
+            
 
-            case CPU_SOLICITA_ESCRIBIR_PAGINA_COMPLETA:
-                printf("CPU SOLICITA ESCRIBIR PAGINA COMPLETA:--------------------------------------------------------\n");
-                unBuffer = recibiendo_super_paquete(cliente_fd);
-                pid = recibir_int_del_buffer(unBuffer);
-                direccion_fisica = recibir_int_del_buffer(unBuffer);
-                valor_registro = recibir_string_del_buffer(unBuffer);
-                limpiarBuffer(unBuffer);
-                printf("PID: %d - DIRECCION FISICA: %d - VALOR: %s\n", pid, direccion_fisica, valor_registro);
 
-                if ( escribir_memoria(p, direccion_fisica, valor) == 1) {
-                    paquete = crear_super_paquete(CPU_RECIBE_OK_DE_ESCRITURA);
-                } else {
-                    paquete = crear_super_paquete(CPU_RECIBE_OK_DE_ESCRITURA);// todo: que hacer si falla la escritura?
-                }
-                // Respuesta a CPU
-                cargar_int_al_super_paquete(paquete, pid);
-                cargar_int_al_super_paquete(paquete, direccion_fisica);
-                enviar_paquete(paquete, cliente_fd);
-                eliminar_paquete(paquete);
-                break;
-
-            case CPU_SOLICITA_LEER_PAGINA_COMPLETA:
-                printf("CPU SOLICITA LEER PAGINA COMPLETA:--------------------------------------------------------\n");
-                unBuffer = recibiendo_super_paquete(cliente_fd);
-                pid = recibir_int_del_buffer(unBuffer);
-                direccion_fisica = recibir_int_del_buffer(unBuffer);
-                tamanio = recibir_int_del_buffer(unBuffer);
-                limpiarBuffer(unBuffer);
-                printf("PID: %d - DIRECCION FISICA: %d - TAMAÑO: %d\n", pid, direccion_fisica, tamanio);
-
-                p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
-                valor_Leido = leer_memoria(p,direccion_fisica,tamanio);
-
-                printf("VALOR LEIDO: %s\n", valor_Leido);
-                // Respuesta a CPU
-                paquete = crear_super_paquete(CPU_RECIBE_OK_DE_LECTURA);
-                cargar_int_al_super_paquete(paquete, pid);
-                cargar_string_al_super_paquete(paquete, valor_Leido);  
-                cargar_int_al_super_paquete(paquete, tamanio);
-                enviar_paquete(paquete, cliente_fd);
-                eliminar_paquete(paquete);
-
-                break;
 
             case SWAP_SUSPENDER_PROCESO:
                 usleep(retardo_swap * 1000);
@@ -271,7 +225,7 @@ int atender_cliente(int *fd_conexion)
             case DUMP_MEMORY:
                 printf("DUMP_MEMORY ------------------------------------------------------------------\n");
                 unBuffer = recibiendo_super_paquete(cliente_fd);
-                uint32_t pid = recibir_uint32_t_del_buffer(buffer);
+                pid = recibir_uint32_t_del_buffer(unBuffer);
                 free(unBuffer);
                 log_info(logger_memoria, "## PID: <%u> - Memory Dump solicitado", pid);
                 

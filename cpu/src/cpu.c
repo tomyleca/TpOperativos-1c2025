@@ -16,6 +16,9 @@ int main(int argc, char* argv[]) {
     identificador_cpu = argv[1];  
     // INICIO HILOS
     inicializar_hilos(config_cpu);
+    
+    inicializar_cache();
+
 
     while(1)
     {
@@ -80,7 +83,6 @@ void inicializar_recursos()
     iniciar_diccionario_instrucciones();
     
     pthread_mutex_init(&mutex_motivo_interrupcion, NULL);
-
 
     lista_tlb = list_create();
 }

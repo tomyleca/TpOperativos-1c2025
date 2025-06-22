@@ -52,7 +52,20 @@ int cant_niveles;
 int timestamp_actual;
 int nro_marco;
 
+int pid_lectura;
+int dir_fisica_lectura;
+char* valor_str_temp;
+
 EntradaTLB* TLB_proceso;
+
+// *********CACHE**********
+EntradaCache* cache_paginas;
+int puntero_clock; 
+int pid_pagina;
+int nro_pagina_recibida ;
+int nro_marco_recibido;
+
+
 t_list* lista_tlb;
 
 pthread_mutex_t mutex_motivo_interrupcion;
