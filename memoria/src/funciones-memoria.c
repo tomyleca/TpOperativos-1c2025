@@ -141,7 +141,6 @@ void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
     t_paquete* paquete_contexto = crear_super_paquete(CPU_RECIBE_INSTRUCCION_MEMORIA);
     cargar_uint32_t_al_super_paquete(paquete_contexto, nuevo_contexto->pid);
     cargar_string_al_super_paquete(paquete_contexto, instruccion);
-    
     enviar_paquete(paquete_contexto, socket_cpu);
     
     printf("Indice: %d -- INSTRUCCION: %s \n", pc, instruccion);

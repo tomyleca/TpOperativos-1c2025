@@ -205,6 +205,6 @@ void actualizarPCAsincronico(uint32_t PID,uint32_t PCActualizado)
     };
     
     PCB* proceso = sacarDeListaSegunCondicion(listaProcesosPorSerDesalojados,_mismoPID);
-    if(proceso != NULL); // Puede ser que se este intentado desalojar un proceso que ya termino
+    if(proceso != NULL)// Puede ser que se este intentado desalojar un proceso que ya termino
         proceso->PC = PCActualizado;
 }
