@@ -275,7 +275,6 @@ int reservar_memoria(Proceso *p, int bytes) {
     p->tabla_raiz = crear_tabla_nivel(1);
     int pagina_logica_actual = 0;
     asignar_frames_en_tabla(p->tabla_raiz, paginas_necesarias, frames, &pagina_logica_actual, 1, p);
-    //p->tamanio_reservado = paginas_necesarias * TAM_PAGINA;
     p->tamanio_reservado = paginas_necesarias * TAM_PAGINA;
 
   free(frames);
@@ -297,7 +296,7 @@ void escribir_memoria(Proceso *p,  int dir_fisica, char *texto) {
     memoria_real[dir_fisica + i] = texto[i];
     p->metricas.escrituras_memoria++;
 
-    printf("## PID: %d - Escritura - Dir. Física: %d - Valor: '%c'", p->pid,
+    printf("## PID: %d - Escritura - Dir. Física: %d - Valor: '%c' \n", p->pid,
            dir_fisica, texto[i]);
   }
   log_info(logger_memoria, "Escritura en memoria del proceso %d: '%s' en dir física %d", p->pid, texto, dir_fisica);
@@ -392,6 +391,7 @@ void liberar_memoria(Proceso *p) {
   
   liberar_frames_en_tabla(p->tabla_raiz, 1);
   liberar_tabla(p->tabla_raiz);
+
   p->tabla_raiz = NULL;
   p->tamanio_reservado=0;
 }
@@ -549,6 +549,9 @@ void suspender_proceso(Proceso *p, int dir_fisica) {
   list_add(tabla_swap, entrada);
 
   for (int i = 0; i < paginas; i++) {
+    int direccion_virtual = i * TAM_PAGINA;
+    int dir_fisica = traducir_direccion(p, direccion_virtual);
+
     if (dir_fisica != -1) {
       fwrite(memoria_real + dir_fisica, 1, TAM_PAGINA, archivo_swap);
     } else {
@@ -607,6 +610,7 @@ void restaurar_proceso(Proceso *p ) {
   for (int i = 0; i < entrada->cantidad_paginas; i++) {
     fread(memoria_real + frames[i] * TAM_PAGINA, 1, TAM_PAGINA, archivo_swap);
   }
+  p->tamanio_reservado = entrada->cantidad_paginas * TAM_PAGINA;
 
   fclose(archivo_swap);
   free(frames);
