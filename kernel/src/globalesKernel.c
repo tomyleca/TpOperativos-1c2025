@@ -28,7 +28,6 @@ t_log* loggerKernel;
 
 t_config* config_kernel;
 
-
 pthread_t hilo_escuchar_kernel;
 pthread_t hilo_escuchar_kernel_interrupcion;
 pthread_t hilo_crear_kernel_memoria;

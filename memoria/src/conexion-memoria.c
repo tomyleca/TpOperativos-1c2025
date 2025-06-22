@@ -37,7 +37,7 @@ int atender_cliente(int *fd_conexion)
     printf("Si llegue aca, es porque tengo un cliente de kernel o cpu");
 
     while (1) {
-        int cod_op = recibir_operacion(cliente_fd); 
+        int cod_op = recibir_operacion(cliente_fd);
         switch (cod_op) {
             // ! KERNEL
             case MENSAJE:
@@ -214,6 +214,11 @@ int atender_cliente(int *fd_conexion)
                 enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
                 break;
+            case DUMP_MEMORY:
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                manejar_dump_memory(cliente_fd, unBuffer);
+                free(unBuffer);
+                break;
 
             case -1:
                 log_error(logger_memoria, "El cliente se desconectó. Terminando servidor.");
@@ -224,10 +229,23 @@ int atender_cliente(int *fd_conexion)
          
             
             default:
-                log_warning(logger_memoria, "Operación desconocida.");
+                log_warning(logger_memoria, "Operación desconocida: %d", cod_op);
             break;
             }
         }
 }
 
+bool manejar_dump_memory(int cliente_fd, t_buffer* buffer) {
+    uint32_t pid = recibir_uint32_t_del_buffer(buffer);
+    
+    log_info(logger_memoria, "## PID: <%u> - Memory Dump solicitado", pid);
+    
+    if (realizar_dump_memoria(pid)) {
+        enviar_paquete(crear_super_paquete(DUMP_MEMORY_OK), cliente_fd);
+        return true;
+    }
+    
+    enviar_paquete(crear_super_paquete(DUMP_MEMORY_ERROR), cliente_fd);
+    return false;
+}
 
