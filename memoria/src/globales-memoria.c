@@ -24,7 +24,5 @@ t_log_level log_level;
 char* dump_path;
 pthread_t hilo_memoria;
 
-Proceso* nuevo_contexto_provisorio; 
-Proceso* nuevo_contexto;
 
 int fd_escucha_servidor;

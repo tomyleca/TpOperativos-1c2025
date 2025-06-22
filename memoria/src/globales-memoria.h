@@ -16,10 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ERROR_MEMORIA_INSUFICIENTE -1
 #define OK 0
-#define ERROR_CREACION_ESTRUCTURAS -2
-#define SOLICITAR_MEMORIA_PROCESO 1
 typedef struct {
     uint32_t pc;            // Program Counter
     char* pseudocodigo;     // Archivo de pseudocodigo de cada tid
@@ -74,8 +71,6 @@ typedef struct {
   uint32_t pc;
 } Proceso;
 
-extern Proceso* nuevo_contexto_provisorio; 
-extern Proceso* nuevo_contexto;
 
 extern int conexion;
 extern char* ip;

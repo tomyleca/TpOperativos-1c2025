@@ -9,7 +9,6 @@
 bool *bitmap_frames = NULL;
 void *memoria_principal ;
 
-// Mutexes
 t_diccionarioConSemaforos* diccionarioProcesos;
 
 typedef struct {
@@ -85,6 +84,7 @@ TablaPagina *crear_tabla_nivel(int nivel_actual) {
   
   return tabla;
 }
+//todo borrar esto
 int traducir_direccion(Proceso *p, int direccion_virtual) {
   int nro_pagina = direccion_virtual / TAM_PAGINA;
   int desplazamiento = direccion_virtual % TAM_PAGINA;
@@ -231,9 +231,9 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   }
   p->pid = PID;  
   p->tamanio_reservado = tam;
-  agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
   p->pseudocodigo = pseudocodigo;
   p->lista_instrucciones = leer_archivo_y_cargar_instrucciones(p->pseudocodigo);
+  agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
 
   log_info(logger_memoria,"## PID: <%u> - Proceso Creado - Tamaño: <%u>",p->pid,p->tamanio_reservado);
 
@@ -339,8 +339,6 @@ char* leer_memoria(Proceso *p, int dir_fisica,int tamanio) {
 void mostrar_procesos_activos() {
   printf("\n=== Procesos Activos ===\n");
 
-  sem_wait(diccionarioProcesos->semaforoMutex);
-
   t_list* procesos = dictionary_elements(diccionarioProcesos->diccionario);
   for (int i = 0; i < list_size(procesos); i++) {
       Proceso* p = list_get(procesos, i);
@@ -350,8 +348,6 @@ void mostrar_procesos_activos() {
   }
 
   list_destroy(procesos);
-
-  sem_post(diccionarioProcesos->semaforoMutex);
 }
 
 
@@ -435,7 +431,7 @@ void liberar_entrada_swap(int pid) {
 }
 
 bool realizar_dump_memoria(int pid) {
-    Proceso* proceso = buscar_contexto_por_pid(pid);
+    Proceso* proceso = leerDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(pid));
     if (!proceso) {
         return false;
     }

@@ -271,8 +271,18 @@ int atender_cliente(int *fd_conexion)
             case DUMP_MEMORY:
                 printf("DUMP_MEMORY ------------------------------------------------------------------\n");
                 unBuffer = recibiendo_super_paquete(cliente_fd);
-                manejar_dump_memory(cliente_fd, unBuffer);
+                uint32_t pid = recibir_uint32_t_del_buffer(buffer);
                 free(unBuffer);
+                log_info(logger_memoria, "## PID: <%u> - Memory Dump solicitado", pid);
+                
+                printf("PID: %d\n", pid);
+
+                if (realizar_dump_memoria(pid)) {
+                    enviar_paquete(crear_super_paquete(DUMP_MEMORY_OK), cliente_fd);
+                } else {
+                    enviar_paquete(crear_super_paquete(DUMP_MEMORY_ERROR), cliente_fd);
+                }
+        
                 break;
 
             case -1:
@@ -289,20 +299,5 @@ int atender_cliente(int *fd_conexion)
             break;
             }
         }
-}
-
-bool manejar_dump_memory(int cliente_fd, t_buffer* buffer) {
-    uint32_t pid = recibir_uint32_t_del_buffer(buffer);
-    printf("PID: %d\n", pid);
-    log_info(logger_memoria, "## PID: <%u> - Memory Dump solicitado", pid);
-    
-
-    if (realizar_dump_memoria(pid)) {
-        enviar_paquete(crear_super_paquete(DUMP_MEMORY_OK), cliente_fd);
-        return true;
-    }
-    
-    enviar_paquete(crear_super_paquete(DUMP_MEMORY_ERROR), cliente_fd);
-    return false;
 }
 
