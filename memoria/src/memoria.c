@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
     pthread_join(hilo_memoria,NULL);
 
    //LIBRERA TODA LA MEMORIA 
-    free(memoria_real);
+    free(memoria_principal);
     free(bitmap_frames);
  
     return EXIT_SUCCESS;

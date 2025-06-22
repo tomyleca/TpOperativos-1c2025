@@ -23,7 +23,7 @@
 // =====================
 
 extern bool *bitmap_frames;
-extern char *memoria_real;
+extern void *memoria_principal;
 
 // =====================
 // Estructuras de datos
@@ -35,6 +35,8 @@ extern t_diccionarioConSemaforos* diccionarioProcesos;
 extern int cantidad_Procesos;
 
 extern t_list* tabla_swap;
+
+extern bool memoria_inicializada;
 // =====================
 // Prototipos
 // =====================
@@ -51,8 +53,8 @@ void asignar_frames_hojas(TablaPagina *tabla);
 Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo);
 int *reservar_frames(int cantidad);
 int reservar_memoria(Proceso *p, int bytes);
-void escribir_memoria(Proceso *p, int dir_fisica, char* valor);
-void leer_memoria(Proceso *p, int dir_fisica,int tamanio);
+int escribir_memoria(Proceso *p, int dir_fisica, char* valor);
+char* leer_memoria(Proceso *p, int dir_fisica,int tamanio);
 int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo);
 void mostrar_procesos_activos();
 void liberar_memoria(Proceso *p);
@@ -63,7 +65,7 @@ void interpretar_instruccion(char *linea);
 void dump_memory (Proceso *p);
 bool realizar_dump_memoria(int pid);
 
-void suspender_proceso(Proceso* p, int dir_fisica);
-void restaurar_proceso(Proceso* p);
+int suspender_proceso(Proceso* p, int dir_fisica);
+int restaurar_proceso(Proceso* p);
 #endif
 

@@ -486,7 +486,6 @@ int buscar_en_cache(int pid, int nro_pagina)
 
 int algoritmo_clock() 
 {
-    int inicio = puntero_clock;
     
     for (int i = 0; i < entradas_cache; i++) {
         if (cache_paginas[puntero_clock].bit_referencia == false) {
@@ -508,8 +507,6 @@ int algoritmo_clock()
 
 int algoritmo_clock_modificado() 
 {
-    int inicio = puntero_clock;
-    int primera_vuelta = true;
     
     //Primera vuelta:buscar (0,0)
     for(int i = 0; i < entradas_cache; i++) {
