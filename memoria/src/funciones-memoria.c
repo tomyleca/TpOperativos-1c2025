@@ -105,11 +105,12 @@ t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo)
 Proceso* buscar_contexto_por_pid(int pid)
 {
     Proceso* contexto_actual;
+    t_list* lista_contextos2 = dictionary_elements(diccionarioProcesos->diccionario);
     // Recorrer la lista de contextos
-    for (int i = 0; i < list_size(lista_contextos); i++) 
+    for (int i = 0; i < list_size(lista_contextos2); i++) 
     {
         // Obtener el contexto actual
-        contexto_actual = list_get(lista_contextos, i);
+        contexto_actual = list_get(lista_contextos2, i);
         
         // Verificar si el PID coincide
         if(contexto_actual->pid == pid) 

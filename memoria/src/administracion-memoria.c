@@ -522,7 +522,6 @@ int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
 
   memset(&p->metricas, 0, sizeof(MetricaProceso));
 
-  dump_memory(p);
 
 return 0;
 

@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
     leerConfigMemoria(config_memoria); 
 
     //INICIO LOGGER 
-    logger_memoria = iniciar_logger("memoriaLogger.log","Logger de memoria",log_level);
+    logger_memoria = iniciar_logger("memoriaLogger.log","LOGGER_MEMORIA",log_level);
 
     //INICIO MEMORIA
     inicializar_memoria();
