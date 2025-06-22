@@ -82,7 +82,6 @@ void log_instruccion(char** parte);
 
 
 //-----------CACHE---------------------//
-
 typedef struct 
 {
     int pid;                    
@@ -92,10 +91,7 @@ typedef struct
     bool bit_referencia;       
     bool bit_modificacion;  //para el CLOCK modificado   
     bool bit_validez;           
-} EntradaCache;
-
-extern EntradaCache* cache_paginas;
-extern int puntero_clock;  
+} EntradaCache; 
 
 void inicializar_cache();
 int buscar_en_cache(int pid, int nro_pagina);

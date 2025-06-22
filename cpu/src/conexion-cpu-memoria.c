@@ -75,8 +75,31 @@ void atender_memoria()
                 sem_post(&semLlegoPeticionMMU);
                 break;
 
+            case RESPUESTA_VALOR_LEIDO_CPU: 
+                buffer = recibiendo_super_paquete(socket_cpu_memoria);
+                int pid_lectura = recibir_int_del_buffer(buffer);
+                int dir_fisica_lectura = recibir_int_del_buffer(buffer);
+                char* valor_str_temp = recibir_string_del_buffer(buffer); // Recibe el valor como string
 
+                // Copia el valor al buffer temporal global. Asegura espacio y terminador nulo.
+                strncpy(valor_leido_memoria, valor_str_temp, sizeof(valor_leido_memoria) - 1);
+                valor_leido_memoria[sizeof(valor_leido_memoria) - 1] = '\0';
+                sem_post(&sem_valor_leido); 
+                break;
 
+            case RESPUESTA_PAGINA_COMPLETA_CPU: 
+                buffer = recibiendo_super_paquete(socket_cpu_memoria);
+                if (buffer != NULL && buffer->stream != NULL) {
+                    int pid_pagina = recibir_int_del_buffer(buffer);
+                    int nro_pagina_recibida = recibir_int_del_buffer(buffer);
+                    int nro_marco_recibido = recibir_int_del_buffer(buffer);
+
+                    buffer_pagina_recibida = recibir_cosas_del_buffer(buffer); // Recibe el contenido binario
+
+                    limpiarBuffer(buffer);
+                    sem_post(&sem_pagina_recibida); // Señaliza que la página está disponible
+                } 
+                break;
 
             case CPU_RECIBE_OK_DE_LECTURA:
                buffer = recibiendo_super_paquete(socket_cpu_memoria);

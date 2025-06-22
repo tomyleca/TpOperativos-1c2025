@@ -215,6 +215,7 @@ int mmu_traducir_direccion_logica(int direccion_logica) {
 
     // Calculamos dirección física
     int direccion_fisica = nro_marco * tamanio_pagina + desplazamiento;
+    log_info(logger_cpu, "## PID: <%d> - OBTENER MARCO - Página: <%d> - Marco: <%d>", contexto->pid, nro_pagina, nro_marco);
     agregar_a_tlb(contexto->pid, nro_pagina, nro_marco);
     return direccion_fisica;
 }
@@ -573,6 +574,8 @@ void escribir_pagina_a_memoria(int indice_cache)
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_string_al_super_paquete(paquete, entrada->contenido); // Página completa
     enviar_paquete(paquete, socket_cpu_memoria);
+
+    log_info(logger_cpu, "PID: <%d> - Memory Update - Página: <%d> - Frame: <%d>", entrada->pid, entrada->nro_pagina, entrada->nro_marco);
     
     entrada->bit_modificacion = false;
 }
@@ -601,18 +604,31 @@ void cargar_pagina_en_cache(int pid, int nro_pagina, int nro_marco)
     cargar_int_al_super_paquete(paquete, tamanio_pagina);
     enviar_paquete(paquete, socket_cpu_memoria);
     
-    //Falta funcion recibir_string_de_memoria()
+    
+    sem_wait(&sem_pagina_recibida); // Espera a que el hilo de atender_memoria reciba la página
+    pthread_mutex_lock(&mutex_cache); // Proteger la entrada de caché al actualizarla
 
-    //char* contenido_pagina = recibir_string_de_memoria();
     
     // Actualizo entrada de caché
     cache_paginas[indice_victima].pid = pid;
     cache_paginas[indice_victima].nro_pagina = nro_pagina;
     cache_paginas[indice_victima].nro_marco = nro_marco;
-    //memcpy(cache_paginas[indice_victima].contenido, contenido_pagina, tamanio_pagina);
+
+
+
+    if (buffer_pagina_recibida != NULL) {
+        memcpy(cache_paginas[indice_victima].contenido, buffer_pagina_recibida, tamanio_pagina);
+        free(buffer_pagina_recibida); // Liberar el buffer temporal
+        buffer_pagina_recibida = NULL; // Resetear el puntero
+    } else {
+        memset(cache_paginas[indice_victima].contenido, 0, tamanio_pagina); // Limpiar para evitar basura
+    }
+
     cache_paginas[indice_victima].bit_referencia = true;
     cache_paginas[indice_victima].bit_modificacion = false;
     cache_paginas[indice_victima].bit_validez = true;
+
+    log_info(logger_cpu, "PID: %d - Cache Add - Pagina: %d", pid, nro_pagina);
     
 }
 
@@ -626,6 +642,7 @@ void escribir_byte_con_cache(int direccion_logica, char valor) {
         }
         
         char valor_str[2] = {valor, '\0'};
+        log_info(logger_cpu, "PID: <%d> - Acción: <ESCRIBIR> - Dirección Física: <%u> - Valor: <%s>", contexto->pid, direccion_fisica, valor_str);
         peticion_escritura_a_memoria(direccion_fisica, valor_str);
         return;
     }
@@ -651,6 +668,9 @@ void escribir_byte_con_cache(int direccion_logica, char valor) {
     if (indice_cache != -1) {
         cache_paginas[indice_cache].contenido[desplazamiento] = valor;
         cache_paginas[indice_cache].bit_modificacion = true; // Marco como modificada
+        int direccion_fisica_log = cache_paginas[indice_cache].nro_marco * tamanio_pagina + desplazamiento;
+        char valor_str[2] = {valor, '\0'};
+        log_info(logger_cpu, "PID: <%d> - Acción: <ESCRIBIR> - Dirección Física: <%u> - Valor: <%s>", contexto->pid, direccion_fisica_log, valor_str);
     }
 }
 
@@ -665,7 +685,11 @@ char leer_byte_con_cache(int direccion_logica)
     
         // Leer directamente de memoria
         peticion_lectura_a_memoria(direccion_fisica, 1);
-        // return recibir_char_de_memoria(); **************************************
+        
+        sem_wait(&sem_valor_leido); // Espera a que el hilo de atender_memoria reciba el valor
+        log_info(logger_cpu, "PID: <%d> - Acción: <LEER> - Dirección Física: <%u> - Valor: <%c>", contexto->pid, direccion_fisica, valor_leido_memoria[0]);
+        
+        return valor_leido_memoria[0]; // Retorna el primer byte leído
     }
     
     //CACHÉ HABILITADA
@@ -678,6 +702,8 @@ char leer_byte_con_cache(int direccion_logica)
     int indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
     if (indice_cache != -1) {
         // CACHE HIT -> pagina encontrada
+        int direccion_fisica_log = cache_paginas[indice_cache].nro_marco * tamanio_pagina + desplazamiento;
+        log_info(logger_cpu, "PID: <%d> - Acción: <LEER> - Dirección Física: <%u> - Valor: <%c>", contexto->pid, direccion_fisica_log, cache_paginas[indice_cache].contenido[desplazamiento]);
         return cache_paginas[indice_cache].contenido[desplazamiento];
     }
     
@@ -693,10 +719,48 @@ char leer_byte_con_cache(int direccion_logica)
     // Busco de nuevo en caché
     indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
     if (indice_cache != -1) {
+        int direccion_fisica_log = cache_paginas[indice_cache].nro_marco * tamanio_pagina + desplazamiento;
+        log_info(logger_cpu, "PID: <%d> - Acción: <LEER> - Dirección Física: <%u> - Valor: <%c>", contexto->pid, direccion_fisica_log, cache_paginas[indice_cache].contenido[desplazamiento]);
         return cache_paginas[indice_cache].contenido[desplazamiento];
     }
     
-    return 0; 
+
+    log_error(logger_cpu, "PID: <%d> - ERROR: No se pudo leer la dirección lógica <%d>", contexto->pid, direccion_logica);
+
+    return 0;
+}
 
 
+void escribir_paginas_modificadas_proceso(int pid) 
+{
+    
+    for (int i = 0; i < entradas_cache; i++) {
+        if (cache_paginas[i].bit_validez != NULL && 
+            cache_paginas[i].pid == pid && 
+            cache_paginas[i].bit_modificacion != NULL) {
+            
+            escribir_pagina_a_memoria(i);
+        }
+    }
+}
+
+void eliminar_paginas_proceso_de_cache(int pid) 
+{
+    for (int i = 0; i < entradas_cache; i++) {
+        if (cache_paginas[i].bit_validez != NULL && cache_paginas[i].pid == pid) {
+            cache_paginas[i].bit_validez = false;
+            cache_paginas[i].pid = -1;
+            cache_paginas[i].nro_pagina = -1;
+            cache_paginas[i].nro_marco = -1;
+            cache_paginas[i].bit_referencia = false;
+            cache_paginas[i].bit_modificacion = false;
+            memset(cache_paginas[i].contenido, 0, tamanio_pagina);
+        }
+    }
+}
+
+void desalojar_proceso_de_cache(int pid) 
+{
+    escribir_paginas_modificadas_proceso(pid);
+    eliminar_paginas_proceso_de_cache(pid);
 }

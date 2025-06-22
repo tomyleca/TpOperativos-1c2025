@@ -103,6 +103,13 @@ extern int entradas_cache;
 extern char* reemplazo_cache;
 extern int retardo_cache;
 
+
+extern char* buffer_pagina_recibida;
+extern sem_t sem_pagina_recibida;
+extern char valor_leido_memoria[256]; 
+extern sem_t sem_valor_leido;
+extern sem_t mutex_cache;
+
 // Log level
 extern t_log_level log_level;
 

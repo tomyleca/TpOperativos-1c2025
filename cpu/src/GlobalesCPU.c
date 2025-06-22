@@ -40,6 +40,9 @@ sem_t sem_interrupcion;
 sem_t semMutexPC;
 sem_t semLlegoPeticionMMU;
 
+sem_t sem_pagina_recibida;
+sem_t sem_valor_leido;
+sem_t mutex_cache;
 
 
 //MMU
@@ -66,3 +69,8 @@ int entradas_cache;
 char* reemplazo_cache;
 int retardo_cache;
 t_log_level log_level;
+
+//CACHE
+
+char valor_leido_memoria[256]; 
+char* buffer_pagina_recibida;
