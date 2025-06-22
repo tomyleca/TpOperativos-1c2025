@@ -89,16 +89,14 @@ void atender_memoria()
 
             case RESPUESTA_PAGINA_COMPLETA_CPU: 
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
-                if (buffer != NULL && buffer->stream != NULL) {
-                    int pid_pagina = recibir_int_del_buffer(buffer);
-                    int nro_pagina_recibida = recibir_int_del_buffer(buffer);
-                    int nro_marco_recibido = recibir_int_del_buffer(buffer);
+                int pid_pagina = recibir_int_del_buffer(buffer);
+                int nro_pagina_recibida = recibir_int_del_buffer(buffer);
+                int nro_marco_recibido = recibir_int_del_buffer(buffer);
 
-                    buffer_pagina_recibida = recibir_cosas_del_buffer(buffer); // Recibe el contenido binario
+                buffer_pagina_recibida = recibir_cosas_del_buffer(buffer); // Recibe el contenido binario
 
-                    limpiarBuffer(buffer);
-                    sem_post(&sem_pagina_recibida); // Señaliza que la página está disponible
-                } 
+                sem_post(&sem_pagina_recibida); // Señaliza que la página está disponible
+                
                 break;
 
             case CPU_RECIBE_OK_DE_LECTURA:

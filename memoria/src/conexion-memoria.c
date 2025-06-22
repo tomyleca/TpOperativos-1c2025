@@ -166,6 +166,12 @@ int atender_cliente(int *fd_conexion)
 
                 break;
 
+            case CPU_SOLICITA_ESCRIBIR_PAGINA_COMPLETA:
+                break;
+
+            case CPU_SOLICITA_LEER_PAGINA_COMPLETA:
+                break;
+
             case SWAP_SUSPENDER_PROCESO:
                 usleep(retardo_swap * 1000);
                 printf("en CPU_PIDE_SUSPENDER_MEMORIA ------------------------------------------------------------------\n");

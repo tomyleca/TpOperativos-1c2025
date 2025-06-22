@@ -569,7 +569,7 @@ void escribir_pagina_a_memoria(int indice_cache)
     int direccion_fisica = entrada -> nro_marco * tamanio_pagina;
     
     // Enviar página completa a memoria
-    t_paquete* paquete = crear_super_paquete(CPU_ESCRIBE_PAGINA_COMPLETA); 
+    t_paquete* paquete = crear_super_paquete(CPU_SOLICITA_ESCRIBIR_PAGINA_COMPLETA); 
     cargar_int_al_super_paquete(paquete, entrada->pid);
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_string_al_super_paquete(paquete, entrada->contenido); // Página completa
@@ -598,7 +598,7 @@ void cargar_pagina_en_cache(int pid, int nro_pagina, int nro_marco)
     int direccion_fisica = nro_marco * tamanio_pagina;
         
     // Solicito contenido de la página a memoria
-    t_paquete* paquete = crear_super_paquete(CPU_LEE_PAGINA_COMPLETA); 
+    t_paquete* paquete = crear_super_paquete(CPU_SOLICITA_LEER_PAGINA_COMPLETA); 
     cargar_int_al_super_paquete(paquete, pid);
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_int_al_super_paquete(paquete, tamanio_pagina);
