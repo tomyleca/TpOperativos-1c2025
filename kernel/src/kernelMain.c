@@ -86,7 +86,7 @@ void crearEstructuras()
     listaCPUsLibres = crearListaConSemaforos();
     listaCPUsEnUso = crearListaConSemaforos();
 
-
+    listaProcesosPorSerDesalojados = crearListaConSemaforos();
 
     
     diccionarioDispositivosIO = crearDiccionarioConSemaforos();
@@ -105,6 +105,9 @@ void crearEstructuras()
     sem_init(semaforoMutexPIDDisponible,1,1);
     semaforoMutexGuardarDatosCPU = malloc(sizeof(sem_t));
     sem_init(semaforoMutexGuardarDatosCPU,1,1);
+    semaforoPCActualizado = malloc(sizeof(sem_t));
+    sem_init(semaforoPCActualizado,1,0);
+
 
   
 

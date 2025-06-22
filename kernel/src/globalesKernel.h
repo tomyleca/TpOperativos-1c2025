@@ -32,6 +32,8 @@ int64_t estimadoSiguienteRafaga;
 t_temporal* cronometros[7];
 t_temporal* cronometroEjecucionActual;
 
+sem_t* semMutex;
+
 
 int ME[7];
 int MT[7];
@@ -163,7 +165,7 @@ extern void* planificadorCortoPlazo(void* arg);
 extern bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera);
 extern bool menorEstimadoRafagaRestante(NucleoCPU* CPU1,NucleoCPU* CPU2);
 
-extern void terminarEjecucion(PCB* proceso);
+extern int terminarEjecucion(PCB* proceso,op_code tipoInterrupcion);
 extern void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion);
 
 /**
@@ -179,6 +181,7 @@ extern t_listaConSemaforos* listaProcesosSwapReady;
 extern t_listaConSemaforos* listaCPUsAInicializar;
 extern t_listaConSemaforos* listaCPUsLibres;
 extern t_listaConSemaforos* listaCPUsEnUso;
+extern t_listaConSemaforos* listaProcesosPorSerDesalojados; //Procesos que el planificador de corto plazo los saco de lista de los qu estan en execute, pero que todavia estan ejecutando
 
 extern t_diccionarioConSemaforos* diccionarioProcesosBloqueados;
 
@@ -201,6 +204,7 @@ extern sem_t* semaforoHayCPULibre;
 extern sem_t* semaforoEsperarOKDispatch;
 extern sem_t* semaforoMutexGuardarDatosCPU;
 extern sem_t* semaforoEsperarOKInterrupt;
+extern sem_t* semaforoPCActualizado;
 
 //MEMORIA
 extern int mandarDatosProcesoAMemoria(PCB* proceso);

@@ -3,6 +3,7 @@
 void* planificadorCortoPlazo(void* arg)
 {
     PCB* procesoAEjecutar= NULL;
+
     while(1)
     {
         sem_wait(semaforoIntentarPlanificar);
@@ -31,9 +32,12 @@ void* planificadorCortoPlazo(void* arg)
                 else 
                 {
                     ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
-                    procesoAEjecutar = sacarDeLista(listaProcesosReady,0); //Si la lista esta vacía se queda esperando
-                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == false)
+                    procesoAEjecutar = leerDeLista(listaProcesosReady,0); //Si la lista esta vacía se queda esperando
+                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == true)
+                        procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
+                    else
                         procesoAEjecutar = NULL;
+                    
                     
                     break;
                 }
@@ -92,60 +96,73 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 
  bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera)
 {
-    
-    bool _menorRafaga(NucleoCPU* CPU)
+    int64_t tiempoProcesoActualEnEjecucion;
+    bool _menorRafagaQueProcesoEnReady(NucleoCPU* CPU)
     {
-        return estimadoRafagaProcesoEnEspera < temporal_gettime(CPU->procesoEnEjecucion->cronometroEjecucionActual);
+        tiempoProcesoActualEnEjecucion = temporal_gettime(CPU->procesoEnEjecucion->cronometroEjecucionActual);
+        return estimadoRafagaProcesoEnEspera < tiempoProcesoActualEnEjecucion;
     };
     
-    sem_wait(listaCPUsEnUso->semaforoMutex);
-        t_list* listaCPUsOrdenadaPorRafagaRestante = list_sorted(listaCPUsEnUso->lista,menorEstimadoRafagaRestante);
-    sem_post(listaCPUsEnUso->semaforoMutex);
-    NucleoCPU* nucleoConMenorRafagaRestante = NULL;
+
+    NucleoCPU* nucleoADesalojar = NULL;
     
 
-    nucleoConMenorRafagaRestante = list_remove_by_condition(listaCPUsOrdenadaPorRafagaRestante,_menorRafaga);
+    nucleoADesalojar = leerDeListaSegunCondicion(listaCPUsEnUso,_menorRafagaQueProcesoEnReady); //Si la rafaga del proceso en ready es menor  a la del cpu con menor rafaga restante devuelve ese cpu, sino devuelve NULL
     
     
             
-    if(nucleoConMenorRafagaRestante!=NULL)
+    if(nucleoADesalojar!=NULL && nucleoADesalojar->procesoEnEjecucion != NULL)
     {
         
-        terminarEjecucion(nucleoConMenorRafagaRestante->procesoEnEjecucion);
-        PCB* procesoDesalojado = nucleoConMenorRafagaRestante->procesoEnEjecucion;
-        log_info(loggerKernel, "## (<%u>) - Desalojado por algoritmo SJF/SRT",procesoDesalojado->PID);
-        log_info(loggerKernel, "## (<%u>) Pasa del estado <%s> al estado <%s>",procesoDesalojado->PID,"EXECUTE","READY");
-        pasarAReady(procesoDesalojado);
-        return true;
+        if(terminarEjecucion(nucleoADesalojar->procesoEnEjecucion,INTERRUPCION_ASINCRONICA) == 1) //si es igual a 1 quiere decir que la ejecución termino por el desalojo y no por una syscall
+            {
+            PCB* procesoDesalojado = nucleoADesalojar->procesoEnEjecucion;
+            log_info(loggerKernel, "## (<%u>) - Desalojado por algoritmo SJF/SRT",procesoDesalojado->PID);
+            log_info(loggerKernel, "## (<%u>) Pasa del estado <%s> al estado <%s>",procesoDesalojado->PID,"EXECUTE","READY");
+            pasarAReady(procesoDesalojado);
+            return true;
+            }
+        else 
+            return false;
     }
     else
     {
         return false;
     }
 
-    list_clean(listaCPUsOrdenadaPorRafagaRestante);
-    free(listaCPUsOrdenadaPorRafagaRestante);
+
 
 
 }
 
-void terminarEjecucion(PCB* proceso)
+int terminarEjecucion(PCB* proceso,op_code tipoInterruccion)
 {
-    bool _ejecutandoProceso(NucleoCPU* NucleoCPU)
+    bool _ejecutandoProceso(NucleoCPU* nucleoCPU)
     {
-        return NucleoCPU->procesoEnEjecucion == proceso;
+        return nucleoCPU->procesoEnEjecucion == proceso;
     };
 
-    NucleoCPU* NucleoCPU = sacarDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
-    NucleoCPU->ejecutando=false;
-    mandarInterrupcion(NucleoCPU);
-    agregarALista(listaCPUsLibres,NucleoCPU);
-    PCB* procesoPostEjecucion = NucleoCPU->procesoEnEjecucion;
-    guardarDatosDeEjecucion(procesoPostEjecucion);
-    
-    sem_post(semaforoIntentarPlanificar);
+    if(tipoInterruccion == INTERRUPCION_ASINCRONICA)
+        agregarAListaSinRepetidos(listaProcesosPorSerDesalojados,proceso);
     
     
+    NucleoCPU* nucleoCPU = sacarDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
+    
+    if(nucleoCPU != NULL)
+        {
+        nucleoCPU->ejecutando=false;
+        mandarInterrupcion(nucleoCPU,tipoInterruccion);
+        agregarALista(listaCPUsLibres,nucleoCPU);
+        PCB* procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
+        guardarDatosDeEjecucion(procesoPostEjecucion);
+
+        sem_post(semaforoIntentarPlanificar);
+        return 1;
+        } /* Puede ocurrir que se intente finalizar la ejecucion de un proceso por desalojo al despues que el mismo se intenta 
+        finalizar por algo que ocurre en su ejecución(SYSCALL EXIT, IO NO ENCONTRADO ETC.)
+        , o visceversa, por lo que chequeo que haya un cpu ejecutando el proceso del que quiero terminar la ejecucion*/
+
+        return 0;
 }
 
 bool menorEstimadoRafagaRestante(NucleoCPU* CPU1,NucleoCPU* CPU2)

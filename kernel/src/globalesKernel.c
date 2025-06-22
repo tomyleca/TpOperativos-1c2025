@@ -39,6 +39,7 @@ t_listaConSemaforos* listaProcesosSwapReady;
 t_listaConSemaforos* listaCPUsAInicializar;
 t_listaConSemaforos* listaCPUsLibres;
 t_listaConSemaforos* listaCPUsEnUso;
+t_listaConSemaforos* listaProcesosPorSerDesalojados;
 
 t_diccionarioConSemaforos* diccionarioProcesosBloqueados;
 
@@ -59,6 +60,7 @@ sem_t* semaforoHayCPULibre;
 sem_t* semaforoEsperarOKDispatch;
 sem_t* semaforoMutexGuardarDatosCPU;
 sem_t* semaforoEsperarOKInterrupt;
+sem_t* semaforoPCActualizado;
 
 //HILOS
 pthread_t hiloAtenderDispatch;

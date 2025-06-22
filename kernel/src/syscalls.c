@@ -7,9 +7,8 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     nuevoProceso->tam=tam;
     nuevoProceso->PC=0;
     
-    nuevoProceso->PID=pidDisponible;
-    
     sem_wait(semaforoMutexPIDDisponible);
+        nuevoProceso->PID=pidDisponible;
         pidDisponible++;
     sem_post(semaforoMutexPIDDisponible);
 
@@ -24,7 +23,8 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     }
 
 
-    
+    nuevoProceso->semMutex =malloc(sizeof(sem_t));
+    sem_init(nuevoProceso->semMutex,1,1);
 
     
     nuevoProceso->estimadoSiguienteRafaga=estimacion_inicial;
@@ -95,7 +95,7 @@ void dump_memory(uint32_t pid) {
      
     else { //TODO esto lo arreglo cuando haga dumpMemory en memoria
         log_error(loggerKernel, "## (<%u>) - Error en DUMP_MEMORY. Finalizando proceso", pid);
-        terminarEjecucion(proceso);
+        terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
         pasarAExit(proceso,"EXECUTE");
     }
     //TODO hacer bloqueo para dumpMemory
@@ -125,14 +125,14 @@ void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
 
     if (dispositivo == NULL) {
         log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", pid, nombreIO);
-        terminarEjecucion(proceso);
+        terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
         pasarAExit(proceso,"EXECUTE");
         return;
     }
 
     log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",pid,nombreIO);
 
-    terminarEjecucion(proceso);
+    terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
     pasarABLoqueadoPorIO(proceso, tiempo, nombreIO);
     
 }
@@ -148,7 +148,7 @@ void syscallExit(uint32_t pid)
     }
 
     
-    terminarEjecucion(proceso);
+    terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
     pasarAExit(proceso,"EXECUTE");
     
     
@@ -160,9 +160,17 @@ PCB* buscarPCBEjecutando(uint32_t pid) {
         return nucleoEnEjecucion->procesoEnEjecucion->PID == pid;
     };
 
+    bool _mismoPID2(PCB* procesoEnEjecucion) {
+        return procesoEnEjecucion->PID == pid;
+    };
+
     NucleoCPU* NucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_mismoPID);
+    PCB* procesoPorSerDesalojado = leerDeListaSegunCondicion(listaProcesosPorSerDesalojados,_mismoPID2);
+
     if(NucleoCPU!= NULL)
         return NucleoCPU->procesoEnEjecucion;
+    else if(procesoPorSerDesalojado!=NULL)
+        return procesoPorSerDesalojado;
     else
         return NULL;
 }

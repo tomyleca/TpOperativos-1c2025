@@ -79,10 +79,11 @@ bool menorTam(PCB* PCB1,PCB* PCB2)
 
 
 void pasarAReady(PCB* proceso){
-    agregarALista(listaProcesosReady,proceso);
+    agregarAListaSinRepetidos(listaProcesosReady,proceso);
     temporal_resume(proceso->cronometros[READY]);
     proceso->ME[READY]++;
-
     
+    if(algoritmoDePlanificacionInt == SRT)
+        sem_post(semaforoIntentarPlanificar);
     
 }

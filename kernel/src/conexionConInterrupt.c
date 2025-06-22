@@ -27,7 +27,6 @@ void esperarDatosInterrupt(void* conexion)
     switch(cod_op)    
     {
         case 1:
-            printf("Llega OK interrupt");
             sem_post(semaforoEsperarOKInterrupt);
             break;
         case HANDSHAKE_CPU_KERNEL_I:
@@ -81,9 +80,17 @@ NucleoCPU* guardarDatosCPUInterrupt(char* identificador,int fdConexion)
 
 }
 
-void mandarInterrupcion(NucleoCPU* nucleoCPU)
+void mandarInterrupcion(NucleoCPU* nucleoCPU,op_code tipoInterrupcion)
 {
-    int Interrupcion = INTERRUPCION;
+    int Interrupcion = tipoInterrupcion;
     send(nucleoCPU->fdConexionInterrupt,&Interrupcion,sizeof(int),0);   
-    sem_wait(semaforoEsperarOKInterrupt);
+    
+    if(tipoInterrupcion == INTERRUPCION_ASINCRONICA)    
+        sem_wait(semaforoPCActualizado); //Este espera que cpu le mande el PC actualizado, esto lo hace al final del ciclo de instrucción si lel llega una interrupcion asincronica en el medio
+                                        //De esta forma evito sacar el cpu de ejecucion a la mitad de una syscall, lo que puede llevar a seg faults
+
+
+    sem_wait(semaforoEsperarOKInterrupt); //Este espera que cpu le avise que le llego la interrupcion
+
+
 }

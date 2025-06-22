@@ -149,7 +149,8 @@ void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
 
     if(chequearListaVacia(dispositivoIO->listaInstancias)) //Si despues de sacar la instancia no quedan más paso a exit todos los proceso esperando el dispositivo
     {
-        list_iterate(dispositivoIO->colaEsperandoIO->lista,exitDeProcesoBLoqueadoPorIO);
+        if(!chequearListaVacia(dispositivoIO->colaEsperandoIO)) //Chequeo que no este vacia tampoco
+            list_iterate(dispositivoIO->colaEsperandoIO->lista,exitDeProcesoBLoqueadoPorIO);
         
         borrarListaConSemaforos(dispositivoIO->listaInstancias);
         borrarListaConSemaforos(dispositivoIO->colaEsperandoIO);
@@ -164,7 +165,8 @@ void exitDeProcesoBLoqueadoPorIO(ProcesoEnEsperaIO* procesoEnEsperaIO)
 {
     
     
-    
+    if(procesoEnEsperaIO != NULL)
+    {
     sem_wait(procesoEnEsperaIO->semaforoMutex); //Para no interrumpir manejarProcesoBloqueado o hiloContadorSwap a la mitad 
         esperarCancelacionDeHilo(procesoEnEsperaIO->hiloContadorSwap); //Cancelo el hilo contadorSwap, para que no tire seg fault cuando haga free del semaforoMutex
         esperarCancelacionDeHilo(procesoEnEsperaIO->hiloManejoBloqueado); //Cancelo este hilo que esta esperando el fin de IO
@@ -177,7 +179,7 @@ void exitDeProcesoBLoqueadoPorIO(ProcesoEnEsperaIO* procesoEnEsperaIO)
         free(procesoEnEsperaIO->semaforoMutex);
         free(procesoEnEsperaIO->semaforoIOFinalizada);
         free(procesoEnEsperaIO);
-    
+    }
     
         
        

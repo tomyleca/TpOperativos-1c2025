@@ -40,7 +40,14 @@ void atender_dispatch_cpu(void* conexion)
                 NucleoCPU = guardarDatosCPUDispatch(identificador,fdConexion);
                 limpiarBuffer(buffer);
                 break;
-            
+
+            case PC_INTERRUPCION_ASINCRONICA:
+                buffer = recibiendo_super_paquete(fdConexion);
+                PID = recibir_uint32_t_del_buffer(buffer);
+                PC = recibir_uint32_t_del_buffer(buffer);
+                actualizarPCAsincronico(PID,PC);
+                sem_post(semaforoPCActualizado);
+                break;
             case IO:
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
@@ -187,6 +194,17 @@ void mandarContextoACPU(uint32_t PID,uint32_t PC,int fdConexion)
 void actualizarPC(uint32_t pid, uint32_t PCActualizado)
 {
     PCB* proceso = buscarPCBEjecutando(pid);
-    proceso->PC = PCActualizado;
+    proceso->PC = PCActualizado; 
 
+}
+
+void actualizarPCAsincronico(uint32_t PID,uint32_t PCActualizado)
+{
+     bool _mismoPID(PCB* procesoEsperandoPC) {
+        return procesoEsperandoPC->PID == PID;
+    };
+    
+    PCB* proceso = sacarDeListaSegunCondicion(listaProcesosPorSerDesalojados,_mismoPID);
+    if(proceso != NULL)// Puede ser que se este intentado desalojar un proceso que ya termino
+        proceso->PC = PCActualizado;
 }

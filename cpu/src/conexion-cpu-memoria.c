@@ -117,17 +117,28 @@ void atender_interrupcion_kernel()
         switch (cod_op) 
         {
       
-            case INTERRUPCION:
+            case INTERRUPCION_SINCRONICA:
                 
-                log_info(logger_cpu, " ## Llega interrupción al puerto Interrupt.");
+                log_info(logger_cpu, " ## Llega interrupción sincrónica al puerto Interrupt.");
+                pthread_mutex_lock(&mutex_motivo_interrupcion);
+                flag_interrupcion = true;
+                printf("Adentro de lmutex interrup \n");
+                motivo_interrupcion = INTERRUPCION_SINCRONICA;
+                pthread_mutex_unlock(&mutex_motivo_interrupcion);
+                enviarOK(socket_cpu_kernel_interrupt);
+                
+                
+                break;
+
+            case INTERRUPCION_ASINCRONICA:
+                log_info(logger_cpu, " ## Llega interrupción asincrónica al puerto Interrupt.");
                 
                 pthread_mutex_lock(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;
                 printf("Adentro de lmutex interrup \n");
-                motivo_interrupcion = INTERRUPCION;
+                motivo_interrupcion = INTERRUPCION_ASINCRONICA;
                 pthread_mutex_unlock(&mutex_motivo_interrupcion);
                 enviarOK(socket_cpu_kernel_interrupt);
-                
                 break;
             case -1:
                 log_error(logger_cpu, "KERNEL INTERRUPT se desconecto. Terminando servidor");

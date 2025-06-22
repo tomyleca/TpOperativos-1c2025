@@ -350,8 +350,18 @@ void check_interrupt()
         
         pthread_mutex_lock(&mutex_motivo_interrupcion);
         flag_interrupcion = false;  // Leer flag
+
+        if(motivo_interrupcion == INTERRUPCION_ASINCRONICA) //Si es asincronica le mando el PC actualizado
+        {
+            t_paquete* paquete = crear_super_paquete(PC_INTERRUPCION_ASINCRONICA);
+            cargar_uint32_t_al_super_paquete(paquete,contexto->pid);
+            cargar_uint32_t_al_super_paquete(paquete,contexto->registros.PC);
+            enviar_paquete(paquete,socket_cpu_kernel_dispatch);
+            eliminar_paquete(paquete);
+        }
         pthread_mutex_unlock(&mutex_motivo_interrupcion); 
 
+        
         sem_post(&semFetch); //Si todavia no se recibio el nuevo PID a ejecutar , solo hay 1/2 semaforos necerios para volver a arrancar el ciclo de instrucion
 
         
@@ -429,9 +439,10 @@ void log_instruccion(char** parte) {
 
 
 // *********CACHE**********
+EntradaCache* cache_paginas;
+int puntero_clock; 
 
-
-/*void inicializar_cache() 
+void inicializar_cache() 
 {
     if (entradas_cache <= 0) {
         cache_paginas = NULL;
@@ -439,6 +450,7 @@ void log_instruccion(char** parte) {
     }
 
     cache_paginas = malloc(sizeof(EntradaCache) * entradas_cache);
+
     puntero_clock = 0;
     
     // Inicializo todas las entradas  deshabilitadas
@@ -457,19 +469,189 @@ void log_instruccion(char** parte) {
 int buscar_en_cache(int pid, int nro_pagina) 
 {   
     for (int i = 0; i < entradas_cache; i++) {
-        if (cache_paginas[i].bit_validez && 
+        if (cache_paginas[i].bit_validez != false && 
             cache_paginas[i].pid == pid && 
             cache_paginas[i].nro_pagina == nro_pagina) {
             
+            //CACHE HIT
             cache_paginas[i].bit_referencia = true;
-            
             log_info(logger_cpu, "PID: <%d> - CACHE HIT - Página: <%d>", pid, nro_pagina);
-            return i; // Devuelve indice
+            return i; 
         }
     }
-    
+    //CACHE MISS
     log_info(logger_cpu, "PID: <%d> - CACHE MISS - Página: <%d>", pid, nro_pagina);
     return -1; // No encontrada
+}
+
+int algoritmo_clock() 
+{
+    int inicio = puntero_clock;
+    
+    for (int i = 0; i < entradas_cache; i++) {
+        if (cache_paginas[puntero_clock].bit_referencia == false) {
+            int victima = puntero_clock;
+            puntero_clock = (puntero_clock + 1) % entradas_cache; //avanzo
+            return victima;
+        }
+
+        cache_paginas[puntero_clock].bit_referencia = false; //si es true le da otra vuelta
+        puntero_clock = (puntero_clock + 1) % entradas_cache; //avanzo
+    }
+    
+    //si todas estaban en true, ahora todas tienen false y la victima es el primero
+    int victima = puntero_clock;
+    puntero_clock = (puntero_clock + 1) % entradas_cache;
+
+    return victima;
+}
+
+int algoritmo_clock_modificado() 
+{
+    int inicio = puntero_clock;
+    int primera_vuelta = true;
+    
+    //Primera vuelta:buscar (0,0)
+    for(int i = 0; i < entradas_cache; i++) {
+        if (cache_paginas[puntero_clock].bit_referencia == false && 
+            cache_paginas[puntero_clock].bit_modificacion == false) {
+            int victima = puntero_clock;
+            puntero_clock = (puntero_clock + 1) % entradas_cache;
+            return victima;
+        }
+        puntero_clock = (puntero_clock + 1) % entradas_cache;
+    }
+    
+    //Segunda vuelta:buscar (0,1)
+    for(int i = 0; i < entradas_cache; i++) {
+        if (cache_paginas[puntero_clock].bit_referencia == false) {
+            int victima = puntero_clock;
+            puntero_clock = (puntero_clock + 1) % entradas_cache;
+            return victima;
+        }
+        cache_paginas[puntero_clock].bit_referencia = false;
+        puntero_clock = (puntero_clock + 1) % entradas_cache;
+    }
+    
+    // Si llega acá, usa la posición actual
+    int victima = puntero_clock;
+    puntero_clock = (puntero_clock + 1) % entradas_cache;
+    return victima;
+}
+
+int seleccionar_victima() 
+{
+    // Buscar entrada libre 
+    for (int i = 0; i < entradas_cache; i++) {
+        if (cache_paginas[i].bit_validez == false) {
+            return i;
+        }
+    }
+
+    // No hay entradas libres, aplico algoritmo 
+    if (strcmp(reemplazo_cache, "CLOCK") == 0) {
+        return algoritmo_clock();
+    } else if (strcmp(reemplazo_cache, "CLOCK-M") == 0) {
+        return algoritmo_clock_modificado();
+    } else {
+        return 0; 
+    }
+}
+
+void escribir_pagina_a_memoria(int indice_cache) 
+{
+    if (cache_paginas[indice_cache].bit_modificacion == false) {
+        return; 
+    }
+    
+    EntradaCache* entrada = &cache_paginas[indice_cache];
+    int direccion_fisica = entrada -> nro_marco * tamanio_pagina;
+    
+    // Enviar página completa a memoria
+    t_paquete* paquete = crear_super_paquete(CPU_ESCRIBE_PAGINA_COMPLETA); 
+    cargar_int_al_super_paquete(paquete, entrada->pid);
+    cargar_int_al_super_paquete(paquete, direccion_fisica);
+    cargar_string_al_super_paquete(paquete, entrada->contenido); // Página completa
+    enviar_paquete(paquete, socket_cpu_memoria);
+    
+    entrada->bit_modificacion = false;
+}
+
+void cargar_pagina_en_cache(int pid, int nro_pagina, int nro_marco) 
+{
+    if (cache_paginas == NULL){
+        return;
+    }
+
+    int indice_victima = seleccionar_victima();
+    
+    // Si hay una página válida en esa posición, escribirla si está modificada
+    // Se mantiene todo actualizado
+    if (cache_paginas[indice_victima].bit_validez != false) {
+        escribir_pagina_a_memoria(indice_victima);
+    }
+    
+    // Cargo nueva página desde memoria
+    int direccion_fisica = nro_marco * tamanio_pagina;
+        
+    // Solicito contenido de la página a memoria
+    t_paquete* paquete = crear_super_paquete(CPU_LEE_PAGINA_COMPLETA); 
+    cargar_int_al_super_paquete(paquete, pid);
+    cargar_int_al_super_paquete(paquete, direccion_fisica);
+    cargar_int_al_super_paquete(paquete, tamanio_pagina);
+    enviar_paquete(paquete, socket_cpu_memoria);
+    
+    //Falta funcion recibir_string_de_memoria()
+
+    //char* contenido_pagina = recibir_string_de_memoria();
+    
+    // Actualizo entrada de caché
+    cache_paginas[indice_victima].pid = pid;
+    cache_paginas[indice_victima].nro_pagina = nro_pagina;
+    cache_paginas[indice_victima].nro_marco = nro_marco;
+    //memcpy(cache_paginas[indice_victima].contenido, contenido_pagina, tamanio_pagina);
+    cache_paginas[indice_victima].bit_referencia = true;
+    cache_paginas[indice_victima].bit_modificacion = false;
+    cache_paginas[indice_victima].bit_validez = true;
+    
+}
+
+void escribir_byte_con_cache(int direccion_logica, char valor) {
+
+    // Si caché está deshabilitada, voy directo a memoria
+    if (cache_paginas == NULL) {
+        int direccion_fisica = buscar_en_tlb(direccion_logica);
+        if (direccion_fisica == -1) { //ERROR Traduccion
+            return;
+        }
+        
+        char valor_str[2] = {valor, '\0'};
+        peticion_escritura_a_memoria(direccion_fisica, valor_str);
+        return;
+    }
+    
+    int nro_pagina = direccion_logica / tamanio_pagina;
+    int desplazamiento = direccion_logica % tamanio_pagina;
+    
+    // Buscar en caché primero
+    int indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
+    
+    if (indice_cache == -1) {
+
+        int direccion_fisica = buscar_en_tlb(direccion_logica);
+        if (direccion_fisica == -1) {
+            return;
+        }
+        
+        int nro_marco = direccion_fisica / tamanio_pagina;
+        cargar_pagina_en_cache(contexto->pid, nro_pagina, nro_marco);
+        indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
+    }
+    
+    if (indice_cache != -1) {
+        cache_paginas[indice_cache].contenido[desplazamiento] = valor;
+        cache_paginas[indice_cache].bit_modificacion = true; // Marco como modificada
+    }
 }
 
 char leer_byte_con_cache(int direccion_logica) 
@@ -506,7 +688,7 @@ char leer_byte_con_cache(int direccion_logica)
     }
     
     int nro_marco = direccion_fisica / tamanio_pagina;
-    //cargar_pagina_en_cache(); FALTA ESTA FUNCION!!!
+    cargar_pagina_en_cache(contexto->pid, nro_pagina, nro_marco); 
     
     // Busco de nuevo en caché
     indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
@@ -515,78 +697,6 @@ char leer_byte_con_cache(int direccion_logica)
     }
     
     return 0; 
+
+
 }
-
-int algoritmo_clock() 
-{
-    int inicio = puntero_clock;
-    
-    for (int i = 0; i < entradas_cache; i++) {
-        if (cache_paginas[puntero_clock].bit_referencia == false) {
-            int victima = puntero_clock;
-            puntero_clock = (puntero_clock + 1) % entradas_cache; //avanzo
-            return victima;
-        }
-
-        cache_paginas[puntero_clock].bit_referencia = false; //si es true le da otra vuelta
-        puntero_clock = (puntero_clock + 1) % entradas_cache; //avanzo
-    }
-    
-    //si todas estaban en true, ahora todas tienen false y no devuelve victima
-    int victima = puntero_clock;
-    puntero_clock = (puntero_clock + 1) % entradas_cache;
-
-    return victima;
-}
-
-int algoritmo_clock_modificado() {
-    int inicio = puntero_clock;
-    int primera_vuelta = true;
-    
-    //Primera vuelta:buscar (0,0)
-    do {
-        if (cache_paginas[puntero_clock].bit_referencia == NULL && 
-            cache_paginas[puntero_clock].bit_modificacion == NULL) {
-            int victima = puntero_clock;
-            puntero_clock = (puntero_clock + 1) % entradas_cache;
-            return victima;
-        }
-        puntero_clock = (puntero_clock + 1) % entradas_cache;
-    } while (puntero_clock != inicio);
-    
-    //Segunda vuelta:buscar (0,1)
-    do {
-        if (cache_paginas[puntero_clock].bit_referencia == NULL) {
-            int victima = puntero_clock;
-            puntero_clock = (puntero_clock + 1) % entradas_cache;
-            return victima;
-        }
-        cache_paginas[puntero_clock].bit_referencia = false;
-        puntero_clock = (puntero_clock + 1) % entradas_cache;
-    } while (puntero_clock != inicio);
-    
-    // Si llega acá, usa la posición actual
-    int victima = puntero_clock;
-    puntero_clock = (puntero_clock + 1) % entradas_cache;
-    return victima;
-}
-
-int seleccionar_victima() {
-    // Buscar entrada libre 
-    for (int i = 0; i < entradas_cache; i++) {
-        if (!cache_paginas[i].es_valida) {
-            return i;
-        }
-    }
-
-    // No hay entradas libres, aplico algoritmo 
-    if (strcmp(reemplazo_cache, "CLOCK") == 0) {
-        return algoritmo_clock();
-    } else if (strcmp(reemplazo_cache, "CLOCK-M") == 0) {
-        return algoritmo_clock_modificado();
-    } else {
-        return 0; 
-    }
-}*/
-
-

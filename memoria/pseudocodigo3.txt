@@ -1,3 +1,1 @@
-IO Prueba 4
-IO Prueba 100
 EXIT

@@ -2,8 +2,8 @@
 
 void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
     
-    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"READY","BLOCKED");
-    cargarCronometro(proceso,READY);
+    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","BLOCKED");
+    cargarCronometro(proceso,EXECUTE);
     
 
 
