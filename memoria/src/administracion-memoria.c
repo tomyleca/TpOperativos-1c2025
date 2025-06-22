@@ -15,7 +15,7 @@ t_diccionarioConSemaforos* diccionarioProcesos;
 typedef struct {
   uint32_t pid;
   uint32_t offset;
-  uint32_t cantidad_paginas;
+  uint32_t tamanio_original;
 } EntradaSwap;
 
 t_list* tabla_swap;
@@ -276,7 +276,6 @@ int reservar_memoria(Proceso *p, int bytes) {
     p->tabla_raiz = crear_tabla_nivel(1);
     int pagina_logica_actual = 0;
     asignar_frames_en_tabla(p->tabla_raiz, paginas_necesarias, frames, &pagina_logica_actual, 1, p);
-    p->tamanio_reservado = paginas_necesarias * TAM_PAGINA;
 
   free(frames);
   return 0;
@@ -496,8 +495,7 @@ void dump_memory(Proceso *p) {
     log_info(logger_memoria, "## PID: <%d> - Memory Dump completado - <%d> bytes escritos en <%s>", 
              p->pid, bytes_escritos, full_filename);
     
-    mostrar_bitmap();
-    mostrar_procesos_activos();
+  
 
 
   if (!p || !p->tabla_raiz) {
@@ -507,7 +505,10 @@ void dump_memory(Proceso *p) {
     printf("## PID: %d\n", p->pid);
     imprimir_tabla(p->tabla_raiz, 1, 0);
   }
-
+  printf("\n");
+  printf("MODO DEBUG ONLY:\n");
+  mostrar_bitmap();
+  mostrar_procesos_activos();
 }
 
 int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
@@ -521,8 +522,8 @@ int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
 
 
   memset(&p->metricas, 0, sizeof(MetricaProceso));
-
-
+  printf("## PID: <%u> - Proceso guardado y memoria reservada - Tamaño: <%u>\n", p->pid, p->tamanio_reservado);
+  mostrar_bitmap();
 return 0;
 
 }
@@ -548,8 +549,8 @@ int suspender_proceso(Proceso *p, int dir_fisica) {
 
   EntradaSwap *entrada = malloc(sizeof(EntradaSwap));
   entrada->pid = p->pid;
+  entrada->tamanio_original = p->tamanio_reservado;
   entrada->offset = offset;
-  entrada->cantidad_paginas = paginas;
 
   list_add(tabla_swap, entrada);
 
@@ -565,11 +566,10 @@ int suspender_proceso(Proceso *p, int dir_fisica) {
       free(vacio);
     }
   }
-
+  log_info(logger_memoria, "PID: <%u> - Proceso suspendido correctamente en swapfile", p->pid);
   fclose(archivo_swap);
   liberar_memoria(p);
   return 1; 
-  log_info(logger_memoria, "PID: <%u> - Proceso suspendido correctamente en swapfile", p->pid);
 }
 
 int restaurar_proceso(Proceso *p ) {
@@ -596,7 +596,9 @@ int restaurar_proceso(Proceso *p ) {
 
   fseek(archivo_swap, entrada->offset, SEEK_SET);
 
-  int *frames = reservar_frames(entrada->cantidad_paginas);
+  int cantidad_paginas = (entrada->tamanio_original + TAM_PAGINA - 1) / TAM_PAGINA;
+
+  int *frames = reservar_frames(cantidad_paginas);
 
   if (!frames) {
    log_error(logger_memoria, "No hay frames disponibles para restaurar PID: <%u>", p->pid);
@@ -605,14 +607,15 @@ int restaurar_proceso(Proceso *p ) {
   }
 
   p->tabla_raiz = crear_tabla_nivel(1);
-  int pagina_logica_actual = 0;
-  asignar_frames_en_tabla(p->tabla_raiz, entrada->cantidad_paginas, frames,
-                          &pagina_logica_actual, 1, p);
 
-  for (int i = 0; i < entrada->cantidad_paginas; i++) {
+  int pagina_logica_actual = 0;
+  asignar_frames_en_tabla(p->tabla_raiz, cantidad_paginas, frames, &pagina_logica_actual, 1, p);
+
+  for (int i = 0; i < cantidad_paginas; i++) {
     fread((char*)memoria_principal + frames[i] * TAM_PAGINA, 1, TAM_PAGINA, archivo_swap);
   }
-  p->tamanio_reservado = entrada->cantidad_paginas * TAM_PAGINA;
+
+  p->tamanio_reservado = entrada->tamanio_original;
 
   fclose(archivo_swap);
   free(frames);

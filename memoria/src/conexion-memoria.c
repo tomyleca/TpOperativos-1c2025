@@ -293,7 +293,7 @@ int atender_cliente(int *fd_conexion)
 
 bool manejar_dump_memory(int cliente_fd, t_buffer* buffer) {
     uint32_t pid = recibir_uint32_t_del_buffer(buffer);
-    
+    printf("PID: %d\n", pid);
     log_info(logger_memoria, "## PID: <%u> - Memory Dump solicitado", pid);
     
 
