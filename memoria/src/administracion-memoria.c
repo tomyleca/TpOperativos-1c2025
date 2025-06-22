@@ -8,7 +8,6 @@
 
 bool *bitmap_frames = NULL;
 void *memoria_principal ;
-bool memoria_inicializada = false;
 
 // Mutexes
 t_diccionarioConSemaforos* diccionarioProcesos;
@@ -67,7 +66,6 @@ void inicializar_memoria() {
   log_info(logger_memoria, "Memoria inicializada - Lista de swap inicializada");
   log_info(logger_memoria,  "Cantidad de frames: <%d>",  CANT_FRAMES);
   log_info(logger_memoria,"Tamaño de página: <%d>",  TAM_PAGINA);
-  memoria_inicializada = true;
 }
 
 // Crea tabla multinivel recursivamente
@@ -418,12 +416,23 @@ void destruir_proceso(Proceso *p) {
     p->metricas.escrituras_memoria);
 
   liberar_memoria(p); 
-  //todo: marcar como libres entradas de swap si corresponde
+  liberar_entrada_swap(p->pid);
   sacarDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(p->pid));
 
   free(p);
 
 
+}
+
+void liberar_entrada_swap(int pid) {
+  for (int i = 0; i < list_size(tabla_swap); i++) {
+      EntradaSwap *entrada = list_get(tabla_swap, i);
+      if (entrada->pid == pid) {
+          list_remove_and_destroy_element(tabla_swap, i, free);
+          log_info(logger_memoria, "Entrada de swap liberada para PID: <%u>", pid);
+          return;
+      }
+  }
 }
 
 bool realizar_dump_memoria(int pid) {
@@ -519,30 +528,6 @@ return 0;
 
 }
 
-char **leer_instrucciones(const char *ruta, int *cantidad) {
-
-  log_info(logger_memoria,"Ruta recibida: <%s>\n", ruta);
-  FILE *archivo = fopen(ruta, "r");
-
-  if (!archivo) {
-      log_error(logger_memoria, "No se pudo abrir el archivo de instrucciones");
-    return NULL;
-  }
-
-  char **lineas = NULL;
-  char buffer[256];
-  int count = 0;
-
-  while (fgets(buffer, sizeof(buffer), archivo)) {
-    buffer[strcspn(buffer, "\r\n")] = 0;
-    lineas = realloc(lineas, sizeof(char *) * (count + 1));
-    lineas[count++] = strdup(buffer);
-  }
-
-  fclose(archivo);
-  *cantidad = count;
-  return lineas;
-}
 
 int suspender_proceso(Proceso *p, int dir_fisica) {
 
