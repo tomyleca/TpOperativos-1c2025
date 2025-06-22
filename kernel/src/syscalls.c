@@ -1,4 +1,6 @@
-#include <syscalls.h>
+#include "syscalls.h"
+#include "conexionConMemoria.h"
+
 
 void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     //Creo un nuevo proceso
@@ -60,47 +62,14 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     inicializarProceso();
 }
 
-
 void dump_memory(uint32_t pid) {
-    log_info(loggerKernel, "## (<%d>) - Solicitó syscall: DUMP_MEMORY", pid);
-    int socket_memoria_particular = crear_conexion(loggerKernel, ip_memoria, puerto_memoria);
-
-    t_paquete* paquete = crear_super_paquete(DUMP_MEMORY);
-
-    if (paquete == NULL) {
-        log_error(loggerKernel, "Error al crear el paquete para DUMP_MEMORY");
-        return;
-    }
-
-    cargar_uint32_t_al_super_paquete(paquete, pid);
-    enviar_paquete(paquete, socket_memoria_particular);
-    eliminar_paquete(paquete);
-
-    //op_code respuesta = recibir_operacion(socket_memoria_particular);
-
-    PCB* proceso = NULL;
-    proceso = buscarPCBEjecutando(pid);
+    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: DUMP_MEMORY", pid);
     
-    if (proceso == NULL) {
-        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para DUMP_MEMORY", pid);
-        exit(1);
+    if (solicitar_dump_memoria(pid)) {
+        log_info(loggerKernel, "## (<%u>) - Memory Dump solicitado", pid);
+    } else {
+        log_error(loggerKernel, "## (<%u>) - Error al solicitar Memory Dump", pid);
     }
-    /*
-    int respuesta = recibir_operacion(socket_memoria_particular);
-    if (respuesta == DUMP_MEMORY_OK) {
-        log_info(loggerKernel, "## (<%u>) - Finalizó correctamente DUMP_MEMORY", pid);
-        pasarAEXECUTE(proceso);
-    }
-    */
-     
-    else { //TODO esto lo arreglo cuando haga dumpMemory en memoria
-        log_error(loggerKernel, "## (<%u>) - Error en DUMP_MEMORY. Finalizando proceso", pid);
-        terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
-        pasarAExit(proceso,"EXECUTE");
-    }
-    //TODO hacer bloqueo para dumpMemory
-
-    liberar_conexion(socket_memoria_particular);
 }
 
 void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
@@ -174,5 +143,4 @@ PCB* buscarPCBEjecutando(uint32_t pid) {
     else
         return NULL;
 }
-
 
