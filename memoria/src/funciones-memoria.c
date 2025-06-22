@@ -118,7 +118,7 @@ Proceso* buscar_contexto_por_pid(int pid)
         }
     }
 
-    log_error(logger_memoria, "No se encontró el contexto para el PID %d", pid);
+    log_error(logger_memoria, "No se encontró el contexto para el PID <%d>", pid);
     //exit(1); // Si no se encuentra, devolver NULL
     return contexto_actual;
 }
@@ -137,7 +137,7 @@ void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
     if(instruccion == NULL) 
         return;
     
-    log_info(logger_memoria, "## PID: %u - Obtener instrucción: %d - Instrucción: %s",nuevo_contexto->pid, pc, instruccion);
+    log_info(logger_memoria, "## PID: <%u> - Obtener instrucción: <%d> - Instrucción: <%s>",nuevo_contexto->pid, pc, instruccion);
    
     t_paquete* paquete_contexto = crear_super_paquete(CPU_RECIBE_INSTRUCCION_MEMORIA);
     cargar_uint32_t_al_super_paquete(paquete_contexto, nuevo_contexto->pid);

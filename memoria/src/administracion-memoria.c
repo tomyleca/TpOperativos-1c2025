@@ -65,8 +65,8 @@ void inicializar_memoria() {
   }
 
   log_info(logger_memoria, "Memoria inicializada - Lista de swap inicializada");
-  log_info(logger_memoria,  "Cantidad de frames: %d",  CANT_FRAMES);
-  log_info(logger_memoria,"Tamaño de página: %d",  TAM_PAGINA);
+  log_info(logger_memoria,  "Cantidad de frames: <%d>",  CANT_FRAMES);
+  log_info(logger_memoria,"Tamaño de página: <%d>",  TAM_PAGINA);
   memoria_inicializada = true;
 }
 
@@ -106,14 +106,14 @@ int traducir_direccion(Proceso *p, int direccion_virtual) {
     if (nivel == CANTIDAD_NIVELES) {
       int frame = tabla->frames[entrada];
       if (frame == -1) {
-     log_error(logger_memoria,"Página no asignada\n");
+     log_error(logger_memoria,"Página no asignada");
         return -1;
       }
       return frame * TAM_PAGINA + desplazamiento;
     } else {
       tabla = tabla->entradas[entrada];
       if (!tabla) {
-        log_error(logger_memoria,"Tabla intermedia nula\n");
+        log_error(logger_memoria,"Tabla intermedia nula");
         return -1;
       }
       divisor /= ENTRADAS_POR_TABLA;
@@ -214,7 +214,7 @@ void asignar_frames_hojas(TablaPagina *tabla) {
         if (frame != -1)
           tabla->frames[i] = frame;
         else {
-            log_error(logger_memoria,"No hay más frames disponibles\n");
+            log_error(logger_memoria,"No hay más frames disponibles.");
         }
       }
     }
@@ -228,7 +228,7 @@ void asignar_frames_hojas(TablaPagina *tabla) {
 Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   Proceso *p = malloc(sizeof(Proceso));
   if (!p) {
-    log_error(logger_memoria, "Error al crear proceso");
+    log_error(logger_memoria, "Error al crear proceso.");
     exit(EXIT_FAILURE);
   }
   p->pid = PID;  
@@ -237,7 +237,7 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   p->pseudocodigo = pseudocodigo;
   p->lista_instrucciones = leer_archivo_y_cargar_instrucciones(p->pseudocodigo);
 
-  log_info(logger_memoria,"## PID: %u - Proceso Creado - Tamaño: %u",p->pid,p->tamanio_reservado);
+  log_info(logger_memoria,"## PID: <%u> - Proceso Creado - Tamaño: <%u>",p->pid,p->tamanio_reservado);
 
   return p;
 }
@@ -291,7 +291,7 @@ int escribir_memoria(Proceso *p,  int dir_fisica, char *texto) {
 
   for (int i = 0; i < len; i++) {
     if (dir_fisica == -1) {
-     log_info(logger_memoria,"## PID: %d  - ERROR: Dirección inválida %d", p->pid, dir_fisica + i);
+     log_info(logger_memoria,"## PID: <%d>  - ERROR: Dirección inválida <%d>", p->pid, dir_fisica + i);
       return -1;
     }
 
@@ -299,15 +299,14 @@ int escribir_memoria(Proceso *p,  int dir_fisica, char *texto) {
     p->metricas.escrituras_memoria++;
   }
 
-  log_info(logger_memoria, "## PID: %u - Escritura - Dir. Física: %d - Tamaño: %d", p->pid, dir_fisica, len);
-  printf("\n");
+  log_info(logger_memoria, "## PID: <%u> - Escritura - Dir. Física: <%d> - Tamaño: <%d>", p->pid, dir_fisica, len);
   return 1;
 }
 
 
 char leer_byte(Proceso *p, int dir_fisica) {
   if (dir_fisica < 0 || dir_fisica >= CANT_FRAMES * TAM_PAGINA) {
-    printf("## PID: %d - ERROR: Lectura fuera de límites físicos", p->pid);
+    printf("## PID: <%d> - ERROR: Lectura fuera de límites físicos", p->pid);
     return -1;
   }
 
@@ -333,7 +332,7 @@ char* leer_memoria(Proceso *p, int dir_fisica,int tamanio) {
   p->metricas.lecturas_memoria++;
 
 
-  log_info(logger_memoria, "## PID: %u - Lectura - Dir. Física: %d - Tamaño: %d", p->pid, dir_fisica, tamanio);
+  log_info(logger_memoria, "## PID: <%u> - Lectura - Dir. Física: <%d> - Tamaño: <%d>", p->pid, dir_fisica, tamanio);
 
   return val;
 }
@@ -409,7 +408,7 @@ void liberar_memoria(Proceso *p) {
 
 void destruir_proceso(Proceso *p) {
 
-  log_info(logger_memoria, "## PID: %u - Proceso Destruido - Métricas - Acc.T.Pag: %d; Inst.Sol.: %d; SWAP: %d; Mem.Prin.: %d; Lec.Mem.: %d; Esc.Mem.: %d",
+  log_info(logger_memoria, "## PID: <%u> - Proceso Destruido - Métricas - Acc.T.Pag: <%d>; Inst.Sol.: <%d>; SWAP: <%d>; Mem.Prin.: <%d>; Lec.Mem.: <%d>; Esc.Mem.: <%d>",
     p->pid,
     p->metricas.accesos_tabla_paginas,
     p->metricas.instrucciones_solicitadas,
@@ -461,11 +460,11 @@ void dump_memory(Proceso *p) {
     
     FILE *dump_file = fopen(full_filename, "wb");
     if (!dump_file) {
-        log_error(logger_memoria, "Error al crear archivo de dump: %s", full_filename);
+        log_error(logger_memoria, "Error al crear archivo de dump: <%s>", full_filename);
         return;
     }
     
-    log_info(logger_memoria, "## PID: %d - Memory Dump - Creando archivo: %s", p->pid, full_filename);
+    log_info(logger_memoria, "## PID: <%d> - Memory Dump - Creando archivo: <%s>", p->pid, full_filename);
     
     int bytes_escritos = 0;
     
@@ -485,7 +484,7 @@ void dump_memory(Proceso *p) {
     
     fclose(dump_file);
     
-    log_info(logger_memoria, "## PID: %d - Memory Dump completado - %d bytes escritos en %s", 
+    log_info(logger_memoria, "## PID: <%d> - Memory Dump completado - <%d> bytes escritos en <%s>", 
              p->pid, bytes_escritos, full_filename);
     
     mostrar_bitmap();
@@ -493,7 +492,7 @@ void dump_memory(Proceso *p) {
 
 
   if (!p || !p->tabla_raiz) {
-    log_error(logger_memoria, "No se puede mostrar la tabla raíz del Proceso PID %d: no existe o no tiene páginas.\n ", p ? p->pid : -1);
+    log_error(logger_memoria, "No se puede mostrar la tabla raíz del Proceso PID <%d>: no existe o no tiene páginas.\n ", p ? p->pid : -1);
     return;
   } else {
     printf("## PID: %d\n", p->pid);
@@ -522,7 +521,7 @@ return 0;
 
 char **leer_instrucciones(const char *ruta, int *cantidad) {
 
-  log_info(logger_memoria,"Ruta recibida: %s\n", ruta);
+  log_info(logger_memoria,"Ruta recibida: <%s>\n", ruta);
   FILE *archivo = fopen(ruta, "r");
 
   if (!archivo) {
@@ -548,14 +547,14 @@ char **leer_instrucciones(const char *ruta, int *cantidad) {
 int suspender_proceso(Proceso *p, int dir_fisica) {
 
   if (!p || !p->tabla_raiz) {
-    log_error(logger_memoria, "No se puede suspender el proceso %u: no existe o no tiene tabla de páginas", p->pid);
+    log_error(logger_memoria, "No se puede suspender el proceso <%u>: no existe o no tiene tabla de páginas", p->pid);
     return -1;
   }
 
   FILE *archivo_swap = fopen(path_swapfile, "ab");
 
   if (!archivo_swap) {
-   log_error(logger_memoria,"No se pudo abrir swapfile.bin para suspender el proceso %u", p->pid);
+   log_error(logger_memoria,"No se pudo abrir swapfile.bin para suspender el proceso <%u>", p->pid);
     return -1;
   }
 
@@ -586,7 +585,7 @@ int suspender_proceso(Proceso *p, int dir_fisica) {
   fclose(archivo_swap);
   liberar_memoria(p);
   return 1; 
-  log_info(logger_memoria, "PID: %u - Proceso suspendido correctamente en swapfile", p->pid);
+  log_info(logger_memoria, "PID: <%u> - Proceso suspendido correctamente en swapfile", p->pid);
 }
 
 int restaurar_proceso(Proceso *p ) {
@@ -601,7 +600,7 @@ int restaurar_proceso(Proceso *p ) {
   }
 
   if (!entrada) {
-    log_error(logger_memoria, "PID %u no está en swap", p->pid);
+    log_error(logger_memoria, "PID <%u> no está en swap", p->pid);
     return -1;
   }
 
@@ -616,7 +615,7 @@ int restaurar_proceso(Proceso *p ) {
   int *frames = reservar_frames(entrada->cantidad_paginas);
 
   if (!frames) {
-   log_error(logger_memoria, "No hay frames disponibles para restaurar PID: %u", p->pid);
+   log_error(logger_memoria, "No hay frames disponibles para restaurar PID: <%u>", p->pid);
     fclose(archivo_swap);
     return -1;
   }
@@ -642,6 +641,6 @@ int restaurar_proceso(Proceso *p ) {
     }
   }
 
-  log_info(logger_memoria," PID: %u - Restaurado exitosamente desde swapfile", p->pid);
+  log_info(logger_memoria," PID: <%u> - Restaurado exitosamente desde swapfile", p->pid);
   return 1;
 }

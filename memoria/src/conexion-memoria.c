@@ -3,7 +3,7 @@
 void server_escucha(int* fd_escucha_servidor)
 {
 
-    log_info(logger_memoria, "## Kernel Conectado - FD del socket: %d", *fd_escucha_servidor);
+    log_info(logger_memoria, "## Kernel Conectado - FD del socket: <%d>", *fd_escucha_servidor);
 
 
     while (1) {
@@ -11,7 +11,7 @@ void server_escucha(int* fd_escucha_servidor)
         int fd_conexion_2 = *fd_escucha_servidor;
         int fd_conexion = esperar_cliente(fd_conexion_2);
         log_info(logger_memoria, "\n");
-        log_info(logger_memoria, "## Cliente conectado - FD del socket: %d", fd_conexion);
+        log_info(logger_memoria, "## Cliente conectado - FD del socket: <%d>", fd_conexion);
 
         if (fd_conexion != -1) {
             pthread_t hilo_conexion;
@@ -37,7 +37,8 @@ int atender_cliente(int *fd_conexion)
     int direccion_fisica;
     int tamanio;
     Proceso* p;
-    printf("Si llegue aca, es porque tengo un cliente de kernel o cpu");
+    printf("---------------------------------------------\n");
+    printf("Atendiendo cliente con fd: %d\n", cliente_fd);
 
     while (1) {
         int cod_op = recibir_operacion(cliente_fd);
@@ -149,7 +150,8 @@ int atender_cliente(int *fd_conexion)
                 pid = recibir_int_del_buffer(unBuffer);
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
                 char* valor_registro = recibir_string_del_buffer(unBuffer);
-                 printf("Valor del dato a ecribir en memoria: %s", valor_registro);
+                 printf("Valor registro en escribir memoria: %s --------------------------------------------------------\n", valor_registro);
+                
                 limpiarBuffer(unBuffer);
                 
                 p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
@@ -165,7 +167,7 @@ int atender_cliente(int *fd_conexion)
                 cargar_int_al_super_paquete(paquete, direccion_fisica);
                 enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
-                printf("despues de mandar el paquete a cpu de CPU_PIDE_ESCRIBIR_MEMORIA\n");
+                printf("despues de mandar el paquete a cpu de CPU_RECIBE_OK_DE_ESCRITURA\n");
 
 
 
@@ -188,7 +190,7 @@ int atender_cliente(int *fd_conexion)
                 }
             
                if ( suspender_proceso(p_suspend, direccion_fisica) == -1) {
-                    log_error(logger_memoria, "Error al suspender el proceso PID %d.", pid);
+                    log_error(logger_memoria, "Error al suspender el proceso PID <%d>.", pid);
                     paquete = crear_super_paquete(SWAP_ERROR);
                 } else{
                     log_info(logger_memoria, "Proceso PID %d suspendido correctamente.", pid);
@@ -212,15 +214,13 @@ int atender_cliente(int *fd_conexion)
                 Proceso* p_restaurar = leerDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(pid));
 
                 if (!p_restaurar) {
-                    log_error(logger_memoria, "No se encontró el proceso PID %d para restaurar.", pid);
+                    log_error(logger_memoria, "No se encontró el proceso PID <%d> para restaurar.", pid);
                     paquete = crear_super_paquete(SWAP_ERROR);
                 }
             
                 if (   restaurar_proceso(p_restaurar) == -1) {
-                    log_error(logger_memoria, "Error al restaurar el proceso PID %d.", pid);
                     paquete = crear_super_paquete(SWAP_ERROR);
                 } else{
-                    log_info(logger_memoria, "Proceso PID %d restaurado correctamente.", pid);
                     paquete = crear_super_paquete(SWAP_OK);
                 }
         
@@ -244,7 +244,7 @@ int atender_cliente(int *fd_conexion)
          
             
             default:
-                log_warning(logger_memoria, "Operación desconocida: %d", cod_op);
+                log_warning(logger_memoria, "Operación desconocida: <%d>", cod_op);
             break;
             }
         }
@@ -253,7 +253,7 @@ int atender_cliente(int *fd_conexion)
 bool manejar_dump_memory(int cliente_fd, t_buffer* buffer) {
     uint32_t pid = recibir_uint32_t_del_buffer(buffer);
     
-    log_info(logger_memoria, "## PID: %u - Memory Dump solicitado", pid);
+    log_info(logger_memoria, "## PID: <%u> - Memory Dump solicitado", pid);
     
 
     if (realizar_dump_memoria(pid)) {
