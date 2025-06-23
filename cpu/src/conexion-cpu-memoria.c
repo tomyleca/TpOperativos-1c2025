@@ -58,13 +58,12 @@ void atender_memoria()
             case CPU_RECIBE_INSTRUCCION_MEMORIA: 
                 //ACA LLEGA LA SOLICITUD DE LA INSTRUCCION DE MEMORIA
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
-                contexto->pid = recibir_uint32_t_del_buffer(buffer);
                 instruccion_recibida = recibir_string_del_buffer(buffer); // instruccion_recibida se usa en instruccion.c
                 log_info(logger_cpu,"# Llega instrucción de memoria: %s", instruccion_recibida);
                 limpiarBuffer(buffer);
                 sem_post(&sem_hay_instruccion);
-                
                 break;
+            
             case RESPUESTA_SOLICITUD_TABLA:
                 sem_post(&semLlegoPeticionMMU);
                 break;
@@ -77,14 +76,17 @@ void atender_memoria()
 
             case RESPUESTA_VALOR_LEIDO_CPU: 
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
-                pid_lectura = recibir_int_del_buffer(buffer);
-                dir_fisica_lectura = recibir_int_del_buffer(buffer);
                 valor_str_temp = recibir_string_del_buffer(buffer); // Recibe el valor como string
-
                 // Copia el valor al buffer temporal global. Asegura espacio y terminador nulo.
                 strncpy(valor_leido_memoria, valor_str_temp, sizeof(valor_leido_memoria) - 1);
                 valor_leido_memoria[sizeof(valor_leido_memoria) - 1] = '\0';
                 sem_post(&sem_valor_leido); 
+                limpiarBuffer(buffer);
+                break;
+
+
+            case CPU_RECIBE_OK_DE_ESCRITURA:
+                sem_post(&semOkEscritura);
                 break;
 
             case RESPUESTA_PAGINA_COMPLETA_CPU: 
@@ -97,14 +99,7 @@ void atender_memoria()
                 sem_post(&sem_pagina_recibida); // Señaliza que la página está disponible
                 
                 break;
-            
-            case CPU_RECIBE_OK_DE_ESCRITURA:
-                buffer = recibiendo_super_paquete(socket_cpu_memoria);
-                contexto->pid = recibir_int_del_buffer(buffer);
-                direccion_fisica = recibir_int_del_buffer(buffer);
-                            
-                limpiarBuffer(buffer); 
-                break;
+
             case -1:
                 log_error(logger_cpu, "MEMORIA se desconecto. Terminando servidor");
                 //shutdown(socket_cpu_memoria, SHUT_RDWR);

@@ -118,13 +118,12 @@ void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
     log_info(logger_memoria, "## PID: <%u> - Obtener instrucción: <%d> - Instrucción: <%s>",nuevo_contexto->pid, pc, instruccion);
    
     t_paquete* paquete_contexto = crear_super_paquete(CPU_RECIBE_INSTRUCCION_MEMORIA);
-    cargar_uint32_t_al_super_paquete(paquete_contexto, nuevo_contexto->pid);
     cargar_string_al_super_paquete(paquete_contexto, instruccion);
     enviar_paquete(paquete_contexto, socket_cpu);
     
     printf("Indice: %d -- INSTRUCCION: %s \n", pc, instruccion);
     
-    free(paquete_contexto);
+    eliminar_paquete(paquete_contexto);
         
     // Liberar memoria usada por el string_split
      

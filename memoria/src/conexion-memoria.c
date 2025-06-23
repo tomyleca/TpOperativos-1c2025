@@ -136,8 +136,6 @@ int atender_cliente(int *fd_conexion)
                 printf("VALOR LEIDO: %s\n", valor_Leido);
                 // Respuesta a CPU
                 paquete = crear_super_paquete(RESPUESTA_VALOR_LEIDO_CPU);
-                cargar_int_al_super_paquete(paquete, pid);
-                cargar_int_al_super_paquete(paquete, direccion_fisica);
                 cargar_string_al_super_paquete(paquete, valor_Leido);  
                 enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
@@ -156,9 +154,9 @@ int atender_cliente(int *fd_conexion)
                 p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
 
                 if (escribir_memoria(p, direccion_fisica, valor_registro) == 1) {
-                    enviarOK(cliente_fd);
+                    enviarOpCode(cliente_fd,CPU_RECIBE_OK_DE_ESCRITURA);
                 } else {
-                    enviarOK(cliente_fd);// todo: que hacer si falla la escritura?
+                    //TODO: que hacer si falla la escritura?
                 }
                 break;
             

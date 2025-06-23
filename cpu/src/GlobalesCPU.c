@@ -39,6 +39,7 @@ sem_t semOKDispatch;
 sem_t sem_interrupcion;
 sem_t semMutexPC;
 sem_t semLlegoPeticionMMU;
+sem_t semOkEscritura;
 
 sem_t sem_pagina_recibida;
 sem_t sem_valor_leido;

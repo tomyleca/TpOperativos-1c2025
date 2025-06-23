@@ -131,19 +131,3 @@ bool esperarOK(int fdConexion)
     return recv(fdConexion,&OK,sizeof(int),0);
 }
 
-void enviarOK2(int conexion)
-{
-    enviar_paquete(crear_super_paquete(OK),conexion);
-}
-
-void esperarOK2(int fdConexion)
-{
-    while(1)
-    {
-    op_code opCode = recibir_operacion(fdConexion);
-    
-    if(opCode == OK)
-        return 1;
-    }
-
-}

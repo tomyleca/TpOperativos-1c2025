@@ -31,11 +31,22 @@ void instruccion_escribir_memoria(char** parte)
     // Traducimos la direccion del registro direccion
     int direccion_logica = atoi(parte[1]); // parte[1] = "0"
 
-    //OK, SI NO ENTENDI MAL, ESTO DEBERIA ESTAR BIEN, cada que quiere escribir un byte en memoria, llama a la MMU, y hace todo hasta que termina de escribir
-    for (int i = 0; i < strlen(datos_a_escribir); i++) {
-        escribir_byte(direccion_logica + i, datos_a_escribir[i]);
-        //TODO verificar porque hay problemas con el esperarOK y enviarOK de parte de memoria
+    int direccion_fisica = mmu_traducir_direccion_logica(direccion_logica);
+
+    if (direccion_fisica < 0) {
+        log_error(logger_cpu, "Segmentation Fault al traducir la dirección lógica %d", direccion_logica);
+        exit(1);
+        return;
     }
+
+    peticion_escritura_a_memoria(direccion_fisica, datos_a_escribir);
+
+    sem_wait(&semOkEscritura);
+
+    log_info(logger_cpu, "PID: <%d> - Acción: <%s> - Dirección Física: <%u> - Valor: <%s>", contexto->pid, "ESCRIBIR" ,direccion_fisica, datos_a_escribir);
+   
+    
+
 
     string_array_destroy(parte);
 
@@ -57,9 +68,17 @@ void instruccion_leer_memoria(char** parte)
 
     int direccion_fisica = mmu_traducir_direccion_logica(direccion_logica);
 
-    char* valor_leido = leer_byte_cache(direccion_fisica, tamanio);
+    if (direccion_fisica < 0) {
+        log_error(logger_cpu, "Segmentation Fault al traducir la dirección lógica %d", direccion_logica);
+        exit(1);
+        return;
+    }
 
-    log_info(logger_cpu, "PID: <%d> - Acción: <LEER> - Dirección Física: <%d> - Valor: <%s>", contexto->pid, direccion_fisica, valor_leido);
+    peticion_lectura_a_memoria(direccion_fisica, tamanio);
+
+    sem_wait(&sem_valor_leido);
+
+    log_info(logger_cpu, "PID: <%d> - Acción: <LEER> - Dirección Física: <%d> - Valor: <%s>", contexto->pid, direccion_fisica, valor_leido_memoria);
 
     string_array_destroy(parte);
 }
@@ -89,7 +108,7 @@ void peticion_escritura_a_memoria(int direccion_fisica, char* valor_registro_dat
     cargar_string_al_super_paquete(paquete, valor_registro_dato);
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
-    esperarOK(socket_cpu_memoria);
+    
 }
 
 

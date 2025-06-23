@@ -76,6 +76,7 @@ void inicializar_recursos()
     sem_init(&semContextoCargado,0,0);
     sem_init(&semMutexPC,0,1);
     sem_init(&semLlegoPeticionMMU,0,0);
+    sem_init(&semOkEscritura,0,0);
 
     sem_init(&sem_pagina_recibida, 0, 0);
     sem_init(&sem_valor_leido, 0, 0);
