@@ -81,6 +81,7 @@ extern int fd_escucha_servidor;
 extern t_log* logger_memoria;
 extern t_config* config_memoria;
 
+extern int entrada_nivel_X;
 extern char* puerto_escucha;
 extern int TAM_MEMORIA;
 extern int TAM_PAGINA;

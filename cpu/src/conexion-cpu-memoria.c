@@ -92,7 +92,7 @@ void atender_memoria()
             case RESPUESTA_PAGINA_COMPLETA_CPU: 
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 buffer_pagina_recibida = recibir_string_del_buffer(buffer);
-
+                
                 sem_post(&sem_pagina_recibida); // Señaliza que la página está disponible
                 
                 break;

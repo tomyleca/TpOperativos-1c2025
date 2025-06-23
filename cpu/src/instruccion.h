@@ -94,7 +94,7 @@ void inicializar_cache();
 
 int buscar_en_cache(int pid, int nro_pagina);
 
-char* leer_cache(int direccion_fisica, int tamanio);
+void leer_cache(int direccion_fisica, int tamanio);
 
 int algoritmo_clock();
 

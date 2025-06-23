@@ -593,7 +593,7 @@ void escribir_pagina_a_memoria(int indice_cache)
 int cargar_pagina_en_cache(int pid, int direccion_logica) 
 {
     if (cache_paginas == NULL){
-        return;
+        return NULL;
     }
 
     int indice_victima = seleccionar_victima();
@@ -625,7 +625,7 @@ int cargar_pagina_en_cache(int pid, int direccion_logica)
     // Actualizo entrada de caché
     cache_paginas[indice_victima].pid = pid;
     cache_paginas[indice_victima].nro_pagina = nro_pagina;
-    cache_paginas[indice_victima].nro_marco = direccion_fisica;
+    cache_paginas[indice_victima].nro_marco = nro_marco;
     
     if (buffer_pagina_recibida != NULL) {
         memcpy(cache_paginas[indice_victima].contenido, buffer_pagina_recibida, tamanio_pagina);
@@ -645,42 +645,40 @@ int cargar_pagina_en_cache(int pid, int direccion_logica)
     
 }
 
-void escribir_cache(int direccion_logica, char* valor) //Chequear siempre si cache no esta en NULL antes de llamar a esta funcion
+void escribir_cache(int direccion_logica, char *valor) // Chequear siempre si cache no esta en NULL antes de llamar a esta funcion
 {
 
     int nro_pagina = direccion_logica / tamanio_pagina;
     int desplazamiento = direccion_logica % tamanio_pagina;
-   
-    char* valor_escrito = malloc(sizeof(valor));
+
+    char *valor_escrito = malloc(sizeof(valor));
 
     int indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
-    if (indice_cache == -1) //Si no esta en cache, la cargo
-        indice_cache = cargar_pagina_en_cache(contexto->pid,direccion_logica);
-        
-    //escribo el valor en cache
-    int i= 0;
-    while(valor[i]!='\0')
-    {   cache_paginas[indice_cache].contenido[desplazamiento+i] = valor[i];
-        valor_escrito[i] = cache_paginas[indice_cache].contenido[desplazamiento+i]; // para chequear lo que escribe
+    if (indice_cache == -1) // Si no esta en cache, la cargo
+        indice_cache = cargar_pagina_en_cache(contexto->pid, direccion_logica);
+
+    // escribo el valor en cache
+    int i = 0;
+    while (valor[i] != '\0')
+    {
+        cache_paginas[indice_cache].contenido[desplazamiento + i] = valor[i];
+        valor_escrito[i] = cache_paginas[indice_cache].contenido[desplazamiento + i]; // para chequear lo que escribe
         i++;
     }
-    cache_paginas[indice_cache].contenido[desplazamiento+i] = '\0';
-    valor_escrito[i] = cache_paginas[indice_cache].contenido[desplazamiento+i];
+    cache_paginas[indice_cache].contenido[desplazamiento + i] = '\0';
+    valor_escrito[i] = cache_paginas[indice_cache].contenido[desplazamiento + i];
 
-    
     cache_paginas[indice_cache].bit_modificacion = true;
 
     int direccion_fisica_log = cache_paginas[indice_cache].nro_marco * tamanio_pagina + desplazamiento;
-    //char valor_str[2] = {valor, '\0'}; //no se para que era esto
+    // char valor_str[2] = {valor, '\0'}; //no se para que era esto
     log_info(logger_cpu, "PID: <%d> - Acción: <ESCRIBIR> - Dirección Física: <%u> - Valor: <%s>",
-                contexto->pid, direccion_fisica_log, valor_escrito);
+             contexto->pid, direccion_fisica_log, valor_escrito);
 
     free(valor_escrito);
 }
 
-
-
-char* leer_cache(int direccion_logica, int tamanio) {
+void leer_cache(int direccion_logica, int tamanio) {
     int nro_pagina = direccion_logica / tamanio_pagina;
     int desplazamiento = direccion_logica % tamanio_pagina;
     char* valor_leido_cache = malloc(sizeof(tamanio));
@@ -697,6 +695,7 @@ char* leer_cache(int direccion_logica, int tamanio) {
     int direccion_fisica_log = cache_paginas[indice_cache].nro_marco * tamanio_pagina + desplazamiento;
     log_info(logger_cpu, "PID: <%d> - Acción: <LEER> - Dirección Física: <%d> - Valor: <%s>", contexto->pid, direccion_fisica_log, valor_leido_cache);
     free(valor_leido_cache);
+
 }
 
 
@@ -705,9 +704,9 @@ void escribir_paginas_modificadas_proceso(int pid)
 {
     
     for (int i = 0; i < entradas_cache; i++) {
-        if (cache_paginas[i].bit_validez != NULL && 
+        if (cache_paginas[i].bit_validez != false && 
             cache_paginas[i].pid == pid && 
-            cache_paginas[i].bit_modificacion != NULL) {
+            cache_paginas[i].bit_modificacion != false) {
             
             escribir_pagina_a_memoria(i);
         }
@@ -717,7 +716,7 @@ void escribir_paginas_modificadas_proceso(int pid)
 void eliminar_paginas_proceso_de_cache(int pid) 
 {
     for (int i = 0; i < entradas_cache; i++) {
-        if (cache_paginas[i].bit_validez != NULL && cache_paginas[i].pid == pid) {
+        if (cache_paginas[i].bit_validez != false && cache_paginas[i].pid == pid) {
             cache_paginas[i].bit_validez = false;
             cache_paginas[i].pid = -1;
             cache_paginas[i].nro_pagina = -1;

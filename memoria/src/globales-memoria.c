@@ -23,6 +23,6 @@ int retardo_swap;
 t_log_level log_level;
 char* dump_path;
 pthread_t hilo_memoria;
-
+int entrada_nivel_X;
 
 int fd_escucha_servidor;

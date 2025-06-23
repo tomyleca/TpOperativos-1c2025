@@ -100,7 +100,7 @@ int atender_cliente(int *fd_conexion)
                 
                 for(int nivel = 1;nivel <= CANTIDAD_NIVELES; nivel++)
                 {
-                    int entrada_nivel_X = recibir_int_del_buffer(unBuffer);
+                    entrada_nivel_X = recibir_int_del_buffer(unBuffer);
                     
                     
                     if(nivel < CANTIDAD_NIVELES)
