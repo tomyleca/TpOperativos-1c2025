@@ -70,7 +70,7 @@ void decode();
 
 void check_interrupt();
 
-int mmu_traducir_direccion_logica(int direccion_logica);
+int traducir_direccion_logica(int direccion_logica);
 
 int buscar_en_tlb(int direccion_logica);
 
@@ -82,15 +82,19 @@ void log_instruccion(char** parte);
 
 //---------MMU--------------//
 
-void cargar_pagina_en_cache(int pid, int nro_pagina, int nro_marco);
+int traducirDLMedianteMMU(int nro_pagina);
 
-void escribir_byte(int direccion_logica, char valor);
+//---------CACHE--------------//
+
+int cargar_pagina_en_cache(int pid, int direccion_logica);
+
+void escribir_cache(int direccion_logica, char* valor);
 
 void inicializar_cache();
 
 int buscar_en_cache(int pid, int nro_pagina);
 
-char* leer_byte_cache(int direccion_fisica, int tamanio);
+char* leer_cache(int direccion_fisica, int tamanio);
 
 int algoritmo_clock();
 

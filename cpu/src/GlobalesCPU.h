@@ -70,6 +70,7 @@ extern int puntero_clock;
 extern int pid_pagina;
 extern int nro_pagina_recibida ;
 extern int nro_marco_recibido;
+extern int contenido_recibido;
 
 extern t_list* lista_tlb;
 

@@ -160,8 +160,25 @@ int atender_cliente(int *fd_conexion)
                 }
                 break;
             
+             case CPU_SOLICITA_LEER_PAGINA_COMPLETA:
+                
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                pid = recibir_int_del_buffer(unBuffer);
+                direccion_fisica = recibir_int_del_buffer(unBuffer);
+                tamanio = recibir_int_del_buffer(unBuffer);
+                limpiarBuffer(unBuffer);
+                printf("PID: %d - DIRECCION FISICA: %d - TAMAÑO: %d\n", pid, direccion_fisica, tamanio);
 
+                p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
+                valor_Leido = leer_memoria(p,direccion_fisica,tamanio);
 
+                // Respuesta a CPU
+                paquete = crear_super_paquete(RESPUESTA_PAGINA_COMPLETA_CPU);
+                cargar_string_al_super_paquete(paquete, valor_Leido); 
+                enviar_paquete(paquete, cliente_fd);
+                eliminar_paquete(paquete);
+
+                break;
 
             case SWAP_SUSPENDER_PROCESO:
                 usleep(retardo_swap * 1000);

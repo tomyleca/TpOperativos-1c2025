@@ -1,7 +1,7 @@
 NOOP
-WRITE 1 cualquierCosa
+WRITE 10 cualquierCosa
 NOOP
-READ 1 13
+READ 10 13
 INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo2.txt 65
 INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo3.txt 129
 IO Prueba 3000

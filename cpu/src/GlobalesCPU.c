@@ -63,8 +63,9 @@ EntradaTLB* TLB_proceso;
 EntradaCache* cache_paginas;
 int puntero_clock; 
 int pid_pagina;
-int nro_pagina_recibida ;
+int nro_pagina_recibida;
 int nro_marco_recibido;
+int contenido_recibido;
 
 
 t_list* lista_tlb;
