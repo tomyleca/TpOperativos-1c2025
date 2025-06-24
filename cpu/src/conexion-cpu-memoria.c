@@ -97,6 +97,9 @@ void atender_memoria()
                 sem_post(&sem_pagina_recibida); // Señaliza que la página está disponible
                 
                 break;
+            case RESPUESTA_ESCRITURA_PAGINA_COMPLETA:
+                sem_post(&sem_pagina_escrita);
+                break;
 
             case -1:
                 log_error(logger_cpu, "MEMORIA se desconecto. Terminando servidor");
@@ -177,12 +180,16 @@ void atender_dispatch_kernel()
                 
                 case PID_KERNEL_A_CPU:
                 printf("ANTES DE RECIBIR OTRO PROCESO\n");
-                contexto = malloc(sizeof(t_contexto_cpu));
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
-                contexto->pid = recibir_uint32_t_del_buffer(buffer);
-                sem_wait(&semMutexPC);
-                contexto->registros.PC = recibir_uint32_t_del_buffer(buffer);
-                sem_post(&semMutexPC);
+                
+                sem_wait(&semMutexContexto);
+                    contextoAnterior->pid = contexto->pid;
+                    contextoAnterior->registros.PC = contexto->registros.PC;//para check interrupt   
+
+                    contexto->pid = recibir_uint32_t_del_buffer(buffer);
+                    contexto->registros.PC = recibir_uint32_t_del_buffer(buffer);
+                sem_post(&semMutexContexto);
+                
                 enviarOK(socket_cpu_kernel_dispatch);
                 // ACA HAY QUE SOLICITAR A MEMORIA LA PRIMER INSTRUCCION CON EL PID RECIBIMOS DE KERNEL
                 //Falta liberar contexto, pero como lo usamos en el ciclo y todo cpu, a lo mejor conviene liberarlo al final del todo.

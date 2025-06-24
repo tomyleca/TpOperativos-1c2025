@@ -68,7 +68,7 @@ void fetch(int socket_cpu_memoria);
 
 void decode();
 
-void check_interrupt();
+void check_interrupt(uint32_t PIDInicial);
 
 int traducir_direccion_logica(int direccion_logica);
 
@@ -105,6 +105,7 @@ int seleccionar_victima();
 void solicitar_marco_a_memoria(int* entradas_de_nivel);
 
 void solicitar_tabla_a_memoria();
+void desalojar_proceso_de_cache(int pid);
 
 
 #endif

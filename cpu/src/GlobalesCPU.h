@@ -83,6 +83,7 @@ extern t_dictionary* registros;
 extern t_dictionary* instrucciones;
 
 extern t_contexto_cpu* contexto;
+extern t_contexto_cpu* contextoAnterior;
 
 //SEMAFOROS
 extern sem_t sem_hay_instruccion;
@@ -90,10 +91,11 @@ extern sem_t semContextoCargado;
 extern sem_t semFetch;
 extern sem_t semOKDispatch;
 extern sem_t sem_interrupcion;
-extern sem_t semMutexPC; //Creo que no es necesario
+extern sem_t semMutexContexto; 
 extern sem_t semLlegoPeticionMMU;
 extern sem_t semOkEscritura;
 extern sem_t semLlegoPeticionTabla;
+
 
 
 
@@ -133,6 +135,7 @@ extern int retardo_cache;
 
 extern char* buffer_pagina_recibida;
 extern sem_t sem_pagina_recibida;
+extern sem_t sem_pagina_escrita;
 extern char valor_leido_memoria[256]; 
 extern sem_t sem_valor_leido;
 extern sem_t mutex_cache;

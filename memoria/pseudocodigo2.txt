@@ -1,10 +1,7 @@
-EXIT
 NOOP
 WRITE 10 cualquierCosa
 NOOP
 READ 10 13
-INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo2.txt 65
-INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo3.txt 129
 IO Prueba 3000
 DUMP_MEMORY
 EXIT

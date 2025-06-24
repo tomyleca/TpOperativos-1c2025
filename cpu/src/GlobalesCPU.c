@@ -30,6 +30,8 @@ t_dictionary* instrucciones;
 
 
 t_contexto_cpu* contexto;
+t_contexto_cpu* contextoAnterior;
+
 
 //SEMAFOROS
 sem_t sem_hay_instruccion;
@@ -37,11 +39,13 @@ sem_t semContextoCargado;
 sem_t semFetch;
 sem_t semOKDispatch;
 sem_t sem_interrupcion;
-sem_t semMutexPC;
+sem_t semMutexContexto;
 sem_t semLlegoPeticionMMU;
 sem_t semOkEscritura;
+sem_t semLlegoPeticionTabla;
 
 sem_t sem_pagina_recibida;
+sem_t sem_pagina_escrita;
 sem_t sem_valor_leido;
 sem_t mutex_cache;
 sem_t semLlegoPeticionTabla;
@@ -88,5 +92,5 @@ t_log_level log_level;
 
 //CACHE
 
-char valor_leido_memoria[256]; 
+char valor_leido_memoria[256]; //TODO ver si esto no puede traer problemas
 char* buffer_pagina_recibida;

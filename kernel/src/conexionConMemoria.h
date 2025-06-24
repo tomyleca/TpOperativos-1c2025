@@ -16,6 +16,6 @@ bool suspender_proceso_memoria(uint32_t pid);
 bool des_suspender_proceso_memoria(uint32_t pid);
 bool finalizar_proceso_memoria(uint32_t pid);
 bool solicitar_dump_memoria(uint32_t pid);
-void avisarFinDeProcesoAMemoria(uint32_t PID);
+
 
 #endif 

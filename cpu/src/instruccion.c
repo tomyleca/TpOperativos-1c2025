@@ -294,12 +294,11 @@ void fetch(int socket_cpu_memoria)
     // CASO EN EL QUE SE EJECUTA  SOLAMENTE UNA INSTRUCCION COMUN Y SE VUELVE A SOLICITAR OTRA
     paquete = crear_super_paquete(CPU_PIDE_INSTRUCCION_A_MEMORIA);
     
-    cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
 
-    sem_wait(&semMutexPC);
+    cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
     cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC);
     log_info(logger_cpu, "## PID: %d - FETCH - Program Counter: %d", contexto->pid, contexto->registros.PC);
-    sem_post(&semMutexPC);
+    
 
     // Envio el paquete a memoria
     enviar_paquete(paquete, socket_cpu_memoria);
@@ -359,7 +358,7 @@ void decode()
      
 
 
-void check_interrupt()
+void check_interrupt(uint32_t PIDInicial)
 {   
     //El semaforo de recibir interrupcion no es necesario pq la validacion de que ya llego una posible interrupcion para este punto la ahce kernel antes de mandar el OK en las syscalls
     pthread_mutex_lock(&mutex_motivo_interrupcion);
@@ -372,20 +371,34 @@ void check_interrupt()
         free(instruccion_recibida);
         instruccion_recibida = NULL;
         
-        pthread_mutex_lock(&mutex_motivo_interrupcion);
-        flag_interrupcion = false;  // Leer flag
+        sem_wait(&semMutexContexto);
+            
+            t_contexto_cpu* contextoDesalojado;
+            if(contexto->pid != PIDInicial) //ya cargo el nuevo contexto
+                contextoDesalojado=contextoAnterior;
+            else
+             contextoDesalojado=contexto;
+            
 
-        if(motivo_interrupcion == INTERRUPCION_ASINCRONICA) //Si es asincronica le mando el PC actualizado
-        {
-            t_paquete* paquete = crear_super_paquete(PC_INTERRUPCION_ASINCRONICA);
-            cargar_uint32_t_al_super_paquete(paquete,contexto->pid);
-            cargar_uint32_t_al_super_paquete(paquete,contexto->registros.PC);
-            enviar_paquete(paquete,socket_cpu_kernel_dispatch);
-            eliminar_paquete(paquete);
-        }
-        pthread_mutex_unlock(&mutex_motivo_interrupcion); 
+            if(cache_paginas!=NULL)
+                desalojar_proceso_de_cache(contextoDesalojado->pid);
 
-        
+            
+            pthread_mutex_lock(&mutex_motivo_interrupcion);
+            flag_interrupcion = false;  // Leer flag
+
+            if(motivo_interrupcion == INTERRUPCION_ASINCRONICA) //Si es asincronica le mando el PC actualizado
+            {
+                t_paquete* paquete = crear_super_paquete(PC_INTERRUPCION_ASINCRONICA);
+                cargar_uint32_t_al_super_paquete(paquete,contextoDesalojado->pid);
+                cargar_uint32_t_al_super_paquete(paquete,contextoDesalojado->registros.PC);
+                enviar_paquete(paquete,socket_cpu_kernel_dispatch);
+                eliminar_paquete(paquete);
+            }
+            pthread_mutex_unlock(&mutex_motivo_interrupcion); 
+
+        sem_post(&semMutexContexto);
+
         sem_post(&semFetch); //Si todavia no se recibio el nuevo PID a ejecutar , solo hay 1/2 semaforos necerios para volver a arrancar el ciclo de instrucion
 
         
@@ -410,15 +423,17 @@ void ciclo_instruccion(int socket_cpu_memoria)
 {
     fetch(socket_cpu_memoria);
     
-    sem_wait(&semMutexPC);
+    uint32_t pidInicial = contexto->pid;
+    
+    sem_wait(&semMutexContexto);
         contexto->registros.PC = contexto->registros.PC + 1;
-    sem_post(&semMutexPC);
+    sem_post(&semMutexContexto);
 
     decode();
 
 
 
-    check_interrupt();
+    check_interrupt(pidInicial);
 
 }
 // **********************************  
@@ -590,6 +605,9 @@ void escribir_pagina_a_memoria(int indice_cache)
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_string_al_super_paquete(paquete, entrada->contenido); // Página completa
     enviar_paquete(paquete, socket_cpu_memoria);
+    eliminar_paquete(paquete);
+
+    sem_wait(&sem_pagina_escrita);
 
     log_info(logger_cpu, "PID: <%d> - Memory Update - Página: <%d> - Frame: <%d>", entrada->pid, entrada->nro_pagina, entrada->nro_marco);
     

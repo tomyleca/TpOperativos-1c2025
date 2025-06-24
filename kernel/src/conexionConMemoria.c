@@ -85,8 +85,10 @@ void avisarFinDeProcesoAMemoria(uint32_t PID)
     cargar_uint32_t_al_super_paquete(paquete,PID);
     enviar_paquete(paquete,fdMemoria);
     eliminar_paquete(paquete);
-    if(recibir_operacion(fdMemoria)!=1)
-        log_error(loggerKernel,"#<%u> Error en la comunicación con memoria al finalizar el proceso",PID);
+    op_code respuesta = recibir_operacion(fdMemoria);
+    //if(respuesta!=1)
+        //log_error(loggerKernel,"#<%u> Error en la comunicación con memoria al finalizar el proceso",PID);
 
+    cerrar_conexion_memoria(fdMemoria);
 
 }

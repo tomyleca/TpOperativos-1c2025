@@ -208,6 +208,7 @@ extern sem_t* semaforoPCActualizado;
 
 //MEMORIA
 extern int mandarDatosProcesoAMemoria(PCB* proceso);
+extern void avisarFinDeProcesoAMemoria(uint32_t PID);
 
 //HILOS
 extern pthread_t hiloAtenderDispatch;

@@ -23,14 +23,14 @@ int main(int argc, char* argv[]) {
     while(1)
     {
         ciclo_instruccion(socket_cpu_memoria);
-        signal(SIGINT,liberarRecursos);
+        
     }
 
     pthread_join(hilo_escuchar_memoria,NULL);
     pthread_join(hilo_escuchar_kernel,NULL);
     pthread_join(hilo_escuchar_kernel_interrupcion,NULL);
 
-
+    signal(SIGINT,liberarRecursos);
     return 0;
 }
 
@@ -74,12 +74,13 @@ void inicializar_recursos()
     sem_init(&semFetch,0,1);
     sem_init(&semOKDispatch,0,0);
     sem_init(&semContextoCargado,0,0);
-    sem_init(&semMutexPC,0,1);
+    sem_init(&semMutexContexto,0,1);
     sem_init(&semLlegoPeticionMMU,0,0);
     sem_init(&semOkEscritura,0,0);
     sem_init(&semLlegoPeticionTabla,0,0);
 
     sem_init(&sem_pagina_recibida, 0, 0);
+    sem_init(&sem_pagina_escrita,0,0);
     sem_init(&sem_valor_leido, 0, 0);
 
     iniciar_diccionario_instrucciones();
@@ -87,6 +88,8 @@ void inicializar_recursos()
     pthread_mutex_init(&mutex_motivo_interrupcion, NULL);
 
     lista_tlb = list_create();
+    contexto = malloc(sizeof(t_contexto_cpu));
+    contextoAnterior = malloc(sizeof(t_contexto_cpu));
 }
 
 

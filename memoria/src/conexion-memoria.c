@@ -163,7 +163,6 @@ int atender_cliente(int *fd_conexion)
                 break;
             
              case CPU_SOLICITA_LEER_PAGINA_COMPLETA:
-                
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_int_del_buffer(unBuffer);
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
@@ -173,13 +172,27 @@ int atender_cliente(int *fd_conexion)
 
                 p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
                 valor_Leido = leer_memoria(p,direccion_fisica,tamanio);
-
+                
                 // Respuesta a CPU
                 paquete = crear_super_paquete(RESPUESTA_PAGINA_COMPLETA_CPU);
                 cargar_string_al_super_paquete(paquete, valor_Leido); 
                 enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
+                break;
 
+            case CPU_SOLICITA_ESCRIBIR_PAGINA_COMPLETA:
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                pid = recibir_int_del_buffer(unBuffer);
+                direccion_fisica = recibir_int_del_buffer(unBuffer);
+                char* valor_a_escribir = recibir_string_del_buffer(unBuffer);
+                
+                p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
+                if(p!=NULL) //Si es NULL quiere decir que el proceso ya finalizo, y no hace falta escribir la pagina en memoria
+                    escribir_memoria(p,direccion_fisica,valor_a_escribir);
+
+                
+
+                enviarOpCode(cliente_fd,RESPUESTA_ESCRITURA_PAGINA_COMPLETA);
                 break;
 
             case SWAP_SUSPENDER_PROCESO:
@@ -239,6 +252,7 @@ int atender_cliente(int *fd_conexion)
                 enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
                 break;
+            
             case DUMP_MEMORY:
                 printf("DUMP_MEMORY ------------------------------------------------------------------\n");
                 unBuffer = recibiendo_super_paquete(cliente_fd);
@@ -253,13 +267,13 @@ int atender_cliente(int *fd_conexion)
                 } else {
                     enviar_paquete(crear_super_paquete(DUMP_MEMORY_ERROR), cliente_fd);
                 }
-        
-                break;
+            break;
             case FINALIZA_PROCESO:
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
+                
                 destruir_proceso(pid);
-                enviarOK(fd_conexion);
+                enviar_paquete(crear_super_paquete(EXIT_OK),cliente_fd);
                 break;
 
 
