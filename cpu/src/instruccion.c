@@ -670,13 +670,13 @@ void escribir_cache(int direccion_logica, char *valor) // Chequear siempre si ca
         indice_cache = cargar_pagina_en_cache(contexto->pid, direccion_logica);
 
     // escribo el valor en cache
-    
-   for (int i=0; i<=strlen(valor)-1;i++)
+    int i;
+   for (i=0; i<=strlen(valor)-1;i++)
     {
         cache_paginas[indice_cache].contenido[desplazamiento + i] = valor[i];
         valor_escrito[i] = cache_paginas[indice_cache].contenido[desplazamiento + i]; // para chequear lo que escribe
     }
-    
+    valor_escrito[i] = '\0';
    
 
     cache_paginas[indice_cache].bit_modificacion = true;
@@ -698,10 +698,11 @@ void leer_cache(int direccion_logica, int tamanio) {
     if (indice_cache == -1) 
         cargar_pagina_en_cache(contexto->pid,direccion_logica);
         
-    for(int i=0;i<=tamanio;i++) 
+    int i;   
+    for(i=0;i<=tamanio - 1;i++) 
         valor_leido_cache[i] = cache_paginas[indice_cache].contenido[desplazamiento+i];
     
-    
+    valor_leido_cache[i] = '\0';
 
     int direccion_fisica_log = cache_paginas[indice_cache].nro_marco * tamanio_pagina + desplazamiento;
     log_info(logger_cpu, "PID: <%d> - Acción: <LEER> - Dirección Física: <%d> - Valor: <%s>", contexto->pid, direccion_fisica_log, valor_leido_cache);
