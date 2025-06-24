@@ -255,6 +255,14 @@ int atender_cliente(int *fd_conexion)
                 }
         
                 break;
+            case FINALIZA_PROCESO:
+                unBuffer = recibiendo_super_paquete(cliente_fd);
+                pid = recibir_uint32_t_del_buffer(unBuffer);
+                destruir_proceso(pid);
+                enviarOK(fd_conexion);
+                break;
+
+
 
             case -1:
                 log_error(logger_memoria, "## El cliente se desconectó. Terminando servidor.\n");

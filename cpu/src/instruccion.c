@@ -614,6 +614,12 @@ int cargar_pagina_en_cache(int pid, int direccion_logica)
     
     // Cargo nueva página desde memoria
     int direccion_fisica = traducir_direccion_logica(direccion_logica);
+
+    if (direccion_fisica < 0) {
+        log_error(logger_cpu, "Segmentation Fault al traducir la dirección lógica %d", direccion_logica);
+        exit(1);
+        return;
+        }
     int nro_pagina = direccion_logica / tamanio_pagina;
         
     // Solicito contenido de la página a memoria
@@ -664,15 +670,14 @@ void escribir_cache(int direccion_logica, char *valor) // Chequear siempre si ca
         indice_cache = cargar_pagina_en_cache(contexto->pid, direccion_logica);
 
     // escribo el valor en cache
-    int i = 0;
-    while (valor[i] != '\0')
+    
+   for (int i=0; i<=strlen(valor)-1;i++)
     {
         cache_paginas[indice_cache].contenido[desplazamiento + i] = valor[i];
         valor_escrito[i] = cache_paginas[indice_cache].contenido[desplazamiento + i]; // para chequear lo que escribe
-        i++;
     }
-    cache_paginas[indice_cache].contenido[desplazamiento + i] = '\0';
-    valor_escrito[i] = cache_paginas[indice_cache].contenido[desplazamiento + i];
+    
+   
 
     cache_paginas[indice_cache].bit_modificacion = true;
 
@@ -693,10 +698,10 @@ void leer_cache(int direccion_logica, int tamanio) {
     if (indice_cache == -1) 
         cargar_pagina_en_cache(contexto->pid,direccion_logica);
         
-    for(int i=0;i<=tamanio+1;i++) 
+    for(int i=0;i<=tamanio;i++) 
         valor_leido_cache[i] = cache_paginas[indice_cache].contenido[desplazamiento+i];
     
-    printf("%s",valor_leido_cache);
+    
 
     int direccion_fisica_log = cache_paginas[indice_cache].nro_marco * tamanio_pagina + desplazamiento;
     log_info(logger_cpu, "PID: <%d> - Acción: <LEER> - Dirección Física: <%d> - Valor: <%s>", contexto->pid, direccion_fisica_log, valor_leido_cache);

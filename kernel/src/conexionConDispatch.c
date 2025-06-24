@@ -156,6 +156,7 @@ void pasarAExit(PCB* proceso,char* estadoActual){
     loggearMetricas(proceso);
     inicializarProceso();
     hacerFreeDeCronometros(proceso);
+    avisarFinDeProcesoAMemoria(proceso->PID);
     free(proceso->archivoPseudocodigo);
     free(proceso);
 }

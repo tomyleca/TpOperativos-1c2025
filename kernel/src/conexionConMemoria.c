@@ -77,3 +77,16 @@ bool solicitar_dump_memoria(uint32_t pid) {
 
     return respuesta == DUMP_MEMORY_OK;
 } 
+
+void avisarFinDeProcesoAMemoria(uint32_t PID)
+{
+    int fdMemoria = crear_conexion_memoria();
+    t_paquete* paquete = crear_super_paquete(FINALIZA_PROCESO);
+    cargar_uint32_t_al_super_paquete(paquete,PID);
+    enviar_paquete(paquete,fdMemoria);
+    eliminar_paquete(paquete);
+    if(recibir_operacion(fdMemoria)!=1)
+        log_error(loggerKernel,"#<%u> Error en la comunicación con memoria al finalizar el proceso",PID);
+
+
+}

@@ -399,8 +399,9 @@ void liberar_memoria(Proceso *p) {
   p->tamanio_reservado=0;
 }
 
-void destruir_proceso(Proceso *p) {
+void destruir_proceso(uint32_t pid) {
 
+  Proceso *p = sacarDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(pid));
   log_info(logger_memoria, "## PID: <%u> - Proceso Destruido - Métricas - Acc.T.Pag: <%d>; Inst.Sol.: <%d>; SWAP: <%d>; Mem.Prin.: <%d>; Lec.Mem.: <%d>; Esc.Mem.: <%d>",
     p->pid,
     p->metricas.accesos_tabla_paginas,
@@ -412,8 +413,9 @@ void destruir_proceso(Proceso *p) {
 
   liberar_memoria(p); 
   liberar_entrada_swap(p->pid);
-  sacarDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(p->pid));
-
+  
+  free(p->lista_instrucciones);
+  free(p->pseudocodigo);
   free(p);
 
 
