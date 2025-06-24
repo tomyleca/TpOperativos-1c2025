@@ -228,6 +228,12 @@ int traducirDLMedianteMMU(int direccion_logica)
 
     free(entradas_de_nivel);
 
+        // Verificar si nro_marco es válido antes de calcular la dirección física
+    if (nro_marco < 0) {
+        log_error(logger_cpu, "Error: nro_marco es inválido. No se puede calcular la dirección física.");
+        return -1; // Manejo de error
+    }
+
     // Calculamos dirección física
     int direccion_fisica = nro_marco * tamanio_pagina + desplazamiento;
 
@@ -243,7 +249,7 @@ void solicitar_tabla_a_memoria()
 {
     //TODAVIA NO LE MANDO LA ENTRADA_X PQ CUANDO LE PIDA LA DIRECCION FISICA LE MANDO TODAS LAS ENTRADAS JUNTAS, LO UNICO LE MANDO EL OPCODE PARA SIMULAR EL RETARDO DE LA MEMORIA
     enviarOpCode(socket_cpu_memoria,SOLICITUD_TABLA);
-    sem_wait(&semLlegoPeticionMMU);
+    sem_wait(&semLlegoPeticionTabla);
     
 }
 
@@ -258,7 +264,7 @@ void solicitar_marco_a_memoria(int* entradas_de_nivel)
     }
     enviar_paquete(paquete,socket_cpu_memoria);
     eliminar_paquete(paquete);
-    sem_wait(&semLlegoPeticionMMU); //Quiere decir que ya cargo el marco que le llego
+    sem_wait(&semLlegoPeticionMMU);//Quiere decir que ya cargo el marco que le llego
 }
 
 void peticion_lectura_a_memoria(int direccion_fisica, int tamanio)

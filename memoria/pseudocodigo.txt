@@ -3,7 +3,9 @@ WRITE 3 pepito
 WRITE 70 uno
 WRITE 9 escritura
 WRITE 2 cualq
+READ 71 7
 WRITE 5 pepe
-READ 10 13
+WRITE 40 dos
+READ 40 3
 EXIT
 

@@ -114,6 +114,8 @@ int atender_cliente(int *fd_conexion)
                             //TODO manejo de errores en cpu, seg fault
                     }
                 }
+                log_info(logger_memoria, "Marco a enviar: %d", marco);
+
 
                 t_paquete* paquete = crear_super_paquete(RESPUESTA_SOLICITUD_FRAME);
                 cargar_int_al_super_paquete(paquete,marco);

@@ -44,6 +44,7 @@ sem_t semOkEscritura;
 sem_t sem_pagina_recibida;
 sem_t sem_valor_leido;
 sem_t mutex_cache;
+sem_t semLlegoPeticionTabla;
 
 
 //MMU

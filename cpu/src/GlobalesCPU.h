@@ -93,6 +93,8 @@ extern sem_t sem_interrupcion;
 extern sem_t semMutexPC; //Creo que no es necesario
 extern sem_t semLlegoPeticionMMU;
 extern sem_t semOkEscritura;
+extern sem_t semLlegoPeticionTabla;
+
 
 
 
