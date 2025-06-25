@@ -222,6 +222,8 @@ int traducirDLMedianteMMU(int direccion_logica)
             solicitar_tabla_a_memoria(); //SIMULO LA SOLICITUD DE TABLA, ENREALIDAD LE SOLICITO TODAS AL FINAL
         } else {
             entradas_de_nivel[nivel] = entrada_nivel_X;
+            for (int i = 0; i < cant_niveles; i++)
+            printf("[DEBUG] entradas_de_nivel[%d] = %d\n", i, entradas_de_nivel[i]);
             solicitar_marco_a_memoria(entradas_de_nivel); 
         }
     }
@@ -382,6 +384,11 @@ void check_interrupt(uint32_t PIDInicial)
 
             if(cache_paginas!=NULL)
                 desalojar_proceso_de_cache(contextoDesalojado->pid);
+            
+            if(lista_tlb != NULL)
+            {
+                liberar_entradas_tlb();
+            }
 
             
             pthread_mutex_lock(&mutex_motivo_interrupcion);
@@ -646,6 +653,7 @@ int cargar_pagina_en_cache(int pid, int direccion_logica)
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_int_al_super_paquete(paquete, tamanio_pagina);
     enviar_paquete(paquete, socket_cpu_memoria);
+    eliminar_paquete(paquete);
     
     
     sem_wait(&sem_pagina_recibida); // Espera a que el hilo de atender_memoria devuelva la página
@@ -681,7 +689,7 @@ void escribir_cache(int direccion_logica, char *valor) // Chequear siempre si ca
     int nro_pagina = direccion_logica / tamanio_pagina;
     int desplazamiento = direccion_logica % tamanio_pagina;
 
-    char *valor_escrito = malloc(sizeof(valor));
+    char *valor_escrito = malloc(strlen(valor) + 1);  // +1 para el '\0'
 
     int indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
     if (indice_cache == -1) // Si no esta en cache, la cargo
@@ -763,3 +771,27 @@ void desalojar_proceso_de_cache(int pid)
     escribir_paginas_modificadas_proceso(pid);
     eliminar_paginas_proceso_de_cache(pid);
 }
+
+
+void liberar_entradas_tlb()
+{
+    
+    list_clean_and_destroy_elements(lista_tlb, destruir_entrada_tlb);
+    lista_tlb = list_create();
+}
+
+void destruir_entrada_tlb(void* entrada) {
+    free(entrada); 
+}
+
+void liberar_cache()
+{
+    for (int i = 0; i < entradas_cache; i++) {
+        free(cache_paginas[i].contenido);  // liberar contenido de cada entrada
+    }
+    free(cache_paginas);  // liberar el array de estructuras
+}
+
+
+
+

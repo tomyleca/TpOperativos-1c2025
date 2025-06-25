@@ -103,7 +103,8 @@ void liberarRecursos(int signal)
     config_destroy(config_cpu);
     log_destroy(logger_cpu);
     destruir_diccionarios();
-    list_destroy(lista_tlb);
+    liberar_cache();
+    list_clean_and_destroy_elements(lista_tlb, destruir_entrada_tlb);
     close(socket_cpu_kernel_dispatch);
     close(socket_cpu_kernel_interrupt);
     close(socket_cpu_memoria);

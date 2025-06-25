@@ -92,8 +92,12 @@ void atender_memoria()
 
             case RESPUESTA_PAGINA_COMPLETA_CPU: 
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
-                buffer_pagina_recibida = recibir_string_del_buffer(buffer);
-                
+                char* string_temp = recibir_string_del_buffer(buffer);
+                buffer_pagina_recibida = malloc(tamanio_pagina);
+                memset(buffer_pagina_recibida, 0, tamanio_pagina);
+                memcpy(buffer_pagina_recibida, string_temp, strlen(string_temp)); // cuidado con el tamaño
+                free(string_temp);
+                                
                 sem_post(&sem_pagina_recibida); // Señaliza que la página está disponible
                 
                 break;

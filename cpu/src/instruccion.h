@@ -52,6 +52,8 @@ void syscallEXIT(char** parte);
 
 void syscallINIT_PROC(char** parte);
 
+void log_instruccion(char** parte);
+
 //-------------SYSCALLS MEMORIA FUNCIONES--------------//
 
 void peticion_lectura_a_memoria(int direccion_fisica, int tamanio);
@@ -70,6 +72,15 @@ void decode();
 
 void check_interrupt(uint32_t PIDInicial);
 
+
+//---------MMU--------------//
+
+int traducirDLMedianteMMU(int nro_pagina);
+
+void liberar_entradas_tlb();
+
+void destruir_entrada_tlb(void* entrada_tlb);
+
 int traducir_direccion_logica(int direccion_logica);
 
 int buscar_en_tlb(int direccion_logica);
@@ -77,12 +88,6 @@ int buscar_en_tlb(int direccion_logica);
 void agregar_a_tlb(int pid, int nro_pagina, int nro_marco);
 
 int obtener_timestamp_actual();
-
-void log_instruccion(char** parte);
-
-//---------MMU--------------//
-
-int traducirDLMedianteMMU(int nro_pagina);
 
 //---------CACHE--------------//
 
@@ -105,7 +110,10 @@ int seleccionar_victima();
 void solicitar_marco_a_memoria(int* entradas_de_nivel);
 
 void solicitar_tabla_a_memoria();
+
 void desalojar_proceso_de_cache(int pid);
+
+void liberar_cache();
 
 
 #endif
