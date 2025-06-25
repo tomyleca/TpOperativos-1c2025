@@ -60,8 +60,8 @@ void atender_memoria()
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 instruccion_recibida = recibir_string_del_buffer(buffer); // instruccion_recibida se usa en instruccion.c
                 log_info(logger_cpu,"# Llega instrucción de memoria: %s", instruccion_recibida);
-                limpiarBuffer(buffer);
                 sem_post(&sem_hay_instruccion);
+                limpiarBuffer(buffer);
                 break;
             
             case RESPUESTA_SOLICITUD_TABLA:
@@ -73,6 +73,7 @@ void atender_memoria()
                 nro_marco = recibir_int_del_buffer(buffer);
                 log_info(logger_cpu, "RESPUESTA_SOLICITUD_FRAME - PID: <%d> - Marco recibido: <%d>", contexto->pid, nro_marco);
                 sem_post(&semLlegoPeticionMMU);
+                limpiarBuffer(buffer);
                 break;
 
             case RESPUESTA_VALOR_LEIDO_CPU: 
@@ -80,7 +81,7 @@ void atender_memoria()
                 valor_str_temp = recibir_string_del_buffer(buffer); // Recibe el valor como string
                 // Copia el valor al buffer temporal global. Asegura espacio y terminador nulo.
                 strncpy(valor_leido_memoria, valor_str_temp, sizeof(valor_leido_memoria) - 1);
-                valor_leido_memoria[sizeof(valor_leido_memoria) - 1] = '\0';
+                valor_leido_memoria[strlen(valor_leido_memoria) - 1] = '\0';
                 sem_post(&sem_valor_leido); 
                 limpiarBuffer(buffer);
                 break;
@@ -92,13 +93,10 @@ void atender_memoria()
 
             case RESPUESTA_PAGINA_COMPLETA_CPU: 
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
-                char* string_temp = recibir_string_del_buffer(buffer);
-                buffer_pagina_recibida = malloc(tamanio_pagina);
-                memset(buffer_pagina_recibida, 0, tamanio_pagina);
-                memcpy(buffer_pagina_recibida, string_temp, strlen(string_temp)); // cuidado con el tamaño
-                free(string_temp);
-                                
+                char* valor_pagina_completa = recibir_string_del_buffer(buffer);
+                strcpy(buffer_pagina_recibida,valor_pagina_completa);
                 sem_post(&sem_pagina_recibida); // Señaliza que la página está disponible
+                limpiarBuffer(buffer);
                 
                 break;
             case RESPUESTA_ESCRITURA_PAGINA_COMPLETA:
@@ -197,8 +195,8 @@ void atender_dispatch_kernel()
                 enviarOK(socket_cpu_kernel_dispatch);
                 // ACA HAY QUE SOLICITAR A MEMORIA LA PRIMER INSTRUCCION CON EL PID RECIBIMOS DE KERNEL
                 //Falta liberar contexto, pero como lo usamos en el ciclo y todo cpu, a lo mejor conviene liberarlo al final del todo.
-                limpiarBuffer(buffer);
                 sem_post(&semContextoCargado);
+                limpiarBuffer(buffer);
                 break;
                 
             case -1:
