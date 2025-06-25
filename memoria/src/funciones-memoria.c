@@ -108,8 +108,9 @@ void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
     uint32_t pc = recibir_uint32_t_del_buffer(buffer);
     
 
-
-    Proceso* nuevo_contexto = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid)); 
+    char* clave = pasarUnsignedAChar(pid);
+    Proceso* nuevo_contexto = leerDeDiccionario(diccionarioProcesos,clave); 
+    free(clave);
     char* instruccion = obtener_instruccion_por_indice(nuevo_contexto->lista_instrucciones, pc);
     
     if(instruccion == NULL) 

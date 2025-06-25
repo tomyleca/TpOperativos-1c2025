@@ -233,7 +233,9 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   p->tamanio_reservado = tam;
   p->pseudocodigo = pseudocodigo;
   p->lista_instrucciones = leer_archivo_y_cargar_instrucciones(p->pseudocodigo);
-  agregarADiccionario(diccionarioProcesos,pasarUnsignedAChar(PID),p);
+  char* clave = pasarUnsignedAChar(PID);
+  agregarADiccionario(diccionarioProcesos,clave,p);
+  free(clave);
 
   log_info(logger_memoria,"## PID: <%u> - Proceso Creado - Tamaño: <%u>",p->pid,p->tamanio_reservado);
 
@@ -400,8 +402,9 @@ void liberar_memoria(Proceso *p) {
 }
 
 void destruir_proceso(uint32_t pid) {
-
-  Proceso *p = sacarDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(pid));
+  char* clave = pasarUnsignedAChar(pid);
+  Proceso *p = sacarDeDiccionario(diccionarioProcesos, clave);
+  free(clave);
   log_info(logger_memoria, "## PID: <%u> - Proceso Destruido - Métricas - Acc.T.Pag: <%d>; Inst.Sol.: <%d>; SWAP: <%d>; Mem.Prin.: <%d>; Lec.Mem.: <%d>; Esc.Mem.: <%d>",
     p->pid,
     p->metricas.accesos_tabla_paginas,
@@ -414,9 +417,10 @@ void destruir_proceso(uint32_t pid) {
   liberar_memoria(p); 
   liberar_entrada_swap(p->pid);
   
-  free(p->lista_instrucciones);
+  list_destroy_and_destroy_elements(p->lista_instrucciones, free);
   free(p->pseudocodigo);
   free(p);
+
 
 
 }
@@ -433,12 +437,14 @@ void liberar_entrada_swap(int pid) {
 }
 
 bool realizar_dump_memoria(int pid) {
-    Proceso* proceso = leerDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(pid));
+  char* clave = pasarUnsignedAChar(pid);
+    Proceso* proceso = leerDeDiccionario(diccionarioProcesos, clave);
     if (!proceso) {
         return false;
     }
     
     dump_memory(proceso);
+    free(clave);
     
     return true;
 }

@@ -39,6 +39,7 @@ int atender_cliente(int *fd_conexion)
     int tamanio;
     char* valor_Leido;
     char* valor_registro;
+    char* clave;
 
 
     printf("---------------------------------------------\n");
@@ -82,6 +83,7 @@ int atender_cliente(int *fd_conexion)
                 usleep(retardo_memoria * 1000);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 buscar_y_mandar_instruccion(unBuffer,cliente_fd);
+                limpiarBuffer(unBuffer);
                 break;
 
             case SOLICITUD_TABLA:
@@ -94,7 +96,9 @@ int atender_cliente(int *fd_conexion)
                 usleep(retardo_memoria * 1000);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 uint32_t pid = recibir_uint32_t_del_buffer(unBuffer);
-                Proceso* proceso = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
+                clave = pasarUnsignedAChar(pid);
+                Proceso* proceso = leerDeDiccionario(diccionarioProcesos,clave);
+                free(clave);
                 TablaPagina* tabla_nivel_X = proceso->tabla_raiz;
                 int marco;
                 
@@ -139,6 +143,7 @@ int atender_cliente(int *fd_conexion)
                 cargar_string_al_super_paquete(paquete, valor_Leido);  
                 enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
+                free(valor_Leido);
                 break;
 
             case CPU_PIDE_ESCRIBIR_MEMORIA:
@@ -167,8 +172,9 @@ int atender_cliente(int *fd_conexion)
                 tamanio = recibir_int_del_buffer(unBuffer);
                 limpiarBuffer(unBuffer);
                 printf("PID: %d - DIRECCION FISICA: %d - TAMAÑO: %d\n", pid, direccion_fisica, tamanio);
-
-                p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
+                clave = pasarUnsignedAChar(pid);
+                p = leerDeDiccionario(diccionarioProcesos,clave);
+                free(clave);
                 valor_Leido = leer_memoria(p,direccion_fisica,tamanio);
                 
                 // Respuesta a CPU
@@ -176,6 +182,7 @@ int atender_cliente(int *fd_conexion)
                 cargar_string_al_super_paquete(paquete, valor_Leido); 
                 enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
+                free(valor_Leido);
                 break;
 
             case CPU_SOLICITA_ESCRIBIR_PAGINA_COMPLETA:
@@ -183,14 +190,17 @@ int atender_cliente(int *fd_conexion)
                 pid = recibir_int_del_buffer(unBuffer);
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
                 char* valor_a_escribir = recibir_string_del_buffer(unBuffer);
-                
-                p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
+                limpiarBuffer(unBuffer);
+                clave = pasarUnsignedAChar(pid);
+                p = leerDeDiccionario(diccionarioProcesos,clave);
+                free(clave);
                 if(p!=NULL) //Si es NULL quiere decir que el proceso ya finalizo, y no hace falta escribir la pagina en memoria
                     escribir_memoria(p,direccion_fisica,valor_a_escribir);
 
                 
 
                 enviarOpCode(cliente_fd,RESPUESTA_ESCRITURA_PAGINA_COMPLETA);
+                free(valor_a_escribir);
                 break;
 
             case SWAP_SUSPENDER_PROCESO:
@@ -200,7 +210,7 @@ int atender_cliente(int *fd_conexion)
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_int_del_buffer(unBuffer);
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
-                free(unBuffer);
+                limpiarBuffer(unBuffer);
                 printf("PID: %d - DIRECCION FISICA: %d\n", pid, direccion_fisica);
             
                 Proceso* p_suspend = leerDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(pid));
@@ -255,23 +265,30 @@ int atender_cliente(int *fd_conexion)
                 printf("DUMP_MEMORY ------------------------------------------------------------------\n");
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
-                free(unBuffer);
+                limpiarBuffer(unBuffer);
                 log_info(logger_memoria, "## PID: <%u> - Memory Dump solicitado", pid);
                 
                 printf("PID: %d\n", pid);
 
                 if (realizar_dump_memoria(pid)) {
-                    enviar_paquete(crear_super_paquete(DUMP_MEMORY_OK), cliente_fd);
+                    paquete = crear_super_paquete(DUMP_MEMORY_OK);
+                    enviar_paquete(paquete, cliente_fd);
                 } else {
-                    enviar_paquete(crear_super_paquete(DUMP_MEMORY_ERROR), cliente_fd);
+                    paquete = crear_super_paquete(DUMP_MEMORY_OK);
+                    enviar_paquete(paquete, cliente_fd);
                 }
+                eliminar_paquete(paquete);
             break;
             case FINALIZA_PROCESO:
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
                 
                 destruir_proceso(pid);
-                enviar_paquete(crear_super_paquete(EXIT_OK),cliente_fd);
+                paquete = crear_super_paquete(EXIT_OK);
+                enviar_paquete(paquete,cliente_fd);
+                eliminar_paquete(paquete);
+
+                limpiarBuffer(unBuffer);
                 break;
 
 
