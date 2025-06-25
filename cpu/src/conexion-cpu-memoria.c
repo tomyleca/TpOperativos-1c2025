@@ -82,7 +82,8 @@ void atender_memoria()
                 // Copia el valor al buffer temporal global. Asegura espacio y terminador nulo.
                 strncpy(valor_leido_memoria, valor_str_temp, sizeof(valor_leido_memoria) - 1);
                 valor_leido_memoria[strlen(valor_leido_memoria) - 1] = '\0';
-                sem_post(&sem_valor_leido); 
+                sem_post(&sem_valor_leido);
+                free(valor_str_temp); 
                 limpiarBuffer(buffer);
                 break;
 
@@ -93,12 +94,13 @@ void atender_memoria()
 
             case RESPUESTA_PAGINA_COMPLETA_CPU: 
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
-                char* valor_pagina_completa = recibir_string_del_buffer(buffer);
-                strcpy(buffer_pagina_recibida,valor_pagina_completa);
+                buffer_intermedio_pagina_recibida = recibir_string_del_buffer(buffer);
+                strncpy(buffer_pagina_recibida,buffer_intermedio_pagina_recibida,tamanio_pagina);
                 sem_post(&sem_pagina_recibida); // Señaliza que la página está disponible
+                free(buffer_intermedio_pagina_recibida);
                 limpiarBuffer(buffer);
-                
                 break;
+            
             case RESPUESTA_ESCRITURA_PAGINA_COMPLETA:
                 sem_post(&sem_pagina_escrita);
                 break;

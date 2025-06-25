@@ -646,6 +646,7 @@ int cargar_pagina_en_cache(int pid, int direccion_logica)
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_int_al_super_paquete(paquete, tamanio_pagina);
     enviar_paquete(paquete, socket_cpu_memoria);
+    eliminar_paquete(paquete);
     
     
     sem_wait(&sem_pagina_recibida); // Espera a que el hilo de atender_memoria devuelva la página
