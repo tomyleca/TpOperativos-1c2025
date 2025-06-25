@@ -134,6 +134,7 @@ extern int retardo_cache;
 
 
 extern char* buffer_pagina_recibida;
+char* buffer_intermedio_pagina_recibida;
 extern sem_t sem_pagina_recibida;
 extern sem_t sem_pagina_escrita;
 extern char valor_leido_memoria[256]; 

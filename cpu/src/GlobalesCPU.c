@@ -94,3 +94,4 @@ t_log_level log_level;
 
 char valor_leido_memoria[256]; //TODO ver si esto no puede traer problemas
 char* buffer_pagina_recibida;
+char* buffer_intermedio_pagina_recibida;
