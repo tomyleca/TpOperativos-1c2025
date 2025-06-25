@@ -24,7 +24,6 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
         temporal_stop(nuevoProceso->cronometros[i]);
     }
 
-
     nuevoProceso->semMutex =malloc(sizeof(sem_t));
     sem_init(nuevoProceso->semMutex,1,1);
 
@@ -50,7 +49,6 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
             char* input = readline("Apriete ENTER para empezar a planificar procesos.\n");  
 
             if (*input == '\0') {  
-                //sleep(4); // PARA DARLE TIEMPO A CONECTARSE BIEN A LOS OTROS MODULOS
                 break;
             }
 

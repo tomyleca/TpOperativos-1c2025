@@ -16,6 +16,7 @@ void* esperarClientesInterrupt(void* arg)
 void esperarDatosInterrupt(void* conexion) 
 {
     int fdConexion = *(int*) conexion;
+    free(conexion);
     
     t_buffer* buffer;
     int cod_op;

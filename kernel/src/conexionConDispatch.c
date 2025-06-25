@@ -15,6 +15,7 @@ void* esperarClientesDispatch(void* arg)
 void atender_dispatch_cpu(void* conexion) 
 {
     int fdConexion = *(int*)conexion;
+    free(conexion);
     
     
     int cod_op;
@@ -151,13 +152,14 @@ return sacarDeListaSegunCondicion(listaCPUsAInicializar,_mismoIdentificador);
 void pasarAExit(PCB* proceso,char* estadoActual){
     log_info(loggerKernel,"## (<%u>) - Finaliza el proceso",proceso->PID);
     log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,estadoActual,"EXIT");
-    //TODO avisar a memoria 
     proceso->ME[EXIT]++;
     loggearMetricas(proceso);
-    inicializarProceso();
     hacerFreeDeCronometros(proceso);
     avisarFinDeProcesoAMemoria(proceso->PID);
+    inicializarProceso();
     free(proceso->archivoPseudocodigo);
+    sem_destroy(proceso->semMutex);
+    free(proceso->semMutex);
     free(proceso);
 }
 
@@ -179,6 +181,7 @@ void hacerFreeDeCronometros(PCB* proceso)
     for(int i = 0; i<7; i++)
     {
         temporal_destroy(proceso->cronometros[i]);
+        
     }
 }
 
