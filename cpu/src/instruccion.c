@@ -771,7 +771,6 @@ void liberar_entradas_tlb()
 {
     
     list_clean_and_destroy_elements(lista_tlb, destruir_entrada_tlb);
-    lista_tlb = list_create();
 }
 
 void destruir_entrada_tlb(void* entrada) {
