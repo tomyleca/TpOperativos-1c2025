@@ -272,9 +272,11 @@ int atender_cliente(int *fd_conexion)
 
                 if (realizar_dump_memoria(pid)) {
                     paquete = crear_super_paquete(DUMP_MEMORY_OK);
+                    cargar_uint32_t_al_super_paquete(paquete, pid);
                     enviar_paquete(paquete, cliente_fd);
                 } else {
-                    paquete = crear_super_paquete(DUMP_MEMORY_OK);
+                    paquete = crear_super_paquete(DUMP_MEMORY_ERROR);
+                    cargar_uint32_t_al_super_paquete(paquete, pid);
                     enviar_paquete(paquete, cliente_fd);
                 }
                 eliminar_paquete(paquete);

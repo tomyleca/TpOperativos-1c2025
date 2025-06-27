@@ -42,6 +42,7 @@ t_listaConSemaforos* listaProcesosPorSerDesalojados;
 
 t_diccionarioConSemaforos* diccionarioProcesosBloqueados;
 
+t_diccionarioConSemaforos* diccionarioProcesosEsperandoDump;
 
 uint32_t pidDisponible = 0;
 

@@ -73,10 +73,28 @@ bool solicitar_dump_memoria(uint32_t pid) {
     eliminar_paquete(paquete);
 
     op_code respuesta = recibir_operacion(socket_memoria);
+    
+    if (respuesta == DUMP_MEMORY_OK) {
+        t_buffer* buffer = recibiendo_super_paquete(socket_memoria);
+        uint32_t pid_confirmado = recibir_uint32_t_del_buffer(buffer);
+        limpiarBuffer(buffer);
+        
+        manejarConfirmacionDumpMemoria(pid_confirmado);
+        cerrar_conexion_memoria(socket_memoria);
+        return true;
+    } else if (respuesta == DUMP_MEMORY_ERROR) {
+        t_buffer* buffer = recibiendo_super_paquete(socket_memoria);
+        uint32_t pid_error = recibir_uint32_t_del_buffer(buffer);
+        limpiarBuffer(buffer);
+        
+        manejarConfirmacionDumpMemoria(pid_error);
+        cerrar_conexion_memoria(socket_memoria);
+        return false;
+    }
+    
     cerrar_conexion_memoria(socket_memoria);
-
-    return respuesta == DUMP_MEMORY_OK;
-} 
+    return false;
+}
 
 void avisarFinDeProcesoAMemoria(uint32_t PID)
 {
@@ -91,4 +109,20 @@ void avisarFinDeProcesoAMemoria(uint32_t PID)
 
     cerrar_conexion_memoria(fdMemoria);
 
+}
+
+void manejarConfirmacionDumpMemoria(uint32_t PID)
+{
+    char* PIDComoChar = pasarUnsignedAChar(PID);
+    ProcesoEnEsperaDump* procesoEsperandoDump = leerDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar);
+    free(PIDComoChar);
+    
+    if (procesoEsperandoDump != NULL) {
+        sem_post(procesoEsperandoDump->semaforoDumpFinalizado);
+        
+        NucleoCPU* nucleoCPU = buscarNucleoCPUPorPID(PID);
+        if (nucleoCPU != NULL) {
+            enviarOK(nucleoCPU->fdConexionDispatch);
+        }
+    }
 }

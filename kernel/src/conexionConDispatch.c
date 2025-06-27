@@ -68,7 +68,6 @@ void atender_dispatch_cpu(void* conexion)
                 PC = recibir_uint32_t_del_buffer(buffer);
                 actualizarPC(PID,PC);
                 dump_memory(PID);
-                enviarOK(fdConexion);
                 limpiarBuffer(buffer);
                 break;
             
@@ -212,3 +211,25 @@ void actualizarPCAsincronico(uint32_t PID,uint32_t PCActualizado)
     if(proceso != NULL)// Puede ser que se este intentado desalojar un proceso que ya termino
         proceso->PC = PCActualizado;
 }
+
+void actualizarPCAsincronico(uint32_t PID,uint32_t PCActualizado)
+{
+    PCB* proceso = buscarPCBEjecutando(PID);
+    proceso->PC = PCActualizado; 
+}
+
+NucleoCPU* buscarNucleoCPUPorPID(uint32_t PID)
+{
+    bool _ejecutandoProceso(NucleoCPU* nucleoCPU)
+    {
+        return nucleoCPU->procesoEnEjecucion != NULL && nucleoCPU->procesoEnEjecucion->PID == PID;
+    };
+    
+    NucleoCPU* nucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso, _ejecutandoProceso);
+    if (nucleoCPU != NULL) {
+        return nucleoCPU;
+    }
+    
+    nucleoCPU = leerDeListaSegunCondicion(listaCPUsLibres, _ejecutandoProceso);
+    return nucleoCPU;
+} 

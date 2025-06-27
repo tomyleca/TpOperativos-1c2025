@@ -63,10 +63,47 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
 void dump_memory(uint32_t pid) {
     log_info(loggerKernel, "## (<%u>) - Solicitó syscall: DUMP_MEMORY", pid);
     
+    PCB* proceso = buscarPCBEjecutando(pid);
+    if (proceso == NULL) {
+        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall DUMP_MEMORY", pid);
+        exit(1);
+    }
+    
+    ProcesoEnEsperaDump* procesoEsperandoDump = malloc(sizeof(ProcesoEnEsperaDump));
+    procesoEsperandoDump->proceso = proceso;
+    procesoEsperandoDump->semaforoDumpFinalizado = malloc(sizeof(sem_t));
+    procesoEsperandoDump->semaforoMutex = malloc(sizeof(sem_t));
+    sem_init(procesoEsperandoDump->semaforoDumpFinalizado, 1, 0);
+    sem_init(procesoEsperandoDump->semaforoMutex, 1, 1);
+    
+    char* PIDComoChar = pasarUnsignedAChar(pid);
+    agregarADiccionario(diccionarioProcesosEsperandoDump, PIDComoChar, procesoEsperandoDump);
+    free(PIDComoChar);
+    
     if (solicitar_dump_memoria(pid)) {
-        log_info(loggerKernel, "## (<%u>) - Memory Dump solicitado", pid);
+        log_info(loggerKernel, "## (<%u>) - Memory Dump solicitado, esperando confirmación", pid);
+        
+        sem_wait(procesoEsperandoDump->semaforoDumpFinalizado);
+        
+        char* PIDComoChar2 = pasarUnsignedAChar(pid);
+        sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar2);
+        free(PIDComoChar2);
+        
+        free(procesoEsperandoDump->semaforoDumpFinalizado);
+        free(procesoEsperandoDump->semaforoMutex);
+        free(procesoEsperandoDump);
+        
+        log_info(loggerKernel, "## (<%u>) - Memory Dump completado", pid);
     } else {
         log_error(loggerKernel, "## (<%u>) - Error al solicitar Memory Dump", pid);
+        
+        char* PIDComoChar2 = pasarUnsignedAChar(pid);
+        sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar2);
+        free(PIDComoChar2);
+        
+        free(procesoEsperandoDump->semaforoDumpFinalizado);
+        free(procesoEsperandoDump->semaforoMutex);
+        free(procesoEsperandoDump);
     }
 }
 
