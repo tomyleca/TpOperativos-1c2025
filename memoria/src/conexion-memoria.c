@@ -208,19 +208,20 @@ int atender_cliente(int *fd_conexion)
                 printf("SWAP_SUSPENDER_PROCESO ------------------------------------------------------------------\n");
             
                 unBuffer = recibiendo_super_paquete(cliente_fd);
-                pid = recibir_int_del_buffer(unBuffer);
-                direccion_fisica = recibir_int_del_buffer(unBuffer);
-                limpiarBuffer(unBuffer);
-                printf("PID: %d - DIRECCION FISICA: %d\n", pid, direccion_fisica);
+                pid = recibir_uint32_t_del_buffer(unBuffer);
+                
+                
             
                 Proceso* p_suspend = leerDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(pid));
 
+
+                limpiarBuffer(unBuffer);
                 if (!p_suspend) {
                     log_error(logger_memoria, "No se encontró el proceso PID %d para suspender.", pid);
                     paquete = crear_super_paquete(SWAP_ERROR);
                 }
             
-               if ( suspender_proceso(p_suspend, direccion_fisica) == -1) {
+               if ( suspender_proceso(p_suspend) == -1) {
                     log_error(logger_memoria, "Error al suspender el proceso PID <%d>.", pid);
                     paquete = crear_super_paquete(SWAP_ERROR);
                 } else{
@@ -228,7 +229,7 @@ int atender_cliente(int *fd_conexion)
                     paquete = crear_super_paquete(SWAP_OK);
                 }
      
-                cargar_int_al_super_paquete(paquete, pid);
+                
                 enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
                 break;
@@ -238,8 +239,7 @@ int atender_cliente(int *fd_conexion)
                 printf("SWAP_RESTAURAR_PROCESO ------------------------------------------------------------------\n");
             
                 unBuffer = recibiendo_super_paquete(cliente_fd);
-                pid = recibir_int_del_buffer(unBuffer);
-                direccion_fisica = recibir_int_del_buffer(unBuffer);
+                pid = recibir_uint32_t_del_buffer(unBuffer);
                 free(unBuffer);
                 printf("PID: %d - DIRECCION FISICA: %d\n", pid, direccion_fisica);
             
@@ -256,7 +256,7 @@ int atender_cliente(int *fd_conexion)
                     paquete = crear_super_paquete(SWAP_OK);
                 }
         
-                cargar_int_al_super_paquete(paquete, pid);
+                
                 enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
                 break;

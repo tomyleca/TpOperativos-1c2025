@@ -1,13 +1,11 @@
 WRITE 10 cualquierCosa
 WRITE 3 pepito
 WRITE 70 uno
-DUMP_MEMORY
 INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo2.txt 65
 INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo3.txt 129
 WRITE 9 escritura
 WRITE 129 algo
-DUMP_MEMORY
+IO Prueba 1000
 WRITE 200 otraCosa
-READ 71 7
 EXIT
 

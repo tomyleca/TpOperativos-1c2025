@@ -533,7 +533,7 @@ return 0;
 }
 
 
-int suspender_proceso(Proceso *p, int dir_fisica) {
+int suspender_proceso(Proceso *p) {
 
   if (!p || !p->tabla_raiz) {
     log_error(logger_memoria, "No se puede suspender el proceso <%u>: no existe o no tiene tabla de páginas", p->pid);

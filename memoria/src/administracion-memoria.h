@@ -62,7 +62,7 @@ void destruir_proceso(uint32_t pid);
 void mostrar_procesos_activos();
 
 //*Swap
-int suspender_proceso(Proceso* p, int dir_fisica);
+int suspender_proceso(Proceso* p);
 int restaurar_proceso(Proceso* p);
 void liberar_entrada_swap(int pid) ;
 

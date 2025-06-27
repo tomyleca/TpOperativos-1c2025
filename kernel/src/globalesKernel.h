@@ -11,6 +11,7 @@
 #include <commons/temporal.h>
 #include <pthread.h>
 #include <commons/collections/dictionary.h>
+#include "conexionConMemoria.h"
 #include "../../utils/src/utils/conexiones.h"
 #include "../../utils/src/utils/monitoresListas.h"
 #include "../../utils/src/utils/monitoresDiccionarios.h"
