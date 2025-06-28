@@ -213,6 +213,7 @@ void actualizarPCAsincronico(uint32_t PID,uint32_t PCActualizado)
         proceso->PC = PCActualizado;
 }
 
+
 NucleoCPU* buscarNucleoCPUPorPID(uint32_t PID)
 {
     bool _ejecutandoProceso(NucleoCPU* nucleoCPU)
