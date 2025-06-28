@@ -75,10 +75,10 @@ void dump_memory(uint32_t pid) {
     procesoEsperandoDump->proceso = proceso;
     procesoEsperandoDump->semaforoDumpFinalizado = malloc(sizeof(sem_t));
     procesoEsperandoDump->semaforoMutex = malloc(sizeof(sem_t));
+    procesoEsperandoDump->nucleoCPU = NULL;
     sem_init(procesoEsperandoDump->semaforoDumpFinalizado, 1, 0);
     sem_init(procesoEsperandoDump->semaforoMutex, 1, 1);
     
-    // Agregar al diccionario de procesos esperando dump
     char* PIDComoChar = pasarUnsignedAChar(pid);
     agregarADiccionario(diccionarioProcesosEsperandoDump, PIDComoChar, procesoEsperandoDump);
     free(PIDComoChar);
@@ -87,10 +87,8 @@ void dump_memory(uint32_t pid) {
     if (solicitar_dump_memoria(pid)) {
         log_info(loggerKernel, "## (<%u>) - Memory Dump solicitado, esperando confirmación", pid);
         
-        // Bloquear el proceso hasta que memoria confirme
         sem_wait(procesoEsperandoDump->semaforoDumpFinalizado);
         
-        // Remover del diccionario y liberar recursos
         char* PIDComoChar2 = pasarUnsignedAChar(pid);
         sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar2);
         free(PIDComoChar2);
@@ -101,11 +99,6 @@ void dump_memory(uint32_t pid) {
         
         log_info(loggerKernel, "## (<%u>) - Memory Dump completado", pid);
         
-        // Enviar OK al CPU para que continúe
-        NucleoCPU* nucleoCPU = buscarNucleoCPUPorPID(pid);
-        if (nucleoCPU != NULL) {
-            enviarOK(nucleoCPU->fdConexionDispatch);
-        }
     } else {
         log_error(loggerKernel, "## (<%u>) - Error al solicitar Memory Dump", pid);
         
@@ -118,11 +111,6 @@ void dump_memory(uint32_t pid) {
         free(procesoEsperandoDump->semaforoMutex);
         free(procesoEsperandoDump);
         
-        // Enviar OK al CPU para que continúe (incluso en caso de error)
-        NucleoCPU* nucleoCPU = buscarNucleoCPUPorPID(pid);
-        if (nucleoCPU != NULL) {
-            enviarOK(nucleoCPU->fdConexionDispatch);
-        }
     }
 }
 

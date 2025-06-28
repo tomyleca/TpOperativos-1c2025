@@ -95,11 +95,7 @@ typedef struct{
     
 } ProcesoEnEsperaIO;
 
-typedef struct{
-    PCB* proceso;
-    sem_t* semaforoDumpFinalizado;
-    sem_t* semaforoMutex;
-} ProcesoEnEsperaDump;
+
 
 typedef struct{
     char* identificador;
@@ -112,7 +108,12 @@ typedef struct{
 }
 NucleoCPU;
 
-
+typedef struct{
+    PCB* proceso;
+    sem_t* semaforoDumpFinalizado;
+    sem_t* semaforoMutex;
+    NucleoCPU* nucleoCPU;
+} ProcesoEnEsperaDump;
 
 extern int socket_kernel_memoria;
 extern int socket_kernel_io;

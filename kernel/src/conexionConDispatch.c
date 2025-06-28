@@ -69,6 +69,7 @@ void atender_dispatch_cpu(void* conexion)
                 PC = recibir_uint32_t_del_buffer(buffer);
                 actualizarPC(PID,PC);
                 dump_memory(PID);
+                enviarOK(fdConexion);
                 limpiarBuffer(buffer);
                 break;
             
@@ -229,5 +230,11 @@ NucleoCPU* buscarNucleoCPUPorPID(uint32_t PID)
     
     // Buscar en CPUs libres (por si acaso)
     nucleoCPU = leerDeListaSegunCondicion(listaCPUsLibres, _ejecutandoProceso);
+    if (nucleoCPU != NULL) {
+        return nucleoCPU;
+    }
+    
+    // Buscar en CPUs a inicializar (último recurso)
+    nucleoCPU = leerDeListaSegunCondicion(listaCPUsAInicializar, _ejecutandoProceso);
     return nucleoCPU;
 } 
