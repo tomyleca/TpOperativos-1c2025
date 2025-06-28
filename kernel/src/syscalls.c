@@ -1,5 +1,6 @@
 #include "syscalls.h"
 #include "conexionConMemoria.h"
+#include "../../utils/src/utils/conexiones.h"
 
 
 void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
@@ -69,6 +70,7 @@ void dump_memory(uint32_t pid) {
         exit(1);
     }
     
+    // Crear estructura para esperar confirmación del dump
     ProcesoEnEsperaDump* procesoEsperandoDump = malloc(sizeof(ProcesoEnEsperaDump));
     procesoEsperandoDump->proceso = proceso;
     procesoEsperandoDump->semaforoDumpFinalizado = malloc(sizeof(sem_t));
@@ -76,15 +78,19 @@ void dump_memory(uint32_t pid) {
     sem_init(procesoEsperandoDump->semaforoDumpFinalizado, 1, 0);
     sem_init(procesoEsperandoDump->semaforoMutex, 1, 1);
     
+    // Agregar al diccionario de procesos esperando dump
     char* PIDComoChar = pasarUnsignedAChar(pid);
     agregarADiccionario(diccionarioProcesosEsperandoDump, PIDComoChar, procesoEsperandoDump);
     free(PIDComoChar);
     
+    // Solicitar dump a memoria
     if (solicitar_dump_memoria(pid)) {
         log_info(loggerKernel, "## (<%u>) - Memory Dump solicitado, esperando confirmación", pid);
         
+        // Bloquear el proceso hasta que memoria confirme
         sem_wait(procesoEsperandoDump->semaforoDumpFinalizado);
         
+        // Remover del diccionario y liberar recursos
         char* PIDComoChar2 = pasarUnsignedAChar(pid);
         sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar2);
         free(PIDComoChar2);
@@ -94,9 +100,16 @@ void dump_memory(uint32_t pid) {
         free(procesoEsperandoDump);
         
         log_info(loggerKernel, "## (<%u>) - Memory Dump completado", pid);
+        
+        // Enviar OK al CPU para que continúe
+        NucleoCPU* nucleoCPU = buscarNucleoCPUPorPID(pid);
+        if (nucleoCPU != NULL) {
+            enviarOK(nucleoCPU->fdConexionDispatch);
+        }
     } else {
         log_error(loggerKernel, "## (<%u>) - Error al solicitar Memory Dump", pid);
         
+        // Remover del diccionario y liberar recursos en caso de error
         char* PIDComoChar2 = pasarUnsignedAChar(pid);
         sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar2);
         free(PIDComoChar2);
@@ -104,6 +117,12 @@ void dump_memory(uint32_t pid) {
         free(procesoEsperandoDump->semaforoDumpFinalizado);
         free(procesoEsperandoDump->semaforoMutex);
         free(procesoEsperandoDump);
+        
+        // Enviar OK al CPU para que continúe (incluso en caso de error)
+        NucleoCPU* nucleoCPU = buscarNucleoCPUPorPID(pid);
+        if (nucleoCPU != NULL) {
+            enviarOK(nucleoCPU->fdConexionDispatch);
+        }
     }
 }
 
