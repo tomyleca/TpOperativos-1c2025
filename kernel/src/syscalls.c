@@ -1,5 +1,6 @@
 #include "syscalls.h"
 #include "conexionConMemoria.h"
+#include "../../utils/src/utils/conexiones.h"
 
 
 void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
@@ -63,11 +64,55 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
 void dump_memory(uint32_t pid) {
     log_info(loggerKernel, "## (<%u>) - Solicitó syscall: DUMP_MEMORY", pid);
     
-    if (solicitar_dump_memoria(pid)) {
-        log_info(loggerKernel, "## (<%u>) - Memory Dump solicitado", pid);
-    } else {
-        log_error(loggerKernel, "## (<%u>) - Error al solicitar Memory Dump", pid);
+    PCB* proceso = buscarPCBEjecutando(pid);
+    if (proceso == NULL) {
+        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall DUMP_MEMORY", pid);
+        exit(1);
     }
+    
+    ProcesoEnEsperaDump* procesoEsperandoDump = malloc(sizeof(ProcesoEnEsperaDump));
+    procesoEsperandoDump->proceso = proceso;
+    procesoEsperandoDump->semaforoDumpFinalizado = malloc(sizeof(sem_t));
+    procesoEsperandoDump->semaforoMutex = malloc(sizeof(sem_t));
+    procesoEsperandoDump->nucleoCPU = NULL;
+    sem_init(procesoEsperandoDump->semaforoDumpFinalizado, 1, 0);
+    sem_init(procesoEsperandoDump->semaforoMutex, 1, 1);
+    
+    char* PIDComoChar = pasarUnsignedAChar(pid);
+    agregarADiccionario(diccionarioProcesosEsperandoDump, PIDComoChar, procesoEsperandoDump);
+    free(PIDComoChar);
+    
+    terminarEjecucion(proceso, INTERRUPCION_SINCRONICA);
+    
+    pthread_t hiloEsperarDump;
+    pthread_create(&hiloEsperarDump, NULL, (void*)manejarProcesoEsperandoDump, procesoEsperandoDump);
+    
+    log_info(loggerKernel, "## (<%u>) - Memory Dump solicitado, proceso liberado de CPU", pid);
+}
+
+void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
+    if (solicitar_dump_memoria(procesoEsperandoDump->proceso->PID)) {
+        log_info(loggerKernel, "## (<%u>) - Memory Dump completado exitosamente", procesoEsperandoDump->proceso->PID);
+    } else {
+        log_error(loggerKernel, "## (<%u>) - Error en Memory Dump", procesoEsperandoDump->proceso->PID);
+    }
+    
+    sem_wait(procesoEsperandoDump->semaforoDumpFinalizado);
+
+    uint32_t pidAux = procesoEsperandoDump->proceso->PID;
+
+    char* PIDComoChar = pasarUnsignedAChar(procesoEsperandoDump->proceso->PID);
+    sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar);
+    free(PIDComoChar);
+    
+    free(procesoEsperandoDump->semaforoDumpFinalizado);
+    free(procesoEsperandoDump->semaforoMutex);
+    free(procesoEsperandoDump);
+    
+    //log_info(loggerKernel, "## (<%u>) - Proceso desbloqueado después del dump", procesoEsperandoDump->proceso->PID);
+    log_info(loggerKernel, "## (<%u>) - Proceso desbloqueado después del dump", pidAux);
+    
+    return NULL;
 }
 
 void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {

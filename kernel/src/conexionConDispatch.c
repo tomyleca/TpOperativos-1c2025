@@ -1,4 +1,5 @@
 #include "conexionConCPU.h"
+#include "../../utils/src/utils/conexiones.h"
 
 void* esperarClientesDispatch(void* arg)
 {
@@ -212,3 +213,28 @@ void actualizarPCAsincronico(uint32_t PID,uint32_t PCActualizado)
     if(proceso != NULL)// Puede ser que se este intentado desalojar un proceso que ya termino
         proceso->PC = PCActualizado;
 }
+
+
+NucleoCPU* buscarNucleoCPUPorPID(uint32_t PID)
+{
+    bool _ejecutandoProceso(NucleoCPU* nucleoCPU)
+    {
+        return nucleoCPU->procesoEnEjecucion != NULL && nucleoCPU->procesoEnEjecucion->PID == PID;
+    };
+    
+    // Buscar en CPUs en uso
+    NucleoCPU* nucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso, _ejecutandoProceso);
+    if (nucleoCPU != NULL) {
+        return nucleoCPU;
+    }
+    
+    // Buscar en CPUs libres (por si acaso)
+    nucleoCPU = leerDeListaSegunCondicion(listaCPUsLibres, _ejecutandoProceso);
+    if (nucleoCPU != NULL) {
+        return nucleoCPU;
+    }
+    
+    // Buscar en CPUs a inicializar (último recurso)
+    nucleoCPU = leerDeListaSegunCondicion(listaCPUsAInicializar, _ejecutandoProceso);
+    return nucleoCPU;
+} 

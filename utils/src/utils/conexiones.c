@@ -121,8 +121,12 @@ void enviarOpCode(int fdConexion, op_code opCode)
 
 void enviarOK(int fdConexion)
 {
+    if (fdConexion <= 0) {
+        return;
+    }
+    
     int OK = 1;
-    send(fdConexion,&OK,sizeof(int),0);
+    send(fdConexion, &OK, sizeof(int), 0);
 }
 
 bool esperarOK(int fdConexion)

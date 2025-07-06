@@ -96,6 +96,7 @@ typedef struct{
 } ProcesoEnEsperaIO;
 
 
+
 typedef struct{
     char* identificador;
     bool ejecutando;
@@ -107,7 +108,12 @@ typedef struct{
 }
 NucleoCPU;
 
-
+typedef struct{
+    PCB* proceso;
+    sem_t* semaforoDumpFinalizado;
+    sem_t* semaforoMutex;
+    NucleoCPU* nucleoCPU;
+} ProcesoEnEsperaDump;
 
 extern int socket_kernel_memoria;
 extern int socket_kernel_io;
@@ -186,6 +192,8 @@ extern t_listaConSemaforos* listaProcesosPorSerDesalojados; //Procesos que el pl
 
 extern t_diccionarioConSemaforos* diccionarioProcesosBloqueados;
 
+extern t_diccionarioConSemaforos* diccionarioProcesosEsperandoDump;
+
 extern int algoritmoDePlanificacionInt;
 
 
@@ -226,6 +234,7 @@ void nucleoCPUDestroy(void* ptr);
 void dispositivoIODestroy(void* ptr);
 void instanciaIODestroy(void* ptr);
 void procesoEnEsperaIODestroy(void* ptr);
+void procesoEnEsperaDumpDestroy(void* ptr);
 
  
 

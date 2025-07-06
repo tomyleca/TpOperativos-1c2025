@@ -43,3 +43,14 @@ void procesoEnEsperaIODestroy(void* ptr)
     free(procesoEnEsperaIO->semaforoMutex);
     free(procesoEnEsperaIO);
 }
+
+void procesoEnEsperaDumpDestroy(void* ptr)
+{
+    if(ptr==NULL)
+        return;
+
+    ProcesoEnEsperaDump* procesoEnEsperaDump = (ProcesoEnEsperaDump*) ptr;
+    free(procesoEnEsperaDump->semaforoDumpFinalizado);
+    free(procesoEnEsperaDump->semaforoMutex);
+    free(procesoEnEsperaDump);
+}

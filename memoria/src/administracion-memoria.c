@@ -480,7 +480,10 @@ void dump_memory(Proceso *p) {
     
     int bytes_escritos = 0;
     
-    for (int direccion_virtual = 0; direccion_virtual < p->tamanio_reservado; direccion_virtual++) {
+    int paginas_asignadas = (p->tamanio_reservado + TAM_PAGINA - 1) / TAM_PAGINA;
+    int tamanio_total_paginas = paginas_asignadas * TAM_PAGINA;
+    
+    for (int direccion_virtual = 0; direccion_virtual < tamanio_total_paginas; direccion_virtual++) {
         int direccion_fisica = traducir_direccion(p, direccion_virtual);
         
         if (direccion_fisica >= 0 && direccion_fisica < TAM_MEMORIA) {
