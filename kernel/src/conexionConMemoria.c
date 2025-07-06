@@ -85,7 +85,6 @@ bool solicitar_dump_memoria(uint32_t pid) {
         free(PIDComoChar);
         
         if (procesoEsperandoDump != NULL) {
-            // Desbloquear el proceso
             sem_post(procesoEsperandoDump->semaforoDumpFinalizado);
         }
         
@@ -97,13 +96,11 @@ bool solicitar_dump_memoria(uint32_t pid) {
         uint32_t pid_error = recibir_uint32_t_del_buffer(buffer);
         limpiarBuffer(buffer);
         
-        // DESBLOQUEAR EL PROCESO (incluso en caso de error)
         char* PIDComoChar = pasarUnsignedAChar(pid_error);
         ProcesoEnEsperaDump* procesoEsperandoDump = leerDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar);
         free(PIDComoChar);
         
         if (procesoEsperandoDump != NULL) {
-            // Desbloquear el proceso
             sem_post(procesoEsperandoDump->semaforoDumpFinalizado);
         }
         

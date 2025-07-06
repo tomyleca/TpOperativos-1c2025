@@ -70,7 +70,6 @@ void dump_memory(uint32_t pid) {
         exit(1);
     }
     
-    // Crear estructura para esperar confirmación del dump
     ProcesoEnEsperaDump* procesoEsperandoDump = malloc(sizeof(ProcesoEnEsperaDump));
     procesoEsperandoDump->proceso = proceso;
     procesoEsperandoDump->semaforoDumpFinalizado = malloc(sizeof(sem_t));
@@ -99,7 +98,9 @@ void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
     }
     
     sem_wait(procesoEsperandoDump->semaforoDumpFinalizado);
-    
+
+    uint32_t pidAux = procesoEsperandoDump->proceso->PID;
+
     char* PIDComoChar = pasarUnsignedAChar(procesoEsperandoDump->proceso->PID);
     sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar);
     free(PIDComoChar);
@@ -108,7 +109,8 @@ void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
     free(procesoEsperandoDump->semaforoMutex);
     free(procesoEsperandoDump);
     
-    log_info(loggerKernel, "## (<%u>) - Proceso desbloqueado después del dump", procesoEsperandoDump->proceso->PID);
+    //log_info(loggerKernel, "## (<%u>) - Proceso desbloqueado después del dump", procesoEsperandoDump->proceso->PID);
+    log_info(loggerKernel, "## (<%u>) - Proceso desbloqueado después del dump", pidAux);
     
     return NULL;
 }
