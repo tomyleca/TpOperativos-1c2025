@@ -93,44 +93,22 @@ void dump_memory(uint32_t pid) {
 
 void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
     if (solicitar_dump_memoria(procesoEsperandoDump->proceso->PID)) {
-        log_info(loggerKernel, "## (<%u>) - Memory Dump solicitado, esperando confirmación", procesoEsperandoDump->proceso->PID);
-        
-        if (esperar_respuesta_dump_memoria(procesoEsperandoDump->proceso->PID)) {
-            sem_wait(procesoEsperandoDump->semaforoDumpFinalizado);
-            
-            char* PIDComoChar = pasarUnsignedAChar(procesoEsperandoDump->proceso->PID);
-            sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar);
-            free(PIDComoChar);
-            
-            free(procesoEsperandoDump->semaforoDumpFinalizado);
-            free(procesoEsperandoDump->semaforoMutex);
-            free(procesoEsperandoDump);
-            
-            log_info(loggerKernel, "## (<%u>) - Memory Dump completado, proceso desbloqueado", procesoEsperandoDump->proceso->PID);
-        } else {
-            log_error(loggerKernel, "## (<%u>) - Error al esperar respuesta de Memory Dump", procesoEsperandoDump->proceso->PID);
-            
-            char* PIDComoChar = pasarUnsignedAChar(procesoEsperandoDump->proceso->PID);
-            sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar);
-            free(PIDComoChar);
-            
-            free(procesoEsperandoDump->semaforoDumpFinalizado);
-            free(procesoEsperandoDump->semaforoMutex);
-            free(procesoEsperandoDump);
-        }
-        
+        log_info(loggerKernel, "## (<%u>) - Memory Dump completado exitosamente", procesoEsperandoDump->proceso->PID);
     } else {
-        log_error(loggerKernel, "## (<%u>) - Error al solicitar Memory Dump", procesoEsperandoDump->proceso->PID);
-        
-        // Remover del diccionario y liberar recursos en caso de error
-        char* PIDComoChar = pasarUnsignedAChar(procesoEsperandoDump->proceso->PID);
-        sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar);
-        free(PIDComoChar);
-        
-        free(procesoEsperandoDump->semaforoDumpFinalizado);
-        free(procesoEsperandoDump->semaforoMutex);
-        free(procesoEsperandoDump);
+        log_error(loggerKernel, "## (<%u>) - Error en Memory Dump", procesoEsperandoDump->proceso->PID);
     }
+    
+    sem_wait(procesoEsperandoDump->semaforoDumpFinalizado);
+    
+    char* PIDComoChar = pasarUnsignedAChar(procesoEsperandoDump->proceso->PID);
+    sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar);
+    free(PIDComoChar);
+    
+    free(procesoEsperandoDump->semaforoDumpFinalizado);
+    free(procesoEsperandoDump->semaforoMutex);
+    free(procesoEsperandoDump);
+    
+    log_info(loggerKernel, "## (<%u>) - Proceso desbloqueado después del dump", procesoEsperandoDump->proceso->PID);
     
     return NULL;
 }

@@ -72,16 +72,6 @@ bool solicitar_dump_memoria(uint32_t pid) {
     enviar_paquete(paquete, socket_memoria);
     eliminar_paquete(paquete);
     
-    cerrar_conexion_memoria(socket_memoria);
-    
-    log_info(loggerKernel, "## (<%u>) - Solicitud de dump enviada a memoria", pid);
-    return true;
-}
-
-bool esperar_respuesta_dump_memoria(uint32_t pid) {
-    int socket_memoria = crear_conexion_memoria();
-    if (socket_memoria == -1) return false;
-
     op_code respuesta = recibir_operacion(socket_memoria);
     
     if (respuesta == DUMP_MEMORY_OK) {
