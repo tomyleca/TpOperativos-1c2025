@@ -262,6 +262,7 @@ int atender_cliente(int *fd_conexion)
                 break;
             
             case DUMP_MEMORY:
+                usleep(retardo_swap * 1000);
                 printf("DUMP_MEMORY ------------------------------------------------------------------\n");
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
@@ -282,6 +283,7 @@ int atender_cliente(int *fd_conexion)
                 eliminar_paquete(paquete);
             break;
             case FINALIZA_PROCESO:
+                usleep(retardo_swap * 1000);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
                 

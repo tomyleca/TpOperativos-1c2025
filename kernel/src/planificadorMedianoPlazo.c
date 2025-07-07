@@ -17,12 +17,18 @@ void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
     
 
 
-    
+    sem_wait(semaforoMutexIO);
     if(avisarInicioIO(procesoEsperando,nombreIO,tiempo) != -1)
     {
+        pthread_t hiloContadorSwap;
+        pthread_create(&hiloContadorSwap,NULL,(void *)contadorParaSwap,procesoEsperando);
+        procesoEsperando->hiloContadorSwap = hiloContadorSwap;
         pthread_t hiloManejoBloqueado;
         pthread_create(&hiloManejoBloqueado,NULL,(void *)manejarProcesoBloqueadoPorIO,procesoEsperando);
         procesoEsperando->hiloManejoBloqueado= hiloManejoBloqueado;
+
+
+        sem_post(semaforoMutexIO);
 
         log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","BLOCKED");
         cargarCronometro(proceso,EXECUTE);
@@ -31,12 +37,14 @@ void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
     }
     else
     {
+        sem_post(semaforoMutexIO);
         log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", procesoEsperando->proceso->PID, nombreIO);
         pasarAExit(procesoEsperando->proceso,"EXECUTE");
         free(procesoEsperando->semaforoMutex);
         free(procesoEsperando->semaforoIOFinalizada);
         free(procesoEsperando);
     }
+    
 
     
 }
@@ -49,9 +57,7 @@ void* manejarProcesoBloqueadoPorIO(ProcesoEnEsperaIO* ProcesoEnEsperaIO){
     temporal_resume(ProcesoEnEsperaIO->proceso->cronometros[BLOCKED]);
     ProcesoEnEsperaIO->proceso->ME[BLOCKED]++;
 
-    pthread_t hiloContadorSwap;
-    pthread_create(&hiloContadorSwap,NULL,(void *)contadorParaSwap,ProcesoEnEsperaIO);
-    ProcesoEnEsperaIO->hiloContadorSwap = hiloContadorSwap;
+
 
 
     sem_wait(ProcesoEnEsperaIO->semaforoIOFinalizada);
@@ -61,7 +67,7 @@ void* manejarProcesoBloqueadoPorIO(ProcesoEnEsperaIO* ProcesoEnEsperaIO){
     free(PID);
     
     sem_wait(ProcesoEnEsperaIO->semaforoMutex); //Mutex para chequear que el otro hilo no este en medio de un proceso
-    esperarCancelacionDeHilo(hiloContadorSwap); //Cancelo el hilo contadorSwap, para que no tire seg fault cuando haga free del semaforoMutex
+    esperarCancelacionDeHilo(ProcesoEnEsperaIO->hiloContadorSwap); //Cancelo el hilo contadorSwap, para que no tire seg fault cuando haga free del semaforoMutex
     
     if(ProcesoEnEsperaIO->estaENSwap == 0) //Chequeo que no se haya pasado a swap
     {
@@ -159,6 +165,7 @@ void pasarASwapReady(PCB* proceso)
 
 void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)
 {
+    sem_wait(semaforoMutexIO);
     bool _esInstancia(InstanciaIO* instanciaIO)
     {
         return instanciaIO->fdConexion == fdConexion;  //Busco la instancia por conexixón, que es lo que las diferencia
@@ -170,7 +177,7 @@ void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)
     sem_wait(instanciaIO->semaforoMutex);
         instanciaIO->estaLibre=true;
     sem_post(instanciaIO->semaforoMutex);
-
+    log_info(loggerKernel, "## (<%u>) finalizó IO y pasa a READY",PID);
     
     
     if(!list_is_empty(dispositivoIOLiberado->colaEsperandoIO->lista)) //Si la cola de procesos en espera no esta vacía, empiezo el IO del proceso esperando
@@ -179,16 +186,19 @@ void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)
     char* PIDComoChar = pasarUnsignedAChar(PID);
     ProcesoEnEsperaIO* procesoADesbloquear = leerDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
     free(PIDComoChar);
-    sem_post(procesoADesbloquear->semaforoIOFinalizada);
+    if(procesoADesbloquear!=NULL);
+        sem_post(procesoADesbloquear->semaforoIOFinalizada);
 
-    log_info(loggerKernel, "## (<%u>) finalizó IO y pasa a READY",PID);
+    sem_post(semaforoMutexIO);
+    
 
     
 }
 
-//TODO probarlo
+
 void empezarIODelProximoEnEspera(DispositivoIO* dispositivoIO)
 {
+    log_info(loggerKernel,"## Empezando IO del proximo en espera para el dispositivo: %s",dispositivoIO->nombre); 
     ProcesoEnEsperaIO* ProcesoEnEsperaIO = sacarDeLista(dispositivoIO->colaEsperandoIO,0);
     avisarInicioIO(ProcesoEnEsperaIO,dispositivoIO->nombre,ProcesoEnEsperaIO->tiempo);
 }

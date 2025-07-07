@@ -70,7 +70,6 @@ void* atenderInstanciaIO(void* conexion)
             
             //case 0:
             case -1:
-                log_info(loggerKernel,"# Se desconectó IO: ");
                 manejarDesconexionDeIO(nombreIO,*fdConexion);
                 //shutdown(*fdConexion, SHUT_RDWR);
                 close(*fdConexion);
@@ -92,7 +91,7 @@ void* atenderInstanciaIO(void* conexion)
 
 int avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo)
 {
-    sem_wait(semaforoMutexIO);
+    
     InstanciaIO* instanciaIO = NULL;
     DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
     if(dispositivoIO == NULL)
@@ -121,7 +120,7 @@ int avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t t
     eliminar_paquete(paquete);
     }
 
-    sem_post(semaforoMutexIO);
+    
     return 0;
 
 
@@ -145,28 +144,32 @@ bool instanciaLibre(InstanciaIO* instanciaIO)
 void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
 {
     sem_wait(semaforoMutexIO);
-    bool _esInstancia(InstanciaIO* instanciaIO)
-    {
-        return instanciaIO->fdConexion == fdConexion;  //Busco la instancia por conexixón, que es lo que las diferencia
-    };
-    
-    DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
-    InstanciaIO* instanciaIO = leerDeListaSegunCondicion(dispositivoIO->listaInstancias,_esInstancia);
-    ProcesoEnEsperaIO* procesoEnEsperaIO = leerDeDiccionario(diccionarioProcesosBloqueados,pasarUnsignedAChar(instanciaIO->PIDEnIO));
-    exitDeProcesoBLoqueadoPorIO(procesoEnEsperaIO);
-
-    sacarElementoDeLista(dispositivoIO->listaInstancias,instanciaIO);
-
-    if(chequearListaVacia(dispositivoIO->listaInstancias)) //Si despues de sacar la instancia no quedan más paso a exit todos los proceso esperando el dispositivo
-    {
-        if(!chequearListaVacia(dispositivoIO->colaEsperandoIO)) //Chequeo que no este vacia tampoco
-            list_iterate(dispositivoIO->colaEsperandoIO->lista,exitDeProcesoBLoqueadoPorIO);
+        log_info(loggerKernel,"# Se desconectó IO: %s",nombreDispositivoIO);
+        bool _esInstancia(InstanciaIO* instanciaIO)
+        {
+            return instanciaIO->fdConexion == fdConexion;  //Busco la instancia por conexixón, que es lo que las diferencia
+        };
         
-        borrarListaConSemaforos(dispositivoIO->listaInstancias);
-        borrarListaConSemaforos(dispositivoIO->colaEsperandoIO);
-        sacarDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
-        free(dispositivoIO->nombre);
-    }
+        DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
+        InstanciaIO* instanciaIO = leerDeListaSegunCondicion(dispositivoIO->listaInstancias,_esInstancia);
+        ProcesoEnEsperaIO* procesoEnEsperaIO = leerDeDiccionario(diccionarioProcesosBloqueados,pasarUnsignedAChar(instanciaIO->PIDEnIO));
+        exitDeProcesoBLoqueadoPorIO(procesoEnEsperaIO);
+
+        sacarElementoDeLista(dispositivoIO->listaInstancias,instanciaIO);
+
+        if(chequearListaVacia(dispositivoIO->listaInstancias)) //Si despues de sacar la instancia no quedan más paso a exit todos los proceso esperando el dispositivo
+        {
+            if(!chequearListaVacia(dispositivoIO->colaEsperandoIO)) //Chequeo que no este vacia tampoco
+                {   
+                    log_info(loggerKernel,"# Finalizando procesos encolados en dispositivo: %s",nombreDispositivoIO);
+                    list_iterate(dispositivoIO->colaEsperandoIO->lista,exitDeProcesoBLoqueadoPorIO);
+                }
+            
+            borrarListaConSemaforos(dispositivoIO->listaInstancias);
+            borrarListaConSemaforos(dispositivoIO->colaEsperandoIO);
+            sacarDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
+            free(dispositivoIO->nombre);
+        }
     
     sem_post(semaforoMutexIO);
 }
