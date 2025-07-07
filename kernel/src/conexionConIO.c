@@ -30,6 +30,7 @@ void* atenderInstanciaIO(void* conexion)
         {
             case HANDSHAKE_IO_KERNEL:
                 nombreIO = recibir_string_del_buffer(buffer);
+                sem_wait(semaforoMutexIO);
                 if(leerDeDiccionario(diccionarioDispositivosIO,nombreIO) != NULL) // Si el IO ya existe, osea ya hay una instancia e este
                 {
                     DispositivoIO* dispositivoIO= leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
@@ -58,6 +59,7 @@ void* atenderInstanciaIO(void* conexion)
                     
                     agregarADiccionario(diccionarioDispositivosIO,nombreIO,nuevoDispositivoIO);
                 }
+                sem_post(semaforoMutexIO);
                 break;
             
             case TERMINO_IO:
@@ -88,11 +90,17 @@ void* atenderInstanciaIO(void* conexion)
 
 }
 
-void avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo)
+int avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo)
 {
+    sem_wait(semaforoMutexIO);
+    InstanciaIO* instanciaIO = NULL;
     DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
-    InstanciaIO* instanciaIO = leerDeListaSegunCondicion(dispositivoIO->listaInstancias,instanciaLibre); //Busco la primer instancia libre
+    if(dispositivoIO == NULL)
+        return -1;
+   
+    instanciaIO = leerDeListaSegunCondicion(dispositivoIO->listaInstancias,instanciaLibre); //Busco la primer instancia libre
     
+
     if(instanciaIO == NULL) // No hay instancias libres
     {
         agregarALista(dispositivoIO->colaEsperandoIO,procesoEnEsperaIO); // Si el dispositivo ya esta ocupado entra acá
@@ -113,7 +121,8 @@ void avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t 
     eliminar_paquete(paquete);
     }
 
-    
+    sem_post(semaforoMutexIO);
+    return 0;
 
 
 }
@@ -135,6 +144,7 @@ bool instanciaLibre(InstanciaIO* instanciaIO)
 
 void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
 {
+    sem_wait(semaforoMutexIO);
     bool _esInstancia(InstanciaIO* instanciaIO)
     {
         return instanciaIO->fdConexion == fdConexion;  //Busco la instancia por conexixón, que es lo que las diferencia
@@ -158,6 +168,7 @@ void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
         free(dispositivoIO->nombre);
     }
     
+    sem_post(semaforoMutexIO);
 }
 
 

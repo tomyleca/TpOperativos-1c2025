@@ -61,6 +61,7 @@ sem_t* semaforoEsperarOKDispatch;
 sem_t* semaforoMutexGuardarDatosCPU;
 sem_t* semaforoEsperarOKInterrupt;
 sem_t* semaforoPCActualizado;
+sem_t* semaforoMutexIO;
 
 //HILOS
 pthread_t hiloAtenderDispatch;

@@ -1,5 +1,0 @@
-INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo2.txt 65
-INIT_PROC /home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigo3.txt 129
-DUMP_MEMORY
-EXIT
-

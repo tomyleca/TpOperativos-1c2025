@@ -214,6 +214,7 @@ extern sem_t* semaforoEsperarOKDispatch;
 extern sem_t* semaforoMutexGuardarDatosCPU;
 extern sem_t* semaforoEsperarOKInterrupt;
 extern sem_t* semaforoPCActualizado;
+extern sem_t* semaforoMutexIO;
 
 //MEMORIA
 extern int mandarDatosProcesoAMemoria(PCB* proceso);

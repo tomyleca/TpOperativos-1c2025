@@ -108,6 +108,8 @@ void crearEstructuras()
     sem_init(semaforoMutexGuardarDatosCPU,1,1);
     semaforoPCActualizado = malloc(sizeof(sem_t));
     sem_init(semaforoPCActualizado,1,0);
+    semaforoMutexIO = malloc(sizeof(sem_t));
+    sem_init(semaforoMutexIO,1,1);
 
 
   

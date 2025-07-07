@@ -2,14 +2,6 @@
 
 void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
     
-    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","BLOCKED");
-    cargarCronometro(proceso,EXECUTE);
-    
-
-    suspender_proceso_memoria(proceso->PID);
-    
-   
-    
     ProcesoEnEsperaIO* procesoEsperando=malloc(sizeof(ProcesoEnEsperaIO));
     procesoEsperando->proceso=proceso;
     procesoEsperando->estaENSwap=0;
@@ -19,27 +11,34 @@ void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
     sem_init(procesoEsperando->semaforoIOFinalizada,1,0);
     sem_init(procesoEsperando->semaforoMutex,1,1);
 
-    char* PIDComoChar = pasarUnsignedAChar(proceso->PID);
-    agregarADiccionario(diccionarioProcesosBloqueados,PIDComoChar,procesoEsperando);
-    free(PIDComoChar);
     
-
-
-    
-    
-    pthread_t hiloManejoBloqueado;
-    pthread_create(&hiloManejoBloqueado,NULL,(void *)manejarProcesoBloqueadoPorIO,procesoEsperando);
-    procesoEsperando->hiloManejoBloqueado= hiloManejoBloqueado;
-
-    avisarInicioIO(procesoEsperando,nombreIO,tiempo);
-
-    
-
+    agregarADiccionario(diccionarioProcesosBloqueados,pasarUnsignedAChar(proceso->PID),procesoEsperando);
     
     
 
-    
 
+    
+    if(avisarInicioIO(procesoEsperando,nombreIO,tiempo) != -1)
+    {
+        pthread_t hiloManejoBloqueado;
+        pthread_create(&hiloManejoBloqueado,NULL,(void *)manejarProcesoBloqueadoPorIO,procesoEsperando);
+        procesoEsperando->hiloManejoBloqueado= hiloManejoBloqueado;
+
+        log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","BLOCKED");
+        cargarCronometro(proceso,EXECUTE);
+        suspender_proceso_memoria(proceso->PID);
+   
+    }
+    else
+    {
+        log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", procesoEsperando->proceso->PID, nombreIO);
+        pasarAExit(procesoEsperando->proceso,"EXECUTE");
+        free(procesoEsperando->semaforoMutex);
+        free(procesoEsperando->semaforoIOFinalizada);
+        free(procesoEsperando);
+    }
+
+    
 }
 
 
