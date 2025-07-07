@@ -13,9 +13,7 @@
 #include "utils/configs.h"
 #include "utils/shared.h"
 #include "utils/conexiones.h"
-#include "pruebas.h"
 #include "syscalls.h"
-#include "pruebas.h"
 #include <signal.h>
 
 void leerConfigKernel(t_config* config_kernel);

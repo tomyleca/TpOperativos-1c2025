@@ -1,7 +1,2 @@
 NOOP
-WRITE 10 cualquierCosa
-NOOP
-READ 10 13
-IO Prueba 3000
-DUMP_MEMORY
 EXIT

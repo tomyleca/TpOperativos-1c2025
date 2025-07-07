@@ -1,6 +1,7 @@
 #include "syscalls.h"
 #include "conexionConMemoria.h"
 #include "../../utils/src/utils/conexiones.h"
+#include "kernel.h"
 
 
 void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
@@ -77,9 +78,16 @@ void dump_memory(uint32_t pid) {
     procesoEsperandoDump->nucleoCPU = NULL;
     sem_init(procesoEsperandoDump->semaforoDumpFinalizado, 1, 0);
     sem_init(procesoEsperandoDump->semaforoMutex, 1, 1);
+
     
+    //Lo paso a bloqueado
     char* PIDComoChar = pasarUnsignedAChar(pid);
     agregarADiccionario(diccionarioProcesosEsperandoDump, PIDComoChar, procesoEsperandoDump);
+    cargarCronometro(proceso,EXECUTE);
+    log_info(loggerKernel, "## (<%u>) - Bloqueado por DUMP_MEMORY", pid);
+    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","BLOCKED");
+    proceso->ME[BLOCKED]++;
+    temporal_resume(proceso->cronometros[BLOCKED]);
     free(PIDComoChar);
     
     terminarEjecucion(proceso, INTERRUPCION_SINCRONICA);
@@ -87,7 +95,7 @@ void dump_memory(uint32_t pid) {
     pthread_t hiloEsperarDump;
     pthread_create(&hiloEsperarDump, NULL, (void*)manejarProcesoEsperandoDump, procesoEsperandoDump);
     
-    log_info(loggerKernel, "## (<%u>) - Memory Dump solicitado, proceso liberado de CPU", pid);
+    
 }
 
 void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
@@ -103,14 +111,15 @@ void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
 
     char* PIDComoChar = pasarUnsignedAChar(procesoEsperandoDump->proceso->PID);
     sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar);
+    cargarCronometro(procesoEsperandoDump->proceso,BLOCKED);
+    pasarAReady(procesoEsperandoDump->proceso);
     free(PIDComoChar);
     
     free(procesoEsperandoDump->semaforoDumpFinalizado);
     free(procesoEsperandoDump->semaforoMutex);
     free(procesoEsperandoDump);
     
-    //log_info(loggerKernel, "## (<%u>) - Proceso desbloqueado después del dump", procesoEsperandoDump->proceso->PID);
-    log_info(loggerKernel, "## (<%u>) - Proceso desbloqueado después del dump", pidAux);
+
     
     return NULL;
 }
