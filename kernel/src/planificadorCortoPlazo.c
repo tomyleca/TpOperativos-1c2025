@@ -33,7 +33,7 @@ void* planificadorCortoPlazo(void* arg)
                 {
                     ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
                     procesoAEjecutar = leerDeLista(listaProcesosReady,0); //Si la lista esta vacía se queda esperando
-                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == true)
+                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == true && !chequearListaVacia(listaCPUsLibres))
                         procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
                     else
                         procesoAEjecutar = NULL;
@@ -46,6 +46,8 @@ void* planificadorCortoPlazo(void* arg)
                 
         }
 
+       
+        
 
         if(procesoAEjecutar != NULL && procesoAEjecutar->PID >= 0) //Lo del PID es un chequeo de que estoy apuntando a un struct de tipo PCB
         {
@@ -60,6 +62,7 @@ void* planificadorCortoPlazo(void* arg)
 
 void pasarAExecute(PCB* proceso)
 {
+
     NucleoCPU* nucleoCPULibre =  sacarDeLista(listaCPUsLibres,0);
     nucleoCPULibre->ejecutando=true;
     nucleoCPULibre->procesoEnEjecucion=proceso;
@@ -137,32 +140,36 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 
 int terminarEjecucion(PCB* proceso,op_code tipoInterruccion)
 {
-    bool _ejecutandoProceso(NucleoCPU* nucleoCPU)
-    {
-        return nucleoCPU->procesoEnEjecucion == proceso;
-    };
-
-    if(tipoInterruccion == INTERRUPCION_ASINCRONICA)
-        agregarAListaSinRepetidos(listaProcesosPorSerDesalojados,proceso);
-    
-    
-    NucleoCPU* nucleoCPU = sacarDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
-    
-    if(nucleoCPU != NULL)
+    sem_wait(semaforoMutexTerminarEjecucion);
+        bool _ejecutandoProceso(NucleoCPU* nucleoCPU)
         {
-        nucleoCPU->ejecutando=false;
-        mandarInterrupcion(nucleoCPU,tipoInterruccion);
-        agregarALista(listaCPUsLibres,nucleoCPU);
-        PCB* procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
-        guardarDatosDeEjecucion(procesoPostEjecucion);
+            return nucleoCPU->procesoEnEjecucion == proceso;
+        };
 
-        sem_post(semaforoIntentarPlanificar);
-        return 1;
-        } /* Puede ocurrir que se intente finalizar la ejecucion de un proceso por desalojo al despues que el mismo se intenta 
-        finalizar por algo que ocurre en su ejecución(SYSCALL EXIT, IO NO ENCONTRADO ETC.)
-        , o visceversa, por lo que chequeo que haya un cpu ejecutando el proceso del que quiero terminar la ejecucion*/
+        if(tipoInterruccion == INTERRUPCION_ASINCRONICA)
+            agregarAListaSinRepetidos(listaProcesosPorSerDesalojados,proceso);
+        
+        
+        NucleoCPU* nucleoCPU = sacarDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
+        
+        if(nucleoCPU != NULL)
+            {
+            nucleoCPU->ejecutando=false;
+            mandarInterrupcion(nucleoCPU,tipoInterruccion);
+            agregarALista(listaCPUsLibres,nucleoCPU);
+            PCB* procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
+            guardarDatosDeEjecucion(procesoPostEjecucion);
 
-        return 0;
+            sem_post(semaforoIntentarPlanificar);
+            sem_post(semaforoMutexTerminarEjecucion);
+            return 1;
+            } /* Puede ocurrir que se intente finalizar la ejecucion de un proceso por desalojo al despues que el mismo se intenta 
+            finalizar por algo que ocurre en su ejecución(SYSCALL EXIT, IO NO ENCONTRADO ETC.)
+            , o visceversa, por lo que chequeo que haya un cpu ejecutando el proceso del que quiero terminar la ejecucion*/
+            
+            sem_post(semaforoMutexTerminarEjecucion);
+            return 0;
+        
 }
 
 bool menorEstimadoRafagaRestante(NucleoCPU* CPU1,NucleoCPU* CPU2)

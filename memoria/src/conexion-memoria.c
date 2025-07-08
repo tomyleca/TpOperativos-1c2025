@@ -54,6 +54,7 @@ int atender_cliente(int *fd_conexion)
                 break;
 
             case SOLICITUD_ESTRUCTURA_MEMORIA:
+                usleep(retardo_memoria * 1000);
                 printf("SOLICITUD ESTRUCTURA MEMORIA------------------------------------------------------------------\n");
                 paquete = crear_super_paquete(RESPUESTA_ESTRUCTURA_MEMORIA);
                 cargar_int_al_super_paquete(paquete, TAM_PAGINA);
@@ -64,6 +65,7 @@ int atender_cliente(int *fd_conexion)
                 break;
         
             case GUARDAR_PROCESO_EN_MEMORIA:
+                usleep(retardo_memoria * 1000);
                 printf("GUARDAR PROCESO EN MEMORIA------------------------------------------------------------------\n");
                 t_info_kernel datos_kernel; 
                 unBuffer = recibiendo_super_paquete(cliente_fd);
@@ -166,6 +168,7 @@ int atender_cliente(int *fd_conexion)
                 break;
             
              case CPU_SOLICITA_LEER_PAGINA_COMPLETA:
+                usleep(retardo_memoria * 1000);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_int_del_buffer(unBuffer);
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
@@ -186,6 +189,7 @@ int atender_cliente(int *fd_conexion)
                 break;
 
             case CPU_SOLICITA_ESCRIBIR_PAGINA_COMPLETA:
+                usleep(retardo_memoria * 1000);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_int_del_buffer(unBuffer);
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
