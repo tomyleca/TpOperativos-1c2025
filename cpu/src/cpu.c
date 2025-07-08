@@ -69,6 +69,7 @@ void inicializar_hilos(t_config* config_cpu)
     socket_cpu_memoria = crear_conexion(logger_cpu, ip_memoria, puerto_memoria);
     hilo_escuchar_memoria = escuchar_memoria();
     enviarOpCode(socket_cpu_memoria,SOLICITUD_ESTRUCTURA_MEMORIA);
+    sem_wait(&llegaron_tam);
 
     socket_cpu_kernel_dispatch = crear_conexion(logger_cpu, ip_kernel, puerto_kernel_dispatch);
     crear_handshake_cpu_kernel_dispatch(socket_cpu_kernel_dispatch);
@@ -100,6 +101,7 @@ void inicializar_recursos()
 
     sem_init(&mutex_motivo_interrupcion, 0,1);
     sem_init(&mutex_lista_tlb,0,1);
+    sem_init(&llegaron_tam,0,0);
 
     iniciar_diccionario_instrucciones();
     

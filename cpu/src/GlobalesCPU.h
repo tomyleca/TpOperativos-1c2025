@@ -76,6 +76,7 @@ extern t_list* lista_tlb;
 
 extern sem_t mutex_motivo_interrupcion;
 extern sem_t mutex_lista_tlb;
+extern sem_t llegaron_tam;
 
 //DICTIONARYS
 
