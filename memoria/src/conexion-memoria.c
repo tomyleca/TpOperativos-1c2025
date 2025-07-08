@@ -10,7 +10,7 @@ void server_escucha(int* fd_escucha_servidor)
         // Espera a un cliente en el bucle principal
         int fd_conexion_2 = *fd_escucha_servidor;
         int fd_conexion = esperar_cliente(fd_conexion_2);
-        log_info(logger_memoria, "\n");
+        //log_info(logger_memoria, "\n");
         log_info(logger_memoria, "## Cliente conectado - FD del socket: <%d>", fd_conexion);
 
         if (fd_conexion != -1) {

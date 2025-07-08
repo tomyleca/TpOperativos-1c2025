@@ -520,7 +520,7 @@ int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
     log_error(logger_memoria, "Error al crear proceso.");
     exit(EXIT_FAILURE);
   }
-
+  
   if (reservar_memoria(p, tam) < 0) {
    log_error(logger_memoria, "No se pudo asignar memoria al proceso\n");
     free(p);
@@ -528,7 +528,7 @@ int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
     return -1;
   }
   
-  p = guardarProceso(p,PID,tam,pseudocodigo);
+  p = guardarProceso(p,PID,tam,pseudocodigo); 
 
 
   memset(&p->metricas, 0, sizeof(MetricaProceso));

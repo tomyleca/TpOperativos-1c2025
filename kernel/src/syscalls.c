@@ -123,10 +123,10 @@ void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
     return NULL;
 }
 
-void syscall_IO(PCB* proceso, char* nombreIO, int64_t tiempo) {
+void syscall_IO(PCB* proceso,uint32_t PID, char* nombreIO, int64_t tiempo) {
 
     
-    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: IO", proceso->PID);
+    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: IO", PID);
 
     
 
@@ -139,13 +139,13 @@ void syscall_IO(PCB* proceso, char* nombreIO, int64_t tiempo) {
 
 
         if (dispositivo == NULL) {
-            log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", proceso->PID, nombreIO);
+            log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", PID, nombreIO);
             pasarAExit(proceso,"EXECUTE");
             sem_post(semaforoMutexIO);
             return;
         }
         if (proceso == NULL) {
-        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", proceso->PID);
+        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", PID);
         exit(1);
         }
 
@@ -153,7 +153,7 @@ void syscall_IO(PCB* proceso, char* nombreIO, int64_t tiempo) {
         
 
     sem_post(semaforoMutexIO);
-    log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",proceso->PID,nombreIO);
+    log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",PID,nombreIO);
 
     
     pasarABLoqueadoPorIO(proceso, tiempo, nombreIO);
