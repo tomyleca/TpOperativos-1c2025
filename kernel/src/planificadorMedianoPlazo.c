@@ -31,7 +31,7 @@ void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
         sem_post(semaforoMutexIO);
 
         log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","BLOCKED");
-        suspender_proceso_memoria(proceso->PID);
+        
    
     }
     else
@@ -73,7 +73,6 @@ void* manejarProcesoBloqueadoPorIO(ProcesoEnEsperaIO* ProcesoEnEsperaIO){
 
         log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",ProcesoEnEsperaIO->proceso->PID,"BLOCKED","READY");
         cargarCronometro(ProcesoEnEsperaIO->proceso,BLOCKED);
-        des_suspender_proceso_memoria(ProcesoEnEsperaIO->proceso->PID);
         pasarAReady(ProcesoEnEsperaIO->proceso);
         
         
@@ -86,7 +85,6 @@ void* manejarProcesoBloqueadoPorIO(ProcesoEnEsperaIO* ProcesoEnEsperaIO){
     {
         log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",ProcesoEnEsperaIO->proceso->PID,"SWAP_BLOCKED","SWAP_READY");
         cargarCronometro(ProcesoEnEsperaIO->proceso,SWAP_BLOCKED);
-        des_suspender_proceso_memoria(ProcesoEnEsperaIO->proceso->PID);
         pasarASwapReady(ProcesoEnEsperaIO->proceso);
     }
     else
@@ -133,8 +131,7 @@ void contadorParaSwap (ProcesoEnEsperaIO* ProcesoEnEsperaIO)
 
 void pasarASwapBlocked(ProcesoEnEsperaIO* procesoEsperandoIO)
 {
-    //TODO Le aviso a la memoria que el proceso paso a disco.
-    
+    suspender_proceso_memoria(procesoEsperandoIO->proceso->PID);
     temporal_resume(procesoEsperandoIO->proceso->cronometros[SWAP_BLOCKED]);
     procesoEsperandoIO->proceso->ME[SWAP_BLOCKED]++;
     procesoEsperandoIO->estaENSwap=1;

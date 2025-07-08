@@ -223,12 +223,8 @@ void asignar_frames_hojas(TablaPagina *tabla) {
   }
 }
 
-Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
-  Proceso *p = malloc(sizeof(Proceso));
-  if (!p) {
-    log_error(logger_memoria, "Error al crear proceso.");
-    exit(EXIT_FAILURE);
-  }
+Proceso* guardarProceso(Proceso* p,uint32_t PID,uint32_t tam, char* pseudocodigo) {
+
   p->pid = PID;  
   p->tamanio_reservado = tam;
   p->pseudocodigo = pseudocodigo;
@@ -237,7 +233,7 @@ Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   agregarADiccionario(diccionarioProcesos,clave,p);
   free(clave);
 
-  log_info(logger_memoria,"## PID: <%u> - Proceso Creado - Tamaño: <%u>",p->pid,p->tamanio_reservado);
+  
 
   return p;
 }
@@ -519,13 +515,20 @@ void dump_memory(Proceso *p) {
 }
 
 int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
+  Proceso *p = malloc(sizeof(Proceso));
+  if (!p) {
+    log_error(logger_memoria, "Error al crear proceso.");
+    exit(EXIT_FAILURE);
+  }
 
-  Proceso *p = guardarProceso(PID,tam,pseudocodigo);
   if (reservar_memoria(p, tam) < 0) {
    log_error(logger_memoria, "No se pudo asignar memoria al proceso\n");
     free(p);
+    mostrar_procesos_activos();
     return -1;
   }
+  
+  p = guardarProceso(p,PID,tam,pseudocodigo);
 
 
   memset(&p->metricas, 0, sizeof(MetricaProceso));
@@ -573,9 +576,10 @@ int suspender_proceso(Proceso *p) {
       free(vacio);
     }
   }
-  log_info(logger_memoria, "PID: <%u> - Proceso suspendido correctamente en swapfile", p->pid);
+  
   fclose(archivo_swap);
   liberar_memoria(p);
+  log_info(logger_memoria, "PID: <%u> - Proceso suspendido correctamente en swapfile", p->pid);
   return 1; 
 }
 

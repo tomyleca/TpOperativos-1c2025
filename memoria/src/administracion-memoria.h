@@ -56,7 +56,7 @@ int escribir_memoria(Proceso *p, int dir_fisica, char* valor);
 char* leer_memoria(Proceso *p, int dir_fisica,int tamanio);
 
 //*Gestión de procesos
-Proceso* guardarProceso(uint32_t PID,uint32_t tam, char* pseudocodigo);
+Proceso* guardarProceso(Proceso* p,uint32_t PID,uint32_t tam, char* pseudocodigo);
 int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo);
 void destruir_proceso(uint32_t pid);
 void mostrar_procesos_activos();
