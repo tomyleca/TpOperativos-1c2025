@@ -81,7 +81,8 @@ void atender_memoria()
                 valor_str_temp = recibir_string_del_buffer(buffer); // Recibe el valor como string
                 // Copia el valor al buffer temporal global. Asegura espacio y terminador nulo.
                 strncpy(valor_leido_memoria, valor_str_temp, sizeof(valor_leido_memoria) - 1);
-                valor_leido_memoria[strlen(valor_leido_memoria) - 1] = '\0';
+                valor_leido_memoria[sizeof(valor_leido_memoria) - 1] = '\0';  // Asegura \0 al final siempre
+
                 sem_post(&sem_valor_leido);
                 free(valor_str_temp); 
                 limpiarBuffer(buffer);

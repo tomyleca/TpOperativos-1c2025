@@ -99,6 +99,7 @@ void inicializar_recursos()
     sem_init(&sem_valor_leido, 0, 0);
 
     sem_init(&mutex_motivo_interrupcion, 0,1);
+    sem_init(&mutex_lista_tlb,0,1);
 
     iniciar_diccionario_instrucciones();
     

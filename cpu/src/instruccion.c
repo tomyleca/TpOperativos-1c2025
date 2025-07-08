@@ -31,7 +31,7 @@ void instruccion_escribir_memoria(char** parte)
     // Traducimos la direccion del registro direccion
     int direccion_logica = atoi(parte[1]); // parte[1] = "0"
 
-    if(cache_paginas!=NULL) //Si la cache esta habilitada trabajo directamente en cache
+    if (cache_paginas != NULL && entradas_cache > 0) //Si la cache esta habilitada trabajo directamente en cache
     {
         escribir_cache(direccion_logica,datos_a_escribir);
     }
@@ -72,7 +72,7 @@ void instruccion_leer_memoria(char** parte)
     int direccion_logica = atoi(parte[1]); // parte[1] = "0"
 
 
-    if(cache_paginas!=NULL) //Si la cache esta habilitada trabajo directamente en cache
+    if (cache_paginas != NULL && entradas_cache > 0) //Si la cache esta habilitada trabajo directamente en cache
         leer_cache(direccion_logica,tamanio);
 
     else //sino le pido la direccion lógica a memoria y leo en memoria
@@ -156,32 +156,48 @@ int buscar_en_tlb(int direccion_logica) {
 }
 
 void agregar_a_tlb(int pid, int nro_pagina, int nro_marco) {
-    // Crear una nueva entrada para la TLB
-    TLB_proceso = malloc(sizeof(EntradaTLB));
-    TLB_proceso->pid = pid;
-    TLB_proceso->nro_pagina = nro_pagina;
-    TLB_proceso->nro_marco = nro_marco;
-    TLB_proceso->timestamp = obtener_timestamp_actual(); 
-    
+    sem_wait(&mutex_lista_tlb);
+
+    EntradaTLB* nueva_entrada = malloc(sizeof(EntradaTLB));
+    nueva_entrada->pid = pid;
+    nueva_entrada->nro_pagina = nro_pagina;
+    nueva_entrada->nro_marco = nro_marco;
+    nueva_entrada->timestamp = obtener_timestamp_actual(); 
+
     if (list_size(lista_tlb) >= entradas_tlb) {
         if (strcmp(reemplazo_tlb, "FIFO") == 0) {
-            EntradaTLB* entrada_removida = list_remove(lista_tlb, 0);
-            free(entrada_removida);
-        } 
-        else if(strcmp(reemplazo_tlb, "LRU") == 0) {
+            if (list_size(lista_tlb) > 0) {
+                EntradaTLB* entrada_removida = list_remove(lista_tlb, 0);
+                log_info(logger_cpu, "Reemplazo FIFO - Eliminando PID: %d Página: %d", entrada_removida->pid, entrada_removida->nro_pagina);
+                free(entrada_removida);
+            }
+        } else if (strcmp(reemplazo_tlb, "LRU") == 0) {
             int indice_mas_viejo = 0;
+            long ts_min = ((EntradaTLB*)list_get(lista_tlb, 0))->timestamp;
+
             for (int i = 1; i < list_size(lista_tlb); i++) {
-                EntradaTLB *entrada = list_get(lista_tlb, i);
-                if (entrada->timestamp < ((EntradaTLB *)list_get(lista_tlb, indice_mas_viejo))->timestamp) {
+                EntradaTLB* entrada = list_get(lista_tlb, i);
+                if (entrada->timestamp < ts_min) {
+                    ts_min = entrada->timestamp;
                     indice_mas_viejo = i;
                 }
             }
+            int size = list_size(lista_tlb);
+            if (indice_mas_viejo >= size) {
+                log_error(logger_cpu, "ERROR: índice fuera de rango en list_remove. indice=%d, size=%d", indice_mas_viejo, size);
+                return;
+            }
+            
             EntradaTLB* entrada_removida = list_remove(lista_tlb, indice_mas_viejo);
+            log_info(logger_cpu, "Reemplazo LRU - Eliminando PID: %d Página: %d", entrada_removida->pid, entrada_removida->nro_pagina);
             free(entrada_removida);
         }
     }
-    // Agregar la nueva entrada a la TLB
-    list_add(lista_tlb, TLB_proceso);
+
+    list_add(lista_tlb, nueva_entrada);
+    log_info(logger_cpu, "Agregando a TLB: PID: %d Página: %d Marco: %d", pid, nro_pagina, nro_marco);
+
+    sem_post(&mutex_lista_tlb);
 }
 
 int obtener_timestamp_actual() {
@@ -211,7 +227,7 @@ int traducirDLMedianteMMU(int direccion_logica)
     int desplazamiento = direccion_logica % tamanio_pagina;
     int entrada_nivel_X;
     nro_marco = -1;
-    int* entradas_de_nivel = malloc(sizeof(int)* cant_niveles);
+    int* entradas_de_nivel = malloc(sizeof(int)* (cant_niveles + 1));
 
     for (int nivel = 1; nivel <= cant_niveles; nivel++) {
         int potencia = (int) pow(cant_entradas_tabla, cant_niveles - nivel);
@@ -486,21 +502,28 @@ void log_instruccion(char** parte) {
 void inicializar_cache() 
 {
     if (entradas_cache <= 0) {
+        log_error(logger_cpu, "Entradas de caché inválidas: %d", entradas_cache);
+        cache_paginas = NULL;
+        return;
+    }
+
+    if (tamanio_pagina <= 0) {
+        log_error(logger_cpu, "Tamaño de página inválido: %d", tamanio_pagina);
         cache_paginas = NULL;
         return;
     }
 
     cache_paginas = malloc(sizeof(EntradaCache) * entradas_cache);
-
     puntero_clock = 0;
-    
-    // Inicializo todas las entradas  deshabilitadas
+
     for (int i = 0; i < entradas_cache; i++) {
         cache_paginas[i].pid = -1;
         cache_paginas[i].nro_pagina = -1;
         cache_paginas[i].nro_marco = -1;
         cache_paginas[i].contenido = malloc(tamanio_pagina);
-        memset(cache_paginas[i].contenido, 0, tamanio_pagina);
+        if (cache_paginas[i].contenido != NULL) {
+            memset(cache_paginas[i].contenido, 0, tamanio_pagina);
+        }
         cache_paginas[i].bit_referencia = false;
         cache_paginas[i].bit_modificacion = false;
         cache_paginas[i].bit_validez = false;
@@ -509,6 +532,7 @@ void inicializar_cache()
 
 int buscar_en_cache(int pid, int nro_pagina) 
 {   
+
     for (int i = 0; i < entradas_cache; i++) {
         if (cache_paginas[i].bit_validez != false && 
             cache_paginas[i].pid == pid && 
@@ -676,7 +700,9 @@ int cargar_pagina_en_cache(int pid, int direccion_logica)
     cache_paginas[indice_victima].bit_modificacion = false;
     cache_paginas[indice_victima].bit_validez = true;
 
-    log_info(logger_cpu, "PID: %d - Cache Add - Página: %d", pid, nro_pagina);
+
+
+    //log_info(logger_cpu, "PID: %d - Cache Add - Página: %d", pid, nro_pagina);
 
          /*for (int i = 0; i < entradas_cache; i++) {
     log_debug(logger_cpu, "[DEBUG] Entrada %d -> PID: %d | Página: %d | Marco: %d | Validez: %d | Uso: %d | Modif: %d",
