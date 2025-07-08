@@ -75,7 +75,7 @@ int contenido_recibido;
 
 t_list* lista_tlb;
 
-pthread_mutex_t mutex_motivo_interrupcion;
+sem_t mutex_motivo_interrupcion;
 
 
 char* ip_memoria;

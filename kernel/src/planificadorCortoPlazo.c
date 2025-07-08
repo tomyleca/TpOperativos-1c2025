@@ -33,7 +33,7 @@ void* planificadorCortoPlazo(void* arg)
                 {
                     ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
                     procesoAEjecutar = leerDeLista(listaProcesosReady,0); //Si la lista esta vacía se queda esperando
-                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == true && !chequearListaVacia(listaCPUsLibres))
+                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == true )
                         procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
                     else
                         procesoAEjecutar = NULL;
@@ -51,9 +51,10 @@ void* planificadorCortoPlazo(void* arg)
 
         if(procesoAEjecutar != NULL && procesoAEjecutar->PID >= 0) //Lo del PID es un chequeo de que estoy apuntando a un struct de tipo PCB
         {
+            pasarAExecute(procesoAEjecutar);
             log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAEjecutar->PID,"READY","EXECUTE");
             cargarCronometro(procesoAEjecutar,READY);
-            pasarAExecute(procesoAEjecutar);
+            
            
         }
     }

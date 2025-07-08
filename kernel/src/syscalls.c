@@ -128,29 +128,29 @@ void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
     log_info(loggerKernel, "## (<%u>) - Solicitó syscall: IO", pid);
 
     PCB* proceso = NULL;
-    proceso  = buscarPCBEjecutando(pid);
+    sem_wait(semaforoMutexIO);
+        proceso  = buscarPCBEjecutando(pid);
 
-    if (proceso == NULL) {
-        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", pid);
-        exit(1);
-    }
-    
-    
-    
-   
+        DispositivoIO* dispositivo = NULL;
+        dispositivo = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
 
+        if (dispositivo == NULL && proceso == NULL) //ya se finalizo el proceso pq la IO no existe
+            return;
 
-
-    DispositivoIO* dispositivo = NULL;
-    dispositivo = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
-
-    if (dispositivo == NULL) {
+        if (dispositivo == NULL) {
         log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", pid, nombreIO);
         terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
         pasarAExit(proceso,"EXECUTE");
         return;
-    }
+        }
 
+        if (proceso == NULL) {
+            log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", pid);
+            exit(1);
+        }
+        
+
+    sem_post(semaforoMutexIO);
     log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",pid,nombreIO);
 
     terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);

@@ -199,7 +199,8 @@ void mandarContextoACPU(uint32_t PID,uint32_t PC,int fdConexion)
 void actualizarPC(uint32_t pid, uint32_t PCActualizado)
 {
     PCB* proceso = buscarPCBEjecutando(pid);
-    proceso->PC = PCActualizado; 
+    if(proceso!= NULL) 
+        proceso->PC = PCActualizado; 
 
 }
 

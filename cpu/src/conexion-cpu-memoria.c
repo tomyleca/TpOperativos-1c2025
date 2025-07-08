@@ -131,11 +131,11 @@ void atender_interrupcion_kernel()
             case INTERRUPCION_SINCRONICA:
                 
                 log_info(logger_cpu, " ## Llega interrupción sincrónica al puerto Interrupt.");
-                pthread_mutex_lock(&mutex_motivo_interrupcion);
+                sem_wait(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;
                 printf("Adentro de lmutex interrup \n");
                 motivo_interrupcion = INTERRUPCION_SINCRONICA;
-                pthread_mutex_unlock(&mutex_motivo_interrupcion);
+                sem_post(&mutex_motivo_interrupcion);
                 enviarOK(socket_cpu_kernel_interrupt);
                 
                 
@@ -144,11 +144,11 @@ void atender_interrupcion_kernel()
             case INTERRUPCION_ASINCRONICA:
                 log_info(logger_cpu, " ## Llega interrupción asincrónica al puerto Interrupt.");
                 
-                pthread_mutex_lock(&mutex_motivo_interrupcion);
+                sem_wait(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;
                 printf("Adentro de lmutex interrup \n");
                 motivo_interrupcion = INTERRUPCION_ASINCRONICA;
-                pthread_mutex_unlock(&mutex_motivo_interrupcion);
+                sem_post(&mutex_motivo_interrupcion);
                 enviarOK(socket_cpu_kernel_interrupt);
                 break;
             case -1:

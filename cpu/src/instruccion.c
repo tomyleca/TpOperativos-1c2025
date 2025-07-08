@@ -363,9 +363,9 @@ void decode()
 void check_interrupt(uint32_t PIDInicial)
 {   
     //El semaforo de recibir interrupcion no es necesario pq la validacion de que ya llego una posible interrupcion para este punto la ahce kernel antes de mandar el OK en las syscalls
-    pthread_mutex_lock(&mutex_motivo_interrupcion);
+    sem_wait(&mutex_motivo_interrupcion);
     bool hay_interrupcion = flag_interrupcion;  // Leer flag
-    pthread_mutex_unlock(&mutex_motivo_interrupcion);
+    sem_post(&mutex_motivo_interrupcion);
 
     if(hay_interrupcion) // hay una interrupcion
     {   
@@ -391,7 +391,7 @@ void check_interrupt(uint32_t PIDInicial)
             }
 
             
-            pthread_mutex_lock(&mutex_motivo_interrupcion);
+            sem_wait(&mutex_motivo_interrupcion);
             flag_interrupcion = false;  // Leer flag
 
             if(motivo_interrupcion == INTERRUPCION_ASINCRONICA) //Si es asincronica le mando el PC actualizado
@@ -402,7 +402,7 @@ void check_interrupt(uint32_t PIDInicial)
                 enviar_paquete(paquete,socket_cpu_kernel_dispatch);
                 eliminar_paquete(paquete);
             }
-            pthread_mutex_unlock(&mutex_motivo_interrupcion); 
+            sem_post(&mutex_motivo_interrupcion); 
 
         sem_post(&semMutexContexto);
 

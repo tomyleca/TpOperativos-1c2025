@@ -5,12 +5,17 @@ int main(int argc, char* argv[]) {
     saludar("cpu");
 
     //INICIO Y LEO CONFIG
-    config_cpu = iniciar_config("cpu.config");
+    identificador_cpu = argv[1];  
+    char* pathConfig = malloc(strlen(identificador_cpu) + strlen("cpu.config") + 1);
+    strcpy(pathConfig,"cpu");
+    strcat(pathConfig,identificador_cpu);
+    strcat(pathConfig,".config");
+    config_cpu = iniciar_config(pathConfig);
     leerConfigCpu(config_cpu);
+    free(pathConfig);
     
     //INICIO LOGGER
-    identificador_cpu = argv[1];  
-    char* pathLogger = malloc(sizeof(identificador_cpu) + sizeof("cpuLogger.log") + 1);
+    char* pathLogger = malloc(strlen(identificador_cpu) + strlen("cpuLogger.log") + 1);
     strcpy(pathLogger,"cpuLogger");
     strcat(pathLogger,identificador_cpu);
     char* nombreLogger = strdup(pathLogger);
@@ -93,9 +98,11 @@ void inicializar_recursos()
     sem_init(&sem_pagina_escrita,0,0);
     sem_init(&sem_valor_leido, 0, 0);
 
+    sem_init(&mutex_motivo_interrupcion, 0,1);
+
     iniciar_diccionario_instrucciones();
     
-    pthread_mutex_init(&mutex_motivo_interrupcion, NULL);
+    
 
     lista_tlb = list_create();
     contexto = malloc(sizeof(t_contexto_cpu));
