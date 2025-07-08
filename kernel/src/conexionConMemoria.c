@@ -55,7 +55,7 @@ bool des_suspender_proceso_memoria(uint32_t pid) {
     op_code respuesta = recibir_operacion(socket_memoria);
     cerrar_conexion_memoria(socket_memoria);
 
-    return respuesta == SWAP_RESTAURAR_PROCESO;
+    return respuesta == SWAP_OK;
 }
 
 bool solicitar_dump_memoria(uint32_t pid) {

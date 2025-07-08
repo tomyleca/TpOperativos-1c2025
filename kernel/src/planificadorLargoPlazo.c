@@ -9,7 +9,7 @@ void inicializarProceso(){
         {
         procesoAInicializar= leerDeLista(listaProcesosSwapReady,0);
         
-        if(mandarDatosProcesoAMemoria(procesoAInicializar) == OK)
+        if(des_suspender_proceso_memoria(procesoAInicializar->PID))
         {   
             sacarDeLista(listaProcesosSwapReady,0);
             log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"SWAP_READY","READY");
@@ -58,7 +58,7 @@ int mandarDatosProcesoAMemoria(PCB* proceso)
     
     if(respuesta == NO_HAY_MEMORIA)
     {
-        log_error(loggerKernel,"## <%u> No hay suficiente memoria para alojar el proceso",proceso->PID);
+        log_error(loggerKernel,"## (<%u>) No hay suficiente memoria para alojar el proceso",proceso->PID);
     }
 
     eliminar_paquete(paquete);

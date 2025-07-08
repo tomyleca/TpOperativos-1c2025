@@ -60,7 +60,7 @@ void atender_dispatch_cpu(void* conexion)
                 PCB* proceso  = buscarPCBEjecutando(PID);
                 terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
                 enviarOK(fdConexion);
-                syscall_IO(proceso,nombreIO,tiempoEnIO);
+                syscall_IO(proceso,PID,nombreIO,tiempoEnIO);
                 free(nombreIO);
                 limpiarBuffer(buffer);              
                 break;
