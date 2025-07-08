@@ -8,6 +8,7 @@ void* planificadorCortoPlazo(void* arg)
     {
         sem_wait(semaforoIntentarPlanificar);
         
+        
         switch(algoritmoDePlanificacionInt){
             
             
@@ -51,9 +52,10 @@ void* planificadorCortoPlazo(void* arg)
 
         if(procesoAEjecutar != NULL && procesoAEjecutar->PID >= 0) //Lo del PID es un chequeo de que estoy apuntando a un struct de tipo PCB
         {
-            pasarAExecute(procesoAEjecutar);
+            
             log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAEjecutar->PID,"READY","EXECUTE");
             cargarCronometro(procesoAEjecutar,READY);
+            pasarAExecute(procesoAEjecutar);
             
            
         }
@@ -63,16 +65,16 @@ void* planificadorCortoPlazo(void* arg)
 
 void pasarAExecute(PCB* proceso)
 {
-
+   
     NucleoCPU* nucleoCPULibre =  sacarDeLista(listaCPUsLibres,0);
     nucleoCPULibre->ejecutando=true;
     nucleoCPULibre->procesoEnEjecucion=proceso;
     agregarALista(listaCPUsEnUso,nucleoCPULibre);
-    
+    mandarContextoACPU(proceso->PID,proceso->PC,nucleoCPULibre->fdConexionDispatch);
     proceso->cronometroEjecucionActual = temporal_create();
     temporal_resume(proceso->cronometros[EXECUTE]);
     proceso->ME[EXECUTE]++;
-    mandarContextoACPU(proceso->PID,proceso->PC,nucleoCPULibre->fdConexionDispatch);
+    
 
 
    
@@ -85,26 +87,28 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
      
     cargarCronometro(procesoDespuesDeEjecucion,EXECUTE);
     
+    
     temporal_stop(procesoDespuesDeEjecucion->cronometroEjecucionActual);
     procesoDespuesDeEjecucion->duracionRafagaAnterior=temporal_gettime(procesoDespuesDeEjecucion->cronometroEjecucionActual);
+    temporal_destroy(procesoDespuesDeEjecucion->cronometroEjecucionActual);
     procesoDespuesDeEjecucion->estimadoRafagaAnterior=procesoDespuesDeEjecucion->estimadoSiguienteRafaga;
     estimarSiguienteRafaga(procesoDespuesDeEjecucion);
 
     
     
 
-    temporal_destroy(procesoDespuesDeEjecucion->cronometroEjecucionActual);
+    
 
 }
 
 
  bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera)
 {
-    int64_t tiempoProcesoActualEnEjecucion;
+    int64_t tiempoRestanteProcesoActualEnEjecucion;
     bool _menorRafagaQueProcesoEnReady(NucleoCPU* CPU)
     {
-        tiempoProcesoActualEnEjecucion = temporal_gettime(CPU->procesoEnEjecucion->cronometroEjecucionActual);
-        return estimadoRafagaProcesoEnEspera < tiempoProcesoActualEnEjecucion;
+        tiempoRestanteProcesoActualEnEjecucion = CPU->procesoEnEjecucion->estimadoSiguienteRafaga - temporal_gettime(CPU->procesoEnEjecucion->cronometroEjecucionActual);
+        return estimadoRafagaProcesoEnEspera < tiempoRestanteProcesoActualEnEjecucion;
     };
     
 
@@ -160,6 +164,9 @@ int terminarEjecucion(PCB* proceso,op_code tipoInterruccion)
             agregarALista(listaCPUsLibres,nucleoCPU);
             PCB* procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
             guardarDatosDeEjecucion(procesoPostEjecucion);
+            
+            
+            
 
             sem_post(semaforoIntentarPlanificar);
             sem_post(semaforoMutexTerminarEjecucion);
@@ -175,7 +182,7 @@ int terminarEjecucion(PCB* proceso,op_code tipoInterruccion)
 
 bool menorEstimadoRafagaRestante(NucleoCPU* CPU1,NucleoCPU* CPU2)
 {
-    return temporal_gettime(CPU1->procesoEnEjecucion->cronometroEjecucionActual) <= temporal_gettime(CPU2->procesoEnEjecucion->cronometroEjecucionActual);
+    return CPU1->procesoEnEjecucion->estimadoSiguienteRafaga - temporal_gettime(CPU1->procesoEnEjecucion->cronometroEjecucionActual) <= CPU2->procesoEnEjecucion->estimadoSiguienteRafaga - temporal_gettime(CPU2->procesoEnEjecucion->cronometroEjecucionActual);
 }
 
 

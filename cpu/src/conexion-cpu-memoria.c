@@ -182,6 +182,7 @@ void atender_dispatch_kernel()
                 break;
                 
                 case PID_KERNEL_A_CPU:
+                log_info(logger_cpu,"Llega pid");
                 printf("ANTES DE RECIBIR OTRO PROCESO\n");
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
                 

@@ -83,7 +83,6 @@ void dump_memory(uint32_t pid) {
     //Lo paso a bloqueado
     char* PIDComoChar = pasarUnsignedAChar(pid);
     agregarADiccionario(diccionarioProcesosEsperandoDump, PIDComoChar, procesoEsperandoDump);
-    cargarCronometro(proceso,EXECUTE);
     log_info(loggerKernel, "## (<%u>) - Bloqueado por DUMP_MEMORY", pid);
     log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","BLOCKED");
     proceso->ME[BLOCKED]++;
@@ -124,36 +123,39 @@ void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
     return NULL;
 }
 
-void syscall_IO(uint32_t pid, char* nombreIO, int64_t tiempo) {
-    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: IO", pid);
+void syscall_IO(PCB* proceso, char* nombreIO, int64_t tiempo) {
 
-    PCB* proceso = NULL;
+    
+    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: IO", proceso->PID);
+
+    
+
     sem_wait(semaforoMutexIO);
-        proceso  = buscarPCBEjecutando(pid);
+        
 
         DispositivoIO* dispositivo = NULL;
         dispositivo = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
 
-        if (dispositivo == NULL && proceso == NULL) //ya se finalizo el proceso pq la IO no existe
-            return;
+
 
         if (dispositivo == NULL) {
-        log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", pid, nombreIO);
-        terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
-        pasarAExit(proceso,"EXECUTE");
-        return;
+            log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", proceso->PID, nombreIO);
+            pasarAExit(proceso,"EXECUTE");
+            sem_post(semaforoMutexIO);
+            return;
+        }
+        if (proceso == NULL) {
+        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", proceso->PID);
+        exit(1);
         }
 
-        if (proceso == NULL) {
-            log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", pid);
-            exit(1);
-        }
+
         
 
     sem_post(semaforoMutexIO);
-    log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",pid,nombreIO);
+    log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",proceso->PID,nombreIO);
 
-    terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
+    
     pasarABLoqueadoPorIO(proceso, tiempo, nombreIO);
     
 }

@@ -57,9 +57,11 @@ void atender_dispatch_cpu(void* conexion)
                 char* nombreIO = recibir_string_del_buffer(buffer);
                 int64_t tiempoEnIO = recibir_int64_t_del_buffer(buffer);
                 actualizarPC(PID,PC);
-                syscall_IO(PID,nombreIO,tiempoEnIO);
+                PCB* proceso  = buscarPCBEjecutando(PID);
+                terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
+                enviarOK(fdConexion);
+                syscall_IO(proceso,nombreIO,tiempoEnIO);
                 free(nombreIO);
-                enviarOK(fdConexion); 
                 limpiarBuffer(buffer);              
                 break;
             
@@ -173,7 +175,7 @@ void loggearMetricas(PCB* proceso)
     proceso->ME[EXECUTE],proceso->MT[EXECUTE],
     proceso->ME[BLOCKED],proceso->MT[BLOCKED],
     proceso->ME[SWAP_BLOCKED],proceso->MT[SWAP_BLOCKED],
-    proceso->ME[SWAP_READY],proceso->MT[SWAP_READY], //TODO ver por que no anda
+    proceso->ME[SWAP_READY],proceso->MT[SWAP_READY], 
     proceso->ME[EXIT],proceso->MT[EXIT]);
 }
 
