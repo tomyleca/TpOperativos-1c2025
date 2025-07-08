@@ -234,7 +234,7 @@ int atender_cliente(int *fd_conexion)
                 }
      
                 
-                //enviar_paquete(paquete, cliente_fd);
+                enviar_paquete(paquete, cliente_fd);
                 eliminar_paquete(paquete);
                 break;
             

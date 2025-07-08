@@ -31,7 +31,6 @@ void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
         sem_post(semaforoMutexIO);
 
         log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","BLOCKED");
-        cargarCronometro(proceso,EXECUTE);
         suspender_proceso_memoria(proceso->PID);
    
     }

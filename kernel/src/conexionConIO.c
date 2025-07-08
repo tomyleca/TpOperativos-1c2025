@@ -169,6 +169,7 @@ void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
             borrarListaConSemaforos(dispositivoIO->colaEsperandoIO);
             sacarDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
             free(dispositivoIO->nombre);
+            free(dispositivoIO);
         }
     
     sem_post(semaforoMutexIO);

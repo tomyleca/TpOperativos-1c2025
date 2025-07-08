@@ -87,7 +87,7 @@ void mandarInterrupcion(NucleoCPU* nucleoCPU,op_code tipoInterrupcion)
     send(nucleoCPU->fdConexionInterrupt,&Interrupcion,sizeof(int),0);   
     
     if(tipoInterrupcion == INTERRUPCION_ASINCRONICA)    
-        sem_wait(semaforoPCActualizado); //Este espera que cpu le mande el PC actualizado, esto lo hace al final del ciclo de instrucción si lel llega una interrupcion asincronica en el medio
+        //sem_wait(semaforoPCActualizado); //Este espera que cpu le mande el PC actualizado, esto lo hace al final del ciclo de instrucción si lel llega una interrupcion asincronica en el medio
                                         //De esta forma evito sacar el cpu de ejecucion a la mitad de una syscall, lo que puede llevar a seg faults
 
 
