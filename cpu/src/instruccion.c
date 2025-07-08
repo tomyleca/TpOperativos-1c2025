@@ -222,8 +222,7 @@ int traducirDLMedianteMMU(int direccion_logica)
             solicitar_tabla_a_memoria(); //SIMULO LA SOLICITUD DE TABLA, ENREALIDAD LE SOLICITO TODAS AL FINAL
         } else {
             entradas_de_nivel[nivel] = entrada_nivel_X;
-            for (int i = 0; i < cant_niveles; i++)
-            printf("[DEBUG] entradas_de_nivel[%d] = %d\n", i, entradas_de_nivel[i]);
+            for (int i = 1; i < cant_niveles; i++)
             solicitar_marco_a_memoria(entradas_de_nivel); 
         }
     }
@@ -317,7 +316,7 @@ void decode()
         char* instruccionRecibidaLocal = strdup(instruccion_recibida);
        
         char** parte = string_split(instruccionRecibidaLocal, " "); // Divido la instrucción (que es un string) en partes  (decode)
-    
+
         free(instruccionRecibidaLocal);
 
         int instruccion_enum = (int)(intptr_t)dictionary_get(instrucciones, parte[0]); // Aca se obtiene la instrucción (el enum) a partir del diccionario
@@ -677,7 +676,20 @@ int cargar_pagina_en_cache(int pid, int direccion_logica)
     cache_paginas[indice_victima].bit_modificacion = false;
     cache_paginas[indice_victima].bit_validez = true;
 
-    log_info(logger_cpu, "PID: %d - Cache Add - Pagina: %d", pid, indice_victima);
+    log_info(logger_cpu, "PID: %d - Cache Add - Página: %d", pid, nro_pagina);
+
+         /*for (int i = 0; i < entradas_cache; i++) {
+    log_debug(logger_cpu, "[DEBUG] Entrada %d -> PID: %d | Página: %d | Marco: %d | Validez: %d | Uso: %d | Modif: %d",
+              i,
+              cache_paginas[i].pid,
+              cache_paginas[i].nro_pagina,
+              cache_paginas[i].nro_marco,
+              cache_paginas[i].bit_validez,
+              cache_paginas[i].bit_referencia,
+              cache_paginas[i].bit_modificacion);
+}*/
+
+
 
     return indice_victima;
     
@@ -689,17 +701,16 @@ void escribir_cache(int direccion_logica, char *valor) // Chequear siempre si ca
     int nro_pagina = direccion_logica / tamanio_pagina;
     int desplazamiento = direccion_logica % tamanio_pagina;
 
-    char *valor_escrito = malloc(sizeof(valor)+1);
+    char *valor_escrito = malloc(strlen(valor) + 1);
 
     int indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
     if (indice_cache == -1) // Si no esta en cache, la cargo
         indice_cache = cargar_pagina_en_cache(contexto->pid, direccion_logica);
 
     // escribo el valor en cache
-    strncpy(cache_paginas[indice_cache].contenido + desplazamiento, valor, sizeof(valor));
-    strncpy(valor_escrito, cache_paginas[indice_cache].contenido + desplazamiento, sizeof(valor));
-    valor_escrito[strlen(valor)] = '\0';
-   
+    strcpy(cache_paginas[indice_cache].contenido + desplazamiento, valor);
+    valor_escrito = strdup(valor); // Copia segura del string
+
 
     cache_paginas[indice_cache].bit_modificacion = true;
 
