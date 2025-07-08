@@ -9,11 +9,21 @@ int main(int argc, char* argv[]) {
     leerConfigCpu(config_cpu);
     
     //INICIO LOGGER
-    logger_cpu = iniciar_logger("cpuLogger.log","cpuLogger",log_level);
+    identificador_cpu = argv[1];  
+    char* pathLogger = malloc(sizeof(identificador_cpu) + sizeof("cpuLogger.log") + 1);
+    strcpy(pathLogger,"cpuLogger");
+    strcat(pathLogger,identificador_cpu);
+    char* nombreLogger = strdup(pathLogger);
+    strcat(pathLogger,".log");
+
+    logger_cpu = iniciar_logger(pathLogger,nombreLogger,log_level);
+    free(nombreLogger);
+    free(pathLogger);
+
 
     inicializar_recursos();
     
-    identificador_cpu = argv[1];  
+    
     // INICIO HILOS
     inicializar_hilos(config_cpu);
     
