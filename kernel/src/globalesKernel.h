@@ -150,7 +150,7 @@ extern uint32_t pidDisponible;
 /**
  * @brief Se fija cual es el proximo proceso para pasar intentar pasar a Ready. Le consulta a memoria y ,si esta da el OK,lo pasa. De otra forma no hace nada.
 */
-extern void inicializarProceso();
+extern void *inicializarProceso();
 
 PCB* buscarPCBEjecutando(uint32_t pid);
 
@@ -218,6 +218,7 @@ extern sem_t* semaforoMutexIO;
 extern sem_t* semaforoMutexTerminarEjecucion;
 extern sem_t* semaforoMutexEJecucionTerminada;
 extern sem_t* semaforoEnCheckInterrupt;
+extern sem_t* semaforoInicializarProceso;
 
 //MEMORIA
 extern int mandarDatosProcesoAMemoria(PCB* proceso);

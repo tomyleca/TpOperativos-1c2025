@@ -137,7 +137,7 @@ void pasarASwapBlocked(ProcesoEnEsperaIO* procesoEsperandoIO)
     procesoEsperandoIO->estaENSwap=1;
 
 
-    inicializarProceso();
+    sem_post(semaforoInicializarProceso);
 }
 
 
@@ -156,7 +156,7 @@ void pasarASwapReady(PCB* proceso)
     }
 
 
-    inicializarProceso();
+    sem_post(semaforoInicializarProceso);
 }
 
 void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)

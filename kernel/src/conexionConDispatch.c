@@ -169,7 +169,7 @@ void pasarAExit(PCB* proceso,char* estadoActual){
     loggearMetricas(proceso);
     hacerFreeDeCronometros(proceso);
     avisarFinDeProcesoAMemoria(proceso->PID);
-    inicializarProceso();
+    sem_post(semaforoInicializarProceso);
     free(proceso->archivoPseudocodigo);
     sem_destroy(proceso->semMutex);
     free(proceso->semMutex);

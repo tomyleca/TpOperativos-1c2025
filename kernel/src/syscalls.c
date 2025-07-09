@@ -59,7 +59,7 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
         }
     }    
     
-    inicializarProceso();
+    sem_post(semaforoInicializarProceso);
 }
 
 void dump_memory(uint32_t pid) {

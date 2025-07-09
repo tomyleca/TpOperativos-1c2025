@@ -1,49 +1,58 @@
 #include "kernel.h"
 
-void inicializarProceso(){
+void *inicializarProceso(){
     PCB* procesoAInicializar;
+    while(1)
+
+    {
+        sem_wait(semaforoInicializarProceso);
+
+            if (!list_is_empty(listaProcesosSwapReady->lista)) //Esto es para darle mas prioridad a la lista Swap Ready
+            {
+                procesoAInicializar= leerDeLista(listaProcesosSwapReady,0);
+                
+                if(des_suspender_proceso_memoria(procesoAInicializar->PID))
+                {   
+                    if(sacarElementoDeLista(listaProcesosSwapReady,procesoAInicializar)== false)
+                    {
+                        log_debug(loggerKernel,"ERROR AL INICIALIZAR PROCESO");
+                        
+                    }
+                    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"SWAP_READY","READY");
+                    cargarCronometro(procesoAInicializar,SWAP_READY);
+                    pasarAReady(procesoAInicializar);
+                    sem_post(semaforoInicializarProceso); // Mientras la respuesta sea OK sigo intentando inicializar procesos
+                    
+                
+                }
+        
+            }
+            else if (!list_is_empty(listaProcesosNew->lista))
+            {
+                procesoAInicializar = leerDeLista(listaProcesosNew,0);
+                
+
+                if(mandarDatosProcesoAMemoria(procesoAInicializar) == OK)
+                {   
+                    if(sacarElementoDeLista(listaProcesosNew,procesoAInicializar)== false)
+                    {
+                        log_debug(loggerKernel,"ERROR AL INICIALIZAR PROCESO");
+                        
+                    }
+                    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"NEW","READY");
+                    cargarCronometro(procesoAInicializar,NEW);
+                    pasarAReady(procesoAInicializar);
+                    sem_post(semaforoInicializarProceso); // Mientras la respuesta sea OK sigo intentando inicializar procesos
+                }
+                
+
+            }
+
+
     
-
-
-    if (!list_is_empty(listaProcesosSwapReady->lista)) //Esto es para darle mas prioridad a la lista Swap Ready
-        {
-        procesoAInicializar= leerDeLista(listaProcesosSwapReady,0);
-        
-        if(des_suspender_proceso_memoria(procesoAInicializar->PID))
-        {   
-            sacarDeLista(listaProcesosSwapReady,0);
-            log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"SWAP_READY","READY");
-            cargarCronometro(procesoAInicializar,SWAP_READY);
-            pasarAReady(procesoAInicializar);
-            inicializarProceso(); // Mientras la respuesta sea OK sigo intentando inicializar procesos
-            
-           
-        }
-  
-        }
-    else if (!list_is_empty(listaProcesosNew->lista))
-        {
-        procesoAInicializar = leerDeLista(listaProcesosNew,0);
-        
-      
-        if(mandarDatosProcesoAMemoria(procesoAInicializar) == OK)
-        {   
-            sacarDeLista(listaProcesosNew,0);
-            log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"NEW","READY");
-            cargarCronometro(procesoAInicializar,NEW);
-            pasarAReady(procesoAInicializar);
-            inicializarProceso(); // Mientras la respuesta sea OK sigo intentando inicializar procesos
-        }
-        
-
-
-        
-        
-        }
-
-
+    }
+    return 0;
 }
-
 
 int mandarDatosProcesoAMemoria(PCB* proceso)
 {

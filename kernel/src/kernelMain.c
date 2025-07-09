@@ -22,6 +22,8 @@ int main(int argc, char* argv[]) {
     pthread_create(&hiloAtenderDispatch,NULL,esperarClientesDispatch,NULL);
     pthread_create(&hiloAtenderInterrupt,NULL,esperarClientesInterrupt,NULL);
     pthread_create(&hiloAtenderIO,NULL,esperarClientesIO,NULL);
+    pthread_t hiloInicializarProceso;
+    pthread_create(&hiloInicializarProceso,NULL,inicializarProceso,NULL);
     
 
 
@@ -115,6 +117,8 @@ void crearEstructuras()
     sem_init(semaforoMutexTerminarEjecucion,1,1);
     semaforoEnCheckInterrupt= malloc(sizeof(sem_t));
     sem_init(semaforoEnCheckInterrupt,1,0);
+    semaforoInicializarProceso = malloc(sizeof(sem_t));
+    sem_init(semaforoInicializarProceso,1,0);
 
   
 
