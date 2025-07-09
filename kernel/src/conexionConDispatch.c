@@ -90,8 +90,15 @@ void atender_dispatch_cpu(void* conexion)
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
                 PC = recibir_uint32_t_del_buffer(buffer);
-                syscallExit(PID);
-                enviarOK(fdConexion);        
+                proceso = NULL;
+                proceso = buscarPCBEjecutando(PID);
+                if (proceso == NULL) {
+                    log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall Exit", PID);
+                    exit(1);
+                }
+                terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
+                enviarOK(fdConexion); 
+                pasarAExit(proceso,"EXECUTE");
                 limpiarBuffer(buffer);     
                 break;
             case EN_CHECK_INTERRUPT:

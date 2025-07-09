@@ -160,24 +160,7 @@ void syscall_IO(PCB* proceso,uint32_t PID, char* nombreIO, int64_t tiempo) {
     
 }
 
-void syscallExit(uint32_t pid)
-{
-    PCB* proceso = NULL;
-    proceso = buscarPCBEjecutando(pid);
 
-    if (proceso == NULL) {
-        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall Exit", pid);
-        exit(1);
-    }
-
-    
-    terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
-    pasarAExit(proceso,"EXECUTE");
-    
-    
-    
-
-}
 PCB* buscarPCBEjecutando(uint32_t pid) {
     bool _mismoPID(NucleoCPU* nucleoEnEjecucion) {
         return nucleoEnEjecucion->procesoEnEjecucion->PID == pid;

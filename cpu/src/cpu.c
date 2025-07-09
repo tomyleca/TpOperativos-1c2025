@@ -103,6 +103,8 @@ void inicializar_recursos()
     sem_init(&mutex_lista_tlb,0,1);
     sem_init(&llegaron_tam,0,0);
 
+    sem_init(&semFinCicloInstruccion,0,1);
+
     iniciar_diccionario_instrucciones();
     
     

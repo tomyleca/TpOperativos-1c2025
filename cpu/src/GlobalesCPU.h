@@ -96,6 +96,7 @@ extern sem_t semMutexContexto;
 extern sem_t semLlegoPeticionMMU;
 extern sem_t semOkEscritura;
 extern sem_t semLlegoPeticionTabla;
+extern sem_t semFinCicloInstruccion;
 
 
 

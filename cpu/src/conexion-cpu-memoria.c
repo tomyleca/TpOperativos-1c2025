@@ -193,17 +193,19 @@ void atender_dispatch_kernel()
                 
                 case PID_KERNEL_A_CPU:
                     printf("ANTES DE RECIBIR OTRO PROCESO\n");
-                    buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
+                buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
+                sem_wait(&semFinCicloInstruccion);
+                
+                
                 sem_wait(&semMutexContexto);    
-                    contextoAnterior->pid = contexto->pid;
-                    contextoAnterior->registros.PC = contexto->registros.PC;//para check interrupt   
-
                     contexto->pid = recibir_uint32_t_del_buffer(buffer);
                     contexto->registros.PC = recibir_uint32_t_del_buffer(buffer);
                     log_debug(logger_cpu,"Llega pid %u",contexto->pid);
                 sem_post(&semMutexContexto);
-                
+
                 enviarOK(socket_cpu_kernel_dispatch);
+                
+                
                 // ACA HAY QUE SOLICITAR A MEMORIA LA PRIMER INSTRUCCION CON EL PID RECIBIMOS DE KERNEL
                 //Falta liberar contexto, pero como lo usamos en el ciclo y todo cpu, a lo mejor conviene liberarlo al final del todo.
                 sem_post(&semContextoCargado);

@@ -409,7 +409,8 @@ void check_interrupt(uint32_t PIDInicial)
 
         
         sem_post(&semMutexContexto);
-
+        sem_post(&semFinCicloInstruccion);
+        
         sem_post(&semFetch); //Si todavia no se recibio el nuevo PID a ejecutar , solo hay 1/2 semaforos necerios para volver a arrancar el ciclo de instrucion
 
         
@@ -432,7 +433,7 @@ void check_interrupt(uint32_t PIDInicial)
 
 void ciclo_instruccion(int socket_cpu_memoria)
 {
-    sem_wait(&semMutexContexto); // Para que en srt no cambie contexto a mitad de la ejecución de la instrucción
+    //sem_wait(&semMutexContexto); // Para que en srt no cambie contexto a mitad de la ejecución de la instrucción
         fetch(socket_cpu_memoria);
         
         uint32_t pidInicial = contexto->pid;
@@ -441,11 +442,11 @@ void ciclo_instruccion(int socket_cpu_memoria)
         contexto->registros.PC = contexto->registros.PC + 1;
         
         decode();
-    sem_post(&semMutexContexto);
-
-
-
+    //sem_post(&semMutexContexto);
+    
     check_interrupt(pidInicial);
+
+    
 
 }
 // **********************************  

@@ -36,6 +36,8 @@ void* planificadorCortoPlazo(void* arg)
                     procesoAEjecutar = leerDeLista(listaProcesosReady,0); //Si la lista esta vacía se queda esperando
                     if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == false )
                         procesoAEjecutar = NULL;
+                    else
+                        procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
                     
                     
                     break;
@@ -150,7 +152,7 @@ int terminarEjecucion(PCB* proceso,op_code tipoInterruccion)
         
         NucleoCPU* nucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
         
-        if(nucleoCPU == NULL)
+        if(nucleoCPU == NULL || nucleoCPU->ejecutando == false)
         {
             sem_post(semaforoMutexTerminarEjecucion);
             return 0;
@@ -172,7 +174,7 @@ int terminarEjecucion(PCB* proceso,op_code tipoInterruccion)
 
             if(tipoInterruccion == INTERRUPCION_ASINCRONICA)
             {
-                //sem_wait(semaforoEnCheckInterrupt); //Espero que termine el ciclo de instruccion de la instrucción actual, para no desalojar un proceso a media ejecucion
+                sem_wait(semaforoEnCheckInterrupt); //Espero que termine el ciclo de instruccion de la instrucción actual, para no desalojar un proceso a media ejecucion
             }
             
             sacarElementoDeLista(listaCPUsEnUso,nucleoCPU);
