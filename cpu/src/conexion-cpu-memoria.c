@@ -73,7 +73,6 @@ void atender_memoria()
             case RESPUESTA_SOLICITUD_FRAME:
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 nro_marco = recibir_int_del_buffer(buffer);
-                log_info(logger_cpu, "RESPUESTA_SOLICITUD_FRAME - PID: <%d> - Marco recibido: <%d>", contexto->pid, nro_marco);
                 sem_post(&semLlegoPeticionMMU);
                 limpiarBuffer(buffer);
                 break;
