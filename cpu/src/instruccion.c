@@ -409,14 +409,23 @@ void check_interrupt(uint32_t PIDInicial)
             }
 
             
-            sem_wait(&mutex_motivo_interrupcion);
-                flag_interrupcion = false;  // Leer flag
-                if(motivo_interrupcion == INTERRUPCION_ASINCRONICA)
-                    enviarOpCode(socket_cpu_kernel_dispatch, EN_CHECK_INTERRUPT);
-            sem_post(&mutex_motivo_interrupcion); 
+        sem_wait(&mutex_motivo_interrupcion);
+            flag_interrupcion = false;  // Leer flag
+            if(motivo_interrupcion == INTERRUPCION_ASINCRONICA)
+            {
+                log_debug(logger_cpu,"<%u>enviando PC=%u ACTUALIZADO",contexto->pid,contexto->registros.PC);
+                t_paquete* paquete = crear_super_paquete(PC_INTERRUPCION_ASINCRONICA);
+                cargar_uint32_t_al_super_paquete(paquete,contexto->pid);
+                cargar_uint32_t_al_super_paquete(paquete,contexto->registros.PC);
+                enviar_paquete(paquete,socket_cpu_kernel_dispatch);
+                eliminar_paquete(paquete);
+                enviarOpCode(socket_cpu_kernel_dispatch, EN_CHECK_INTERRUPT);
+            }
+        sem_post(&mutex_motivo_interrupcion); 
 
-        
+
         sem_post(&semMutexContexto);
+
         sem_post(&semFinCicloInstruccion);
         
         sem_post(&semFetch); //Si todavia no se recibio el nuevo PID a ejecutar , solo hay 1/2 semaforos necerios para volver a arrancar el ciclo de instrucion

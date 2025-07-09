@@ -151,14 +151,7 @@ void atender_interrupcion_kernel()
                 printf("Adentro de lmutex interrup \n");
                 motivo_interrupcion = INTERRUPCION_ASINCRONICA;
                 sem_post(&mutex_motivo_interrupcion);
-                log_debug(logger_cpu,"<%u>enviando PC=%u ACTUALIZADO",contexto->pid,contexto->registros.PC);
-                t_paquete* paquete = crear_super_paquete(PC_INTERRUPCION_ASINCRONICA);
-                cargar_uint32_t_al_super_paquete(paquete,contexto->pid);
-                cargar_uint32_t_al_super_paquete(paquete,contexto->registros.PC);
-                enviar_paquete(paquete,socket_cpu_kernel_dispatch);
-                eliminar_paquete(paquete);
                 enviarOK(socket_cpu_kernel_interrupt);
-                
                 break;
             case -1:
                 log_error(logger_cpu, "KERNEL INTERRUPT se desconecto. Terminando servidor");

@@ -48,7 +48,7 @@ void atender_dispatch_cpu(void* conexion)
                 PID = recibir_uint32_t_del_buffer(buffer);
                 PC = recibir_uint32_t_del_buffer(buffer);
                 actualizarPCAsincronico(PID,PC);
-                sem_post(semaforoPCActualizado);
+                //sem_post(semaforoPCActualizado);
                 break;
             case IO:
                 buffer = recibiendo_super_paquete(fdConexion);

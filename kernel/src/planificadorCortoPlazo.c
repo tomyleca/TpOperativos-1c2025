@@ -120,7 +120,7 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
         
         if(terminarEjecucion(nucleoADesalojar->procesoEnEjecucion,INTERRUPCION_ASINCRONICA) == 1) //si es igual a 1 quiere decir que la ejecución termino por el desalojo y no por una syscall
             {
-            sem_wait(semaforoPCActualizado); //Lo hace al final del ciclo, para no desalojar dos veces en el mismo ciclo
+            //sem_wait(semaforoPCActualizado); 
                                             
             PCB* procesoDesalojado = nucleoADesalojar->procesoEnEjecucion;
             log_info(loggerKernel, "## (<%u>) - Desalojado por algoritmo SJF/SRT",procesoDesalojado->PID);
