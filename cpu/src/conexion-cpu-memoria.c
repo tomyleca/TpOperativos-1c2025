@@ -54,6 +54,8 @@ void atender_memoria()
                 cant_niveles = recibir_int_del_buffer(buffer);
                 cant_entradas_tabla = recibir_int_del_buffer(buffer);
                 limpiarBuffer(buffer);
+                sem_post(&llegaron_tam);
+
                 break;
             case CPU_RECIBE_INSTRUCCION_MEMORIA: 
                 //ACA LLEGA LA SOLICITUD DE LA INSTRUCCION DE MEMORIA

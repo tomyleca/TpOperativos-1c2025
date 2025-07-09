@@ -77,6 +77,7 @@ t_list* lista_tlb;
 
 sem_t mutex_motivo_interrupcion;
 sem_t mutex_lista_tlb;
+sem_t llegaron_tam;
 
 
 char* ip_memoria;
