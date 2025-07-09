@@ -216,6 +216,8 @@ extern sem_t* semaforoEsperarOKInterrupt;
 extern sem_t* semaforoPCActualizado;
 extern sem_t* semaforoMutexIO;
 extern sem_t* semaforoMutexTerminarEjecucion;
+extern sem_t* semaforoMutexEJecucionTerminada;
+extern sem_t* semaforoEnCheckInterrupt;
 
 //MEMORIA
 extern int mandarDatosProcesoAMemoria(PCB* proceso);
@@ -229,7 +231,7 @@ extern pthread_t hiloPlanificadorCortoPlazo;
 
 //OTRAS
 void esperarCancelacionDeHilo(pthread_t hiloACancelar);
-
+extern bool ejecucionYaTerminada;
 
 //DESTROY
 void nucleoCPUDestroy(void* ptr);

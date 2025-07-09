@@ -86,10 +86,7 @@ void mandarInterrupcion(NucleoCPU* nucleoCPU,op_code tipoInterrupcion)
     int Interrupcion = tipoInterrupcion;
     send(nucleoCPU->fdConexionInterrupt,&Interrupcion,sizeof(int),0);   
     
-    //if(tipoInterrupcion == INTERRUPCION_ASINCRONICA)    
-        
-
-
+    
     sem_wait(semaforoEsperarOKInterrupt); //Este espera que cpu le avise que le llego la interrupcion
 
 

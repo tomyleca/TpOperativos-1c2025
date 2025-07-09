@@ -182,7 +182,7 @@ void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)
     char* PIDComoChar = pasarUnsignedAChar(PID);
     ProcesoEnEsperaIO* procesoADesbloquear = leerDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
     free(PIDComoChar);
-    if(procesoADesbloquear!=NULL);
+    if(procesoADesbloquear!=NULL)
         sem_post(procesoADesbloquear->semaforoIOFinalizada);
 
     sem_post(semaforoMutexIO);

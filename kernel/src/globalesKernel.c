@@ -63,9 +63,14 @@ sem_t* semaforoEsperarOKInterrupt;
 sem_t* semaforoPCActualizado;
 sem_t* semaforoMutexIO;
 sem_t* semaforoMutexTerminarEjecucion;
+sem_t* semaforoMutexEJecucionTerminada;
+sem_t* semaforoEnCheckInterrupt;
 
 //HILOS
 pthread_t hiloAtenderDispatch;
 pthread_t hiloAtenderInterrupt;
 pthread_t hiloAtenderIO;
 pthread_t hiloPlanificadorCortoPlazo;
+
+//OTRAS
+bool ejecucionYaTerminada;

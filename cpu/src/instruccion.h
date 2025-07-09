@@ -111,7 +111,7 @@ void solicitar_marco_a_memoria(int* entradas_de_nivel);
 
 void solicitar_tabla_a_memoria();
 
-void desalojar_proceso_de_cache(int pid);
+void desalojar_proceso_de_cache();
 
 void liberar_cache();
 

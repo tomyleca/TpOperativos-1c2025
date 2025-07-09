@@ -2,6 +2,7 @@
 
 
 void syscall_IO(char** parte){
+    log_instruccion(parte);
     t_paquete* paquete = crear_super_paquete(IO);
     cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
     cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC);
@@ -16,7 +17,7 @@ void syscall_IO(char** parte){
 
 void syscallINIT_PROC(char** parte)
 {
-    
+    log_instruccion(parte);
     t_paquete* paquete = crear_super_paquete(INIT_PROCCESS);
     cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
     cargar_string_al_super_paquete(paquete, parte[1]);
@@ -41,6 +42,7 @@ void syscallDUMP_MEMORY(char** parte)
 
 void syscallEXIT(char** parte)
 {
+    log_instruccion(parte);
     t_paquete* paquete = crear_super_paquete(SYSCALL_EXIT);
     cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
     cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC);
