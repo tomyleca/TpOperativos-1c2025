@@ -127,6 +127,10 @@ int buscar_en_tlb(int direccion_logica) {
     int nro_pagina = direccion_logica / tamanio_pagina;
     int desplazamiento = direccion_logica % tamanio_pagina;
 
+    if (entradas_tlb <= 0) {
+    return -1;
+    }
+
     // Recorrer la lista_tlb para buscar la entrada con la misma nro_pagina
     // Si pasa y devuelve algo dentro del for, es TLB HIT y no hace nada mas que esto.
     for (int i = 0; i < list_size(lista_tlb); i++) {
@@ -163,6 +167,7 @@ void agregar_a_tlb(int pid, int nro_pagina, int nro_marco) {
     nueva_entrada->nro_pagina = nro_pagina;
     nueva_entrada->nro_marco = nro_marco;
     nueva_entrada->timestamp = obtener_timestamp_actual(); 
+
 
     if (list_size(lista_tlb) >= entradas_tlb) {
         if (strcmp(reemplazo_tlb, "FIFO") == 0) {
@@ -208,7 +213,7 @@ int obtener_timestamp_actual() {
 int traducir_direccion_logica(int direccion_logica) {
 
     int direccion_fisica;
-    
+
     direccion_fisica = buscar_en_tlb(direccion_logica);
     if (direccion_fisica != -1) 
     {
@@ -256,7 +261,10 @@ int traducirDLMedianteMMU(int direccion_logica)
 
     log_info(logger_cpu, "## PID: <%d> - OBTENER MARCO - Página: <%d> - Marco: <%d>", contexto->pid, nro_pagina, nro_marco);
     //Agregar a TLB
-    agregar_a_tlb(contexto->pid, nro_pagina, nro_marco); 
+
+    if (entradas_tlb != 0) {
+        agregar_a_tlb(contexto->pid, nro_pagina, nro_marco); 
+    } 
     
     return direccion_fisica;
 }
