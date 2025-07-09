@@ -390,15 +390,10 @@ void check_interrupt(uint32_t PIDInicial)
         
         sem_wait(&semMutexContexto);
             
-            t_contexto_cpu* contextoDesalojado;
-            if(contexto->pid != PIDInicial) //ya cargo el nuevo contexto
-                contextoDesalojado=contextoAnterior;
-            else
-             contextoDesalojado=contexto;
-            
+
 
             if(cache_paginas!=NULL)
-                desalojar_proceso_de_cache(contextoDesalojado->pid);
+                desalojar_proceso_de_cache();
             
             if(lista_tlb != NULL)
             {
@@ -407,18 +402,12 @@ void check_interrupt(uint32_t PIDInicial)
 
             
             sem_wait(&mutex_motivo_interrupcion);
-            flag_interrupcion = false;  // Leer flag
-
-            if(motivo_interrupcion == INTERRUPCION_ASINCRONICA) //Si es asincronica le mando el PC actualizado
-            {
-                t_paquete* paquete = crear_super_paquete(PC_INTERRUPCION_ASINCRONICA);
-                cargar_uint32_t_al_super_paquete(paquete,contextoDesalojado->pid);
-                cargar_uint32_t_al_super_paquete(paquete,contextoDesalojado->registros.PC);
-                enviar_paquete(paquete,socket_cpu_kernel_dispatch);
-                eliminar_paquete(paquete);
-            }
+                flag_interrupcion = false;  // Leer flag
+                if(motivo_interrupcion == INTERRUPCION_ASINCRONICA)
+                    enviarOpCode(socket_cpu_kernel_dispatch, EN_CHECK_INTERRUPT);
             sem_post(&mutex_motivo_interrupcion); 
 
+        
         sem_post(&semMutexContexto);
 
         sem_post(&semFetch); //Si todavia no se recibio el nuevo PID a ejecutar , solo hay 1/2 semaforos necerios para volver a arrancar el ciclo de instrucion
@@ -443,15 +432,16 @@ void check_interrupt(uint32_t PIDInicial)
 
 void ciclo_instruccion(int socket_cpu_memoria)
 {
-    fetch(socket_cpu_memoria);
-    
-    uint32_t pidInicial = contexto->pid;
-    
-    sem_wait(&semMutexContexto);
+    sem_wait(&semMutexContexto); // Para que en srt no cambie contexto a mitad de la ejecución de la instrucción
+        fetch(socket_cpu_memoria);
+        
+        uint32_t pidInicial = contexto->pid;
+        
+        
         contexto->registros.PC = contexto->registros.PC + 1;
+        
+        decode();
     sem_post(&semMutexContexto);
-
-    decode();
 
 
 
@@ -769,12 +759,11 @@ void leer_cache(int direccion_logica, int tamanio) {
 
 
 
-void escribir_paginas_modificadas_proceso(int pid) 
+void escribir_paginas_modificadas_proceso() 
 {
     
     for (int i = 0; i < entradas_cache; i++) {
         if (cache_paginas[i].bit_validez != false && 
-            cache_paginas[i].pid == pid && 
             cache_paginas[i].bit_modificacion != false) {
             
             escribir_pagina_a_memoria(i);
@@ -782,10 +771,10 @@ void escribir_paginas_modificadas_proceso(int pid)
     }
 }
 
-void eliminar_paginas_proceso_de_cache(int pid) 
+void eliminar_paginas_proceso_de_cache() 
 {
     for (int i = 0; i < entradas_cache; i++) {
-        if (cache_paginas[i].bit_validez != false && cache_paginas[i].pid == pid) {
+        if (cache_paginas[i].bit_validez != false) {
             cache_paginas[i].bit_validez = false;
             cache_paginas[i].pid = -1;
             cache_paginas[i].nro_pagina = -1;
@@ -797,10 +786,10 @@ void eliminar_paginas_proceso_de_cache(int pid)
     }
 }
 
-void desalojar_proceso_de_cache(int pid) 
+void desalojar_proceso_de_cache() 
 {
-    escribir_paginas_modificadas_proceso(pid);
-    eliminar_paginas_proceso_de_cache(pid);
+    escribir_paginas_modificadas_proceso();
+    eliminar_paginas_proceso_de_cache();
 }
 
 

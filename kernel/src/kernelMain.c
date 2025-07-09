@@ -76,6 +76,7 @@ void leerConfigKernel(t_config* config_kernel) {
 
 void crearEstructuras()
 {
+    
     setearAlgoritmosDePlanificacion();
 
     listaProcesosNew = crearListaConSemaforos();
@@ -112,7 +113,8 @@ void crearEstructuras()
     sem_init(semaforoMutexIO,1,1);
     semaforoMutexTerminarEjecucion = malloc(sizeof(sem_t));
     sem_init(semaforoMutexTerminarEjecucion,1,1);
-
+    semaforoEnCheckInterrupt= malloc(sizeof(sem_t));
+    sem_init(semaforoEnCheckInterrupt,1,0);
 
   
 

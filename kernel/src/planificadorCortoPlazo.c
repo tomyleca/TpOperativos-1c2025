@@ -34,12 +34,7 @@ void* planificadorCortoPlazo(void* arg)
                 {
                     ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
                     procesoAEjecutar = leerDeLista(listaProcesosReady,0); //Si la lista esta vacía se queda esperando
-                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == true )
-                    {
-                        sem_wait(semaforoPCActualizado); //Lo hace al final del ciclo, para no desalojar dos veces en el mismo ciclo
-                        //procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
-                    }
-                    else
+                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == false )
                         procesoAEjecutar = NULL;
                     
                     
@@ -87,14 +82,8 @@ void pasarAExecute(PCB* proceso)
 
 void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 {
-     
+    procesoDespuesDeEjecucion->duracionRafagaAnterior=temporal_gettime(procesoDespuesDeEjecucion->cronometros[EXECUTE]) - procesoDespuesDeEjecucion->MT[EXECUTE]; //Saco cuanto es lo ultimo que ejecuto
     cargarCronometro(procesoDespuesDeEjecucion,EXECUTE);
-    
-    
-    //temporal_stop(procesoDespuesDeEjecucion->cronometroEjecucionActual);
-    procesoDespuesDeEjecucion->duracionRafagaAnterior=temporal_gettime(procesoDespuesDeEjecucion->cronometroEjecucionActual);
-    temporal_destroy(procesoDespuesDeEjecucion->cronometroEjecucionActual);
-    procesoDespuesDeEjecucion->cronometroEjecucionActual = NULL;
     procesoDespuesDeEjecucion->estimadoRafagaAnterior=procesoDespuesDeEjecucion->estimadoSiguienteRafaga;
     estimarSiguienteRafaga(procesoDespuesDeEjecucion);
 
@@ -111,10 +100,8 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
     int64_t tiempoRestanteProcesoActualEnEjecucion;
     bool _menorRafagaQueProcesoEnReady(NucleoCPU* CPU)
     {
-        if(CPU->procesoEnEjecucion->cronometroEjecucionActual == NULL) // YA LO DESALOJO, EL PROCESO NO DA NULL PQ NO SE PONE EN NULL AL DESALOJAR
-            return false;
-        
-        tiempoRestanteProcesoActualEnEjecucion = CPU->procesoEnEjecucion->estimadoSiguienteRafaga - temporal_gettime(CPU->procesoEnEjecucion->cronometroEjecucionActual);
+                                                                                                     //Lo que lleva ejecutado                                                //Lo que ejecuto antes de la ejecución            
+        tiempoRestanteProcesoActualEnEjecucion = CPU->procesoEnEjecucion->estimadoSiguienteRafaga - (temporal_gettime(CPU->procesoEnEjecucion->cronometros[EXECUTE]) - CPU->procesoEnEjecucion->MT[EXECUTE]);
         return estimadoRafagaProcesoEnEspera < tiempoRestanteProcesoActualEnEjecucion;
     };
     
@@ -131,6 +118,8 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
         
         if(terminarEjecucion(nucleoADesalojar->procesoEnEjecucion,INTERRUPCION_ASINCRONICA) == 1) //si es igual a 1 quiere decir que la ejecución termino por el desalojo y no por una syscall
             {
+            sem_wait(semaforoPCActualizado); //Lo hace al final del ciclo, para no desalojar dos veces en el mismo ciclo
+                                            
             PCB* procesoDesalojado = nucleoADesalojar->procesoEnEjecucion;
             log_info(loggerKernel, "## (<%u>) - Desalojado por algoritmo SJF/SRT",procesoDesalojado->PID);
             log_info(loggerKernel, "## (<%u>) Pasa del estado <%s> al estado <%s>",procesoDesalojado->PID,"EXECUTE","READY");
@@ -158,32 +147,43 @@ int terminarEjecucion(PCB* proceso,op_code tipoInterruccion)
             return nucleoCPU->procesoEnEjecucion == proceso;
         };
 
-        if(tipoInterruccion == INTERRUPCION_ASINCRONICA)
-            agregarAListaSinRepetidos(listaProcesosPorSerDesalojados,proceso);
         
+        NucleoCPU* nucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
         
-        NucleoCPU* nucleoCPU = sacarDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
-        
-        if(nucleoCPU != NULL)
+        if(nucleoCPU == NULL)
+        {
+            sem_post(semaforoMutexTerminarEjecucion);
+            return 0;
+        }
+        else
+        {
+            if(tipoInterruccion == INTERRUPCION_ASINCRONICA)
             {
+                agregarAListaSinRepetidos(listaProcesosPorSerDesalojados,proceso);
+                log_debug(loggerKernel,"Se va a desalojar el proceso %u",nucleoCPU->procesoEnEjecucion->PID);
+            }
             nucleoCPU->ejecutando=false;
             mandarInterrupcion(nucleoCPU,tipoInterruccion);
-            agregarALista(listaCPUsLibres,nucleoCPU);
             PCB* procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
             guardarDatosDeEjecucion(procesoPostEjecucion);
             
-            
-            
-
             sem_post(semaforoIntentarPlanificar);
             sem_post(semaforoMutexTerminarEjecucion);
+
+            if(tipoInterruccion == INTERRUPCION_ASINCRONICA)
+            {
+                //sem_wait(semaforoEnCheckInterrupt); //Espero que termine el ciclo de instruccion de la instrucción actual, para no desalojar un proceso a media ejecucion
+            }
+            
+            sacarElementoDeLista(listaCPUsEnUso,nucleoCPU);
+            agregarALista(listaCPUsLibres,nucleoCPU);
             return 1;
-            } /* Puede ocurrir que se intente finalizar la ejecucion de un proceso por desalojo al despues que el mismo se intenta 
+        } /* Puede ocurrir que se intente finalizar la ejecucion de un proceso por desalojo al despues que el mismo se intenta 
             finalizar por algo que ocurre en su ejecución(SYSCALL EXIT, IO NO ENCONTRADO ETC.)
             , o visceversa, por lo que chequeo que haya un cpu ejecutando el proceso del que quiero terminar la ejecucion*/
-            
-            sem_post(semaforoMutexTerminarEjecucion);
-            return 0;
+        
+  
+           
         
 }
 

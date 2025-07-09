@@ -79,6 +79,9 @@ bool menorTam(PCB* PCB1,PCB* PCB2)
 
 
 void pasarAReady(PCB* proceso){
+    if(leerDeDiccionario(diccionarioProcesosBloqueados,proceso)!= NULL || leerDeDiccionario(diccionarioProcesosEsperandoDump,proceso)!= NULL) //PARA SRT
+        return;
+
     agregarAListaSinRepetidos(listaProcesosReady,proceso);
     temporal_resume(proceso->cronometros[READY]);
     proceso->ME[READY]++;

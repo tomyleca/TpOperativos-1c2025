@@ -150,7 +150,14 @@ void atender_interrupcion_kernel()
                 printf("Adentro de lmutex interrup \n");
                 motivo_interrupcion = INTERRUPCION_ASINCRONICA;
                 sem_post(&mutex_motivo_interrupcion);
+                log_debug(logger_cpu,"<%u>enviando PC=%u ACTUALIZADO",contexto->pid,contexto->registros.PC);
+                t_paquete* paquete = crear_super_paquete(PC_INTERRUPCION_ASINCRONICA);
+                cargar_uint32_t_al_super_paquete(paquete,contexto->pid);
+                cargar_uint32_t_al_super_paquete(paquete,contexto->registros.PC);
+                enviar_paquete(paquete,socket_cpu_kernel_dispatch);
+                eliminar_paquete(paquete);
                 enviarOK(socket_cpu_kernel_interrupt);
+                
                 break;
             case -1:
                 log_error(logger_cpu, "KERNEL INTERRUPT se desconecto. Terminando servidor");
@@ -178,21 +185,20 @@ void atender_dispatch_kernel()
         switch (cod_op) 
         {
             case 1:
-                log_info(logger_cpu,"LLEGA OK");
+                log_debug(logger_cpu,"LLEGA OK");
                 sem_post(&semOKDispatch);
                 break;
                 
                 case PID_KERNEL_A_CPU:
-                log_info(logger_cpu,"Llega pid");
-                printf("ANTES DE RECIBIR OTRO PROCESO\n");
-                buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
-                
-                sem_wait(&semMutexContexto);
+                    printf("ANTES DE RECIBIR OTRO PROCESO\n");
+                    buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
+                sem_wait(&semMutexContexto);    
                     contextoAnterior->pid = contexto->pid;
                     contextoAnterior->registros.PC = contexto->registros.PC;//para check interrupt   
 
                     contexto->pid = recibir_uint32_t_del_buffer(buffer);
                     contexto->registros.PC = recibir_uint32_t_del_buffer(buffer);
+                    log_debug(logger_cpu,"Llega pid %u",contexto->pid);
                 sem_post(&semMutexContexto);
                 
                 enviarOK(socket_cpu_kernel_dispatch);

@@ -94,6 +94,9 @@ void atender_dispatch_cpu(void* conexion)
                 enviarOK(fdConexion);        
                 limpiarBuffer(buffer);     
                 break;
+            case EN_CHECK_INTERRUPT:
+                sem_post(semaforoEnCheckInterrupt);
+                break;
             
             case -1:
                 log_info(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
@@ -208,6 +211,8 @@ void actualizarPC(uint32_t pid, uint32_t PCActualizado)
 
 void actualizarPCAsincronico(uint32_t PID,uint32_t PCActualizado)
 {
+    log_debug(loggerKernel,"Actualizo PC asincrónico %u %u", PID, PCActualizado);
+
      bool _mismoPID(PCB* procesoEsperandoPC) {
         return procesoEsperandoPC->PID == PID;
     };
