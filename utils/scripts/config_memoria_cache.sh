@@ -2,7 +2,7 @@
 
 read -p "Ingrese IP Memoria: " ipMemoria
 read -p "Ingrese IP Kernel: " ipKernel
-read -p "Ingrese Path de Pseudocodigos" pathPseudocodigos
+read -p "Ingrese Path de Pseudocodigos: " pathPseudocodigos
 
 cd ../
 
@@ -22,7 +22,7 @@ declare -A valores=(
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+    sed -i "s|^$var=.*|$var=${valores[$var]}|" "$CONFIG_FILE"
   else
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi
@@ -47,7 +47,7 @@ declare -A valores=(
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+    sed -i "s|^$var=.*|$var=${valores[$var]}|" "$CONFIG_FILE"
   else
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi
@@ -72,7 +72,7 @@ declare -A valores=(
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+    sed -i "s|^$var=.*|$var=${valores[$var]}|" "$CONFIG_FILE"
   else
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi
@@ -90,7 +90,7 @@ declare -A valores=()
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+    sed -i "s|^$var=.*|$var=${valores[$var]}|" "$CONFIG_FILE"
   else
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi

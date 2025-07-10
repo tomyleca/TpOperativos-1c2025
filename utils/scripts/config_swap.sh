@@ -25,10 +25,8 @@ fi
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    # Reemplazar línea existente
-    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+    sed -i "s|^$var=.*|$var=${valores[$var]}|" "$CONFIG_FILE"
   else
-    # Agregar al final si no existe
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi
 done
@@ -57,7 +55,7 @@ fi
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+    sed -i "s|^$var=.*|$var=${valores[$var]}|" "$CONFIG_FILE"
   else
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi
@@ -92,7 +90,7 @@ fi
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+    sed -i "s|^$var=.*|$var=${valores[$var]}|" "$CONFIG_FILE"
   else
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi
@@ -112,7 +110,7 @@ fi
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+    sed -i "s|^$var=.*|$var=${valores[$var]}|" "$CONFIG_FILE"
   else
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi
