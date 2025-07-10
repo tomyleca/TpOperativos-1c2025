@@ -28,7 +28,7 @@ fi
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+    sed -i "s|^$var=.*|$var=${valores[$var]}|" "$CONFIG_FILE"
   else
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi
@@ -44,7 +44,7 @@ for config in cpu1.config cpu2.config cpu3.config cpu4.config; do
 
   case $config in
     "cpu1.config")
-      valores=( 
+      valores=(
         ["ENTRADAS_TLB"]="4"
         ["REEMPLAZO_TLB"]="FIFO"
         ["ENTRADAS_CACHE"]="2"
@@ -87,7 +87,7 @@ for config in cpu1.config cpu2.config cpu3.config cpu4.config; do
 
   for var in "${!valores[@]}"; do
     if grep -q "^$var=" "$config"; then
-      sed -i "s/^$var=.*/$var=${valores[$var]}/" "$config"
+      sed -i "s|^$var=.*|$var=${valores[$var]}|" "$config"
     else
       echo "$var=${valores[$var]}" >> "$config"
     fi
@@ -115,7 +115,7 @@ declare -A valores=(
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+    sed -i "s|^$var=.*|$var=${valores[$var]}|" "$CONFIG_FILE"
   else
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi
@@ -133,7 +133,7 @@ declare -A valores=()
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+    sed -i "s|^$var=.*|$var=${valores[$var]}|" "$CONFIG_FILE"
   else
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi
