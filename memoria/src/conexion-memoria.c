@@ -141,6 +141,7 @@ int atender_cliente(int *fd_conexion)
                 p = leerDeDiccionario(diccionarioProcesos,clave);
                 valor_Leido = leer_memoria(p,direccion_fisica,tamanio);
                 printf("VALOR LEIDO: %s\n", valor_Leido);
+                free(clave);
                 // Respuesta a CPU
                 paquete = crear_super_paquete(RESPUESTA_VALOR_LEIDO_CPU);
                 cargar_string_al_super_paquete(paquete, valor_Leido);  
