@@ -137,7 +137,8 @@ int atender_cliente(int *fd_conexion)
                 tamanio = recibir_int_del_buffer(unBuffer);
                 limpiarBuffer(unBuffer);
                 printf("PID: %d - DIRECCION FISICA: %d - TAMAÑO: %d\n", pid, direccion_fisica, tamanio);
-                p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
+                char* clave = pasarUnsignedAChar(pid);
+                p = leerDeDiccionario(diccionarioProcesos,clave);
                 valor_Leido = leer_memoria(p,direccion_fisica,tamanio);
                 printf("VALOR LEIDO: %s\n", valor_Leido);
                 // Respuesta a CPU
