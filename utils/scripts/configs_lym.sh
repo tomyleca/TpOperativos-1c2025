@@ -1,4 +1,8 @@
 #!/bin/bash
+read -p "Ingrese IP Memoria: " ipMemoria
+read -p "Ingrese IP Kernel: " ipKernel
+read -p "Ingrese Path de Pseudocodigos: " pathPseudocodigos
+
 cd ../
 
 #KERNEL
@@ -12,6 +16,8 @@ declare -A valores=(
   ["ESTIMACION_INICIAL"]="10000"
   ["TIEMPO_SUSPENSION"]="3000"
 )
+
+[ -n "$ipMemoria" ] && valores["IP_MEMORIA"]="$ipMemoria"
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
@@ -35,6 +41,9 @@ declare -A valores=(
   ["RETARDO_CACHE"]="250"
 )
 
+[ -n "$ipMemoria" ] && valores["IP_MEMORIA"]="$ipMemoria"
+[ -n "$ipKernel" ] && valores["IP_KERNEL"]="$ipKernel"
+
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
     sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
@@ -57,6 +66,26 @@ declare -A valores=(
   ["RETARDO_MEMORIA"]="500"
   ["RETARDO_SWAP"]="3000"
 )
+
+[ -n "$pathPseudocodigos" ] && valores["PATH_PSEUDOCODIGOS"]="$pathPseudocodigos"
+
+for var in "${!valores[@]}"; do
+  if grep -q "^$var=" "$CONFIG_FILE"; then
+    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+  else
+    echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
+  fi
+done
+
+cd ../
+
+#IO
+cd io
+CONFIG_FILE="io.config"
+
+declare -A valores=()
+
+[ -n "$ipKernel" ] && valores["IP_KERNEL"]="$ipKernel"
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then

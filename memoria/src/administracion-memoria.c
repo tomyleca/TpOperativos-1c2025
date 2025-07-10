@@ -32,6 +32,7 @@ void leerConfigMemoria(t_config* config_memoria)
     retardo_swap = config_get_int_value(config_memoria, "RETARDO_SWAP");
     log_level = log_level_from_string(config_get_string_value(config_memoria, "LOG_LEVEL"));
     dump_path = config_get_string_value(config_memoria, "DUMP_PATH"); 
+    path_pseudocodigos = config_get_string_value(config_memoria"PATH_PSEUDOCODIGOS");
 }
 
 

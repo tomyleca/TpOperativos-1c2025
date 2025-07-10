@@ -1,6 +1,10 @@
 #!/bin/bash
-cd ../
 
+read -p "Ingrese IP Memoria: " ipMemoria
+read -p "Ingrese IP Kernel: " ipKernel
+read -p "Ingrese Path de Pseudocodigos" pathPseudocodigos
+
+cd ../
 
 #KERNEL
 cd kernel
@@ -14,12 +18,12 @@ declare -A valores=(
   ["TIEMPO_SUSPENSION"]="3000"
 )
 
+[ -n "$ipMemoria" ] && valores["IP_MEMORIA"]="$ipMemoria"
+
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    # Reemplazar línea existente
     sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
   else
-    # Agregar al final si no existe
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi
 done
@@ -38,14 +42,8 @@ declare -A valores=(
   ["RETARDO_CACHE"]="250"
 )
 
-for var in "${!valores[@]}"; do
-  if grep -q "^$var=" "$CONFIG_FILE"; then
-    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
-  else
-    echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
-  fi
-done
-
+[ -n "$ipMemoria" ] && valores["IP_MEMORIA"]="$ipMemoria"
+[ -n "$ipKernel" ] && valores["IP_KERNEL"]="$ipKernel"
 
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
@@ -70,6 +68,26 @@ declare -A valores=(
   ["RETARDO_SWAP"]="5000"
 )
 
+[ -n "$pathPseudocodigos" ] && valores["PATH_PSEUDOCODIGOS"]="$pathPseudocodigos"
+
+for var in "${!valores[@]}"; do
+  if grep -q "^$var=" "$CONFIG_FILE"; then
+    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+  else
+    echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
+  fi
+done
+
+cd ../
+
+#IO
+cd io
+CONFIG_FILE="io.config"
+
+declare -A valores=()
+
+[ -n "$ipKernel" ] && valores["IP_KERNEL"]="$ipKernel"
+
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
     sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
@@ -81,4 +99,3 @@ done
 cd ../
 
 echo "Configuración actualizada para ejecutar MEMORIA_CACHE"
-

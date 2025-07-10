@@ -1,8 +1,15 @@
 #!/bin/bash
+
+
+read -p "Ingrese IP Memoria: " ipMemoria
+read -p "Ingrese IP Kernel: " ipKernel
+read -p "Ingrese Path de Pseudocodigos: " pathPseudocodigos
+read -p "Ingrese Path de Swapfile: " pathSwapfile
+read -p "Ingrese Path de Dump Memory: " pathDumpMemory
+
 cd ../
 
-
-#KERNEL
+# KERNEL
 cd kernel
 CONFIG_FILE="kernel.config"
 
@@ -14,18 +21,22 @@ declare -A valores=(
   ["TIEMPO_SUSPENSION"]="3000"
 )
 
+
+if [ -n "$ipMemoria" ]; then
+  valores["IP_MEMORIA"]="$ipMemoria"
+fi
+
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
-    # Reemplazar línea existente
     sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
   else
-    # Agregar al final si no existe
     echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
   fi
 done
 
 cd ../
 
+#CPU
 cd cpu
 
 for config in cpu1.config cpu2.config cpu3.config cpu4.config; do
@@ -33,7 +44,7 @@ for config in cpu1.config cpu2.config cpu3.config cpu4.config; do
 
   case $config in
     "cpu1.config")
-      valores=(
+      valores=( 
         ["ENTRADAS_TLB"]="4"
         ["REEMPLAZO_TLB"]="FIFO"
         ["ENTRADAS_CACHE"]="2"
@@ -70,6 +81,10 @@ for config in cpu1.config cpu2.config cpu3.config cpu4.config; do
       ;;
   esac
 
+ 
+  [ -n "$ipMemoria" ] && valores["IP_MEMORIA"]="$ipMemoria"
+  [ -n "$ipKernel" ] && valores["IP_KERNEL"]="$ipKernel"
+
   for var in "${!valores[@]}"; do
     if grep -q "^$var=" "$config"; then
       sed -i "s/^$var=.*/$var=${valores[$var]}/" "$config"
@@ -94,6 +109,10 @@ declare -A valores=(
   ["RETARDO_SWAP"]="2500"
 )
 
+[ -n "$pathPseudocodigos" ] && valores["PATH_PSEUDOCODIGOS"]="$pathPseudocodigos"
+[ -n "$pathDumpMemory" ] && valores["DUMP_PATH"]="$pathDumpMemory"
+[ -n "$pathSwapfile" ] && valores["PATH_SWAPFILE"]="$pathSwapfile"
+
 for var in "${!valores[@]}"; do
   if grep -q "^$var=" "$CONFIG_FILE"; then
     sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
@@ -104,5 +123,22 @@ done
 
 cd ../
 
-echo "Configuración actualizada para ejecutar ESTABILIDAD_GENERAL"
+#IO
+cd io
+CONFIG_FILE="io.config"
 
+declare -A valores=()
+
+[ -n "$ipKernel" ] && valores["IP_KERNEL"]="$ipKernel"
+
+for var in "${!valores[@]}"; do
+  if grep -q "^$var=" "$CONFIG_FILE"; then
+    sed -i "s/^$var=.*/$var=${valores[$var]}/" "$CONFIG_FILE"
+  else
+    echo "$var=${valores[$var]}" >> "$CONFIG_FILE"
+  fi
+done
+
+cd ../
+
+echo "Configuración actualizada para ejecutar ESTABILIDAD_GENERAL."

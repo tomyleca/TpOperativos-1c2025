@@ -9,7 +9,7 @@ t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo)
 
     char* filepath = string_new(); // Creo un string para almacenar la ruta del archivo
 
-    string_append(&filepath, "/home/utnso/tp-2025-1c-Syscalls-Society/memoria/pseudocodigos/");
+    string_append(&filepath, path_pseudocodigos);
 
     string_append(&filepath, archivo_pseudocodigo);
 

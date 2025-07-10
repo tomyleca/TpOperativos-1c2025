@@ -96,6 +96,7 @@ extern t_log_level log_level;
 extern char* dump_path;
 extern t_list* lista_contextos;
 extern pthread_t hilo_memoria;
+extern char* path_pseudocodigos;
 
 
 
