@@ -62,6 +62,12 @@ void inicializar_memoria() {
     log_error(logger_memoria, "No se pudo crear la lista de swap\n");
   }
 
+  FILE *archivo = fopen(path_swapfile, "wb");
+  if (!archivo) {
+      log_error(logger_memoria, "No se pudo crear swapfile.bin");
+  }
+  fclose(archivo);
+
   log_info(logger_memoria, "Memoria inicializada - Lista de swap inicializada");
   log_info(logger_memoria,  "Cantidad de frames: <%d>",  CANT_FRAMES);
   log_info(logger_memoria,"Tamaño de página: <%d>",  TAM_PAGINA);
@@ -83,42 +89,6 @@ TablaPagina *crear_tabla_nivel(int nivel_actual) {
     }
   
   return tabla;
-}
-//todo borrar esto
-int traducir_direccion(Proceso *p, int direccion_virtual) {
-  int nro_pagina = direccion_virtual / TAM_PAGINA;
-  int desplazamiento = direccion_virtual % TAM_PAGINA;
-
-  TablaPagina *tabla = p->tabla_raiz;
-
-
-  int divisor = 1;
-  for (int i = 1; i < CANTIDAD_NIVELES; i++)
-    divisor *= ENTRADAS_POR_TABLA;
-
-  for (int nivel = 1; nivel <= CANTIDAD_NIVELES; nivel++) {
-    p->metricas.accesos_tabla_paginas++;
-
-    int entrada = (nro_pagina / divisor) % ENTRADAS_POR_TABLA;
-
-    if (nivel == CANTIDAD_NIVELES) {
-      int frame = tabla->frames[entrada];
-      if (frame == -1) {
-     log_error(logger_memoria,"Página no asignada");
-        return -1;
-      }
-      return frame * TAM_PAGINA + desplazamiento;
-    } else {
-      tabla = tabla->entradas[entrada];
-      if (!tabla) {
-        log_error(logger_memoria,"Tabla intermedia nula");
-        return -1;
-      }
-      divisor /= ENTRADAS_POR_TABLA;
-    }
-  }
-
-  return -1; 
 }
 
 void asignar_frames_en_tabla(TablaPagina *tabla, int paginas_a_reservar, int *frames, int *pagina_logica_actual, int nivel_actual, Proceso *p) {
@@ -148,24 +118,28 @@ void asignar_frames_en_tabla(TablaPagina *tabla, int paginas_a_reservar, int *fr
 
 void imprimir_tabla(TablaPagina *tabla, int nivel_actual, int indent) {
   for (int i = 0; i < ENTRADAS_POR_TABLA; i++) {
-    for (int j = 0; j < indent; j++)
-      printf("  "); 
     if (tabla->es_hoja) {
       int frame = tabla->frames[i];
-      if (frame == -1)
-       printf("Nivel %d - Entrada %d: [SIN FRAME]\n", nivel_actual, i);
-      else
+      if (frame == -1) {
+        for (int j = 0; j < indent; j++) printf("  ");
+        printf("Nivel %d - Entrada %d: [SIN FRAME]\n", nivel_actual, i);
+
+      } else {
+        for (int j = 0; j < indent; j++) printf("  ");
         printf("Nivel %d - Entrada %d: Frame %d\n", nivel_actual, i, frame);
+      }
     } else {
-          if (tabla->entradas == NULL) {
-            printf("  (entradas == NULL)\n");
-            return;
-        }
+
+      if (tabla->entradas == NULL) {
+        printf("  (entradas == NULL)\n");
+        return;
+    }
       if(tabla->entradas[i] != NULL){
+        for (int j = 0; j < indent; j++) printf("  ");
         printf("Nivel %d - Entrada %d:\n", nivel_actual, i);
         imprimir_tabla(tabla->entradas[i], nivel_actual + 1, indent + 1);
       }
- 
+
     }
   }
 }
@@ -445,6 +419,36 @@ bool realizar_dump_memoria(int pid) {
     return true;
 }
 
+void escribir_tabla_en_archivo(FILE *archivo, TablaPagina *tabla, int nivel_actual, int *bytes_escritos, int tam, int *paginas_recorridas) {
+  if (!tabla) return;
+
+  int paginas_reservadas = (tam + TAM_PAGINA - 1) / TAM_PAGINA;
+
+  if (tabla->es_hoja) {
+      for (int i = 0; i < ENTRADAS_POR_TABLA && *paginas_recorridas < paginas_reservadas; i++) {
+          int frame = tabla->frames[i];
+
+          if (frame != -1) {
+            int faltan = tam - *bytes_escritos;
+            if (faltan <= 0) break;
+        
+            int cantidad = (faltan >= TAM_PAGINA) ? TAM_PAGINA : faltan;
+        
+            fwrite((char*)memoria_principal + frame * TAM_PAGINA, 1, cantidad, archivo);
+            *bytes_escritos += cantidad;
+        
+            (*paginas_recorridas)++;
+            if (*paginas_recorridas >= paginas_reservadas) break;
+        }
+      }
+  } else {
+      for (int i = 0; i < ENTRADAS_POR_TABLA; i++) {
+          escribir_tabla_en_archivo(archivo, tabla->entradas[i], nivel_actual + 1, bytes_escritos, tam, paginas_recorridas);
+      }
+  }
+}
+
+
 void dump_memory(Proceso *p) {
     // Obtiene el timestamp actual
     time_t timestamp = time(NULL);
@@ -475,30 +479,17 @@ void dump_memory(Proceso *p) {
     log_info(logger_memoria, "## PID: <%d> - Memory Dump - Creando archivo: <%s>", p->pid, full_filename);
     
     int bytes_escritos = 0;
-    
-    int paginas_asignadas = (p->tamanio_reservado + TAM_PAGINA - 1) / TAM_PAGINA;
-    int tamanio_total_paginas = paginas_asignadas * TAM_PAGINA;
-    
-    for (int direccion_virtual = 0; direccion_virtual < tamanio_total_paginas; direccion_virtual++) {
-        int direccion_fisica = traducir_direccion(p, direccion_virtual);
-        
-        if (direccion_fisica >= 0 && direccion_fisica < TAM_MEMORIA) {
-            char byte =( (char*)memoria_principal)[direccion_fisica];
-            fwrite(&byte, 1, 1, dump_file);
-            bytes_escritos++;
-        } else {
-            char zero_byte = 0;
-            fwrite(&zero_byte, 1, 1, dump_file);
-            bytes_escritos++;
-        }
-    }
+    int paginas_recorridas = 0;
+
+    escribir_tabla_en_archivo(dump_file, p->tabla_raiz, 1, &bytes_escritos,  p->tamanio_reservado, &paginas_recorridas);
+  
     
     fclose(dump_file);
     
     log_info(logger_memoria, "## PID: <%d> - Memory Dump completado - <%d> bytes escritos en <%s>", 
              p->pid, bytes_escritos, full_filename);
-    
   
+
 
 
   if (!p || !p->tabla_raiz) {
@@ -538,7 +529,6 @@ return 0;
 
 }
 
-
 int suspender_proceso(Proceso *p) {
 
   if (!p || !p->tabla_raiz) {
@@ -553,7 +543,6 @@ int suspender_proceso(Proceso *p) {
     return -1;
   }
 
-  int paginas = (p->tamanio_reservado + TAM_PAGINA - 1) / TAM_PAGINA;
 
   uint32_t offset = ftell(archivo_swap);
 
@@ -562,21 +551,14 @@ int suspender_proceso(Proceso *p) {
   entrada->tamanio_original = p->tamanio_reservado;
   entrada->offset = offset;
 
+  int bytes_escritos = 0;
+  int paginas_recorridas = 0;
+
+  escribir_tabla_en_archivo(archivo_swap, p->tabla_raiz, 1, &bytes_escritos,  p->tamanio_reservado, &paginas_recorridas);
+
+
   list_add(tabla_swap, entrada);
 
-  for (int i = 0; i < paginas; i++) {
-    int direccion_virtual = i * TAM_PAGINA;
-    int dir_fisica = traducir_direccion(p, direccion_virtual);
-
-    if (dir_fisica != -1) {
-      fwrite((char*)memoria_principal + dir_fisica, 1, TAM_PAGINA, archivo_swap);
-    } else {
-      char *vacio = calloc(TAM_PAGINA, 1);
-      fwrite(vacio, 1, TAM_PAGINA, archivo_swap);
-      free(vacio);
-    }
-  }
-  
   fclose(archivo_swap);
   liberar_memoria(p);
   log_info(logger_memoria, "PID: <%u> - Proceso suspendido correctamente en swapfile", p->pid);
