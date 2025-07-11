@@ -743,8 +743,7 @@ void escribir_cache(int direccion_logica, char *valor) // Chequear siempre si ca
 
     // escribo el valor en cache
     strcpy(cache_paginas[indice_cache].contenido + desplazamiento, valor);
-    valor_escrito = strdup(valor); // Copia segura del string
-
+    strcpy(valor_escrito, valor);
 
     cache_paginas[indice_cache].bit_modificacion = true;
 
