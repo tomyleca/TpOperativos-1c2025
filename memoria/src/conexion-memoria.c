@@ -42,8 +42,7 @@ int atender_cliente(int *fd_conexion)
     char* clave;
 
 
-    printf("---------------------------------------------\n");
-    printf("Atendiendo cliente con fd: %d\n", cliente_fd);
+
 
     while (1) {
         int cod_op = recibir_operacion(cliente_fd);
@@ -55,7 +54,7 @@ int atender_cliente(int *fd_conexion)
 
             case SOLICITUD_ESTRUCTURA_MEMORIA:
                 usleep(retardo_memoria * 1000);
-                printf("SOLICITUD ESTRUCTURA MEMORIA------------------------------------------------------------------\n");
+                
                 paquete = crear_super_paquete(RESPUESTA_ESTRUCTURA_MEMORIA);
                 cargar_int_al_super_paquete(paquete, TAM_PAGINA);
                 cargar_int_al_super_paquete(paquete, CANTIDAD_NIVELES);
@@ -66,13 +65,13 @@ int atender_cliente(int *fd_conexion)
         
             case GUARDAR_PROCESO_EN_MEMORIA:
                 usleep(retardo_memoria * 1000);
-                printf("GUARDAR PROCESO EN MEMORIA------------------------------------------------------------------\n");
+                
                 t_info_kernel datos_kernel; 
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 datos_kernel.pid = recibir_uint32_t_del_buffer(unBuffer);
                 datos_kernel.tamanio_proceso = recibir_uint32_t_del_buffer(unBuffer); 
                 datos_kernel.archivo_pseudocodigo = recibir_string_del_buffer(unBuffer);
-                printf("PID LLEGADO DE KERNEL: %d -TAMAÑO: %d - ARCHIVO PSEUDOCODIGO: %s\n", datos_kernel.pid, datos_kernel.tamanio_proceso, datos_kernel.archivo_pseudocodigo);
+                //printf("PID LLEGADO DE KERNEL: %d -TAMAÑO: %d - ARCHIVO PSEUDOCODIGO: %s\n", datos_kernel.pid, datos_kernel.tamanio_proceso, datos_kernel.archivo_pseudocodigo);
       
                 if(guardarProcesoYReservar(datos_kernel.pid,datos_kernel.tamanio_proceso,datos_kernel.archivo_pseudocodigo) == -1)
                     enviarOpCode(cliente_fd,NO_HAY_MEMORIA);
@@ -130,17 +129,17 @@ int atender_cliente(int *fd_conexion)
 
             case CPU_PIDE_LEER_MEMORIA:
                 usleep(retardo_memoria* 1000);
-                printf("CPU_PIDE_LEER_MEMORIA------------------------------------------------------------------\n");
+                //printf("CPU_PIDE_LEER_MEMORIA------------------------------------------------------------------\n");
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_int_del_buffer(unBuffer);
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
                 tamanio = recibir_int_del_buffer(unBuffer);
                 limpiarBuffer(unBuffer);
-                printf("PID: %d - DIRECCION FISICA: %d - TAMAÑO: %d\n", pid, direccion_fisica, tamanio);
+                //printf("PID: %d - DIRECCION FISICA: %d - TAMAÑO: %d\n", pid, direccion_fisica, tamanio);
                 char* clave = pasarUnsignedAChar(pid);
                 p = leerDeDiccionario(diccionarioProcesos,clave);
                 valor_Leido = leer_memoria(p,direccion_fisica,tamanio);
-                printf("VALOR LEIDO: %s\n", valor_Leido);
+                //printf("VALOR LEIDO: %s\n", valor_Leido);
                 free(clave);
                 // Respuesta a CPU
                 paquete = crear_super_paquete(RESPUESTA_VALOR_LEIDO_CPU);
@@ -152,13 +151,13 @@ int atender_cliente(int *fd_conexion)
 
             case CPU_PIDE_ESCRIBIR_MEMORIA:
                 usleep(retardo_memoria * 1000);
-                printf("CPU_PIDE_ESCRIBIR_MEMORIA------------------------------------------------------------------\n");
+                //printf("CPU_PIDE_ESCRIBIR_MEMORIA------------------------------------------------------------------\n");
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_int_del_buffer(unBuffer);
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
                 valor_registro = recibir_string_del_buffer(unBuffer);
                 limpiarBuffer(unBuffer);
-                printf("PID: %d - DIRECCION FISICA: %d - VALOR: %s\n", pid, direccion_fisica, valor_registro);
+                //printf("PID: %d - DIRECCION FISICA: %d - VALOR: %s\n", pid, direccion_fisica, valor_registro);
                 
                 p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
 
@@ -176,7 +175,7 @@ int atender_cliente(int *fd_conexion)
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
                 tamanio = recibir_int_del_buffer(unBuffer);
                 limpiarBuffer(unBuffer);
-                printf("PID: %d - DIRECCION FISICA: %d - TAMAÑO: %d\n", pid, direccion_fisica, tamanio);
+                //printf("PID: %d - DIRECCION FISICA: %d - TAMAÑO: %d\n", pid, direccion_fisica, tamanio);
                 clave = pasarUnsignedAChar(pid);
                 p = leerDeDiccionario(diccionarioProcesos,clave);
                 free(clave);
@@ -211,7 +210,7 @@ int atender_cliente(int *fd_conexion)
 
             case SWAP_SUSPENDER_PROCESO:
                 usleep(retardo_swap * 1000);
-                printf("SWAP_SUSPENDER_PROCESO ------------------------------------------------------------------\n");
+                //printf("SWAP_SUSPENDER_PROCESO ------------------------------------------------------------------\n");
             
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
@@ -242,12 +241,12 @@ int atender_cliente(int *fd_conexion)
             
             case SWAP_RESTAURAR_PROCESO:
                 usleep(retardo_swap * 1000);
-                printf("SWAP_RESTAURAR_PROCESO ------------------------------------------------------------------\n");
+                //printf("SWAP_RESTAURAR_PROCESO ------------------------------------------------------------------\n");
             
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
                 free(unBuffer);
-                printf("PID: %d - DIRECCION FISICA: %d\n", pid, direccion_fisica);
+                //printf("PID: %d - DIRECCION FISICA: %d\n", pid, direccion_fisica);
             
                 Proceso* p_restaurar = leerDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(pid));
 
@@ -269,13 +268,13 @@ int atender_cliente(int *fd_conexion)
             
             case DUMP_MEMORY:
                 usleep(retardo_swap * 1000);
-                printf("DUMP_MEMORY ------------------------------------------------------------------\n");
+                //printf("DUMP_MEMORY ------------------------------------------------------------------\n");
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
                 limpiarBuffer(unBuffer);
                 log_info(logger_memoria, "## PID: <%u> - Memory Dump solicitado", pid);
                 
-                printf("PID: %d\n", pid);
+                //printf("PID: %d\n", pid);
 
                 if (realizar_dump_memoria(pid)) {
                     paquete = crear_super_paquete(DUMP_MEMORY_OK);

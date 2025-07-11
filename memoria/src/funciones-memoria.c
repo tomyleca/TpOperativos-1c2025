@@ -15,7 +15,7 @@ t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo)
 
     
 
-    printf("Ruta del archivo: %s\n", filepath);
+    //printf("Ruta del archivo: %s\n", filepath);
 
     FILE* archivo = fopen(filepath, "r"); // abre el archivo en modo lectura
 
@@ -77,7 +77,7 @@ t_list* leer_archivo_y_cargar_instrucciones(char* archivo_pseudocodigo)
             instruccion_formateada = strdup(pseudo_cod->mnemonico);
         }
 
-        printf("Instruccion leida y cargada %s\n", instruccion_formateada);
+        //printf("Instruccion leida y cargada %s\n", instruccion_formateada);
         list_add(instrucciones, instruccion_formateada); // Obtenemos una instruccion
         // free(instruccion_formateada);
 
@@ -124,7 +124,7 @@ void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
     cargar_string_al_super_paquete(paquete_contexto, instruccion);
     enviar_paquete(paquete_contexto, socket_cpu);
     
-    printf("Indice: %d -- INSTRUCCION: %s \n", pc, instruccion);
+    //printf("Indice: %d -- INSTRUCCION: %s \n", pc, instruccion);
     
     eliminar_paquete(paquete_contexto);
         

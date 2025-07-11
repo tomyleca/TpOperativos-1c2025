@@ -122,22 +122,22 @@ void imprimir_tabla(TablaPagina *tabla, int nivel_actual, int indent) {
     if (tabla->es_hoja) {
       int frame = tabla->frames[i];
       if (frame == -1) {
-        for (int j = 0; j < indent; j++) printf("  ");
-        printf("Nivel %d - Entrada %d: [SIN FRAME]\n", nivel_actual, i);
+        for (int j = 0; j < indent; j++) log_debug(logger_memoria,"  ");
+        log_debug(logger_memoria,"Nivel %d - Entrada %d: [SIN FRAME]\n", nivel_actual, i);
 
       } else {
-        for (int j = 0; j < indent; j++) printf("  ");
-        printf("Nivel %d - Entrada %d: Frame %d\n", nivel_actual, i, frame);
+        for (int j = 0; j < indent; j++) log_debug(logger_memoria,"  ");
+        log_debug(logger_memoria,"Nivel %d - Entrada %d: Frame %d\n", nivel_actual, i, frame);
       }
     } else {
 
       if (tabla->entradas == NULL) {
-        printf("  (entradas == NULL)\n");
+        log_debug(logger_memoria,"  (entradas == NULL)\n");
         return;
     }
       if(tabla->entradas[i] != NULL){
-        for (int j = 0; j < indent; j++) printf("  ");
-        printf("Nivel %d - Entrada %d:\n", nivel_actual, i);
+        for (int j = 0; j < indent; j++) log_debug(logger_memoria,"  ");
+        log_debug(logger_memoria,"Nivel %d - Entrada %d:\n", nivel_actual, i);
         imprimir_tabla(tabla->entradas[i], nivel_actual + 1, indent + 1);
       }
 
@@ -162,11 +162,11 @@ void liberar_tabla(TablaPagina *tabla) {
 }
 
 void mostrar_bitmap() {
-  printf("\nEstado del bitmap de frames:\n");
+  log_debug(logger_memoria,"\nEstado del bitmap de frames:\n");
   for (int i = 0; i < CANT_FRAMES; i++) {
-    printf("%d", bitmap_frames[i] ? 1 : 0);
+    log_debug(logger_memoria,"%d", bitmap_frames[i] ? 1 : 0);
   }
-  printf("\n");
+  log_debug(logger_memoria,"\n");
 }
 
 int asignar_frame_libre() {
@@ -243,7 +243,7 @@ int reservar_memoria(Proceso *p, int bytes) {
   int paginas_necesarias = (bytes + TAM_PAGINA - 1) / TAM_PAGINA;
   int *frames = reservar_frames(paginas_necesarias);
   if (!frames) {
-    fprintf(stderr, "No hay suficientes frames libres para %d bytes\n", bytes);
+    log_debug(logger_memoria, "No hay suficientes frames libres para %d bytes\n", bytes);
     return -1;
   }
     p->tabla_raiz = crear_tabla_nivel(1);
@@ -276,7 +276,7 @@ int escribir_memoria(Proceso *p,  int dir_fisica, char *texto) {
 
 char leer_byte(Proceso *p, int dir_fisica) {
   if (dir_fisica < 0 || dir_fisica >= CANT_FRAMES * TAM_PAGINA) {
-    printf("## PID: <%d> - ERROR: Lectura fuera de límites físicos", p->pid);
+    log_debug(logger_memoria,"## PID: <%d> - ERROR: Lectura fuera de límites físicos", p->pid);
     return -1;
   }
 
@@ -310,13 +310,13 @@ char* leer_memoria(Proceso *p, int dir_fisica,int tamanio) {
 
 
 void mostrar_procesos_activos() {
-  printf("\n=== Procesos Activos ===\n");
+  log_debug(logger_memoria,"\n=== Procesos Activos ===\n");
 
   t_list* procesos = dictionary_elements(diccionarioProcesos->diccionario);
   for (int i = 0; i < list_size(procesos); i++) {
       Proceso* p = list_get(procesos, i);
       int cant_paginas = (p->tamanio_reservado + TAM_PAGINA - 1) / TAM_PAGINA;
-      printf("PID %d: %d bytes (%d páginas) | Tabla raíz en %p\n",
+      log_debug(logger_memoria,"PID %d: %d bytes (%d páginas) | Tabla raíz en %p\n",
              p->pid, p->tamanio_reservado, cant_paginas, (void*) p->tabla_raiz);
   }
 
@@ -497,11 +497,11 @@ void dump_memory(Proceso *p) {
     log_error(logger_memoria, "No se puede mostrar la tabla raíz del Proceso PID <%d>: no existe o no tiene páginas.\n ", p ? p->pid : -1);
     return;
   } else {
-    printf("## PID: %d\n", p->pid);
+    log_debug(logger_memoria,"## PID: %d\n", p->pid);
     imprimir_tabla(p->tabla_raiz, 1, 0);
   }
-  printf("\n");
-  printf("MODO DEBUG ONLY:\n");
+  log_debug(logger_memoria,"\n");
+  log_debug(logger_memoria,"MODO DEBUG ONLY:\n");
   mostrar_bitmap();
   mostrar_procesos_activos();
 }
@@ -524,7 +524,7 @@ int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
 
 
   memset(&p->metricas, 0, sizeof(MetricaProceso));
-  printf("## PID: <%u> - Proceso guardado y memoria reservada - Tamaño: <%u>\n", p->pid, p->tamanio_reservado);
+  log_debug(logger_memoria,"## PID: <%u> - Proceso guardado y memoria reservada - Tamaño: <%u>\n", p->pid, p->tamanio_reservado);
   mostrar_bitmap();
 return 0;
 
