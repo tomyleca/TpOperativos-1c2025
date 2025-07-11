@@ -138,6 +138,8 @@ void* leerDeListaSegunCondicion(t_listaConSemaforos* listaConSemaforos,bool (*co
 void borrarListaConSemaforos(t_listaConSemaforos* listaConSemaforos)
 {
     list_destroy(listaConSemaforos->lista);
+    sem_destroy(listaConSemaforos->semaforoCantElementos);
+    sem_destroy(listaConSemaforos->semaforoMutex);
     free(listaConSemaforos->semaforoCantElementos);
     free(listaConSemaforos->semaforoMutex);
     free(listaConSemaforos);
