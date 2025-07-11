@@ -763,8 +763,7 @@ void leer_cache(int direccion_logica, int tamanio) {
     
     int indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
     if (indice_cache == -1) 
-        cargar_pagina_en_cache(contexto->pid,direccion_logica);
-        
+        indice_cache = cargar_pagina_en_cache(contexto->pid, direccion_logica);
     strncpy(valor_leido_cache,cache_paginas[indice_cache].contenido + desplazamiento, tamanio);
     
     valor_leido_cache[tamanio] = '\0';
