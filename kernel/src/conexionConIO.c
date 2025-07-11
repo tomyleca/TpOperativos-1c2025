@@ -66,6 +66,8 @@ void* atenderInstanciaIO(void* conexion)
                 uint32_t PID =recibir_uint32_t_del_buffer(buffer);
                 char* nombre = recibir_string_del_buffer(buffer);
                 manejarFinDeIO(PID,nombre,*fdConexion);
+                free(nombre);
+
                 break;
             
             //case 0:
@@ -167,13 +169,12 @@ void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
                     log_info(loggerKernel,"# Finalizando procesos encolados en dispositivo: %s",nombreDispositivoIO);
                     list_iterate(dispositivoIO->colaEsperandoIO->lista,exitDeProcesoBLoqueadoPorIO);
                 }
-            
-            borrarListaConSemaforos(dispositivoIO->listaInstancias);
-            borrarListaConSemaforos(dispositivoIO->colaEsperandoIO);
-            sacarDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
-            free(dispositivoIO->nombre);
-            free(dispositivoIO);
         }
+        borrarListaConSemaforos(dispositivoIO->listaInstancias);
+        borrarListaConSemaforos(dispositivoIO->colaEsperandoIO);
+        sacarDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
+        free(dispositivoIO->nombre);
+        free(dispositivoIO);
     
     sem_post(semaforoMutexIO);
 }
