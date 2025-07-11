@@ -125,7 +125,7 @@ void atender_interrupcion_kernel()
     
     while(1) 
     {
-        printf("ANTES DE RECIBIR OTRO PROCESO O MENSAJE en INTERRUPT");
+        
         cod_op = recibir_operacion(socket_cpu_kernel_interrupt);
         switch (cod_op) 
         {
@@ -135,7 +135,7 @@ void atender_interrupcion_kernel()
                 log_info(logger_cpu, " ## Llega interrupción sincrónica al puerto Interrupt.");
                 sem_wait(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;
-                printf("Adentro de lmutex interrup \n");
+                
                 motivo_interrupcion = INTERRUPCION_SINCRONICA;
                 sem_post(&mutex_motivo_interrupcion);
                 enviarOK(socket_cpu_kernel_interrupt);
@@ -148,7 +148,7 @@ void atender_interrupcion_kernel()
                 
                 sem_wait(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;
-                printf("Adentro de lmutex interrup \n");
+                
                 motivo_interrupcion = INTERRUPCION_ASINCRONICA;
                 sem_post(&mutex_motivo_interrupcion);
                 enviarOK(socket_cpu_kernel_interrupt);
@@ -174,7 +174,7 @@ void atender_dispatch_kernel()
 
     while(1) 
     {
-        printf("ANTES DE RECIBIR OTRO PROCESO O MENSAJE en dispatch\n");
+        
         cod_op = recibir_operacion(socket_cpu_kernel_dispatch);
         switch (cod_op) 
         {
@@ -184,7 +184,7 @@ void atender_dispatch_kernel()
                 break;
                 
                 case PID_KERNEL_A_CPU:
-                    printf("ANTES DE RECIBIR OTRO PROCESO\n");
+                    
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
                 sem_wait(&semFinCicloInstruccion);
                 

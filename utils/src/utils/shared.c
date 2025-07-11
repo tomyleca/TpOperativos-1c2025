@@ -1,7 +1,7 @@
 #include <utils/shared.h>
 
 void saludar(char* quien) {
-    printf("Hola desde %s!!\n", quien);
+    //printf("Hola desde %s!!\n", quien);
 }
 
 void terminar_programa(int conexion, t_log* logger, t_config* config)

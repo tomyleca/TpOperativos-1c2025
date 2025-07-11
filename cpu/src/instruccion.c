@@ -440,7 +440,7 @@ void check_interrupt(uint32_t PIDInicial)
         free(instruccion_recibida);
         instruccion_recibida = NULL;
         
-        printf("--------------No hay interrupcion \n");
+        log_debug(logger_cpu,"--------------No hay interrupcion \n");
         
         
         sem_post(&semFetch); // 1/2 semaforos necesarios para que vuelva a empezar el ciclo de instruccion

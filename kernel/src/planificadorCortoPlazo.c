@@ -7,7 +7,7 @@ void* planificadorCortoPlazo(void* arg)
     while(1)
     {
         sem_wait(semaforoIntentarPlanificar);
-        
+        log_debug(loggerKernel,"## 3");
         
         switch(algoritmoDePlanificacionInt){
             
