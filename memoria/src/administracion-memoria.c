@@ -524,10 +524,10 @@ void dump_memory(Proceso *p) {
     log_debug(logger_memoria,"## PID: %d\n", p->pid);
     imprimir_tabla(p->tabla_raiz, 1, 0);
   }
-  log_debug(logger_memoria,"\n");
-  log_debug(logger_memoria,"MODO DEBUG ONLY:\n");
-  mostrar_bitmap();
-  mostrar_procesos_activos();
+  //log_debug(logger_memoria,"\n");
+  //log_debug(logger_memoria,"MODO DEBUG ONLY:\n");
+  //mostrar_bitmap();
+  //mostrar_procesos_activos();
 }
 
 int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
