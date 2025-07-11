@@ -37,7 +37,7 @@ sem_t* semMutex;
 
 
 int ME[7];
-int MT[7];
+int64_t MT[7];
 
 
 }PCB;

@@ -7,7 +7,7 @@ void* planificadorCortoPlazo(void* arg)
     while(1)
     {
         sem_wait(semaforoIntentarPlanificar);
-        log_debug(loggerKernel,"## 3");
+        //log_debug(loggerKernel,"## 3");
         
         switch(algoritmoDePlanificacionInt){
             
@@ -84,6 +84,7 @@ void pasarAExecute(PCB* proceso)
 
 void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 {
+
     procesoDespuesDeEjecucion->duracionRafagaAnterior=temporal_gettime(procesoDespuesDeEjecucion->cronometros[EXECUTE]) - procesoDespuesDeEjecucion->MT[EXECUTE]; //Saco cuanto es lo ultimo que ejecuto
     cargarCronometro(procesoDespuesDeEjecucion,EXECUTE);
     procesoDespuesDeEjecucion->estimadoRafagaAnterior=procesoDespuesDeEjecucion->estimadoSiguienteRafaga;
@@ -199,6 +200,6 @@ bool menorEstimadoSiguienteRafaga(PCB* PCB1,PCB* PCB2)
 
 void estimarSiguienteRafaga(PCB* proceso)
 {
-    proceso->estimadoSiguienteRafaga= alfa * proceso->duracionRafagaAnterior + (1- alfa) * proceso->estimadoRafagaAnterior;
+     proceso->estimadoSiguienteRafaga= alfa * proceso->duracionRafagaAnterior + (1- alfa) * proceso->estimadoRafagaAnterior;
 
 }
