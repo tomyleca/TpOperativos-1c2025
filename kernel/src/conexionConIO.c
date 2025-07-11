@@ -188,7 +188,7 @@ void exitDeProcesoBLoqueadoPorIO(ProcesoEnEsperaIO* procesoEnEsperaIO)
     sem_wait(procesoEnEsperaIO->semaforoMutex); //Para no interrumpir manejarProcesoBloqueado o hiloContadorSwap a la mitad 
         esperarCancelacionDeHilo(procesoEnEsperaIO->hiloContadorSwap); //Cancelo el hilo contadorSwap, para que no tire seg fault cuando haga free del semaforoMutex
         esperarCancelacionDeHilo(procesoEnEsperaIO->hiloManejoBloqueado); //Cancelo este hilo que esta esperando el fin de IO
-        char* clave= pasarUnsignedAChar(procesoEnEsperaIO->proceso->PID)
+        char* clave= pasarUnsignedAChar(procesoEnEsperaIO->proceso->PID);
         sacarDeDiccionario(diccionarioProcesosBloqueados,clave);
         free(clave);
         if(procesoEnEsperaIO->estaENSwap)
