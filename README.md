@@ -71,7 +71,7 @@ script [so-deploy] de la cátedra:
 ```bash
 git clone https://github.com/sisoputnfrba/so-deploy.git
 cd so-deploy
-./deploy.sh -r=release -p=utils -p=kernel -p=cpu -p=memoria -p=io "tp-{año}-{cuatri}-{grupo}"
+./deploy.sh -r=release -p=utils -p=kernel -p=cpu -p=memoria -p=io "tp-2025-1c-Syscalls-Society"
 ```
 
 El mismo se encargará de instalar las Commons, clonar el repositorio del grupo
