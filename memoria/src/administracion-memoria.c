@@ -449,6 +449,28 @@ void escribir_tabla_en_archivo(FILE *archivo, TablaPagina *tabla, int nivel_actu
   }
 }
 
+void escribir_tabla_en_archivo_dump(FILE *archivo, TablaPagina *tabla, int nivel_actual, int *bytes_escritos, int tam, int *paginas_recorridas) {
+  if (!tabla) return;
+
+  int paginas_reservadas = tam / TAM_PAGINA;
+
+  if (tabla->es_hoja) {
+      for (int i = 0; i < ENTRADAS_POR_TABLA && *paginas_recorridas < paginas_reservadas; i++) {
+          int frame = tabla->frames[i];
+
+          if (frame != -1) {
+            fwrite((char*)memoria_principal + frame * TAM_PAGINA, 1, TAM_PAGINA, archivo);
+            *bytes_escritos += TAM_PAGINA;
+            (*paginas_recorridas)++;
+            if (*paginas_recorridas >= paginas_reservadas) break;
+        }
+      }
+  } else {
+      for (int i = 0; i < ENTRADAS_POR_TABLA; i++) {
+          escribir_tabla_en_archivo(archivo, tabla->entradas[i], nivel_actual + 1, bytes_escritos, tam, paginas_recorridas);
+      }
+  }
+}
 
 void dump_memory(Proceso *p) {
     // Obtiene el timestamp actual
@@ -481,8 +503,10 @@ void dump_memory(Proceso *p) {
     
     int bytes_escritos = 0;
     int paginas_recorridas = 0;
+    int paginas_reservadas = (p->tamanio_reservado + TAM_PAGINA - 1) / TAM_PAGINA;
+    int tam_reservado = paginas_reservadas * TAM_PAGINA;
 
-    escribir_tabla_en_archivo(dump_file, p->tabla_raiz, 1, &bytes_escritos,  p->tamanio_reservado, &paginas_recorridas);
+    escribir_tabla_en_archivo_dump(dump_file, p->tabla_raiz, 1, &bytes_escritos, tam_reservado, &paginas_recorridas);
   
     
     fclose(dump_file);

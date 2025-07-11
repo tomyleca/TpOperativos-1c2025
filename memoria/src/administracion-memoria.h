@@ -50,6 +50,7 @@ void mostrar_bitmap();
 //* Dump de memoria
 void dump_memory (Proceso *p);
 bool realizar_dump_memoria(int pid);
+void escribir_tabla_en_archivo_dump(FILE *archivo, TablaPagina *tabla, int nivel_actual, int *bytes_escritos, int tam, int *paginas_recorridas);
 
 //*Operaciones sobre la memoria
 int escribir_memoria(Proceso *p, int dir_fisica, char* valor);
