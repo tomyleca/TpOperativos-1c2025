@@ -517,17 +517,17 @@ void dump_memory(Proceso *p) {
 
 
 
-  if (!p || !p->tabla_raiz) {
-    log_error(logger_memoria, "No se puede mostrar la tabla raíz del Proceso PID <%d>: no existe o no tiene páginas.\n ", p ? p->pid : -1);
-    return;
-  } else {
-    log_debug(logger_memoria,"## PID: %d\n", p->pid);
-    imprimir_tabla(p->tabla_raiz, 1, 0);
-  }
-  log_debug(logger_memoria,"\n");
-  log_debug(logger_memoria,"MODO DEBUG ONLY:\n");
-  mostrar_bitmap();
-  mostrar_procesos_activos();
+  //if (!p || !p->tabla_raiz) {
+  //  log_error(logger_memoria, "No se puede mostrar la tabla raíz del Proceso PID <%d>: no existe o no tiene páginas.\n ", p ? p->pid : -1);
+  //  return;
+  //} else {
+  //  log_debug(logger_memoria,"## PID: %d\n", p->pid);
+  //  imprimir_tabla(p->tabla_raiz, 1, 0);
+  //}
+  //log_debug(logger_memoria,"\n");
+  //log_debug(logger_memoria,"MODO DEBUG ONLY:\n");
+  //mostrar_bitmap();
+  //mostrar_procesos_activos();
 }
 
 int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
