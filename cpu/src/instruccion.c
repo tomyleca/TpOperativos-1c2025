@@ -759,7 +759,7 @@ void escribir_cache(int direccion_logica, char *valor) // Chequear siempre si ca
 void leer_cache(int direccion_logica, int tamanio) {
     int nro_pagina = direccion_logica / tamanio_pagina;
     int desplazamiento = direccion_logica % tamanio_pagina;
-    char* valor_leido_cache = malloc(sizeof(tamanio));
+    char* valor_leido_cache = malloc(tamanio+1);
     
     int indice_cache = buscar_en_cache(contexto->pid, nro_pagina);
     if (indice_cache == -1) 
