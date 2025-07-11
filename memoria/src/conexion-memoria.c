@@ -310,6 +310,7 @@ int atender_cliente(int *fd_conexion)
 
                 //shutdown(cliente_fd, SHUT_RDWR);
                 close(cliente_fd);
+                free(fd_conexion);  
                 pthread_exit(NULL);  
                 break;
          
