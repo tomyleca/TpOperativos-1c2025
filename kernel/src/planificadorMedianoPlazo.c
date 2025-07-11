@@ -11,9 +11,9 @@ void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
     sem_init(procesoEsperando->semaforoIOFinalizada,1,0);
     sem_init(procesoEsperando->semaforoMutex,1,1);
 
-    
-    agregarADiccionario(diccionarioProcesosBloqueados,pasarUnsignedAChar(proceso->PID),procesoEsperando);
-    
+    char* clave=pasarUnsignedAChar(proceso->PID);
+    agregarADiccionario(diccionarioProcesosBloqueados,clave,procesoEsperando);
+    free(clave);
     
 
 
