@@ -136,7 +136,7 @@ int atender_cliente(int *fd_conexion)
                 tamanio = recibir_int_del_buffer(unBuffer);
                 limpiarBuffer(unBuffer);
                 //printf("PID: %d - DIRECCION FISICA: %d - TAMAÑO: %d\n", pid, direccion_fisica, tamanio);
-                char* clave = pasarUnsignedAChar(pid);
+                clave = pasarUnsignedAChar(pid);
                 p = leerDeDiccionario(diccionarioProcesos,clave);
                 valor_Leido = leer_memoria(p,direccion_fisica,tamanio);
                 //printf("VALOR LEIDO: %s\n", valor_Leido);
@@ -158,9 +158,10 @@ int atender_cliente(int *fd_conexion)
                 valor_registro = recibir_string_del_buffer(unBuffer);
                 limpiarBuffer(unBuffer);
                 //printf("PID: %d - DIRECCION FISICA: %d - VALOR: %s\n", pid, direccion_fisica, valor_registro);
+                clave =   pasarUnsignedAChar(pid);
+                p = leerDeDiccionario(diccionarioProcesos,clave);
+                free (clave);
                 
-                p = leerDeDiccionario(diccionarioProcesos,pasarUnsignedAChar(pid));
-
                 if (escribir_memoria(p, direccion_fisica, valor_registro) == 1) {
                     enviarOpCode(cliente_fd,CPU_RECIBE_OK_DE_ESCRITURA);
                 } else {
@@ -216,9 +217,9 @@ int atender_cliente(int *fd_conexion)
                 pid = recibir_uint32_t_del_buffer(unBuffer);
                 
                 
-            
-                Proceso* p_suspend = leerDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(pid));
-
+                clave =  pasarUnsignedAChar(pid);
+                Proceso* p_suspend = leerDeDiccionario(diccionarioProcesos, clave);
+                free (clave);
 
                 limpiarBuffer(unBuffer);
                 if (!p_suspend) {
@@ -247,8 +248,10 @@ int atender_cliente(int *fd_conexion)
                 pid = recibir_uint32_t_del_buffer(unBuffer);
                 free(unBuffer);
                 //printf("PID: %d - DIRECCION FISICA: %d\n", pid, direccion_fisica);
-            
-                Proceso* p_restaurar = leerDeDiccionario(diccionarioProcesos, pasarUnsignedAChar(pid));
+                
+                clave =  pasarUnsignedAChar(pid);
+                Proceso* p_restaurar = leerDeDiccionario(diccionarioProcesos, clave);
+                free (clave);
 
                 if (!p_restaurar) {
                     log_error(logger_memoria, "No se encontró el proceso PID <%d> para restaurar.", pid);
