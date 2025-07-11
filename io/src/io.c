@@ -67,12 +67,12 @@ uint32_t recibirProcesoEnIOEIniciarUsleep()
     {
         opCode =recibir_operacion(conexionKernel);
     } while(opCode!=INICIA_IO_PROCESO);
-    uint32_t PID;
+    int64_t PID;
     t_buffer* buffer = recibiendo_super_paquete(conexionKernel); 
     PID = recibir_uint32_t_del_buffer(buffer);
-    uint32_t tiempo = recibir_uint32_t_del_buffer(buffer);
+    int64_t tiempo = recibir_int64_t_del_buffer(buffer);
 
-    log_info(loggerIO,"## PID: <%u> - Inicio de IO - Tiempo: <%u>",PID,tiempo);
+    log_info(loggerIO,"## PID: <%lu> - Inicio de IO - Tiempo: <%u>",PID,tiempo);
     
     usleep(tiempo*1000); //  *1000 para pasar de milisegundos a microsegundos
  

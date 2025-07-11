@@ -115,7 +115,7 @@ int avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t t
 
     t_paquete* paquete = crear_super_paquete(INICIA_IO_PROCESO);
     cargar_uint32_t_al_super_paquete(paquete,procesoEnEsperaIO->proceso->PID);
-    cargar_uint32_t_al_super_paquete(paquete,tiempo);
+    cargar_int64_t_al_super_paquete(paquete,tiempo);
     enviar_paquete(paquete,instanciaIO->fdConexion);
     eliminar_paquete(paquete);
     }
