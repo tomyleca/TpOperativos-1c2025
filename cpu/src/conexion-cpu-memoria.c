@@ -132,7 +132,7 @@ void atender_interrupcion_kernel()
       
             case INTERRUPCION_SINCRONICA:
                 
-                log_info(logger_cpu, " ## Llega interrupción al puerto Interrupt.");
+                log_info(logger_cpu, "## Llega interrupción al puerto Interrupt.");
                 sem_wait(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;
                 
@@ -144,7 +144,7 @@ void atender_interrupcion_kernel()
                 break;
 
             case INTERRUPCION_ASINCRONICA:
-                log_info(logger_cpu, " ## Llega interrupción al puerto Interrupt.");
+                log_info(logger_cpu, "## Llega interrupción al puerto Interrupt.");
                 
                 sem_wait(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;

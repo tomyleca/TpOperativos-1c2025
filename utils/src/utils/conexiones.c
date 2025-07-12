@@ -31,7 +31,7 @@ int crear_conexion(t_log* nombreLogger, char* ip, char* puerto) {
         exit(1);
     }
 
-    log_info(nombreLogger, "Conexion exitosa con %s:%s", ip, puerto);
+    log_debug(nombreLogger, "Conexion exitosa con %s:%s", ip, puerto);
 
     freeaddrinfo(servinfo);
     return socket_cliente;

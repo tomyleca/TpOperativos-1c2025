@@ -3,7 +3,6 @@
 void server_escucha(int* fd_escucha_servidor)
 {
 
-    log_info(logger_memoria, "## Kernel Conectado - FD del socket: <%d>", *fd_escucha_servidor);
 
 
     while (1) {
@@ -11,7 +10,7 @@ void server_escucha(int* fd_escucha_servidor)
         int fd_conexion_2 = *fd_escucha_servidor;
         int fd_conexion = esperar_cliente(fd_conexion_2);
         log_debug(logger_memoria, "\n");
-        log_info(logger_memoria, "## Cliente conectado - FD del socket: <%d>", fd_conexion);
+        log_debug(logger_memoria, "## Cliente conectado - FD del socket: <%d>", fd_conexion);
 
         if (fd_conexion != -1) {
             pthread_t hilo_conexion;
@@ -65,7 +64,7 @@ int atender_cliente(int *fd_conexion)
         
             case GUARDAR_PROCESO_EN_MEMORIA:
                 usleep(retardo_memoria * 1000);
-                
+                log_info(logger_memoria, "## Kernel Conectado - FD del socket: <%d>", cliente_fd);
                 t_info_kernel datos_kernel; 
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 datos_kernel.pid = recibir_uint32_t_del_buffer(unBuffer);
@@ -212,7 +211,8 @@ int atender_cliente(int *fd_conexion)
             case SWAP_SUSPENDER_PROCESO:
                 usleep(retardo_swap * 1000);
                 //printf("SWAP_SUSPENDER_PROCESO ------------------------------------------------------------------\n");
-            
+                log_info(logger_memoria, "## Kernel Conectado - FD del socket: <%d>", cliente_fd);
+
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
                 
@@ -243,7 +243,8 @@ int atender_cliente(int *fd_conexion)
             case SWAP_RESTAURAR_PROCESO:
                 usleep(retardo_swap * 1000);
                 //printf("SWAP_RESTAURAR_PROCESO ------------------------------------------------------------------\n");
-            
+                log_info(logger_memoria, "## Kernel Conectado - FD del socket: <%d>", cliente_fd);
+
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
                 free(unBuffer);
@@ -272,6 +273,7 @@ int atender_cliente(int *fd_conexion)
             case DUMP_MEMORY:
                 usleep(retardo_swap * 1000);
                 //printf("DUMP_MEMORY ------------------------------------------------------------------\n");
+                log_info(logger_memoria, "## Kernel Conectado - FD del socket: <%d>", cliente_fd);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
                 limpiarBuffer(unBuffer);
@@ -292,6 +294,7 @@ int atender_cliente(int *fd_conexion)
             break;
             case FINALIZA_PROCESO:
                 usleep(retardo_swap * 1000);
+                log_info(logger_memoria, "## Kernel Conectado - FD del socket: <%d>", cliente_fd);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
                 
@@ -306,7 +309,7 @@ int atender_cliente(int *fd_conexion)
 
 
             case -1:
-                log_info(logger_memoria, "## El cliente se desconectó. Terminando servidor.\n");
+                log_debug(logger_memoria, "## El cliente se desconectó. Terminando servidor.\n");
 
                 //shutdown(cliente_fd, SHUT_RDWR);
                 close(cliente_fd);

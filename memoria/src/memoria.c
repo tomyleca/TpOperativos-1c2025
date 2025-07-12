@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 
 
     diccionarioProcesos = crearDiccionarioConSemaforos();
-	log_info(logger_memoria, "Servidor listo para recibir clientes"); 
+	log_debug(logger_memoria, "Servidor listo para recibir clientes"); 
     fd_escucha_servidor = iniciar_servidor(logger_memoria, puerto_escucha);
 
     pthread_create(&hilo_memoria,NULL, (void*)server_escucha,&fd_escucha_servidor);

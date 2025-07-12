@@ -18,7 +18,7 @@ t_log* iniciar_logger(char* pathLogger, char* nombreLogger,t_log_level logLevel)
 	t_log* nuevo_logger;
     nuevo_logger = log_create(pathLogger, nombreLogger, 0,logLevel);
 	
-    log_info(nuevo_logger,"%s iniciado",nombreLogger);
+    log_debug(nuevo_logger,"%s iniciado",nombreLogger);
     
     if(nuevo_logger == NULL)
     {

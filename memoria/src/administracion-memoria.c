@@ -548,7 +548,7 @@ int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
 
 
   memset(&p->metricas, 0, sizeof(MetricaProceso));
-  log_info(logger_memoria,"## PID: <%u> - Proceso creado - Tamaño: <%u>\n", p->pid, p->tamanio_reservado);
+  log_info(logger_memoria,"## PID: <%u> - Proceso creado - Tamaño: <%u>", p->pid, p->tamanio_reservado);
   //mostrar_bitmap();
 return 0;
 
