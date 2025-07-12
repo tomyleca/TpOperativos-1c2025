@@ -70,7 +70,7 @@ int atender_cliente(int *fd_conexion)
                 datos_kernel.pid = recibir_uint32_t_del_buffer(unBuffer);
                 datos_kernel.tamanio_proceso = recibir_uint32_t_del_buffer(unBuffer); 
                 datos_kernel.archivo_pseudocodigo = recibir_string_del_buffer(unBuffer);
-                //printf("PID LLEGADO DE KERNEL: %d -TAMAÑO: %d - ARCHIVO PSEUDOCODIGO: %s\n", datos_kernel.pid, datos_kernel.tamanio_proceso, datos_kernel.archivo_pseudocodigo);
+                log_debug(logger_memoria, "PID LLEGADO DE KERNEL: %d -TAMAÑO: %d - ARCHIVO PSEUDOCODIGO: %s\n", datos_kernel.pid, datos_kernel.tamanio_proceso, datos_kernel.archivo_pseudocodigo);
       
                 if(guardarProcesoYReservar(datos_kernel.pid,datos_kernel.tamanio_proceso,datos_kernel.archivo_pseudocodigo) == -1)
                     enviarOpCode(cliente_fd,NO_HAY_MEMORIA);
