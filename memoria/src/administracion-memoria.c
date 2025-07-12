@@ -42,6 +42,8 @@ void inicializar_memoria() {
   CANT_FRAMES = TAM_MEMORIA / TAM_PAGINA;
 
   memoria_principal = malloc(TAM_MEMORIA);
+  memset(memoria_principal, 0, TAM_MEMORIA);
+
   if (!memoria_principal) {
     log_error(logger_memoria, "No se pudo asignar memoria simulada\n");
     exit(EXIT_FAILURE);
@@ -436,6 +438,8 @@ void escribir_tabla_en_archivo(FILE *archivo, TablaPagina *tabla, int nivel_actu
             int cantidad = (faltan >= TAM_PAGINA) ? TAM_PAGINA : faltan;
         
             fwrite((char*)memoria_principal + frame * TAM_PAGINA, 1, cantidad, archivo);
+            log_debug(logger_memoria, "Frame %d: %.*s", frame, cantidad, (char*)memoria_principal + frame * TAM_PAGINA);
+
             *bytes_escritos += cantidad;
         
             (*paginas_recorridas)++;
