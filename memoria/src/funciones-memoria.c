@@ -112,6 +112,7 @@ void buscar_y_mandar_instruccion(t_buffer *buffer, int socket_cpu)
 
     char* clave = pasarUnsignedAChar(pid);
     Proceso* nuevo_contexto = leerDeDiccionario(diccionarioProcesos,clave); 
+    nuevo_contexto->metricas.instrucciones_solicitadas++;
     free(clave);
     char* instruccion = obtener_instruccion_por_indice(nuevo_contexto->lista_instrucciones, pc);
     

@@ -420,9 +420,9 @@ bool realizar_dump_memoria(int pid) {
     return true;
 }
 
-void escribir_tabla_en_archivo(FILE *archivo, TablaPagina *tabla, int nivel_actual, int *bytes_escritos, int tam, int *paginas_recorridas) {
+void escribir_tabla_en_archivo(FILE *archivo, TablaPagina *tabla, int nivel_actual, int *bytes_escritos, int tam, int *paginas_recorridas, Proceso *p) {
   if (!tabla) return;
-
+  p->metricas.accesos_tabla_paginas++;
   int paginas_reservadas = (tam + TAM_PAGINA - 1) / TAM_PAGINA;
 
   if (tabla->es_hoja) {
@@ -444,14 +444,15 @@ void escribir_tabla_en_archivo(FILE *archivo, TablaPagina *tabla, int nivel_actu
       }
   } else {
       for (int i = 0; i < ENTRADAS_POR_TABLA; i++) {
-          escribir_tabla_en_archivo(archivo, tabla->entradas[i], nivel_actual + 1, bytes_escritos, tam, paginas_recorridas);
+          escribir_tabla_en_archivo(archivo, tabla->entradas[i], nivel_actual + 1, bytes_escritos, tam, paginas_recorridas, p);
       }
   }
 }
 
-void escribir_tabla_en_archivo_dump(FILE *archivo, TablaPagina *tabla, int nivel_actual, int *bytes_escritos, int tam, int *paginas_recorridas) {
+void escribir_tabla_en_archivo_dump(FILE *archivo, TablaPagina *tabla, int nivel_actual, int *bytes_escritos, int tam, int *paginas_recorridas, Proceso *p) {
+  
   if (!tabla) return;
-
+  p->metricas.accesos_tabla_paginas++;
   int paginas_reservadas = tam / TAM_PAGINA;
 
   if (tabla->es_hoja) {
@@ -467,7 +468,7 @@ void escribir_tabla_en_archivo_dump(FILE *archivo, TablaPagina *tabla, int nivel
       }
   } else {
       for (int i = 0; i < ENTRADAS_POR_TABLA; i++) {
-          escribir_tabla_en_archivo(archivo, tabla->entradas[i], nivel_actual + 1, bytes_escritos, tam, paginas_recorridas);
+          escribir_tabla_en_archivo(archivo, tabla->entradas[i], nivel_actual + 1, bytes_escritos, tam, paginas_recorridas, p);
       }
   }
 }
@@ -506,7 +507,7 @@ void dump_memory(Proceso *p) {
     int paginas_reservadas = (p->tamanio_reservado + TAM_PAGINA - 1) / TAM_PAGINA;
     int tam_reservado = paginas_reservadas * TAM_PAGINA;
 
-    escribir_tabla_en_archivo_dump(dump_file, p->tabla_raiz, 1, &bytes_escritos, tam_reservado, &paginas_recorridas);
+    escribir_tabla_en_archivo_dump(dump_file, p->tabla_raiz, 1, &bytes_escritos, tam_reservado, &paginas_recorridas, p);
   
     
     fclose(dump_file);
@@ -556,10 +557,6 @@ return 0;
 
 int suspender_proceso(Proceso *p) {
 
-  if (!p || !p->tabla_raiz) {
-    log_error(logger_memoria, "No se puede suspender el proceso <%u>: no existe o no tiene tabla de páginas", p->pid);
-    return -1;
-  }
 
   FILE *archivo_swap = fopen(path_swapfile, "ab");
 
@@ -579,14 +576,15 @@ int suspender_proceso(Proceso *p) {
   int bytes_escritos = 0;
   int paginas_recorridas = 0;
 
-  escribir_tabla_en_archivo(archivo_swap, p->tabla_raiz, 1, &bytes_escritos,  p->tamanio_reservado, &paginas_recorridas);
+  escribir_tabla_en_archivo(archivo_swap, p->tabla_raiz, 1, &bytes_escritos,  p->tamanio_reservado, &paginas_recorridas,p );
 
 
   list_add(tabla_swap, entrada);
-
+  p->metricas.bajadas_swap++;
   fclose(archivo_swap);
   liberar_memoria(p);
   log_debug(logger_memoria, "PID: <%u> - Proceso suspendido correctamente en swapfile", p->pid);
+  
   return 1; 
 }
 
@@ -647,5 +645,6 @@ int restaurar_proceso(Proceso *p ) {
   }
 
   log_debug(logger_memoria," PID: <%u> - Restaurado exitosamente desde swapfile", p->pid);
+  p->metricas.subidas_memoria++;
   return 1;
 }
