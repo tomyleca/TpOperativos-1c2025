@@ -61,7 +61,7 @@ void atender_memoria()
                 //ACA LLEGA LA SOLICITUD DE LA INSTRUCCION DE MEMORIA
                 buffer = recibiendo_super_paquete(socket_cpu_memoria);
                 instruccion_recibida = recibir_string_del_buffer(buffer); // instruccion_recibida se usa en instruccion.c
-                log_info(logger_cpu,"# Llega instrucción de memoria: %s", instruccion_recibida);
+                log_debug(logger_cpu,"# Llega instrucción de memoria: %s", instruccion_recibida);
                 sem_post(&sem_hay_instruccion);
                 limpiarBuffer(buffer);
                 break;
@@ -132,7 +132,7 @@ void atender_interrupcion_kernel()
       
             case INTERRUPCION_SINCRONICA:
                 
-                log_info(logger_cpu, " ## Llega interrupción sincrónica al puerto Interrupt.");
+                log_info(logger_cpu, " ## Llega interrupción al puerto Interrupt.");
                 sem_wait(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;
                 
@@ -144,7 +144,7 @@ void atender_interrupcion_kernel()
                 break;
 
             case INTERRUPCION_ASINCRONICA:
-                log_info(logger_cpu, " ## Llega interrupción asincrónica al puerto Interrupt.");
+                log_info(logger_cpu, " ## Llega interrupción al puerto Interrupt.");
                 
                 sem_wait(&mutex_motivo_interrupcion);
                 flag_interrupcion = true;

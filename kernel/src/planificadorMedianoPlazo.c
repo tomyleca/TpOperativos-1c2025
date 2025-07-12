@@ -89,7 +89,7 @@ void* manejarProcesoBloqueadoPorIO(ProcesoEnEsperaIO* ProcesoEnEsperaIO){
     }
     else
     {
-        log_info(loggerKernel,"## (<%u>) ERROR. PROCESO EN ESTADO INCONSISTENTE",ProcesoEnEsperaIO->proceso->PID);
+        log_debug(loggerKernel,"## (<%u>) ERROR. PROCESO EN ESTADO INCONSISTENTE",ProcesoEnEsperaIO->proceso->PID);
         exit(1);
     }
     
@@ -194,7 +194,7 @@ void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)
 
 void empezarIODelProximoEnEspera(DispositivoIO* dispositivoIO)
 {
-    log_info(loggerKernel,"## Empezando IO del proximo en espera para el dispositivo: %s",dispositivoIO->nombre); 
+    log_debug(loggerKernel,"## Empezando IO del proximo en espera para el dispositivo: %s",dispositivoIO->nombre); 
     ProcesoEnEsperaIO* ProcesoEnEsperaIO = sacarDeLista(dispositivoIO->colaEsperandoIO,0);
     avisarInicioIO(ProcesoEnEsperaIO,dispositivoIO->nombre,ProcesoEnEsperaIO->tiempo);
 }

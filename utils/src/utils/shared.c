@@ -139,13 +139,13 @@ char *recibir_string_del_buffer(t_buffer *palabra)
 
 	if (palabra->size == 0)
 	{
-		printf("\n[ERROR] Al intentar extraer un contenido de un t_buffer vacio\n\n");
+		//printf("\n[ERROR] Al intentar extraer un contenido de un t_buffer vacio\n\n");
 		exit(EXIT_FAILURE);
 	}
 
 	if (palabra->size < 0)
 	{
-		printf("\n[ERROR] Esto es raro. El t_buffer contiene un size NEGATIVO \n\n");
+		//printf("\n[ERROR] Esto es raro. El t_buffer contiene un size NEGATIVO \n\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -166,7 +166,7 @@ char *recibir_string_del_buffer(t_buffer *palabra)
 	}
 	if (nuevo_size < 0)
 	{
-		printf("\n[ERROR_STRING]: BUFFER CON TAMAÑO NEGATIVO\n\n");
+		//printf("\n[ERROR_STRING]: BUFFER CON TAMAÑO NEGATIVO\n\n");
 		free(string);
 		// return "[ERROR]: BUFFER CON TAMAÑO NEGATIVO";
 		exit(EXIT_FAILURE);
@@ -184,13 +184,13 @@ int recibir_int_del_buffer(t_buffer *coso)
 {
 	if (coso->size == 0)
 	{
-		printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
+		//printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
 		exit(EXIT_FAILURE);
 	}
 
 	if (coso->size < 0)
 	{
-		printf("\n[ERROR] Esto es raro. El t_buffer contiene un size NEGATIVO \n\n");
+		//printf("\n[ERROR] Esto es raro. El t_buffer contiene un size NEGATIVO \n\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -207,7 +207,7 @@ int recibir_int_del_buffer(t_buffer *coso)
 	}
 	if (nuevo_size < 0)
 	{
-		printf("\n[ERROR_INT]: BUFFER CON TAMAÑO NEGATIVO\n\n");
+		//printf("\n[ERROR_INT]: BUFFER CON TAMAÑO NEGATIVO\n\n");
 		// free(valor_a_devolver);
 		// return 0;
 		exit(EXIT_FAILURE);
@@ -226,13 +226,13 @@ uint32_t recibir_uint32_t_del_buffer(t_buffer *coso)
 {
 	if (coso->size == 0)
 	{
-		printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
+		//printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
 		exit(EXIT_FAILURE);
 	}
 
 	if (coso->size < 0)
 	{
-		printf("\n[ERROR] Esto es raro. El t_buffer contiene un size NEGATIVO \n\n");
+		//printf("\n[ERROR] Esto es raro. El t_buffer contiene un size NEGATIVO \n\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -249,7 +249,7 @@ uint32_t recibir_uint32_t_del_buffer(t_buffer *coso)
 	}
 	if (nuevo_size < 0)
 	{
-		printf("\n[ERROR_uint32_t]: BUFFER CON TAMAÑO NEGATIVO\n\n");
+		//printf("\n[ERROR_uint32_t]: BUFFER CON TAMAÑO NEGATIVO\n\n");
 		// free(valor_a_devolver);
 		// return 0;
 		exit(EXIT_FAILURE);
@@ -269,13 +269,13 @@ int64_t recibir_int64_t_del_buffer(t_buffer *coso)
 {
 	if (coso->size == 0)
 	{
-		printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
+		//printf("\n[ERROR] Al intentar extraer un INT de un t_buffer vacio\n\n");
 		exit(EXIT_FAILURE);
 	}
 
 	if (coso->size < 0)
 	{
-		printf("\n[ERROR] Esto es raro. El t_buffer contiene un size NEGATIVO \n\n");
+		//printf("\n[ERROR] Esto es raro. El t_buffer contiene un size NEGATIVO \n\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -292,7 +292,7 @@ int64_t recibir_int64_t_del_buffer(t_buffer *coso)
 	}
 	if (nuevo_size < 0)
 	{
-		printf("\n[ERROR_int64_t]: BUFFER CON TAMAÑO NEGATIVO\n\n");
+		//printf("\n[ERROR_int64_t]: BUFFER CON TAMAÑO NEGATIVO\n\n");
 		// free(valor_a_devolver);
 		// return 0;
 		exit(EXIT_FAILURE);
@@ -416,13 +416,13 @@ void *recibir_cosas_del_buffer(t_buffer *coso)
 {
 	if (coso->size == 0)
 	{
-		printf("\n[ERROR] Al intentar extraer un contenido de un t_buffer vacio\n\n");
+		//printf("\n[ERROR] Al intentar extraer un contenido de un t_buffer vacio\n\n");
 		exit(EXIT_FAILURE);
 	}
 
 	if (coso->size < 0)
 	{
-		printf("\n[ERROR] Esto es raro. El t_buffer contiene un size NEGATIVO \n\n");
+		//printf("\n[ERROR] Esto es raro. El t_buffer contiene un size NEGATIVO \n\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -442,7 +442,7 @@ void *recibir_cosas_del_buffer(t_buffer *coso)
 	}
 	if (nuevo_size < 0)
 	{
-		printf("\n[ERROR_CHICLO]: BUFFER CON TAMAÑO NEGATIVO\n\n");
+		//printf("\n[ERROR_CHICLO]: BUFFER CON TAMAÑO NEGATIVO\n\n");
 		// free(choclo);
 		// return "";
 		exit(EXIT_FAILURE);

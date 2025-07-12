@@ -10,7 +10,7 @@ void server_escucha(int* fd_escucha_servidor)
         // Espera a un cliente en el bucle principal
         int fd_conexion_2 = *fd_escucha_servidor;
         int fd_conexion = esperar_cliente(fd_conexion_2);
-        //log_info(logger_memoria, "\n");
+        log_debug(logger_memoria, "\n");
         log_info(logger_memoria, "## Cliente conectado - FD del socket: <%d>", fd_conexion);
 
         if (fd_conexion != -1) {
@@ -231,7 +231,7 @@ int atender_cliente(int *fd_conexion)
                     log_error(logger_memoria, "Error al suspender el proceso PID <%d>.", pid);
                     paquete = crear_super_paquete(SWAP_ERROR);
                 } else{
-                    log_info(logger_memoria, "Proceso PID %d suspendido correctamente.", pid);
+                    log_info(logger_memoria, "## PID: <%d> - Suspendido correctamente.", pid);
                     paquete = crear_super_paquete(SWAP_OK);
                 }
      

@@ -6,7 +6,7 @@ void* esperarClientesInterrupt(void* arg)
     {
         int* fdConexion = malloc(sizeof(int));
         *fdConexion = esperar_cliente(socket_kernel_cpu_interrupt);
-        log_info(loggerKernel, "## Se conectó INTERRUPT");
+        log_debug(loggerKernel, "## Se conectó INTERRUPT");
         pthread_t hilo_interrupcion_cpu;
         pthread_create(&hilo_interrupcion_cpu, NULL, (void*) esperarDatosInterrupt, fdConexion);
     }
@@ -38,13 +38,13 @@ void esperarDatosInterrupt(void* conexion)
             break;
         
         case -1:
-            log_info(loggerKernel,"# Se desconectó Interrupt");
+            log_debug(loggerKernel,"# Se desconectó Interrupt");
             //shutdown(fdConexion, SHUT_RDWR);
             close(fdConexion);
             pthread_exit(NULL);
             break;
         default:
-            log_info(loggerKernel,"# Operación desconocida en Interrupt");
+            log_debug(loggerKernel,"# Operación desconocida en Interrupt");
             break;
 
     

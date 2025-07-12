@@ -49,14 +49,6 @@ void generar_handshake(int socket, char *nombreLogger, char *ip, char *puerto) {
     send(socket, &handshake, sizeof(int32_t), 0);
 	recv(socket, &result, sizeof(int32_t), MSG_WAITALL);
 
-
-   /* if(result == 0) 
-        //log_info(logger_cpu, "Handshake exitoso con %s", nombreLogger);
-    else {
-        //log_error(logger_cpu, "Error en el handshake con %s", nombreLogger);
-        exit(EXIT_FAILURE);
-    }*/
-
 }
 //----------------------------------------SERVIDOR------------------------------------------------------------------
 int iniciar_servidor(t_log* logger, char* puerto)

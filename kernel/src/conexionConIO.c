@@ -7,7 +7,7 @@ void* esperarClientesIO(void* arg)
     {
         int* fdConexion = malloc(sizeof(int));
         *fdConexion = esperar_cliente(socket_kernel_io);
-        log_info(loggerKernel, "## Se conectó IO");
+        log_debug(loggerKernel, "## Se conectó IO");
         pthread_t* nuevoHiloAtenderIO = malloc(sizeof(pthread_t));
         pthread_create(nuevoHiloAtenderIO,NULL,atenderInstanciaIO,fdConexion);
     }
@@ -105,7 +105,7 @@ int avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t t
     if(instanciaIO == NULL) // No hay instancias libres
     {
         agregarALista(dispositivoIO->colaEsperandoIO,procesoEnEsperaIO); // Si el dispositivo ya esta ocupado entra acá
-        log_info(loggerKernel,"## (<%u>) Dispositivo IO: %s ocupado. Se agrega el PID a la Cola de Espera del dispositivo",procesoEnEsperaIO->proceso->PID,dispositivoIO->nombre);
+        log_debug(loggerKernel,"## (<%u>) Dispositivo IO: %s ocupado. Se agrega el PID a la Cola de Espera del dispositivo",procesoEnEsperaIO->proceso->PID,dispositivoIO->nombre);
         
     }
     else
@@ -146,7 +146,7 @@ bool instanciaLibre(InstanciaIO* instanciaIO)
 void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
 {
     sem_wait(semaforoMutexIO);
-        log_info(loggerKernel,"# Se desconectó IO: %s",nombreDispositivoIO);
+        log_debug(loggerKernel,"# Se desconectó IO: %s",nombreDispositivoIO);
         bool _esInstancia(InstanciaIO* instanciaIO)
         {
             return instanciaIO->fdConexion == fdConexion;  //Busco la instancia por conexixón, que es lo que las diferencia
@@ -166,7 +166,7 @@ void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
         {
             if(!chequearListaVacia(dispositivoIO->colaEsperandoIO)) //Chequeo que no este vacia tampoco
                 {   
-                    log_info(loggerKernel,"# Finalizando procesos encolados en dispositivo: %s",nombreDispositivoIO);
+                    log_debug(loggerKernel,"# Finalizando procesos encolados en dispositivo: %s",nombreDispositivoIO);
                     list_iterate(dispositivoIO->colaEsperandoIO->lista,exitDeProcesoBLoqueadoPorIO);
                 }
         }

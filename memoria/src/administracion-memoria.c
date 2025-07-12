@@ -69,9 +69,9 @@ void inicializar_memoria() {
   }
   fclose(archivo);
 
-  log_info(logger_memoria, "Memoria inicializada - Lista de swap inicializada");
-  log_info(logger_memoria,  "Cantidad de frames: <%d>",  CANT_FRAMES);
-  log_info(logger_memoria,"Tamaño de página: <%d>",  TAM_PAGINA);
+  log_info(logger_memoria, "## Memoria inicializada");
+  log_debug(logger_memoria,  "Cantidad de frames: <%d>",  CANT_FRAMES);
+  log_debug(logger_memoria,"Tamaño de página: <%d>",  TAM_PAGINA);
 }
 
 // Crea tabla multinivel recursivamente
@@ -161,7 +161,7 @@ void liberar_tabla(TablaPagina *tabla) {
   free(tabla);
 }
 
-void mostrar_bitmap() {
+void mostrar_bitmap() {//modo debug only
   log_debug(logger_memoria,"\nEstado del bitmap de frames:\n");
   for (int i = 0; i < CANT_FRAMES; i++) {
     log_debug(logger_memoria,"%d", bitmap_frames[i] ? 1 : 0);
@@ -261,7 +261,7 @@ int escribir_memoria(Proceso *p,  int dir_fisica, char *texto) {
 
   for (int i = 0; i < len; i++) {
     if (dir_fisica == -1) {
-     log_info(logger_memoria,"## PID: <%d>  - ERROR: Dirección inválida <%d>", p->pid, dir_fisica + i);
+     log_error(logger_memoria,"## PID: <%d>  - ERROR: Dirección inválida <%d>", p->pid, dir_fisica + i);
       return -1;
     }
 
@@ -401,7 +401,7 @@ void liberar_entrada_swap(int pid) {
       EntradaSwap *entrada = list_get(tabla_swap, i);
       if (entrada->pid == pid) {
           list_remove_and_destroy_element(tabla_swap, i, free);
-          log_info(logger_memoria, "Entrada de swap liberada para PID: <%u>", pid);
+          log_debug(logger_memoria, "Entrada de swap liberada para PID: <%u>", pid);
           return;
       }
   }
@@ -499,7 +499,7 @@ void dump_memory(Proceso *p) {
         return;
     }
     
-    log_info(logger_memoria, "## PID: <%d> - Memory Dump - Creando archivo: <%s>", p->pid, full_filename);
+    log_debug(logger_memoria, "## PID: <%d> - Memory Dump - Creando archivo: <%s>", p->pid, full_filename);
     
     int bytes_escritos = 0;
     int paginas_recorridas = 0;
@@ -511,7 +511,7 @@ void dump_memory(Proceso *p) {
     
     fclose(dump_file);
     
-    log_info(logger_memoria, "## PID: <%d> - Memory Dump completado - <%d> bytes escritos en <%s>", 
+    log_debug(logger_memoria, "## PID: <%d> - Memory Dump completado - <%d> bytes escritos en <%s>", 
              p->pid, bytes_escritos, full_filename);
   
 
@@ -548,8 +548,8 @@ int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
 
 
   memset(&p->metricas, 0, sizeof(MetricaProceso));
-  log_debug(logger_memoria,"## PID: <%u> - Proceso guardado y memoria reservada - Tamaño: <%u>\n", p->pid, p->tamanio_reservado);
-  mostrar_bitmap();
+  log_info(logger_memoria,"## PID: <%u> - Proceso creado - Tamaño: <%u>\n", p->pid, p->tamanio_reservado);
+  //mostrar_bitmap();
 return 0;
 
 }
@@ -586,7 +586,7 @@ int suspender_proceso(Proceso *p) {
 
   fclose(archivo_swap);
   liberar_memoria(p);
-  log_info(logger_memoria, "PID: <%u> - Proceso suspendido correctamente en swapfile", p->pid);
+  log_debug(logger_memoria, "PID: <%u> - Proceso suspendido correctamente en swapfile", p->pid);
   return 1; 
 }
 
@@ -646,6 +646,6 @@ int restaurar_proceso(Proceso *p ) {
     }
   }
 
-  log_info(logger_memoria," PID: <%u> - Restaurado exitosamente desde swapfile", p->pid);
+  log_debug(logger_memoria," PID: <%u> - Restaurado exitosamente desde swapfile", p->pid);
   return 1;
 }

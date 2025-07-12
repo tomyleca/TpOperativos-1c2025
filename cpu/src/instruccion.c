@@ -48,7 +48,7 @@ void instruccion_escribir_memoria(char** parte)
 
         sem_wait(&semOkEscritura);
 
-        log_info(logger_cpu, "PID: <%d> - Acción: <%s> - Dirección Física: <%u> - Valor: <%s>", contexto->pid, "ESCRIBIR" ,direccion_fisica, datos_a_escribir);
+        log_info(logger_cpu, "PID: <%d> - Acción: <ESCRIBIR>  - Dirección Física: <%u> - Valor: <%s>", contexto->pid ,direccion_fisica, datos_a_escribir);
    
     }
 
@@ -173,7 +173,7 @@ void agregar_a_tlb(int pid, int nro_pagina, int nro_marco) {
         if (strcmp(reemplazo_tlb, "FIFO") == 0) {
             if (list_size(lista_tlb) > 0) {
                 EntradaTLB* entrada_removida = list_remove(lista_tlb, 0);
-                log_info(logger_cpu, "Reemplazo FIFO - Eliminando PID: %d Página: %d", entrada_removida->pid, entrada_removida->nro_pagina);
+                log_debug(logger_cpu, "Reemplazo FIFO - Eliminando PID: %d Página: %d", entrada_removida->pid, entrada_removida->nro_pagina);
                 free(entrada_removida);
             }
         } else if (strcmp(reemplazo_tlb, "LRU") == 0) {
@@ -194,13 +194,13 @@ void agregar_a_tlb(int pid, int nro_pagina, int nro_marco) {
             }
             
             EntradaTLB* entrada_removida = list_remove(lista_tlb, indice_mas_viejo);
-            log_info(logger_cpu, "Reemplazo LRU - Eliminando PID: %d Página: %d", entrada_removida->pid, entrada_removida->nro_pagina);
+            log_debug(logger_cpu, "Reemplazo LRU - Eliminando PID: %d Página: %d", entrada_removida->pid, entrada_removida->nro_pagina);
             free(entrada_removida);
         }
     }
 
     list_add(lista_tlb, nueva_entrada);
-    log_info(logger_cpu, "Agregando a TLB: PID: %d Página: %d Marco: %d", pid, nro_pagina, nro_marco);
+    log_debug(logger_cpu, "Agregando a TLB: PID: %d Página: %d Marco: %d", pid, nro_pagina, nro_marco);
 
     sem_post(&mutex_lista_tlb);
 }
@@ -710,7 +710,7 @@ int cargar_pagina_en_cache(int pid, int direccion_logica)
 
 
 
-    //log_info(logger_cpu, "PID: %d - Cache Add - Página: %d", pid, nro_pagina);
+    log_info(logger_cpu, "PID: %d - Cache Add - Página: %d", pid, nro_pagina);
 
          /*for (int i = 0; i < entradas_cache; i++) {
     log_debug(logger_cpu, "[DEBUG] Entrada %d -> PID: %d | Página: %d | Marco: %d | Validez: %d | Uso: %d | Modif: %d",

@@ -16,7 +16,7 @@ void iniciarServidores()
 
     //INICIO SERVIDOR KERNEL-IO
     socket_kernel_io = iniciar_servidor(loggerKernel, puerto_escucha_IO);
-    log_info(loggerKernel, "## Servidor  iniciado para IO");
+    log_debug(loggerKernel, "## Servidor  iniciado para IO");
     
     
     
@@ -31,10 +31,10 @@ void iniciarServidores()
     //INICIO SERVIDOR KERNEL-CPU
     
     socket_kernel_cpu_dispatch = iniciar_servidor(loggerKernel, puerto_escucha_dispatch); 
-    log_info(loggerKernel, "## Servidor DISPATCH iniciado");
+    log_debug(loggerKernel, "## Servidor DISPATCH iniciado");
 
     socket_kernel_cpu_interrupt = iniciar_servidor(loggerKernel, puerto_escucha_interrupt); 
-    log_info(loggerKernel, "## Servidor INTERRUPT iniciado");
+    log_debug(loggerKernel, "## Servidor INTERRUPT iniciado");
     
     
 

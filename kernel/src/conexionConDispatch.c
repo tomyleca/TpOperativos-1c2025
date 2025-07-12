@@ -7,7 +7,7 @@ void* esperarClientesDispatch(void* arg)
     {
         int* fdConexion = malloc(sizeof(int));
         *fdConexion = esperar_cliente(socket_kernel_cpu_dispatch);
-        log_info(loggerKernel, "## Se conectó DISPATCH");
+        log_debug(loggerKernel, "## Se conectó DISPATCH");
         pthread_t hilo_dispatch_cpu;
         pthread_create(&hilo_dispatch_cpu, NULL, (void*) atender_dispatch_cpu, fdConexion);
     }
@@ -107,7 +107,7 @@ void atender_dispatch_cpu(void* conexion)
                 break;
             
             case -1:
-                log_info(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
+                log_debug(loggerKernel, "KERNEL DISPATCH se desconecto. Terminando servidor");
                 //shutdown(fdConexion, SHUT_RDWR);
                 close(fdConexion);
                 pthread_exit(NULL);

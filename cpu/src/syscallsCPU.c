@@ -31,6 +31,7 @@ void syscallINIT_PROC(char** parte)
 
 void syscallDUMP_MEMORY(char** parte)
 {
+    log_instruccion(parte);
     t_paquete* paquete = crear_super_paquete(DUMP_MEMORY);
     cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
     cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC);
