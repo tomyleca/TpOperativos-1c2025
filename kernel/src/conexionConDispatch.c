@@ -183,13 +183,14 @@ void loggearMetricas(PCB* proceso)
 {   
     log_info(loggerKernel,"## (<%u>) - Métricas de estado: NEW (%d) (%d), READY (%d) (%d) EXECUTE (%d) (%d) BLOCKED (%d) (%d) SWAP_BLOCKED (%d) (%d) SWAP_READY (%d) (%d) EXIT (%d) (%d)",
     proceso->PID,
-    proceso->ME[NEW],proceso->MT[NEW],
-    proceso->ME[READY],proceso->MT[READY],
-    proceso->ME[EXECUTE],proceso->MT[EXECUTE],
-    proceso->ME[BLOCKED],proceso->MT[BLOCKED],
-    proceso->ME[SWAP_BLOCKED],proceso->MT[SWAP_BLOCKED],
-    proceso->ME[SWAP_READY],proceso->MT[SWAP_READY], 
-    proceso->ME[EXIT],proceso->MT[EXIT]);
+    proceso->ME[NEW],(int)proceso->MT[NEW],
+    proceso->ME[READY],(int)proceso->MT[READY],
+    proceso->ME[EXECUTE],(int)proceso->MT[EXECUTE],
+    proceso->ME[BLOCKED],(int)proceso->MT[BLOCKED],
+    proceso->ME[SWAP_BLOCKED],(int)proceso->MT[SWAP_BLOCKED],
+    proceso->ME[SWAP_READY],(int)proceso->MT[SWAP_READY], 
+    proceso->ME[EXIT],(int)proceso->MT[EXIT]);
+
 }
 
 void hacerFreeDeCronometros(PCB* proceso)

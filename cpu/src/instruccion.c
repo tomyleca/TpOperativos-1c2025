@@ -642,6 +642,7 @@ void escribir_pagina_a_memoria(int indice_cache)
     cargar_int_al_super_paquete(paquete, entrada->pid);
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_string_al_super_paquete(paquete, entrada->contenido); // Página completa
+    printf("%s",entrada->contenido);
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
 
@@ -674,7 +675,7 @@ int cargar_pagina_en_cache(int pid, int direccion_logica)
     if (direccion_fisica < 0) {
         log_error(logger_cpu, "Segmentation Fault al traducir la dirección lógica %d", direccion_logica);
         exit(1);
-        return;
+        return -1;
         }
     int nro_pagina = direccion_logica / tamanio_pagina;
         
@@ -743,6 +744,7 @@ void escribir_cache(int direccion_logica, char *valor) // Chequear siempre si ca
 
     // escribo el valor en cache
     strcpy(cache_paginas[indice_cache].contenido + desplazamiento, valor);
+    log_debug(logger_cpu,"ESCRIBIO: %s",cache_paginas[indice_cache].contenido + desplazamiento);
     strcpy(valor_escrito, valor);
 
     cache_paginas[indice_cache].bit_modificacion = true;

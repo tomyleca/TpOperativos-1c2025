@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/${workspaceFolderBasename}",
-      "args": ["ESTABILIDAD_GENERAL","0"],
+      "args": ["MEMORIA_BASE","256"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
