@@ -35,10 +35,10 @@ cd cpu
 CONFIG_FILE="cpu1.config"
 
 declare -A valores=(
-  ["ENTRADAS_TLB"]="4"
+  ["ENTRADAS_TLB"]="0"
   ["REEMPLAZO_TLB"]="FIFO"
   ["ENTRADAS_CACHE"]="2"
-  ["REEMPLAZO_CACHE"]="CLOCK-M"
+  ["REEMPLAZO_CACHE"]="CLOCK"
   ["RETARDO_CACHE"]="250"
 )
 
