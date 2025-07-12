@@ -6,6 +6,7 @@ int main(int argc, char* argv[]) {
     //INICIO Y LEO CONFIG
     config_io = iniciar_config("io.config");
     leerConfigIO(config_io);
+    sem_init(&semaforoEmpezarIO,0,0);
     
     //INICIO LOGGER
     loggerIO = iniciar_logger("ioLogger.log","ioLogger",log_level);
@@ -62,17 +63,9 @@ void conectarseAKernel(char* nombre)
 uint32_t recibirProcesoEnIOEIniciarUsleep()
 {
 
-    opCodesKernelIO opCode;
-    do
-    {
-        opCode =recibir_operacion(conexionKernel);
-    } while(opCode!=INICIA_IO_PROCESO);
-    int64_t PID;
-    t_buffer* buffer = recibiendo_super_paquete(conexionKernel); 
-    PID = recibir_uint32_t_del_buffer(buffer);
-    int64_t tiempo = recibir_int64_t_del_buffer(buffer);
+    sem_wait(&semaforoEmpezarIO);
 
-    log_info(loggerIO,"## PID: <%lu> - Inicio de IO - Tiempo: <%u>",PID,tiempo);
+    log_info(loggerIO,"## PID: <%u> - Inicio de IO - Tiempo: <%d>",PID,(int)tiempo);
     
     usleep(tiempo*1000); //  *1000 para pasar de milisegundos a microsegundos
  
@@ -92,4 +85,20 @@ void avisarFinDeIO(uint32_t PID,char* nombreIO)
     log_info(loggerIO,"## PID: <%u> - Fin de IO",PID);
     
 
+}
+
+void escuchar_kernel()
+{
+    while(1)
+    {
+        int opCode =recibir_operacion(conexionKernel);
+        
+        if(opCode == INICIA_IO_PROCESO)
+            {
+            t_buffer* buffer = recibiendo_super_paquete(conexionKernel); 
+            PID = recibir_uint32_t_del_buffer(buffer);
+            tiempo = recibir_int64_t_del_buffer(buffer);
+            sem_post(&semaforoEmpezarIO);
+            }
+    }
 }

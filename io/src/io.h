@@ -11,6 +11,11 @@
 #include "utils/configs.h"
 #include "utils/conexiones.h"
 #include "GlobalesIO.h"
+#include <semaphore.h>
+
+uint32_t PID;
+int64_t tiempo;
+sem_t semaforoEmpezarIO;
 
 
 extern void conectarseAKernel(char* nombre);
