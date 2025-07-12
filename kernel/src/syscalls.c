@@ -48,7 +48,7 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     {
         while (1) {
 
-            char* input = readline("");  
+            char* input = readline("Apriete enter para empezar a planificar proceso\n");  
 
             if (*input == '\0') {  
                 break;

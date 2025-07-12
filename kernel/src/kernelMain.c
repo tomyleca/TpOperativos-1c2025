@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 
 
 
-    if(argc == 3)
+    if(true)
     {
         INIT_PROC(argv[1], (uint32_t) strtoul(argv[2], NULL, 10)); // Paso el char a uint32_t
     }
