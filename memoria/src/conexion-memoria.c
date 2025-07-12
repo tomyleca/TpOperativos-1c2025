@@ -178,7 +178,7 @@ int atender_cliente(int *fd_conexion)
                 tamanio = recibir_int_del_buffer(unBuffer);
                 limpiarBuffer(unBuffer);
                 //printf("PID: %d - DIRECCION FISICA: %d - TAMAÑO: %d\n", pid, direccion_fisica, tamanio);
-                direccion_fisica = (direccion_fisica / tamanio) * tamanio;
+                direccion_fisica = (direccion_fisica / TAM_PAGINA) * TAM_PAGINA;
                 clave = pasarUnsignedAChar(pid);
                 p = leerDeDiccionario(diccionarioProcesos,clave);
                 free(clave);
@@ -199,7 +199,7 @@ int atender_cliente(int *fd_conexion)
                 direccion_fisica = recibir_int_del_buffer(unBuffer);
                 char* valor_a_escribir = recibir_string_del_buffer(unBuffer);
                 limpiarBuffer(unBuffer);
-                direccion_fisica = (direccion_fisica / tamanio) * tamanio;
+                direccion_fisica = (direccion_fisica / TAM_PAGINA) * TAM_PAGINA;
                 clave = pasarUnsignedAChar(pid);
                 p = leerDeDiccionario(diccionarioProcesos,clave);
                 free(clave);
