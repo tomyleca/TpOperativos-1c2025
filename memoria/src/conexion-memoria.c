@@ -104,7 +104,7 @@ int atender_cliente(int *fd_conexion)
                 
                 for(int nivel = 1;nivel <= CANTIDAD_NIVELES; nivel++)
                 {
-                    p->metricas.accesos_tabla_paginas++;
+                    proceso->metricas.accesos_tabla_paginas++;
 
                     entrada_nivel_X = recibir_int_del_buffer(unBuffer);
                     
