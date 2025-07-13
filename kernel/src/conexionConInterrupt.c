@@ -9,6 +9,7 @@ void* esperarClientesInterrupt(void* arg)
         log_debug(loggerKernel, "## Se conectó INTERRUPT");
         pthread_t hilo_interrupcion_cpu;
         pthread_create(&hilo_interrupcion_cpu, NULL, (void*) esperarDatosInterrupt, fdConexion);
+        pthread_detach(hilo_interrupcion_cpu);
     }
 }
 

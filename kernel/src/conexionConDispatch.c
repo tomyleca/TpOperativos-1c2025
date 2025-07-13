@@ -10,6 +10,7 @@ void* esperarClientesDispatch(void* arg)
         log_debug(loggerKernel, "## Se conectó DISPATCH");
         pthread_t hilo_dispatch_cpu;
         pthread_create(&hilo_dispatch_cpu, NULL, (void*) atender_dispatch_cpu, fdConexion);
+        pthread_detach(hilo_dispatch_cpu);
     }
 }
 
@@ -173,7 +174,11 @@ void pasarAExit(PCB* proceso,char* estadoActual){
         proceso->ME[EXIT]++;
         loggearMetricas(proceso);
         hacerFreeDeCronometros(proceso);
-        avisarFinDeProcesoAMemoria(proceso->PID);
+        pthread_t hiloAvisarMemoria;
+        int* PIDPuntero = malloc(sizeof(int));
+        *PIDPuntero = proceso->PID;
+        pthread_create(&hiloAvisarMemoria,NULL,avisarFinDeProcesoAMemoria,PIDPuntero);
+        pthread_detach(hiloAvisarMemoria);
         sem_post(semaforoInicializarProceso);
         free(proceso->archivoPseudocodigo);
         sem_destroy(proceso->semMutex);

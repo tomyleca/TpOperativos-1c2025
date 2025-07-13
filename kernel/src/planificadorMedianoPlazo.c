@@ -23,9 +23,11 @@ void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
         log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",procesoEsperando->proceso->PID,nombreIO);
         pthread_t hiloContadorSwap;
         pthread_create(&hiloContadorSwap,NULL,(void *)contadorParaSwap,procesoEsperando);
+        pthread_detach(hiloContadorSwap);
         procesoEsperando->hiloContadorSwap = hiloContadorSwap;
         pthread_t hiloManejoBloqueado;
         pthread_create(&hiloManejoBloqueado,NULL,(void *)manejarProcesoBloqueadoPorIO,procesoEsperando);
+        pthread_detach(hiloManejoBloqueado);
         procesoEsperando->hiloManejoBloqueado= hiloManejoBloqueado;
 
 

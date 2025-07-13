@@ -113,8 +113,10 @@ bool solicitar_dump_memoria(uint32_t pid) {
     return false;
 }
 
-void avisarFinDeProcesoAMemoria(uint32_t PID)
+void avisarFinDeProcesoAMemoria(uint32_t* PIDPuntero)
 {
+    uint32_t PID = *PIDPuntero;
+    free(PIDPuntero);
     int fdMemoria = crear_conexion_memoria();
     t_paquete* paquete = crear_super_paquete(FINALIZA_PROCESO);
     cargar_uint32_t_al_super_paquete(paquete,PID);

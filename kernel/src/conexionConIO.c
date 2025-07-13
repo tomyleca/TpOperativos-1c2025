@@ -10,6 +10,7 @@ void* esperarClientesIO(void* arg)
         log_debug(loggerKernel, "## Se conectó IO");
         pthread_t* nuevoHiloAtenderIO = malloc(sizeof(pthread_t));
         pthread_create(nuevoHiloAtenderIO,NULL,atenderInstanciaIO,fdConexion);
+        pthread_detach(nuevoHiloAtenderIO);
     }
 }
 

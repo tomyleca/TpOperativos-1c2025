@@ -90,6 +90,7 @@ void dump_memory(PCB* proceso) {
     
     pthread_t hiloEsperarDump;
     pthread_create(&hiloEsperarDump, NULL, (void*)manejarProcesoEsperandoDump, procesoEsperandoDump);
+    pthread_detach(hiloEsperarDump);
     
     
 }

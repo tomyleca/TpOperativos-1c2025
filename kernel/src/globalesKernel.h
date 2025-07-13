@@ -224,7 +224,7 @@ extern sem_t* semaforoInicializarProceso;
 
 //MEMORIA
 extern int mandarDatosProcesoAMemoria(PCB* proceso);
-extern void avisarFinDeProcesoAMemoria(uint32_t PID);
+extern void avisarFinDeProcesoAMemoria(uint32_t* PID);
 
 //HILOS
 extern pthread_t hiloAtenderDispatch;
