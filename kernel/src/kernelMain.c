@@ -119,6 +119,8 @@ void crearEstructuras()
     sem_init(semaforoEnCheckInterrupt,1,0);
     semaforoInicializarProceso = malloc(sizeof(sem_t));
     sem_init(semaforoInicializarProceso,1,0);
+    semaforoMutexExit= malloc(sizeof(sem_t));
+    sem_init(semaforoMutexExit,1,1);
 
   
 

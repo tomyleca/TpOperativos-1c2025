@@ -63,7 +63,7 @@ sem_t* semaforoEsperarOKInterrupt;
 sem_t* semaforoPCActualizado;
 sem_t* semaforoMutexIO;
 sem_t* semaforoMutexTerminarEjecucion;
-sem_t* semaforoMutexEJecucionTerminada;
+sem_t* semaforoMutexExit;
 sem_t* semaforoEnCheckInterrupt;
 sem_t* semaforoInicializarProceso;
 

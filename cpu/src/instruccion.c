@@ -385,9 +385,9 @@ void decode()
 
 void check_interrupt(uint32_t PIDInicial)
 {   
-    //El semaforo de recibir interrupcion no es necesario pq la validacion de que ya llego una posible interrupcion para este punto la ahce kernel antes de mandar el OK en las syscalls
+    //El semaforo de recibir interrupcion no es necesario pq la validacion de que ya llego una posible interrupcion para este punto la hace kernel antes de mandar el OK en las syscalls
     sem_wait(&mutex_motivo_interrupcion);
-    bool hay_interrupcion = flag_interrupcion;  // Leer flag
+        bool hay_interrupcion = flag_interrupcion;  // Leer flag
     sem_post(&mutex_motivo_interrupcion);
 
     if(hay_interrupcion) // hay una interrupcion

@@ -12,7 +12,7 @@ void syscall_IO(char** parte){
     enviar_paquete(paquete,socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
     string_array_destroy(parte);
-    sem_wait(&semOKDispatch);
+    marcarInterrupcionSincronica();
 }
 
 void syscallINIT_PROC(char** parte)
@@ -25,8 +25,6 @@ void syscallINIT_PROC(char** parte)
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
     string_array_destroy(parte);
-    sem_wait(&semOKDispatch);
-  
 }
 
 void syscallDUMP_MEMORY(char** parte)
@@ -38,7 +36,7 @@ void syscallDUMP_MEMORY(char** parte)
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
     string_array_destroy(parte);
-    sem_wait(&semOKDispatch);
+    marcarInterrupcionSincronica();
 }
 
 void syscallEXIT(char** parte)
@@ -50,6 +48,13 @@ void syscallEXIT(char** parte)
     enviar_paquete(paquete, socket_cpu_kernel_dispatch);
     eliminar_paquete(paquete);
     string_array_destroy(parte);
-    sem_wait(&semOKDispatch);
-    
+    marcarInterrupcionSincronica();
+}
+
+void marcarInterrupcionSincronica()
+{
+    sem_wait(&mutex_motivo_interrupcion);
+        flag_interrupcion = true;
+        motivo_interrupcion = INTERRUPCION_SINCRONICA;
+    sem_post(&mutex_motivo_interrupcion);
 }

@@ -46,10 +46,10 @@ void atender_dispatch_cpu(void* conexion)
             case PC_INTERRUPCION_ASINCRONICA:
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
-                PC = recibir_uint32_t_del_buffer(buffer);
+                PC = recibir_uint32_t_del_buffer(buffer); //TODO ver si pongo un semaforo
                 actualizarPCAsincronico(PID,PC);
                 limpiarBuffer(buffer);
-                //sem_post(semaforoPCActualizado);
+                sem_post(semaforoPCActualizado);
                 break;
             case IO:
                 buffer = recibiendo_super_paquete(fdConexion);
@@ -59,8 +59,6 @@ void atender_dispatch_cpu(void* conexion)
                 int64_t tiempoEnIO = recibir_int64_t_del_buffer(buffer);
                 actualizarPC(PID,PC);
                 PCB* proceso  = buscarPCBEjecutando(PID);
-                terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
-                enviarOK(fdConexion);
                 syscall_IO(proceso,PID,nombreIO,tiempoEnIO);
                 free(nombreIO);
                 limpiarBuffer(buffer);              
@@ -72,7 +70,7 @@ void atender_dispatch_cpu(void* conexion)
                 PC = recibir_uint32_t_del_buffer(buffer);
                 actualizarPC(PID,PC);
                 dump_memory(PID);
-                enviarOK(fdConexion);
+                
                 limpiarBuffer(buffer);
                 break;
             
@@ -83,7 +81,7 @@ void atender_dispatch_cpu(void* conexion)
                 uint32_t tam = recibir_uint32_t_del_buffer(buffer);
                 INIT_PROC(nombrePseudocodigo,tam);
                 free(nombrePseudocodigo);
-                enviarOK(fdConexion);
+                
                 limpiarBuffer(buffer);
                 break;
             
@@ -98,11 +96,12 @@ void atender_dispatch_cpu(void* conexion)
                     exit(1);
                 }
                 terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
-                enviarOK(fdConexion); 
+                 
                 pasarAExit(proceso,"EXECUTE");
                 limpiarBuffer(buffer);     
                 break;
             case EN_CHECK_INTERRUPT:
+                log_debug(loggerKernel,"Llega en check interrupt");
                 sem_post(semaforoEnCheckInterrupt);
                 break;
             
@@ -164,19 +163,23 @@ return sacarDeListaSegunCondicion(listaCPUsAInicializar,_mismoIdentificador);
 
 
 void pasarAExit(PCB* proceso,char* estadoActual){
-    log_info(loggerKernel,"## (<%u>) - Finaliza el proceso",proceso->PID);
-    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,estadoActual,"EXIT");
-    proceso->ME[EXIT]++;
-    loggearMetricas(proceso);
-    hacerFreeDeCronometros(proceso);
-    avisarFinDeProcesoAMemoria(proceso->PID);
-    //log_debug(loggerKernel,"## 1");
-    sem_post(semaforoInicializarProceso);
-    free(proceso->archivoPseudocodigo);
-    sem_destroy(proceso->semMutex);
-    free(proceso->semMutex);
-    free(proceso);
-    //log_debug(loggerKernel,"## 2");
+    
+    sem_wait(semaforoMutexExit);
+
+        log_info(loggerKernel,"## (<%u>) - Finaliza el proceso",proceso->PID);
+        log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,estadoActual,"EXIT");
+        proceso->ME[EXIT]++;
+        loggearMetricas(proceso);
+        hacerFreeDeCronometros(proceso);
+        avisarFinDeProcesoAMemoria(proceso->PID);
+        sem_post(semaforoInicializarProceso);
+        free(proceso->archivoPseudocodigo);
+        sem_destroy(proceso->semMutex);
+        free(proceso->semMutex);
+        free(proceso);
+
+    sem_post(semaforoMutexExit);
+    
 }
 
 void loggearMetricas(PCB* proceso)

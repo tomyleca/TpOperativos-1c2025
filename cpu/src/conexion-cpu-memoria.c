@@ -132,26 +132,17 @@ void atender_interrupcion_kernel()
       
             case INTERRUPCION_SINCRONICA:
                 
-                log_info(logger_cpu, "## Llega interrupción al puerto Interrupt.");
-                sem_wait(&mutex_motivo_interrupcion);
-                flag_interrupcion = true;
-                
-                motivo_interrupcion = INTERRUPCION_SINCRONICA;
-                sem_post(&mutex_motivo_interrupcion);
-                enviarOK(socket_cpu_kernel_interrupt);
-                
-                
+                log_debug(logger_cpu, "## Llega interrupción sincrónica al puerto Interrupt.ESTO NO DEBERIA PASAR");
                 break;
 
             case INTERRUPCION_ASINCRONICA:
                 log_info(logger_cpu, "## Llega interrupción al puerto Interrupt.");
                 
                 sem_wait(&mutex_motivo_interrupcion);
-                flag_interrupcion = true;
-                
-                motivo_interrupcion = INTERRUPCION_ASINCRONICA;
+                    flag_interrupcion = true;
+                    motivo_interrupcion = INTERRUPCION_ASINCRONICA;
                 sem_post(&mutex_motivo_interrupcion);
-                enviarOK(socket_cpu_kernel_interrupt);
+                
                 break;
             case -1:
                 log_error(logger_cpu, "KERNEL INTERRUPT se desconecto. Terminando servidor");
@@ -184,22 +175,21 @@ void atender_dispatch_kernel()
                 break;
                 
                 case PID_KERNEL_A_CPU:
-                    
                 buffer = recibiendo_super_paquete(socket_cpu_kernel_dispatch);
+                log_debug(logger_cpu,"Llega pid %u",contexto->pid);
+
                 sem_wait(&semFinCicloInstruccion);
                 
                 
                 sem_wait(&semMutexContexto);    
                     contexto->pid = recibir_uint32_t_del_buffer(buffer);
                     contexto->registros.PC = recibir_uint32_t_del_buffer(buffer);
-                    log_debug(logger_cpu,"Llega pid %u",contexto->pid);
                 sem_post(&semMutexContexto);
 
-                enviarOK(socket_cpu_kernel_dispatch);
+                //enviarOK(socket_cpu_kernel_dispatch);
                 
                 
                 // ACA HAY QUE SOLICITAR A MEMORIA LA PRIMER INSTRUCCION CON EL PID RECIBIMOS DE KERNEL
-                //Falta liberar contexto, pero como lo usamos en el ciclo y todo cpu, a lo mejor conviene liberarlo al final del todo.
                 sem_post(&semContextoCargado);
                 limpiarBuffer(buffer);
                 break;

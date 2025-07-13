@@ -172,9 +172,10 @@ extern void* planificadorCortoPlazo(void* arg);
 extern bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera);
 extern bool menorEstimadoRafagaRestante(NucleoCPU* CPU1,NucleoCPU* CPU2);
 
-extern int terminarEjecucion(PCB* proceso,op_code tipoInterrupcion);
+extern NucleoCPU* terminarEjecucion(PCB* proceso,op_code tipoInterrupcion);
 extern void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion);
 
+extern void desalojarProceso(NucleoCPU* nucleoADesalojar,PCB* proceso);
 /**
  * @brief Loggea las métricas de estado antes de finalizar el proceso
 */
@@ -216,9 +217,10 @@ extern sem_t* semaforoEsperarOKInterrupt;
 extern sem_t* semaforoPCActualizado;
 extern sem_t* semaforoMutexIO;
 extern sem_t* semaforoMutexTerminarEjecucion;
-extern sem_t* semaforoMutexEJecucionTerminada;
+extern sem_t* semaforoMutexExit;
 extern sem_t* semaforoEnCheckInterrupt;
 extern sem_t* semaforoInicializarProceso;
+
 
 //MEMORIA
 extern int mandarDatosProcesoAMemoria(PCB* proceso);

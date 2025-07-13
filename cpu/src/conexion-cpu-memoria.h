@@ -20,7 +20,7 @@ void crear_handshake_cpu_kernel_dispatch(int conexion_cpu_kernel);
 void crear_handshake_cpu_kernel_interrupt(int conexion_cpu_kernel);
 
 
-
+void marcarInterrupcionSincronica();
 void atender_memoria();
 void atender_interrupcion_kernel();
 void atender_dispatch_kernel();

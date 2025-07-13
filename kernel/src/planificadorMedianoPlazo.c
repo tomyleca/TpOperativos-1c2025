@@ -17,9 +17,10 @@ void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
     
 
 
-    sem_wait(semaforoMutexIO);
+    
     if(avisarInicioIO(procesoEsperando,nombreIO,tiempo) != -1)
     {
+        log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",procesoEsperando->proceso->PID,nombreIO);
         pthread_t hiloContadorSwap;
         pthread_create(&hiloContadorSwap,NULL,(void *)contadorParaSwap,procesoEsperando);
         procesoEsperando->hiloContadorSwap = hiloContadorSwap;
@@ -28,7 +29,7 @@ void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
         procesoEsperando->hiloManejoBloqueado= hiloManejoBloqueado;
 
 
-        sem_post(semaforoMutexIO);
+        
 
         log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","BLOCKED");
         
@@ -36,7 +37,7 @@ void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
     }
     else
     {
-        sem_post(semaforoMutexIO);
+        
         log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", procesoEsperando->proceso->PID, nombreIO);
         pasarAExit(procesoEsperando->proceso,"EXECUTE");
         free(procesoEsperando->semaforoMutex);

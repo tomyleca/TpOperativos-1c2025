@@ -140,6 +140,7 @@ void syscall_IO(PCB* proceso,uint32_t PID, char* nombreIO, int64_t tiempo) {
 
         if (dispositivo == NULL) {
             log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", PID, nombreIO);
+            terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
             pasarAExit(proceso,"EXECUTE");
             sem_post(semaforoMutexIO);
             return;
@@ -153,9 +154,9 @@ void syscall_IO(PCB* proceso,uint32_t PID, char* nombreIO, int64_t tiempo) {
         
 
     sem_post(semaforoMutexIO);
-    log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",PID,nombreIO);
-
     
+
+    terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
     pasarABLoqueadoPorIO(proceso, tiempo, nombreIO);
     
 }

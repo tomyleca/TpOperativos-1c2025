@@ -10,6 +10,8 @@ int main(int argc, char* argv[]) {
     
     //INICIO LOGGER
     loggerIO = iniciar_logger("ioLogger.log","ioLogger",log_level);
+    pthread_t hiloEscucharKernel;
+    pthread_create(&hiloEscucharKernel,NULL,escuchar_kernel,NULL);
 
  
 
@@ -87,7 +89,7 @@ void avisarFinDeIO(uint32_t PID,char* nombreIO)
 
 }
 
-void escuchar_kernel()
+void* escuchar_kernel(void* arg)
 {
     while(1)
     {
@@ -101,4 +103,5 @@ void escuchar_kernel()
             sem_post(&semaforoEmpezarIO);
             }
     }
+    return NULL;
 }

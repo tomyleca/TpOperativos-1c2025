@@ -30,7 +30,7 @@ void* atenderInstanciaIO(void* conexion)
         {
             case HANDSHAKE_IO_KERNEL:
                 nombreIO = recibir_string_del_buffer(buffer);
-                sem_wait(semaforoMutexIO);
+                //sem_wait(semaforoMutexIO);
                 if(leerDeDiccionario(diccionarioDispositivosIO,nombreIO) != NULL) // Si el IO ya existe, osea ya hay una instancia e este
                 {
                     DispositivoIO* dispositivoIO= leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
@@ -59,7 +59,7 @@ void* atenderInstanciaIO(void* conexion)
                     
                     agregarADiccionario(diccionarioDispositivosIO,nombreIO,nuevoDispositivoIO);
                 }
-                sem_post(semaforoMutexIO);
+                //sem_post(semaforoMutexIO);
                 break;
             
             case TERMINO_IO:
@@ -93,35 +93,38 @@ void* atenderInstanciaIO(void* conexion)
 
 int avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo)
 {
+    //sem_wait(semaforoMutexIO);
+        InstanciaIO* instanciaIO = NULL;
+        DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
+        if(dispositivoIO == NULL)
+            {
+            sem_post(semaforoMutexIO);
+            return -1;
+            }
     
-    InstanciaIO* instanciaIO = NULL;
-    DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
-    if(dispositivoIO == NULL)
-        return -1;
-   
-    instanciaIO = leerDeListaSegunCondicion(dispositivoIO->listaInstancias,instanciaLibre); //Busco la primer instancia libre
-    
-
-    if(instanciaIO == NULL) // No hay instancias libres
-    {
-        agregarALista(dispositivoIO->colaEsperandoIO,procesoEnEsperaIO); // Si el dispositivo ya esta ocupado entra acá
-        log_debug(loggerKernel,"## (<%u>) Dispositivo IO: %s ocupado. Se agrega el PID a la Cola de Espera del dispositivo",procesoEnEsperaIO->proceso->PID,dispositivoIO->nombre);
+        instanciaIO = leerDeListaSegunCondicion(dispositivoIO->listaInstancias,instanciaLibre); //Busco la primer instancia libre
         
-    }
-    else
-    {
-    sem_wait(instanciaIO->semaforoMutex),
-        instanciaIO->PIDEnIO= procesoEnEsperaIO->proceso->PID;
-        instanciaIO->estaLibre=false;
-    sem_post(instanciaIO->semaforoMutex);
 
-    t_paquete* paquete = crear_super_paquete(INICIA_IO_PROCESO);
-    cargar_uint32_t_al_super_paquete(paquete,procesoEnEsperaIO->proceso->PID);
-    cargar_int64_t_al_super_paquete(paquete,tiempo);
-    enviar_paquete(paquete,instanciaIO->fdConexion);
-    eliminar_paquete(paquete);
-    }
+        if(instanciaIO == NULL) // No hay instancias libres
+        {
+            agregarALista(dispositivoIO->colaEsperandoIO,procesoEnEsperaIO); // Si el dispositivo ya esta ocupado entra acá
+            log_debug(loggerKernel,"## (<%u>) Dispositivo IO: %s ocupado. Se agrega el PID a la Cola de Espera del dispositivo",procesoEnEsperaIO->proceso->PID,dispositivoIO->nombre);
+            
+        }
+        else
+        {
+        //sem_wait(instanciaIO->semaforoMutex),
+            instanciaIO->PIDEnIO= procesoEnEsperaIO->proceso->PID;
+            instanciaIO->estaLibre=false;
+        sem_post(instanciaIO->semaforoMutex);
 
+        t_paquete* paquete = crear_super_paquete(INICIA_IO_PROCESO);
+        cargar_uint32_t_al_super_paquete(paquete,procesoEnEsperaIO->proceso->PID);
+        cargar_int64_t_al_super_paquete(paquete,tiempo);
+        enviar_paquete(paquete,instanciaIO->fdConexion);
+        eliminar_paquete(paquete);
+        }
+    //sem_post(semaforoMutexIO);
     
     return 0;
 

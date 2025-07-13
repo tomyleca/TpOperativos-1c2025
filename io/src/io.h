@@ -17,7 +17,7 @@ uint32_t PID;
 int64_t tiempo;
 sem_t semaforoEmpezarIO;
 
-
+extern void* escuchar_kernel(void* arg);
 extern void conectarseAKernel(char* nombre);
 extern void leerConfigIO(t_config* config_io);
 extern uint32_t recibirProcesoEnIOEIniciarUsleep();
