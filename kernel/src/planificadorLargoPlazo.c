@@ -20,7 +20,7 @@ void *inicializarProceso(){
                     }
                     log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"SWAP_READY","READY");
                     cargarCronometro(procesoAInicializar,SWAP_READY);
-                    pasarAReady(procesoAInicializar);
+                    pasarAReady(procesoAInicializar,false);
                     sem_post(semaforoInicializarProceso); // Mientras la respuesta sea OK sigo intentando inicializar procesos
                     
                 
@@ -41,7 +41,7 @@ void *inicializarProceso(){
                     }
                     log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"NEW","READY");
                     cargarCronometro(procesoAInicializar,NEW);
-                    pasarAReady(procesoAInicializar);
+                    pasarAReady(procesoAInicializar,false);
                     sem_post(semaforoInicializarProceso); // Mientras la respuesta sea OK sigo intentando inicializar procesos
                 }
                 
@@ -87,7 +87,7 @@ bool menorTam(PCB* PCB1,PCB* PCB2)
 
 
 
-void pasarAReady(PCB* proceso){
+void pasarAReady(PCB* proceso, bool desalojado){
     if(leerDeDiccionario(diccionarioProcesosBloqueados,proceso)!= NULL || leerDeDiccionario(diccionarioProcesosEsperandoDump,proceso)!= NULL) //PARA SRT
         return;
 
@@ -95,7 +95,10 @@ void pasarAReady(PCB* proceso){
     temporal_resume(proceso->cronometros[READY]);
     proceso->ME[READY]++;
     
-    if(algoritmoDePlanificacionInt == SRT)
-        sem_post(semaforoIntentarPlanificar);
+    if(algoritmoDePlanificacionInt == SRT && desalojado == false)
+    {
+        chequearSiHayDesalojo(proceso->estimadoSiguienteRafaga);
+    }
+
     
 }

@@ -25,28 +25,11 @@ void* planificadorCortoPlazo(void* arg)
                 break;
                 
         case SRT: 
-                if(!chequearListaVacia(listaCPUsLibres))
-                {   
-                    ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
-                    procesoAEjecutar = sacarDeLista(listaProcesosReady,0); //Si la lista esta vacía se queda esperando
-                    break;
-                }
-                else 
-                {
-                    ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
-                    procesoAEjecutar = leerDeLista(listaProcesosReady,0); //Si la lista esta vacía se queda esperando
-                    if(chequearSiHayDesalojo(procesoAEjecutar->estimadoSiguienteRafaga) == false )
-                        procesoAEjecutar = NULL;
-                    else
-                        procesoAEjecutar = sacarDeLista(listaProcesosReady,0);
-                    
-                    
-                    break;
-                }
-
+                ordenarLista(listaProcesosReady,menorEstimadoSiguienteRafaga);
+                procesoAEjecutar = sacarDeLista(listaProcesosReady,0); //Si la lista esta vacía se queda esperando
+                break;
                 
-                
-        }
+            }
 
        
         
@@ -121,7 +104,7 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
     if(nucleoADesalojar!=NULL && nucleoADesalojar->procesoEnEjecucion != NULL)
     {
         
-        if(terminarEjecucion(nucleoADesalojar->procesoEnEjecucion,INTERRUPCION_ASINCRONICA) != NULL) //si no es igual a NULL quiere decir que la ejecución termino por el desalojo y no por una syscall
+        if(terminarEjecucion(nucleoADesalojar->procesoEnEjecucion->PID,INTERRUPCION_ASINCRONICA) != NULL) //si no es igual a NULL quiere decir que la ejecución termino por el desalojo y no por una syscall
             {
             desalojarProceso(nucleoADesalojar,nucleoADesalojar->procesoEnEjecucion);
             return true;
@@ -161,25 +144,30 @@ void desalojarProceso(NucleoCPU* nucleoADesalojar,PCB* proceso)
     sem_wait(semaforoMutexExit);
         log_info(loggerKernel, "## (<%u>) - Desalojado por algoritmo SJF/SRT",proceso->PID);
         log_info(loggerKernel, "## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","READY");
-        pasarAReady(proceso);
+        pasarAReady(proceso,true);
     sem_post(semaforoMutexExit);
 
     
 }
 
 
-NucleoCPU* terminarEjecucion(PCB* proceso,op_code tipoInterruccion)
+PCB* terminarEjecucion(uint32_t PID,op_code tipoInterruccion)
 {
     NucleoCPU* nucleoCPU;
     
     sem_wait(semaforoMutexTerminarEjecucion);
         bool _ejecutandoProceso(NucleoCPU* nucleoCPU)
         {
-            return nucleoCPU->procesoEnEjecucion == proceso;
+            return nucleoCPU->procesoEnEjecucion->PID == PID;
         };
 
+        PCB* procesoPostEjecucion = NULL;
+
         if(tipoInterruccion == INTERRUPCION_SINCRONICA)
+        {
             nucleoCPU = sacarDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso);
+            procesoPostEjecucion = nucleoCPU->procesoEnEjecucion; //como en sincronica no me interesa que retorne si lo saco de ejecucion ahora o antes puedo agregarlo aca
+        }
         else 
             nucleoCPU = leerDeListaSegunCondicion(listaCPUsEnUso,_ejecutandoProceso); //para asincronica lo saco despues para que no haya problemas si esta
                                                                                         // a mitad de una syscall
@@ -188,7 +176,7 @@ NucleoCPU* terminarEjecucion(PCB* proceso,op_code tipoInterruccion)
         if(nucleoCPU->ejecutando) //osea que esta el proceso no habia sido sacado de ejecucion antes
         {
             nucleoCPU->ejecutando=false;
-            PCB* procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
+            procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
             guardarDatosDeEjecucion(procesoPostEjecucion);
             
             if(tipoInterruccion== INTERRUPCION_SINCRONICA)  
@@ -203,7 +191,7 @@ NucleoCPU* terminarEjecucion(PCB* proceso,op_code tipoInterruccion)
     sem_post(semaforoMutexTerminarEjecucion);
             
             
-    return nucleoCPU;
+    return procesoPostEjecucion;
 } 
         
   

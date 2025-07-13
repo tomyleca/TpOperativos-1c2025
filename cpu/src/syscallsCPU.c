@@ -7,9 +7,12 @@ void syscall_IO(char** parte){
     cargar_uint32_t_al_super_paquete(paquete, contexto->pid);
     cargar_uint32_t_al_super_paquete(paquete, contexto->registros.PC);
     cargar_string_al_super_paquete(paquete,parte[1]);
+    log_debug(logger_cpu,"Antes de strtoll");
     int64_t tiempo = (int64_t) strtoll(parte[2], NULL, 10);
+    log_debug(logger_cpu,"despues de strtoll");
     cargar_int64_t_al_super_paquete(paquete,tiempo);
     enviar_paquete(paquete,socket_cpu_kernel_dispatch);
+    log_debug(logger_cpu,"Mando paquete syscall IO");
     eliminar_paquete(paquete);
     string_array_destroy(parte);
     marcarInterrupcionSincronica();
@@ -54,6 +57,10 @@ void syscallEXIT(char** parte)
 void marcarInterrupcionSincronica()
 {
     sem_wait(&mutex_motivo_interrupcion);
+        if(flag_interrupcion == true)
+            return; //para no sobreescribir si ya llego una asincronica
+
+
         flag_interrupcion = true;
         motivo_interrupcion = INTERRUPCION_SINCRONICA;
     sem_post(&mutex_motivo_interrupcion);

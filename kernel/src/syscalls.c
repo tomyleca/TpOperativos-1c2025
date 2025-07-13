@@ -34,6 +34,7 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
 
     
    
+
     if(algoritmoColaNewEnFIFO)
         agregarALista(listaProcesosNew,nuevoProceso);
     else
@@ -59,17 +60,15 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
         }
     }    
     
+    
+
     sem_post(semaforoInicializarProceso);
 }
 
-void dump_memory(uint32_t pid) {
-    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: DUMP_MEMORY", pid);
+void dump_memory(PCB* proceso) {
+    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: DUMP_MEMORY", proceso->PID);
     
-    PCB* proceso = buscarPCBEjecutando(pid);
-    if (proceso == NULL) {
-        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall DUMP_MEMORY", pid);
-        exit(1);
-    }
+
     
     ProcesoEnEsperaDump* procesoEsperandoDump = malloc(sizeof(ProcesoEnEsperaDump));
     procesoEsperandoDump->proceso = proceso;
@@ -81,15 +80,13 @@ void dump_memory(uint32_t pid) {
 
     
     //Lo paso a bloqueado
-    char* PIDComoChar = pasarUnsignedAChar(pid);
+    char* PIDComoChar = pasarUnsignedAChar(proceso->PID);
     agregarADiccionario(diccionarioProcesosEsperandoDump, PIDComoChar, procesoEsperandoDump);
-    log_info(loggerKernel, "## (<%u>) - Bloqueado por DUMP_MEMORY", pid);
+    log_info(loggerKernel, "## (<%u>) - Bloqueado por DUMP_MEMORY", proceso->PID);
     log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","BLOCKED");
     proceso->ME[BLOCKED]++;
     temporal_resume(proceso->cronometros[BLOCKED]);
     free(PIDComoChar);
-    
-    terminarEjecucion(proceso, INTERRUPCION_SINCRONICA);
     
     pthread_t hiloEsperarDump;
     pthread_create(&hiloEsperarDump, NULL, (void*)manejarProcesoEsperandoDump, procesoEsperandoDump);
@@ -111,7 +108,7 @@ void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
     char* PIDComoChar = pasarUnsignedAChar(procesoEsperandoDump->proceso->PID);
     sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar);
     cargarCronometro(procesoEsperandoDump->proceso,BLOCKED);
-    pasarAReady(procesoEsperandoDump->proceso);
+    pasarAReady(procesoEsperandoDump->proceso,false);
     free(PIDComoChar);
     
     free(procesoEsperandoDump->semaforoDumpFinalizado);
@@ -123,10 +120,10 @@ void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
     return NULL;
 }
 
-void syscall_IO(PCB* proceso,uint32_t PID, char* nombreIO, int64_t tiempo) {
+void syscall_IO(PCB* proceso, char* nombreIO, int64_t tiempo) {
 
     
-    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: IO", PID);
+    log_info(loggerKernel, "## (<%u>) - Solicitó syscall: IO", proceso->PID);
 
     
 
@@ -139,14 +136,13 @@ void syscall_IO(PCB* proceso,uint32_t PID, char* nombreIO, int64_t tiempo) {
 
 
         if (dispositivo == NULL) {
-            log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", PID, nombreIO);
-            terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
+            log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", proceso->PID, nombreIO);
             pasarAExit(proceso,"EXECUTE");
             sem_post(semaforoMutexIO);
             return;
         }
         if (proceso == NULL) {
-        log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall IO", PID);
+        log_error(loggerKernel, "## - No se encontró el PCB para syscall IO");
         exit(1);
         }
 
@@ -156,7 +152,7 @@ void syscall_IO(PCB* proceso,uint32_t PID, char* nombreIO, int64_t tiempo) {
     sem_post(semaforoMutexIO);
     
 
-    terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
+    
     pasarABLoqueadoPorIO(proceso, tiempo, nombreIO);
     
 }

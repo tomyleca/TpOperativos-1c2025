@@ -54,6 +54,8 @@ void syscallINIT_PROC(char** parte);
 
 void log_instruccion(char** parte);
 
+void marcarInterrupcionSincronica();
+
 //-------------SYSCALLS MEMORIA FUNCIONES--------------//
 
 void peticion_lectura_a_memoria(int direccion_fisica, int tamanio);
@@ -71,6 +73,8 @@ void fetch(int socket_cpu_memoria);
 void decode();
 
 void check_interrupt(uint32_t PIDInicial);
+
+
 
 
 //---------MMU--------------//

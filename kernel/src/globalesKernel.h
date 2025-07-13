@@ -172,7 +172,7 @@ extern void* planificadorCortoPlazo(void* arg);
 extern bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera);
 extern bool menorEstimadoRafagaRestante(NucleoCPU* CPU1,NucleoCPU* CPU2);
 
-extern NucleoCPU* terminarEjecucion(PCB* proceso,op_code tipoInterrupcion);
+extern PCB* terminarEjecucion(uint32_t PID,op_code tipoInterrupcion);
 extern void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion);
 
 extern void desalojarProceso(NucleoCPU* nucleoADesalojar,PCB* proceso);

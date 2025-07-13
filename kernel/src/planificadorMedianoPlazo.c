@@ -74,7 +74,7 @@ void* manejarProcesoBloqueadoPorIO(ProcesoEnEsperaIO* ProcesoEnEsperaIO){
 
         log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",ProcesoEnEsperaIO->proceso->PID,"BLOCKED","READY");
         cargarCronometro(ProcesoEnEsperaIO->proceso,BLOCKED);
-        pasarAReady(ProcesoEnEsperaIO->proceso);
+        pasarAReady(ProcesoEnEsperaIO->proceso,false);
         
         
         free(ProcesoEnEsperaIO->semaforoIOFinalizada);

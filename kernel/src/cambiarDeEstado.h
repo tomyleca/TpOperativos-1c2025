@@ -3,7 +3,7 @@
 #include "globalesKernel.h"
 
 
-extern void pasarAReady(PCB* proceso);
+extern void pasarAReady(PCB* proceso,bool desalojado);
 extern void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO);
 extern void* manejarProcesoBloqueadoPorIO(ProcesoEnEsperaIO* ProcesoEnEsperaIO);
 extern bool dispositivoOcupado (DispositivoIO* dispositivoIO);

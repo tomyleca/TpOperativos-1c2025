@@ -20,17 +20,21 @@ void atender_dispatch_cpu(void* conexion)
     
     
     int cod_op;
-    NucleoCPU* NucleoCPU;
+    NucleoCPU* nucleoCPU;
     uint32_t PID;
     uint32_t PC;
     t_buffer* buffer;
+    PCB* proceso;
+    
     
     
    
     
     while(1) 
     {
+        log_debug(loggerKernel,"LISTO PARA RECIBIR OPERACION");
         cod_op = recibir_operacion(fdConexion);
+        log_debug(loggerKernel,"LLEGA OPERACION");
         switch (cod_op) 
         {
             case 1:
@@ -39,7 +43,7 @@ void atender_dispatch_cpu(void* conexion)
             case HANDSHAKE_CPU_KERNEL_D:
                 buffer = recibiendo_super_paquete(fdConexion);
                 char* identificador = recibir_string_del_buffer(buffer);    
-                NucleoCPU = guardarDatosCPUDispatch(identificador,fdConexion);
+                nucleoCPU = guardarDatosCPUDispatch(identificador,fdConexion);
                 limpiarBuffer(buffer);
                 break;
 
@@ -52,14 +56,16 @@ void atender_dispatch_cpu(void* conexion)
                 sem_post(semaforoPCActualizado);
                 break;
             case IO:
+                log_debug(loggerKernel,"LLEGA SYSCAL IO");
                 buffer = recibiendo_super_paquete(fdConexion);
                 PID = recibir_uint32_t_del_buffer(buffer);
                 PC = recibir_uint32_t_del_buffer(buffer);
                 char* nombreIO = recibir_string_del_buffer(buffer);
                 int64_t tiempoEnIO = recibir_int64_t_del_buffer(buffer);
                 actualizarPC(PID,PC);
-                PCB* proceso  = buscarPCBEjecutando(PID);
-                syscall_IO(proceso,PID,nombreIO,tiempoEnIO);
+                proceso = NULL;
+                proceso=terminarEjecucion(PID,INTERRUPCION_SINCRONICA);
+                syscall_IO(proceso,nombreIO,tiempoEnIO);
                 free(nombreIO);
                 limpiarBuffer(buffer);              
                 break;
@@ -69,7 +75,9 @@ void atender_dispatch_cpu(void* conexion)
                 PID = recibir_uint32_t_del_buffer(buffer);
                 PC = recibir_uint32_t_del_buffer(buffer);
                 actualizarPC(PID,PC);
-                dump_memory(PID);
+                proceso=NULL;
+                proceso=terminarEjecucion(PID,INTERRUPCION_SINCRONICA);
+                dump_memory(proceso);
                 
                 limpiarBuffer(buffer);
                 break;
@@ -90,13 +98,7 @@ void atender_dispatch_cpu(void* conexion)
                 PID = recibir_uint32_t_del_buffer(buffer);
                 PC = recibir_uint32_t_del_buffer(buffer);
                 proceso = NULL;
-                proceso = buscarPCBEjecutando(PID);
-                if (proceso == NULL) {
-                    log_error(loggerKernel, "## (<%u>) - No se encontró el PCB para syscall Exit", PID);
-                    exit(1);
-                }
-                terminarEjecucion(proceso,INTERRUPCION_SINCRONICA);
-                 
+                proceso = terminarEjecucion(PID,INTERRUPCION_SINCRONICA);
                 pasarAExit(proceso,"EXECUTE");
                 limpiarBuffer(buffer);     
                 break;
