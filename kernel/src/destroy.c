@@ -17,8 +17,13 @@ void dispositivoIODestroy(void* ptr)
     
     DispositivoIO* dispositivoIO = (DispositivoIO*) ptr;
     free(dispositivoIO->nombre);
-    list_destroy(dispositivoIO->colaEsperandoIO);
-    list_destroy_and_destroy_elements(dispositivoIO->listaInstancias,instanciaIODestroy);
+    borrarListaConSemaforos(dispositivoIO->colaEsperandoIO);
+    list_destroy_and_destroy_elements(dispositivoIO->listaInstancias->lista,instanciaIODestroy);
+    sem_destroy(dispositivoIO->listaInstancias->semaforoCantElementos);
+    sem_destroy(dispositivoIO->listaInstancias->semaforoMutex);
+    free(dispositivoIO->listaInstancias->semaforoCantElementos);
+    free(dispositivoIO->listaInstancias->semaforoMutex);
+    free(dispositivoIO->listaInstancias);
     free(dispositivoIO);
 }
 

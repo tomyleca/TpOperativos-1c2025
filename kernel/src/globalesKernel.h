@@ -155,8 +155,8 @@ extern void *inicializarProceso();
 PCB* buscarPCBEjecutando(uint32_t pid);
 
 //Ordenar listas
-extern bool menorTam(PCB* PCB1,PCB* PCB2);
-extern bool menorEstimadoSiguienteRafaga(PCB* PCB1,PCB* PCB2);
+extern bool menorTam(void* PCB1,void* PCB2);
+extern bool menorEstimadoSiguienteRafaga(void* PCB1,void* PCB2);
 
 //Planificador
 /**
@@ -204,7 +204,7 @@ extern void cerrarConexiones();
 
 //IO
 extern void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion);
-extern void exitDeProcesoBLoqueadoPorIO(ProcesoEnEsperaIO* procesoEnEsperaIO);
+extern void exitDeProcesoBLoqueadoPorIO(void* procesoEnEsperaIO);
 
 extern t_diccionarioConSemaforos* diccionarioDispositivosIO;
 
@@ -224,7 +224,7 @@ extern sem_t* semaforoInicializarProceso;
 
 //MEMORIA
 extern int mandarDatosProcesoAMemoria(PCB* proceso);
-extern void avisarFinDeProcesoAMemoria(uint32_t* PID);
+extern void* avisarFinDeProcesoAMemoria(void* PID);
 
 //HILOS
 extern pthread_t hiloAtenderDispatch;

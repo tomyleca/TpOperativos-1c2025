@@ -86,9 +86,9 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
  bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera)
 {
     int64_t tiempoRestanteProcesoActualEnEjecucion;
-    bool _menorRafagaQueProcesoEnReady(NucleoCPU* CPU)
+    bool _menorRafagaQueProcesoEnReady(void* arg)
     {
-                                                                                                     //Lo que lleva ejecutado                                                //Lo que ejecuto antes de la ejecución            
+        NucleoCPU* CPU = (NucleoCPU*) arg;                                                            //Lo que lleva ejecutado                                                //Lo que ejecuto antes de la ejecución            
         tiempoRestanteProcesoActualEnEjecucion = CPU->procesoEnEjecucion->estimadoSiguienteRafaga - (temporal_gettime(CPU->procesoEnEjecucion->cronometros[EXECUTE]) - CPU->procesoEnEjecucion->MT[EXECUTE]);
         return estimadoRafagaProcesoEnEspera < tiempoRestanteProcesoActualEnEjecucion;
     };
@@ -138,7 +138,7 @@ void desalojarProceso(NucleoCPU* nucleoADesalojar,PCB* proceso)
     sem_wait(semaforoPCActualizado);      
     sem_wait(semaforoEnCheckInterrupt);                               
     
-    if(sacarElementoDeLista(listaCPUsEnUso,nucleoADesalojar)!=NULL) // recien ahora lo puedo sacar para que no cause problemas
+    if(sacarElementoDeLista(listaCPUsEnUso,nucleoADesalojar)!=false) // recien ahora lo puedo sacar para que no cause problemas
         agregarAListaSinRepetidos(listaCPUsLibres,nucleoADesalojar);
 
     sem_wait(semaforoMutexExit);
@@ -156,8 +156,9 @@ PCB* terminarEjecucion(uint32_t PID,op_code tipoInterruccion)
     NucleoCPU* nucleoCPU;
     
     sem_wait(semaforoMutexTerminarEjecucion);
-        bool _ejecutandoProceso(NucleoCPU* nucleoCPU)
+        bool _ejecutandoProceso(void* arg)
         {
+            NucleoCPU* nucleoCPU = (NucleoCPU*) arg;
             return nucleoCPU->procesoEnEjecucion->PID == PID;
         };
 
@@ -202,12 +203,13 @@ PCB* terminarEjecucion(uint32_t PID,op_code tipoInterruccion)
 
 
 
-bool menorEstimadoSiguienteRafaga(PCB* PCB1,PCB* PCB2)
+bool menorEstimadoSiguienteRafaga(void* PCB1,void* PCB2)
 {
-    
-    log_debug(loggerKernel,"<%u> ESTIMADO SIGUIENTE RAFAGA: %d", PCB1->PID,(int)PCB1->estimadoSiguienteRafaga);
-    log_debug(loggerKernel,"<%u> ESTIMADO SIGUIENTE RAFAGA: %d", PCB2->PID,(int)PCB2->estimadoSiguienteRafaga);
-    return PCB1->estimadoSiguienteRafaga <= PCB2->estimadoSiguienteRafaga;
+    PCB* proceso1 = (PCB*) PCB1;
+    PCB* proceso2 = (PCB*) PCB2;
+    log_debug(loggerKernel,"<%u> ESTIMADO SIGUIENTE RAFAGA: %d", proceso1->PID,(int)proceso1->estimadoSiguienteRafaga);
+    log_debug(loggerKernel,"<%u> ESTIMADO SIGUIENTE RAFAGA: %d", proceso2->PID,(int)proceso2->estimadoSiguienteRafaga);
+    return proceso1->estimadoSiguienteRafaga <= proceso2->estimadoSiguienteRafaga;
 }
 
 void estimarSiguienteRafaga(PCB* proceso)

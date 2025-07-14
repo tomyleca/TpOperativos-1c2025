@@ -21,7 +21,7 @@ void atender_dispatch_cpu(void* conexion)
     
     
     int cod_op;
-    NucleoCPU* nucleoCPU;
+    
     uint32_t PID;
     uint32_t PC;
     t_buffer* buffer;
@@ -44,7 +44,7 @@ void atender_dispatch_cpu(void* conexion)
             case HANDSHAKE_CPU_KERNEL_D:
                 buffer = recibiendo_super_paquete(fdConexion);
                 char* identificador = recibir_string_del_buffer(buffer);    
-                nucleoCPU = guardarDatosCPUDispatch(identificador,fdConexion);
+                guardarDatosCPUDispatch(identificador,fdConexion);
                 limpiarBuffer(buffer);
                 break;
 
@@ -155,9 +155,10 @@ NucleoCPU* guardarDatosCPUDispatch(char* identificador,int fdConexion)
 
 NucleoCPU* chequearSiCPUYaPuedeInicializarse(char* identificador)
 {
-bool _mismoIdentificador(NucleoCPU* NucleoCPU)
+bool _mismoIdentificador(void* arg)
 {
-    return (strcmp(NucleoCPU->identificador,identificador) == 0);
+    NucleoCPU* nucleoCPU = (NucleoCPU*) arg;
+    return (strcmp(nucleoCPU->identificador,identificador) == 0);
 };
 
 return sacarDeListaSegunCondicion(listaCPUsAInicializar,_mismoIdentificador);
@@ -234,7 +235,8 @@ void actualizarPCAsincronico(uint32_t PID,uint32_t PCActualizado)
 {
     log_debug(loggerKernel,"Actualizo PC asincrónico %u %u", PID, PCActualizado);
 
-     bool _mismoPID(PCB* procesoEsperandoPC) {
+     bool _mismoPID(void* arg) {
+        PCB* procesoEsperandoPC = (PCB*) arg;
         return procesoEsperandoPC->PID == PID;
     };
     
@@ -246,8 +248,9 @@ void actualizarPCAsincronico(uint32_t PID,uint32_t PCActualizado)
 
 NucleoCPU* buscarNucleoCPUPorPID(uint32_t PID)
 {
-    bool _ejecutandoProceso(NucleoCPU* nucleoCPU)
+    bool _ejecutandoProceso(void* arg)
     {
+        NucleoCPU* nucleoCPU = (NucleoCPU*) nucleoCPU;
         return nucleoCPU->procesoEnEjecucion != NULL && nucleoCPU->procesoEnEjecucion->PID == PID;
     };
     

@@ -80,17 +80,23 @@ int mandarDatosProcesoAMemoria(PCB* proceso)
 
 
 
-bool menorTam(PCB* PCB1,PCB* PCB2)
+bool menorTam(void* arg1, void* arg2)
 {
+    PCB* PCB1 = (PCB*) arg1;
+    PCB* PCB2 = (PCB*) arg2;
     return PCB1->tam <= PCB2->tam;
 }
 
 
 
 void pasarAReady(PCB* proceso, bool desalojado){
-    if(leerDeDiccionario(diccionarioProcesosBloqueados,proceso)!= NULL || leerDeDiccionario(diccionarioProcesosEsperandoDump,proceso)!= NULL) //PARA SRT
+    char* PIDComoChar = pasarUnsignedAChar(proceso->PID);
+    if(leerDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar)!= NULL || leerDeDiccionario(diccionarioProcesosEsperandoDump,PIDComoChar)!= NULL) //PARA SRT
+    {
+        free(PIDComoChar);
         return;
-
+    }
+    free(PIDComoChar);
     agregarAListaSinRepetidos(listaProcesosReady,proceso);
     temporal_resume(proceso->cronometros[READY]);
     proceso->ME[READY]++;

@@ -104,7 +104,7 @@ void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
     
     sem_wait(procesoEsperandoDump->semaforoDumpFinalizado);
 
-    uint32_t pidAux = procesoEsperandoDump->proceso->PID;
+    //procesoEsperandoDump->proceso->PID;
 
     char* PIDComoChar = pasarUnsignedAChar(procesoEsperandoDump->proceso->PID);
     sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar);
@@ -160,11 +160,13 @@ void syscall_IO(PCB* proceso, char* nombreIO, int64_t tiempo) {
 
 
 PCB* buscarPCBEjecutando(uint32_t pid) {
-    bool _mismoPID(NucleoCPU* nucleoEnEjecucion) {
+    bool _mismoPID(void* arg) {
+        NucleoCPU* nucleoEnEjecucion = (NucleoCPU*) arg;
         return nucleoEnEjecucion->procesoEnEjecucion->PID == pid;
     };
 
-    bool _mismoPID2(PCB* procesoEnEjecucion) {
+    bool _mismoPID2(void* arg) {
+        PCB* procesoEnEjecucion = (PCB*) arg;
         return procesoEnEjecucion->PID == pid;
     };
 

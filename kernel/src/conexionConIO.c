@@ -10,7 +10,7 @@ void* esperarClientesIO(void* arg)
         log_debug(loggerKernel, "## Se conectó IO");
         pthread_t* nuevoHiloAtenderIO = malloc(sizeof(pthread_t));
         pthread_create(nuevoHiloAtenderIO,NULL,atenderInstanciaIO,fdConexion);
-        pthread_detach(nuevoHiloAtenderIO);
+        pthread_detach(*nuevoHiloAtenderIO);
     }
 }
 
@@ -18,7 +18,7 @@ void* esperarClientesIO(void* arg)
 void* atenderInstanciaIO(void* conexion)
 {
     int* fdConexion = (int*)conexion;
-    InstanciaIO* instanciaIO = NULL;
+    
     char* nombreIO;
     while(1)
     {
@@ -135,10 +135,10 @@ int avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t t
 
 
 
-bool instanciaLibre(InstanciaIO* instanciaIO)
+bool instanciaLibre(void* arg)
 {
     bool estaLibre;
-
+    InstanciaIO* instanciaIO = (InstanciaIO*) arg;
     sem_wait(instanciaIO->semaforoMutex);
         estaLibre = instanciaIO->estaLibre;
     sem_post(instanciaIO->semaforoMutex);
@@ -151,8 +151,9 @@ void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
 {
     sem_wait(semaforoMutexIO);
         log_debug(loggerKernel,"# Se desconectó IO: %s",nombreDispositivoIO);
-        bool _esInstancia(InstanciaIO* instanciaIO)
+        bool _esInstancia(void* arg)
         {
+            InstanciaIO* instanciaIO = (InstanciaIO*) arg;
             return instanciaIO->fdConexion == fdConexion;  //Busco la instancia por conexixón, que es lo que las diferencia
         };
         
@@ -184,9 +185,9 @@ void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
 }
 
 
-void exitDeProcesoBLoqueadoPorIO(ProcesoEnEsperaIO* procesoEnEsperaIO)
+void exitDeProcesoBLoqueadoPorIO(void* arg)
 {
-    
+    ProcesoEnEsperaIO* procesoEnEsperaIO = (ProcesoEnEsperaIO*) arg;
     
     if(procesoEnEsperaIO != NULL)
     {

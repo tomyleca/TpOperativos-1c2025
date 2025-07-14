@@ -166,8 +166,9 @@ void pasarASwapReady(PCB* proceso)
 void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)
 {
     sem_wait(semaforoMutexIO);   
-        bool _esInstancia(InstanciaIO* instanciaIO)
+        bool _esInstancia(void* arg)
         {
+            InstanciaIO* instanciaIO = (InstanciaIO*) arg;
             return instanciaIO->fdConexion == fdConexion;  //Busco la instancia por conexixón, que es lo que las diferencia
         };
         
