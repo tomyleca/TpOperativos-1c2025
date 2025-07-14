@@ -114,13 +114,30 @@ int recibir_operacion(int socket_cliente)
 
 void *recibir_buffer(int *size, int socket_cliente)
 {
-	void *buffer;
+    void *buffer = NULL;
+    int bytes_recibidos = recv(socket_cliente, size, sizeof(int), MSG_WAITALL);
 
-	recv(socket_cliente, size, sizeof(int), MSG_WAITALL);
-	buffer = malloc(*size);
-	recv(socket_cliente, buffer, *size, MSG_WAITALL);
+    if (bytes_recibidos <= 0) {
+        // Error o desconexión
+        *size = 0;
+        return NULL;
+    }
 
-	return buffer;
+    buffer = malloc(*size);
+    if (!buffer) {
+        perror("malloc");
+        *size = 0;
+        return NULL;
+    }
+
+    bytes_recibidos = recv(socket_cliente, buffer, *size, MSG_WAITALL);
+    if (bytes_recibidos <= 0) {
+        free(buffer);
+        *size = 0;
+        return NULL;
+    }
+
+    return buffer;
 }
 
 void recibir_mensaje(int socket_cliente, t_log *logger)
