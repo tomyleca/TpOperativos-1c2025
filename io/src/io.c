@@ -10,6 +10,9 @@ int main(int argc, char* argv[]) {
     
     //INICIO LOGGER
     loggerIO = iniciar_logger("ioLogger.log","ioLogger",log_level);
+
+    conectarseAKernel(argv[1]);
+
     pthread_t hiloEscucharKernel;
     pthread_create(&hiloEscucharKernel,NULL,escuchar_kernel,NULL);
 
@@ -22,7 +25,7 @@ int main(int argc, char* argv[]) {
     }
 
 
-    conectarseAKernel(argv[1]);
+    
     
     while(1)
     {
@@ -102,6 +105,8 @@ void* escuchar_kernel(void* arg)
             tiempo = recibir_int64_t_del_buffer(buffer);
             sem_post(&semaforoEmpezarIO);
             }
+        if(opCode == -1)
+            exit(1);
     }
     return NULL;
 }
