@@ -142,6 +142,12 @@ void desalojarProceso(NucleoCPU* nucleoADesalojar,PCB* proceso)
         agregarAListaSinRepetidos(listaCPUsLibres,nucleoADesalojar);
 
     sem_wait(semaforoMutexExit);
+        proceso->duracionRafagaAnterior=temporal_gettime(proceso->cronometros[EXECUTE]) - proceso->MT[EXECUTE]; //Saco cuanto es lo ultimo que ejecuto
+        cargarCronometro(proceso,EXECUTE);
+        proceso->estimadoSiguienteRafaga = proceso->estimadoSiguienteRafaga - proceso->duracionRafagaAnterior; //Lo que le falta ejecutar del estimado anterior
+        if(proceso->estimadoSiguienteRafaga < 0)
+            proceso->estimadoSiguienteRafaga = 0;
+
         log_info(loggerKernel, "## (<%u>) - Desalojado por algoritmo SJF/SRT",proceso->PID);
         log_info(loggerKernel, "## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"EXECUTE","READY");
         pasarAReady(proceso,true);
@@ -178,10 +184,13 @@ PCB* terminarEjecucion(uint32_t PID,op_code tipoInterruccion)
         {
             nucleoCPU->ejecutando=false;
             procesoPostEjecucion = nucleoCPU->procesoEnEjecucion;
-            guardarDatosDeEjecucion(procesoPostEjecucion);
             
-            if(tipoInterruccion== INTERRUPCION_SINCRONICA)  
+            
+            if(tipoInterruccion== INTERRUPCION_SINCRONICA)  //SI ES ASINCRONICA LO GUARDO CUANDO ME LLEGA QUE ESTA EN CHECK_INTERRUOPT
+            {
                 agregarAListaSinRepetidos(listaCPUsLibres,nucleoCPU);
+                guardarDatosDeEjecucion(procesoPostEjecucion);
+            }
             
             sem_post(semaforoIntentarPlanificar);
             log_debug(loggerKernel,"(<%u>) termina su ejecución",procesoPostEjecucion->PID);
