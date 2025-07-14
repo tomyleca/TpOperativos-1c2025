@@ -17,9 +17,10 @@ void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
     
 
 
-    
+    sem_wait(semaforoMutexIO);
     if(avisarInicioIO(procesoEsperando,nombreIO,tiempo) != -1)
     {
+        sem_post(semaforoMutexIO);
         log_info(loggerKernel, "## (<%u>) - Bloqueado por IO: <%s>",procesoEsperando->proceso->PID,nombreIO);
         pthread_t hiloContadorSwap;
         pthread_create(&hiloContadorSwap,NULL,(void *)contadorParaSwap,procesoEsperando);
@@ -39,7 +40,7 @@ void pasarABLoqueadoPorIO(PCB* proceso,int64_t tiempo,char* nombreIO){
     }
     else
     {
-        
+        sem_post(semaforoMutexIO);
         log_error(loggerKernel, "## (<%u>) - Dispositivo IO %s no encontrado. Finalizando proceso", procesoEsperando->proceso->PID, nombreIO);
         pasarAExit(procesoEsperando->proceso,"EXECUTE");
         free(procesoEsperando->semaforoMutex);
@@ -164,29 +165,29 @@ void pasarASwapReady(PCB* proceso)
 
 void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)
 {
-    sem_wait(semaforoMutexIO);
-    bool _esInstancia(InstanciaIO* instanciaIO)
-    {
-        return instanciaIO->fdConexion == fdConexion;  //Busco la instancia por conexixón, que es lo que las diferencia
-    };
-    
-    DispositivoIO* dispositivoIOLiberado = leerDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
-    InstanciaIO* instanciaIO = leerDeListaSegunCondicion(dispositivoIOLiberado->listaInstancias,_esInstancia);
+    sem_wait(semaforoMutexIO);   
+        bool _esInstancia(InstanciaIO* instanciaIO)
+        {
+            return instanciaIO->fdConexion == fdConexion;  //Busco la instancia por conexixón, que es lo que las diferencia
+        };
+        
+        DispositivoIO* dispositivoIOLiberado = leerDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
+        InstanciaIO* instanciaIO = leerDeListaSegunCondicion(dispositivoIOLiberado->listaInstancias,_esInstancia);
 
-    sem_wait(instanciaIO->semaforoMutex);
-        instanciaIO->estaLibre=true;
-    sem_post(instanciaIO->semaforoMutex);
-    log_info(loggerKernel, "## (<%u>) finalizó IO y pasa a READY",PID);
-    
-    
-    if(!list_is_empty(dispositivoIOLiberado->colaEsperandoIO->lista)) //Si la cola de procesos en espera no esta vacía, empiezo el IO del proceso esperando
-        empezarIODelProximoEnEspera(dispositivoIOLiberado);
-    
-    char* PIDComoChar = pasarUnsignedAChar(PID);
-    ProcesoEnEsperaIO* procesoADesbloquear = leerDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
-    free(PIDComoChar);
-    if(procesoADesbloquear!=NULL)
-        sem_post(procesoADesbloquear->semaforoIOFinalizada);
+        sem_wait(instanciaIO->semaforoMutex);
+            instanciaIO->estaLibre=true;
+        sem_post(instanciaIO->semaforoMutex);
+        log_info(loggerKernel, "## (<%u>) finalizó IO y pasa a READY",PID);
+        
+        
+        if(!list_is_empty(dispositivoIOLiberado->colaEsperandoIO->lista)) //Si la cola de procesos en espera no esta vacía, empiezo el IO del proceso esperando
+            empezarIODelProximoEnEspera(dispositivoIOLiberado);
+        
+        char* PIDComoChar = pasarUnsignedAChar(PID);
+        ProcesoEnEsperaIO* procesoADesbloquear = leerDeDiccionario(diccionarioProcesosBloqueados,PIDComoChar);
+        free(PIDComoChar);
+        if(procesoADesbloquear!=NULL)
+            sem_post(procesoADesbloquear->semaforoIOFinalizada);
 
     sem_post(semaforoMutexIO);
     

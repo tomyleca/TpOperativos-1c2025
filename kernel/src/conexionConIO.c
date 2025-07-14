@@ -94,7 +94,7 @@ void* atenderInstanciaIO(void* conexion)
 
 int avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t tiempo)
 {
-    //sem_wait(semaforoMutexIO);
+    
         InstanciaIO* instanciaIO = NULL;
         DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
         if(dispositivoIO == NULL)
@@ -114,7 +114,7 @@ int avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t t
         }
         else
         {
-        //sem_wait(instanciaIO->semaforoMutex),
+        sem_wait(instanciaIO->semaforoMutex),
             instanciaIO->PIDEnIO= procesoEnEsperaIO->proceso->PID;
             instanciaIO->estaLibre=false;
         sem_post(instanciaIO->semaforoMutex);
@@ -125,7 +125,7 @@ int avisarInicioIO(ProcesoEnEsperaIO* procesoEnEsperaIO,char* nombreIO,int64_t t
         enviar_paquete(paquete,instanciaIO->fdConexion);
         eliminar_paquete(paquete);
         }
-    //sem_post(semaforoMutexIO);
+    
     
     return 0;
 
