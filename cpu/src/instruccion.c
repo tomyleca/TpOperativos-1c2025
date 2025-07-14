@@ -600,6 +600,7 @@ int algoritmo_clock_modificado()
             return victima;
         }
         cache_paginas[puntero_clock].bit_referencia = false;
+        cache_paginas[puntero_clock].bit_modificacion = false;
         puntero_clock = (puntero_clock + 1) % entradas_cache;
     }
     
