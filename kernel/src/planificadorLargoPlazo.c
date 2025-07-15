@@ -3,10 +3,12 @@
 void *inicializarProceso(){
     PCB* procesoAInicializar;
     sem_wait(semaforoAprietaEnter);
+    bool swapBlockedInicializado;
     while(1)
 
     {
         sem_wait(semaforoInicializarProceso);
+            swapBlockedInicializado = false;
 
             if (!list_is_empty(listaProcesosSwapReady->lista)) //Esto es para darle mas prioridad a la lista Swap Ready
             {
@@ -22,13 +24,14 @@ void *inicializarProceso(){
                     log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"SWAP_READY","READY");
                     cargarCronometro(procesoAInicializar,SWAP_READY);
                     pasarAReady(procesoAInicializar,false);
+                    swapBlockedInicializado = true;
                     sem_post(semaforoInicializarProceso); // Mientras la respuesta sea OK sigo intentando inicializar procesos
                     
                 
                 }
         
             }
-            else if (!list_is_empty(listaProcesosNew->lista))
+            if (!list_is_empty(listaProcesosNew->lista) && swapBlockedInicializado == false)
             {
                 procesoAInicializar = leerDeLista(listaProcesosNew,0);
                 
