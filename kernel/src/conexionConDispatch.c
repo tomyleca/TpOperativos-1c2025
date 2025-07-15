@@ -180,12 +180,11 @@ void pasarAExit(PCB* proceso,char* estadoActual){
         *PIDPuntero = proceso->PID;
         pthread_create(&hiloAvisarMemoria,NULL,avisarFinDeProcesoAMemoria,PIDPuntero);
         pthread_detach(hiloAvisarMemoria);
-        sem_post(semaforoInicializarProceso);
         free(proceso->archivoPseudocodigo);
         sem_destroy(proceso->semMutex);
         free(proceso->semMutex);
         free(proceso);
-
+        sem_post(semaforoInicializarProceso);
     sem_post(semaforoMutexExit);
     
 }
