@@ -189,7 +189,7 @@ void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
         }
 
     
-    sem_post(semaforoMutexIO);
+    
 }
 
 
@@ -200,8 +200,7 @@ void exitDeProcesoBLoqueadoPorIO(void* arg)
     if(procesoEnEsperaIO != NULL)
     {
     sem_wait(procesoEnEsperaIO->semaforoMutex); //Para no interrumpir manejarProcesoBloqueado o hiloContadorSwap a la mitad 
-        esperarCancelacionDeHilo(procesoEnEsperaIO->hiloContadorSwap); //Cancelo el hilo contadorSwap, para que no tire seg fault cuando haga free del semaforoMutex
-        esperarCancelacionDeHilo(procesoEnEsperaIO->hiloManejoBloqueado); //Cancelo este hilo que esta esperando el fin de IO
+
         char* clave= pasarUnsignedAChar(procesoEnEsperaIO->proceso->PID);
         sacarDeDiccionario(diccionarioProcesosBloqueados,clave);
         free(clave);
@@ -209,10 +208,10 @@ void exitDeProcesoBLoqueadoPorIO(void* arg)
             pasarAExit(procesoEnEsperaIO->proceso,"SWAP_BLOCKED");
         else
             pasarAExit(procesoEnEsperaIO->proceso,"BLOCKED");
-       
-        free(procesoEnEsperaIO->semaforoMutex);
-        free(procesoEnEsperaIO->semaforoIOFinalizada);
-        free(procesoEnEsperaIO);
+
+
+    procesoEnEsperaIO->proceso=NULL;
+    sem_post(procesoEnEsperaIO->semaforoMutex); //le paso la pelota para que termine de hacer los frees
      
     }
     

@@ -48,7 +48,7 @@ for config in cpu1.config cpu2.config cpu3.config cpu4.config; do
         ["ENTRADAS_TLB"]="4"
         ["REEMPLAZO_TLB"]="FIFO"
         ["ENTRADAS_CACHE"]="2"
-        ["REEMPLAZO_CACHE"]="CLOCK-M"
+        ["REEMPLAZO_CACHE"]="CLOCK"
         ["RETARDO_CACHE"]="50"
       )
       ;;

@@ -643,7 +643,7 @@ void escribir_pagina_a_memoria(int indice_cache)
     cargar_int_al_super_paquete(paquete, entrada->pid);
     cargar_int_al_super_paquete(paquete, direccion_fisica);
     cargar_string_al_super_paquete(paquete, entrada->contenido); // Página completa
-    printf("%s",entrada->contenido);
+    //printf("%s",entrada->contenido);
     enviar_paquete(paquete, socket_cpu_memoria);
     eliminar_paquete(paquete);
 
