@@ -648,7 +648,7 @@ int restaurar_proceso(Proceso *p ) {
     }
   }
 
-  log_debug(logger_memoria," PID: <%u> - Restaurado exitosamente desde swapfile", p->pid);
+  log_info(logger_memoria," PID: <%u> - Restaurado exitosamente desde swapfile", p->pid);
   p->metricas.subidas_memoria++;
   return 1;
 }
