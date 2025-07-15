@@ -196,6 +196,7 @@ void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
             free(dispositivoIO);
         }
 
+    log_debug(loggerKernel,"HAGO POST DEL SEMAFORO");
     sem_post(semaforoMutexIO);
     
 }

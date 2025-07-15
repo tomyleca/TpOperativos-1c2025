@@ -392,7 +392,7 @@ void check_interrupt(uint32_t PIDInicial)
 
     if(hay_interrupcion) // hay una interrupcion
     {   
-        
+        log_debug(logger_cpu,"HAY INTERRUPCION");
         free(instruccion_recibida);
         instruccion_recibida = NULL;
         

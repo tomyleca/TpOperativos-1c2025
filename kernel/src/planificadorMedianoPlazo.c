@@ -143,18 +143,20 @@ void* contadorParaSwap (void* arg)
     ProcesoEnEsperaIO* procesoEnEsperaIO = (ProcesoEnEsperaIO*) arg;
     usleep(tiempo_suspension*1000); //  *1000 para pasar de milisegundos a microsegundos //TODO ver si hay que pasarlo a microsegundos o como es
     
-    if(procesoEnEsperaIO->proceso == NULL) //quiere decir que ya finalizo el proceso
-    {
-        sem_destroy(procesoEnEsperaIO->semaforoIOFinalizada);
-        free(procesoEnEsperaIO->semaforoIOFinalizada);
-        procesoEnEsperaIO->semaforoIOFinalizada = NULL;
-        sem_destroy(procesoEnEsperaIO->semaforoMutex);
-        free(procesoEnEsperaIO->semaforoMutex);
-        free(procesoEnEsperaIO);
-        return NULL;        
-    }
-    
     sem_wait(procesoEnEsperaIO->semaforoMutex); 
+
+        if(procesoEnEsperaIO->proceso == NULL) //quiere decir que ya finalizo el proceso
+        {
+            sem_destroy(procesoEnEsperaIO->semaforoIOFinalizada);
+            free(procesoEnEsperaIO->semaforoIOFinalizada);
+            procesoEnEsperaIO->semaforoIOFinalizada = NULL;
+            sem_destroy(procesoEnEsperaIO->semaforoMutex);
+            free(procesoEnEsperaIO->semaforoMutex);
+            free(procesoEnEsperaIO);
+            return NULL;        
+        }
+    
+    
         if(procesoEnEsperaIO->semaforoIOFinalizada == NULL)  //QUIERE DECIR QUE YA LO PASO A READY
         {
             sem_destroy(procesoEnEsperaIO->semaforoMutex);

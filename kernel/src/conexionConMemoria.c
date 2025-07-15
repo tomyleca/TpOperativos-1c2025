@@ -125,7 +125,7 @@ void* avisarFinDeProcesoAMemoria(void* PIDPuntero)
     recibir_operacion(fdMemoria);
     //if(respuesta!=1)
         //log_error(loggerKernel,"#<%u> Error en la comunicación con memoria al finalizar el proceso",PID);
-
+    sem_post(semaforoIntentarPlanificar);
     cerrar_conexion_memoria(fdMemoria);
     return NULL;
 }
