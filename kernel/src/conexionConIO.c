@@ -8,9 +8,9 @@ void* esperarClientesIO(void* arg)
         int* fdConexion = malloc(sizeof(int));
         *fdConexion = esperar_cliente(socket_kernel_io);
         log_debug(loggerKernel, "## Se conectó IO");
-        pthread_t* nuevoHiloAtenderIO = malloc(sizeof(pthread_t));
-        pthread_create(nuevoHiloAtenderIO,NULL,atenderInstanciaIO,fdConexion);
-        pthread_detach(*nuevoHiloAtenderIO);
+        pthread_t nuevoHiloAtenderIO;
+        pthread_create(&nuevoHiloAtenderIO,NULL,atenderInstanciaIO,fdConexion);
+        pthread_detach(nuevoHiloAtenderIO);
     }
 }
 
@@ -61,6 +61,7 @@ void* atenderInstanciaIO(void* conexion)
                     agregarADiccionario(diccionarioDispositivosIO,nombreIO,nuevoDispositivoIO);
                 }
                 //sem_post(semaforoMutexIO);
+                limpiarBuffer(buffer);
                 break;
             
             case TERMINO_IO:
@@ -68,7 +69,7 @@ void* atenderInstanciaIO(void* conexion)
                 char* nombre = recibir_string_del_buffer(buffer);
                 manejarFinDeIO(PID,nombre,*fdConexion);
                 free(nombre);
-
+                limpiarBuffer(buffer);
                 break;
             
             //case 0:
@@ -76,6 +77,8 @@ void* atenderInstanciaIO(void* conexion)
                 manejarDesconexionDeIO(nombreIO,*fdConexion);
                 //shutdown(*fdConexion, SHUT_RDWR);
                 close(*fdConexion);
+                free(fdConexion);
+                limpiarBuffer(buffer);
                 pthread_exit(NULL);
                 break;
             
@@ -85,7 +88,7 @@ void* atenderInstanciaIO(void* conexion)
                 
 
         }
-    limpiarBuffer(buffer);
+    
         
 
 }
@@ -166,14 +169,19 @@ void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
         
         DispositivoIO* dispositivoIO = leerDeDiccionario(diccionarioDispositivosIO,nombreDispositivoIO);
         InstanciaIO* instanciaIO = leerDeListaSegunCondicion(dispositivoIO->listaInstancias,_esInstancia);
-        
+        if(instanciaIO == NULL)
+            log_error(loggerKernel,"- InstanciaIO no encontrada");
+
         char* clave=pasarUnsignedAChar(instanciaIO->PIDEnIO);
         ProcesoEnEsperaIO* procesoEnEsperaIO = leerDeDiccionario(diccionarioProcesosBloqueados,clave);
         exitDeProcesoBLoqueadoPorIO(procesoEnEsperaIO);
         free(clave);
 
         sacarElementoDeLista(dispositivoIO->listaInstancias,instanciaIO);
-
+        sem_destroy(instanciaIO->semaforoMutex);
+        free(instanciaIO->semaforoMutex);
+        free(instanciaIO);
+        
         if(chequearListaVacia(dispositivoIO->listaInstancias)) //Si despues de sacar la instancia no quedan más paso a exit todos los proceso esperando el dispositivo
         {
             if(!chequearListaVacia(dispositivoIO->colaEsperandoIO)) //Chequeo que no este vacia tampoco
@@ -188,7 +196,7 @@ void manejarDesconexionDeIO(char* nombreDispositivoIO, int fdConexion)
             free(dispositivoIO);
         }
 
-    
+    sem_post(semaforoMutexIO);
     
 }
 

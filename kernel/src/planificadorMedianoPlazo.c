@@ -143,7 +143,17 @@ void* contadorParaSwap (void* arg)
     ProcesoEnEsperaIO* procesoEnEsperaIO = (ProcesoEnEsperaIO*) arg;
     usleep(tiempo_suspension*1000); //  *1000 para pasar de milisegundos a microsegundos //TODO ver si hay que pasarlo a microsegundos o como es
     
-    //Paso el proceso a Swap
+    if(procesoEnEsperaIO->proceso == NULL) //quiere decir que ya finalizo el proceso
+    {
+        sem_destroy(procesoEnEsperaIO->semaforoIOFinalizada);
+        free(procesoEnEsperaIO->semaforoIOFinalizada);
+        procesoEnEsperaIO->semaforoIOFinalizada = NULL;
+        sem_destroy(procesoEnEsperaIO->semaforoMutex);
+        free(procesoEnEsperaIO->semaforoMutex);
+        free(procesoEnEsperaIO);
+        return NULL;        
+    }
+    
     sem_wait(procesoEnEsperaIO->semaforoMutex); 
         if(procesoEnEsperaIO->semaforoIOFinalizada == NULL)  //QUIERE DECIR QUE YA LO PASO A READY
         {
@@ -153,7 +163,7 @@ void* contadorParaSwap (void* arg)
             return NULL;
         }
         
-        
+        //Paso el proceso a Swap
         pasarASwapBlocked(procesoEnEsperaIO);
         log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoEnEsperaIO->proceso->PID,"BLOCKED","SWAP_BLOCKED");
         cargarCronometro(procesoEnEsperaIO->proceso,BLOCKED);
