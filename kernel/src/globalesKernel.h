@@ -220,6 +220,7 @@ extern sem_t* semaforoMutexTerminarEjecucion;
 extern sem_t* semaforoMutexExit;
 extern sem_t* semaforoEnCheckInterrupt;
 extern sem_t* semaforoInicializarProceso;
+extern sem_t* semaforoAprietaEnter;
 
 
 //MEMORIA

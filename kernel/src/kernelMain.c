@@ -41,8 +41,16 @@ int main(int argc, char* argv[]) {
     pthread_create(&hiloPlanificadorCortoPlazo,NULL,planificadorCortoPlazo,NULL);
 
     
-   
+    char* input;   
+    do {
 
+        input= readline("Apriete enter para empezar a planificar proceso\n");  
+        
+    } while (*input != '\0');
+
+    free(input);
+
+    sem_post(semaforoAprietaEnter);
   
 
 
@@ -98,29 +106,31 @@ void crearEstructuras()
 
     
     semaforoEsperarOKDispatch = malloc(sizeof(sem_t));
-    sem_init(semaforoEsperarOKDispatch,1,0);
+    sem_init(semaforoEsperarOKDispatch,0,0);
     semaforoEsperarOKInterrupt = malloc(sizeof(sem_t));
-    sem_init(semaforoEsperarOKInterrupt,1,0);
+    sem_init(semaforoEsperarOKInterrupt,0,0);
     semaforoIntentarPlanificar = malloc(sizeof(sem_t));
-    sem_init(semaforoIntentarPlanificar,1,0);
+    sem_init(semaforoIntentarPlanificar,0,0);
     semaforoHayCPULibre = malloc(sizeof(sem_t));
-    sem_init(semaforoHayCPULibre,1,0);
+    sem_init(semaforoHayCPULibre,0,0);
     semaforoMutexPIDDisponible = malloc(sizeof(sem_t));
-    sem_init(semaforoMutexPIDDisponible,1,1);
+    sem_init(semaforoMutexPIDDisponible,0,1);
     semaforoMutexGuardarDatosCPU = malloc(sizeof(sem_t));
-    sem_init(semaforoMutexGuardarDatosCPU,1,1);
+    sem_init(semaforoMutexGuardarDatosCPU,0,1);
     semaforoPCActualizado = malloc(sizeof(sem_t));
-    sem_init(semaforoPCActualizado,1,0);
+    sem_init(semaforoPCActualizado,0,0);
     semaforoMutexIO = malloc(sizeof(sem_t));
-    sem_init(semaforoMutexIO,1,1);
+    sem_init(semaforoMutexIO,0,1);
     semaforoMutexTerminarEjecucion = malloc(sizeof(sem_t));
-    sem_init(semaforoMutexTerminarEjecucion,1,1);
+    sem_init(semaforoMutexTerminarEjecucion,0,1);
     semaforoEnCheckInterrupt= malloc(sizeof(sem_t));
-    sem_init(semaforoEnCheckInterrupt,1,0);
+    sem_init(semaforoEnCheckInterrupt,0,0);
     semaforoInicializarProceso = malloc(sizeof(sem_t));
-    sem_init(semaforoInicializarProceso,1,0);
+    sem_init(semaforoInicializarProceso,0,0);
     semaforoMutexExit= malloc(sizeof(sem_t));
-    sem_init(semaforoMutexExit,1,1);
+    sem_init(semaforoMutexExit,0,1);
+    semaforoAprietaEnter=malloc(sizeof(sem_t));
+    sem_init(semaforoAprietaEnter,0,0);
 
   
 

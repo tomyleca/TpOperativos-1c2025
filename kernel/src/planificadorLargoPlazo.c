@@ -2,6 +2,7 @@
 
 void *inicializarProceso(){
     PCB* procesoAInicializar;
+    sem_wait(semaforoAprietaEnter);
     while(1)
 
     {

@@ -66,6 +66,7 @@ sem_t* semaforoMutexTerminarEjecucion;
 sem_t* semaforoMutexExit;
 sem_t* semaforoEnCheckInterrupt;
 sem_t* semaforoInicializarProceso;
+sem_t* semaforoAprietaEnter;
 
 //HILOS
 pthread_t hiloAtenderDispatch;

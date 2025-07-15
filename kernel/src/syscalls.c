@@ -45,23 +45,7 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
 
     log_info(loggerKernel, "## (<%u>) Se crea el proceso - Estado: NEW",nuevoProceso->PID);
     
-    if(nuevoProceso->PID==0) //Si es el primer proceso, espero el ENTER
-    {
-        while (1) {
-
-            char* input = readline("Apriete enter para empezar a planificar proceso\n");  
-
-            if (*input == '\0') {  
-                break;
-            }
-
-            free(input);
-            
-        }
-    }    
-    
-    
-
+   
     sem_post(semaforoInicializarProceso);
 }
 
