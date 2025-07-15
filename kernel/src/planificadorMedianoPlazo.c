@@ -115,6 +115,9 @@ void* manejarProcesoBloqueadoPorIO(void* arg){
         sem_destroy(procesoEnEsperaIO->semaforoIOFinalizada);
         free(procesoEnEsperaIO->semaforoIOFinalizada);
         procesoEnEsperaIO->semaforoIOFinalizada = NULL;
+        sem_destroy(procesoEnEsperaIO->semaforoMutex);
+        free(procesoEnEsperaIO->semaforoMutex);
+        free(procesoEnEsperaIO);
     }
     else
     {
