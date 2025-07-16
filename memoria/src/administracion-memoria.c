@@ -272,7 +272,6 @@ int escribir_memoria(Proceso *p,  int dir_fisica, char *texto) {
     p->metricas.escrituras_memoria++;
   }
 
-  free(texto);
   log_info(logger_memoria, "## PID: <%u> - Escritura - Dir. Física: <%d> - Tamaño: <%d>", p->pid, dir_fisica, len);
   return 1;
 }
