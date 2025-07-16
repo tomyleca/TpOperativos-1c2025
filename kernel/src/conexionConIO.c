@@ -221,7 +221,7 @@ void exitDeProcesoBLoqueadoPorIO(void* arg)
 
     procesoEnEsperaIO->proceso=NULL;
     sem_post(procesoEnEsperaIO->semaforoMutex); //le paso la pelota para que termine de hacer los frees
-     
+    sem_post(semaforoIntentarPlanificar); 
     }
     
         
