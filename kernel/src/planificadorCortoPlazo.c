@@ -143,6 +143,8 @@ void desalojarProceso(NucleoCPU* nucleoADesalojar,PCB* proceso)
         agregarAListaSinRepetidos(listaCPUsLibres,nucleoADesalojar);
 
     sem_wait(semaforoMutexExit);
+        if(proceso == NULL) //si da false es pq el proceso se paso a exit
+            return;
         proceso->duracionRafagaAnterior=temporal_gettime(proceso->cronometros[EXECUTE]) - proceso->MT[EXECUTE]; //Saco cuanto es lo ultimo que ejecuto
         cargarCronometro(proceso,EXECUTE);
         proceso->estimadoSiguienteRafaga = proceso->estimadoSiguienteRafaga - proceso->duracionRafagaAnterior; //Lo que le falta ejecutar del estimado anterior
