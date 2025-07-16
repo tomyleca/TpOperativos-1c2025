@@ -37,7 +37,7 @@ bool suspender_proceso_memoria(uint32_t pid) {
     sem_getvalue(semaforoInicializarProceso,&valorSemaforo);
     
 
-    if(valorSemaforo<=0) 
+    if(valorSemaforo<=3) 
         sem_post(semaforoInicializarProceso);
 
 
@@ -142,7 +142,7 @@ void* avisarFinDeProcesoAMemoria(void* PIDPuntero)
     sem_getvalue(semaforoInicializarProceso,&valorSemaforo);
     
 
-    if(valorSemaforo<=0) 
+    if(valorSemaforo<=3) 
         sem_post(semaforoInicializarProceso);
     
     cerrar_conexion_memoria(fdMemoria);

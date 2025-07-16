@@ -213,7 +213,7 @@ void pasarASwapReady(PCB* proceso)
     sem_getvalue(semaforoInicializarProceso,&valorSemaforo);
     
 
-    if(valorSemaforo<=0) 
+    if(valorSemaforo<=3) 
         sem_post(semaforoInicializarProceso);
 }
 

@@ -50,7 +50,7 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     sem_getvalue(semaforoInicializarProceso,&valorSemaforo);
     
 
-    if(valorSemaforo<=0) 
+    if(valorSemaforo<=3) 
         sem_post(semaforoInicializarProceso);
 }
 
