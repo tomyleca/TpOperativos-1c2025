@@ -209,7 +209,11 @@ void pasarASwapReady(PCB* proceso)
     }
 
 
-    if(sem_trywait(semaforoInicializarProceso)== -1) //solo hago post si esta en 0
+    int valorSemaforo;
+    sem_getvalue(semaforoInicializarProceso,&valorSemaforo);
+    
+
+    if(valorSemaforo<=0) 
         sem_post(semaforoInicializarProceso);
 }
 

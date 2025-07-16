@@ -263,6 +263,7 @@ int escribir_memoria(Proceso *p,  int dir_fisica, char *texto) {
 
   for (int i = 0; i < len; i++) {
     if (dir_fisica == -1) {
+      
      log_error(logger_memoria,"## PID: <%d>  - ERROR: Dirección inválida <%d>", p->pid, dir_fisica + i);
       return -1;
     }
@@ -270,6 +271,8 @@ int escribir_memoria(Proceso *p,  int dir_fisica, char *texto) {
   ((char*)memoria_principal)[dir_fisica + i] = texto[i];
     p->metricas.escrituras_memoria++;
   }
+
+  free(texto);
 
   log_info(logger_memoria, "## PID: <%u> - Escritura - Dir. Física: <%d> - Tamaño: <%d>", p->pid, dir_fisica, len);
   return 1;

@@ -46,7 +46,11 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     log_info(loggerKernel, "## (<%u>) Se crea el proceso - Estado: NEW",nuevoProceso->PID);
     
    
-    if(sem_trywait(semaforoInicializarProceso)== -1) //solo hago post si esta en 0
+    int valorSemaforo;
+    sem_getvalue(semaforoInicializarProceso,&valorSemaforo);
+    
+
+    if(valorSemaforo<=0) 
         sem_post(semaforoInicializarProceso);
 }
 

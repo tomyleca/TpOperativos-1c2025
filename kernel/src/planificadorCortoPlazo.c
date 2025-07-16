@@ -85,6 +85,7 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 
  bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera)
 {
+    log_debug(loggerKernel,"LLEGO A CHEQUEAR SI HAY DESALOJO");
     int64_t tiempoRestanteProcesoActualEnEjecucion;
     bool _menorRafagaQueProcesoEnReady(void* arg)
     {
@@ -100,7 +101,7 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
         nucleoADesalojar = leerDeListaSegunCondicion(listaCPUsEnUso,_menorRafagaQueProcesoEnReady); //Si la rafaga del proceso en ready es menor  a la del cpu con menor rafaga restante devuelve ese cpu, sino devuelve NULL
     sem_post(semaforoMutexTerminarEjecucion);
     
-            
+    log_debug(loggerKernel,"LLEGO A CHEQUEAR SI HAY DESALOjo MITAD");
     if(nucleoADesalojar!=NULL && nucleoADesalojar->procesoEnEjecucion != NULL)
     {
         

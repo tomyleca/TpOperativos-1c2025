@@ -114,6 +114,6 @@ void pasarAReady(PCB* proceso, bool desalojado){
     {
         chequearSiHayDesalojo(proceso->estimadoSiguienteRafaga);
     }
-    
+    log_debug(loggerKernel,"LLEGO A CHEQUEAR SI HAY DESALOJO FINAL");
     
 }
