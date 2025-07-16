@@ -243,7 +243,6 @@ int traducirDLMedianteMMU(int direccion_logica)
             solicitar_tabla_a_memoria(); //SIMULO LA SOLICITUD DE TABLA, ENREALIDAD LE SOLICITO TODAS AL FINAL
         } else {
             entradas_de_nivel[nivel] = entrada_nivel_X;
-            for (int i = 1; i < cant_niveles; i++)
             solicitar_marco_a_memoria(entradas_de_nivel); 
         }
     }
