@@ -31,7 +31,7 @@ void* atenderInstanciaIO(void* conexion)
         {
             case HANDSHAKE_IO_KERNEL:
                 nombreIO = recibir_string_del_buffer(buffer);
-                //sem_wait(semaforoMutexIO);
+                sem_wait(semaforoMutexIO);
                 if(leerDeDiccionario(diccionarioDispositivosIO,nombreIO) != NULL) // Si el IO ya existe, osea ya hay una instancia e este
                 {
                     DispositivoIO* dispositivoIO= leerDeDiccionario(diccionarioDispositivosIO,nombreIO);
@@ -60,7 +60,7 @@ void* atenderInstanciaIO(void* conexion)
                     
                     agregarADiccionario(diccionarioDispositivosIO,nombreIO,nuevoDispositivoIO);
                 }
-                //sem_post(semaforoMutexIO);
+                sem_post(semaforoMutexIO);
                 limpiarBuffer(buffer);
                 break;
             
