@@ -169,7 +169,7 @@ int atender_cliente(int *fd_conexion)
                     //TODO: que hacer si falla la escritura?
                 }
 
-                free (valor_Leido);
+                free (valor_registro);
                 break;
             
              case CPU_SOLICITA_LEER_PAGINA_COMPLETA:
