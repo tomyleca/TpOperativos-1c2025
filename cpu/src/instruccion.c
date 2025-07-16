@@ -589,6 +589,7 @@ int algoritmo_clock_modificado()
             puntero_clock = (puntero_clock + 1) % entradas_cache;
             return victima;
         }
+        
         puntero_clock = (puntero_clock + 1) % entradas_cache;
     }
     
@@ -600,13 +601,13 @@ int algoritmo_clock_modificado()
             return victima;
         }
         cache_paginas[puntero_clock].bit_referencia = false;
-        cache_paginas[puntero_clock].bit_modificacion = false;
+        //cache_paginas[puntero_clock].bit_modificacion = false;
         puntero_clock = (puntero_clock + 1) % entradas_cache;
     }
     
     // Si llega acá, usa la posición actual
-    int victima = puntero_clock;
-    puntero_clock = (puntero_clock + 1) % entradas_cache;
+    int victima = algoritmo_clock_modificado();
+    //puntero_clock = (puntero_clock + 1) % entradas_cache;
     return victima;
 }
 
@@ -662,6 +663,7 @@ int cargar_pagina_en_cache(int pid, int direccion_logica)
 
     int indice_victima = seleccionar_victima();
     
+    log_debug(logger_cpu,"SACO DE CACHE LA ENTRADA: %d",indice_victima);
     // Si hay una página válida en esa posición, escribirla si está modificada
     // Se mantiene todo actualizado
     if (cache_paginas[indice_victima].bit_validez != false) {

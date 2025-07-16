@@ -27,7 +27,7 @@ void *inicializarProceso(){
                     pasarAReady(procesoAInicializar,false);
                     swapBlockedInicializado = true;
                     log_debug(loggerKernel,"LLEGO ACA");
-                    while (sem_trywait(semaforoInicializarProceso) == 0);
+                    
                     sem_post(semaforoInicializarProceso); // Mientras la respuesta sea OK sigo intentando inicializar procesos
                     
                 
@@ -50,7 +50,7 @@ void *inicializarProceso(){
                     cargarCronometro(procesoAInicializar,NEW);
                     pasarAReady(procesoAInicializar,false);
                     log_debug(loggerKernel,"LLEGO ACA");
-                    while (sem_trywait(semaforoInicializarProceso) == 0);
+                    
                     sem_post(semaforoInicializarProceso); // Mientras la respuesta sea OK sigo intentando inicializar procesos
                 }
                 
