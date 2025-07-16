@@ -548,6 +548,7 @@ int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   if (reservar_memoria(p, tam) < 0) {
    log_error(logger_memoria, "No se pudo asignar memoria al proceso\n");
     free(p);
+    free(pseudocodigo);
     mostrar_procesos_activos();
     return -1;
   }
