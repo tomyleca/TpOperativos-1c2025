@@ -184,7 +184,7 @@ void pasarAExit(PCB* proceso,char* estadoActual){
         sem_destroy(proceso->semMutex);
         free(proceso->semMutex);
         free(proceso);
-        sem_post(semaforoInicializarProceso);
+        
     sem_post(semaforoMutexExit);
     
 }

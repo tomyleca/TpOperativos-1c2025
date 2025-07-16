@@ -33,6 +33,9 @@ bool suspender_proceso_memoria(uint32_t pid) {
     op_code respuesta = recibir_operacion(socket_memoria);
     cerrar_conexion_memoria(socket_memoria);
 
+    sem_post(semaforoInicializarProceso);
+
+
     return respuesta == SWAP_SUSPENDER_PROCESO;
    
 }
@@ -54,6 +57,11 @@ bool des_suspender_proceso_memoria(uint32_t pid) {
 
     op_code respuesta = recibir_operacion(socket_memoria);
     cerrar_conexion_memoria(socket_memoria);
+
+    if(respuesta == SWAP_ERROR)
+    {
+        log_error(loggerKernel,"## (<%u>) No hay suficiente memoria para alojar el proceso",pid);
+    }
 
     return respuesta == SWAP_OK;
 }
@@ -125,7 +133,7 @@ void* avisarFinDeProcesoAMemoria(void* PIDPuntero)
     recibir_operacion(fdMemoria);
     //if(respuesta!=1)
         //log_error(loggerKernel,"#<%u> Error en la comunicación con memoria al finalizar el proceso",PID);
-    sem_post(semaforoIntentarPlanificar);
+    sem_post(semaforoInicializarProceso);
     cerrar_conexion_memoria(fdMemoria);
     return NULL;
 }

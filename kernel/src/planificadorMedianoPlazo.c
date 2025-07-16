@@ -190,14 +190,14 @@ void pasarASwapBlocked(ProcesoEnEsperaIO* procesoEsperandoIO)
     procesoEsperandoIO->estaENSwap=1;
 
 
-    sem_post(semaforoInicializarProceso);
+    
 }
 
 
 void pasarASwapReady(PCB* proceso)
 {
     temporal_resume(proceso->cronometros[SWAP_READY]);
-    proceso->MT[SWAP_READY]++;
+    proceso->ME[SWAP_READY]++;
 
     if(algoritmoColaNewEnFIFO)
     {
