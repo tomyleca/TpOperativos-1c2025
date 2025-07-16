@@ -98,7 +98,7 @@ void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
     char* PIDComoChar = pasarUnsignedAChar(procesoEsperandoDump->proceso->PID);
     sacarDeDiccionario(diccionarioProcesosEsperandoDump, PIDComoChar);
     cargarCronometro(procesoEsperandoDump->proceso,BLOCKED);
-    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,"BLOCKED","READY");
+    log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoEsperandoDump->proceso->PID,"BLOCKED","READY");
     pasarAReady(procesoEsperandoDump->proceso,false);
     free(PIDComoChar);
     
