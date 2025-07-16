@@ -58,8 +58,10 @@ void marcarInterrupcionSincronica()
 {
     sem_wait(&mutex_motivo_interrupcion);
         if(flag_interrupcion == true)
+        {
+            sem_post(&mutex_motivo_interrupcion);
             return; //para no sobreescribir si ya llego una asincronica
-
+        }
 
         flag_interrupcion = true;
         motivo_interrupcion = INTERRUPCION_SINCRONICA;

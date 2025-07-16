@@ -7,6 +7,7 @@ void *inicializarProceso(){
     while(1)
 
     {
+        log_debug(loggerKernel,"LISTO PARA RECIBIR");
         sem_wait(semaforoInicializarProceso);
             swapBlockedInicializado = false;
 
@@ -25,6 +26,8 @@ void *inicializarProceso(){
                     cargarCronometro(procesoAInicializar,SWAP_READY);
                     pasarAReady(procesoAInicializar,false);
                     swapBlockedInicializado = true;
+                    log_debug(loggerKernel,"LLEGO ACA");
+                    while (sem_trywait(semaforoInicializarProceso) == 0);
                     sem_post(semaforoInicializarProceso); // Mientras la respuesta sea OK sigo intentando inicializar procesos
                     
                 
@@ -46,6 +49,8 @@ void *inicializarProceso(){
                     log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",procesoAInicializar->PID,"NEW","READY");
                     cargarCronometro(procesoAInicializar,NEW);
                     pasarAReady(procesoAInicializar,false);
+                    log_debug(loggerKernel,"LLEGO ACA");
+                    while (sem_trywait(semaforoInicializarProceso) == 0);
                     sem_post(semaforoInicializarProceso); // Mientras la respuesta sea OK sigo intentando inicializar procesos
                 }
                 
@@ -109,6 +114,6 @@ void pasarAReady(PCB* proceso, bool desalojado){
     {
         chequearSiHayDesalojo(proceso->estimadoSiguienteRafaga);
     }
-
+    
     
 }

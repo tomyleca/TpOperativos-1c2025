@@ -81,7 +81,7 @@ void dump_memory(PCB* proceso) {
 
 void* manejarProcesoEsperandoDump(ProcesoEnEsperaDump* procesoEsperandoDump) {
     if (solicitar_dump_memoria(procesoEsperandoDump->proceso->PID)) {
-        log_debug(loggerKernel, "## (<%u>) - Memory Dump completado exitosamente", procesoEsperandoDump->proceso->PID);
+        log_info(loggerKernel, "## (<%u>) - Memory Dump completado exitosamente", procesoEsperandoDump->proceso->PID);
     } else {
         log_error(loggerKernel, "## (<%u>) - Error en Memory Dump", procesoEsperandoDump->proceso->PID);
     }
