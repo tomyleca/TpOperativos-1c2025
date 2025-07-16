@@ -509,7 +509,7 @@ void log_instruccion(char** parte) {
 void inicializar_cache() 
 {
     if (entradas_cache <= 0) {
-        log_error(logger_cpu, "Entradas de caché inválidas: %d", entradas_cache);
+        //log_error(logger_cpu, "Entradas de caché inválidas: %d", entradas_cache);
         cache_paginas = NULL;
         return;
     }
