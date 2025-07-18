@@ -85,7 +85,7 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
 
  bool chequearSiHayDesalojo(int64_t estimadoRafagaProcesoEnEspera)
 {
-    log_debug(loggerKernel,"LLEGO A CHEQUEAR SI HAY DESALOJO");
+    //log_debug(loggerKernel,"LLEGO A CHEQUEAR SI HAY DESALOJO");
     int64_t tiempoRestanteProcesoActualEnEjecucion;
     bool _menorRafagaQueProcesoEnReady(void* arg)
     {
@@ -101,7 +101,7 @@ void guardarDatosDeEjecucion(PCB* procesoDespuesDeEjecucion)
         nucleoADesalojar = leerDeListaSegunCondicion(listaCPUsEnUso,_menorRafagaQueProcesoEnReady); //Si la rafaga del proceso en ready es menor  a la del cpu con menor rafaga restante devuelve ese cpu, sino devuelve NULL
     sem_post(semaforoMutexTerminarEjecucion);
     
-    log_debug(loggerKernel,"LLEGO A CHEQUEAR SI HAY DESALOjo MITAD");
+    //log_debug(loggerKernel,"LLEGO A CHEQUEAR SI HAY DESALOjo MITAD");
     if(nucleoADesalojar!=NULL && nucleoADesalojar->procesoEnEjecucion != NULL)
     {
         
@@ -127,7 +127,7 @@ void desalojarProceso(NucleoCPU* nucleoADesalojar,PCB* proceso)
 {   
     sem_wait(semaforoMutexExit);
     
-        if(proceso == NULL) //si da false es pq el proceso se paso a exit
+        if(proceso == NULL) //si da true es pq el proceso se paso a exit
             return;
 
         agregarAListaSinRepetidos(listaProcesosPorSerDesalojados,proceso);
@@ -143,7 +143,7 @@ void desalojarProceso(NucleoCPU* nucleoADesalojar,PCB* proceso)
         agregarAListaSinRepetidos(listaCPUsLibres,nucleoADesalojar);
 
     sem_wait(semaforoMutexExit);
-        if(proceso == NULL) //si da false es pq el proceso se paso a exit
+        if(proceso == NULL) //si da true es pq el proceso se paso a exit
             return;
         proceso->duracionRafagaAnterior=temporal_gettime(proceso->cronometros[EXECUTE]) - proceso->MT[EXECUTE]; //Saco cuanto es lo ultimo que ejecuto
         cargarCronometro(proceso,EXECUTE);

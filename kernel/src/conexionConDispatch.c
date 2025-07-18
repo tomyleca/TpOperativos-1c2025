@@ -35,7 +35,7 @@ void atender_dispatch_cpu(void* conexion)
     {
         log_debug(loggerKernel,"LISTO PARA RECIBIR OPERACION");
         cod_op = recibir_operacion(fdConexion);
-        log_debug(loggerKernel,"LLEGA OPERACION");
+        //log_debug(loggerKernel,"LLEGA OPERACION");
         switch (cod_op) 
         {
             case 1:
@@ -167,23 +167,24 @@ return sacarDeListaSegunCondicion(listaCPUsAInicializar,_mismoIdentificador);
 
 
 void pasarAExit(PCB* proceso,char* estadoActual){
-    
     sem_wait(semaforoMutexExit);
-
+    
+        int* PIDPuntero = malloc(sizeof(int));
+        *PIDPuntero = proceso->PID;
+        avisarFinDeProcesoAMemoria(PIDPuntero);
+    
+        sem_post(semaforoInicializarProceso);
+        
         log_info(loggerKernel,"## (<%u>) - Finaliza el proceso",proceso->PID);
         log_info(loggerKernel,"## (<%u>) Pasa del estado <%s> al estado <%s>",proceso->PID,estadoActual,"EXIT");
         proceso->ME[EXIT]++;
         loggearMetricas(proceso);
         hacerFreeDeCronometros(proceso);
-        pthread_t hiloAvisarMemoria;
-        int* PIDPuntero = malloc(sizeof(int));
-        *PIDPuntero = proceso->PID;
-        pthread_create(&hiloAvisarMemoria,NULL,avisarFinDeProcesoAMemoria,PIDPuntero);
-        pthread_detach(hiloAvisarMemoria);
         free(proceso->archivoPseudocodigo);
         sem_destroy(proceso->semMutex);
         free(proceso->semMutex);
         free(proceso);
+        proceso = NULL;
         
     sem_post(semaforoMutexExit);
     

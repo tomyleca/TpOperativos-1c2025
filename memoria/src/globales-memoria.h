@@ -10,7 +10,7 @@
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/string.h>
-
+#include <semaphore.h>
 #include <pthread.h>
 #include <readline/readline.h>
 #include <stdio.h>
@@ -77,6 +77,8 @@ extern char* ip;
 extern char* puerto;
 extern char* valor;
 extern int fd_escucha_servidor;
+
+extern sem_t sem_mutex_memoria;
 
 extern t_log* logger_memoria;
 extern t_config* config_memoria;

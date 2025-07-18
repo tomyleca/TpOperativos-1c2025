@@ -230,20 +230,17 @@ int atender_cliente(int *fd_conexion)
                 limpiarBuffer(unBuffer);
                 if (!p_suspend) {
                     log_error(logger_memoria, "No se encontró el proceso PID %d para suspender.", pid);
-                    paquete = crear_super_paquete(SWAP_ERROR);
+                    enviarOpCode(cliente_fd,SWAP_ERROR);
                 }
             
                if ( suspender_proceso(p_suspend) == -1) {
                     log_error(logger_memoria, "Error al suspender el proceso PID <%d>.", pid);
-                    paquete = crear_super_paquete(SWAP_ERROR);
+                    enviarOpCode(cliente_fd,SWAP_ERROR);
                 } else{
                     log_info(logger_memoria, "## PID: <%d> - Suspendido correctamente.", pid);
-                    paquete = crear_super_paquete(SWAP_OK);
+                   enviarOpCode(cliente_fd,SWAP_OK);
                 }
      
-                
-                enviar_paquete(paquete, cliente_fd);
-                eliminar_paquete(paquete);
                 break;
             
             case SWAP_RESTAURAR_PROCESO:
@@ -262,24 +259,23 @@ int atender_cliente(int *fd_conexion)
 
                 if (!p_restaurar) {
                     log_error(logger_memoria, "No se encontró el proceso PID <%d> para restaurar.", pid);
-                    paquete = crear_super_paquete(SWAP_ERROR);
+                    enviarOpCode(cliente_fd,SWAP_ERROR);
                 }
             
                 if (   restaurar_proceso(p_restaurar) == -1) {
-                    paquete = crear_super_paquete(SWAP_ERROR);
+                    enviarOpCode(cliente_fd,SWAP_ERROR);
                 } else{
-                    paquete = crear_super_paquete(SWAP_OK);
+                    enviarOpCode(cliente_fd,SWAP_OK);
                 }
         
                 
-                enviar_paquete(paquete, cliente_fd);
-                eliminar_paquete(paquete);
+
                 break;
             
             case DUMP_MEMORY:
+                log_info(logger_memoria, "## Kernel Conectado - FD del socket: <%d>", cliente_fd);
                 usleep(retardo_swap * 1000);
                 //printf("DUMP_MEMORY ------------------------------------------------------------------\n");
-                log_info(logger_memoria, "## Kernel Conectado - FD del socket: <%d>", cliente_fd);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
                 limpiarBuffer(unBuffer);
@@ -299,16 +295,13 @@ int atender_cliente(int *fd_conexion)
                 eliminar_paquete(paquete);
             break;
             case FINALIZA_PROCESO:
-                usleep(retardo_swap * 1000);
                 log_info(logger_memoria, "## Kernel Conectado - FD del socket: <%d>", cliente_fd);
+                usleep(retardo_memoria * 1000);
                 unBuffer = recibiendo_super_paquete(cliente_fd);
                 pid = recibir_uint32_t_del_buffer(unBuffer);
-                
                 destruir_proceso(pid);
-                paquete = crear_super_paquete(EXIT_OK);
-                enviar_paquete(paquete,cliente_fd);
-                eliminar_paquete(paquete);
-
+                log_debug(logger_memoria,"PROCESO DESTRUIDO");
+                enviarOpCode(cliente_fd,EXIT_OK);
                 limpiarBuffer(unBuffer);
                 break;
 

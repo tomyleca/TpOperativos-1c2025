@@ -37,7 +37,7 @@ CONFIG_FILE="cpu1.config"
 
 declare -A valores=(
   ["ENTRADAS_TLB"]="4"
-  ["REEMPLAZO_TLB"]="LRU"
+  ["REEMPLAZO_TLB"]="FIFO"
   ["ENTRADAS_CACHE"]="0"
   ["REEMPLAZO_CACHE"]="CLOCK"
   ["RETARDO_CACHE"]="250"

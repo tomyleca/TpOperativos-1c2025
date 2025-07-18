@@ -209,12 +209,9 @@ void pasarASwapReady(PCB* proceso)
     }
 
 
-    int valorSemaforo;
-    sem_getvalue(semaforoInicializarProceso,&valorSemaforo);
     
 
-    if(valorSemaforo<=3) 
-        sem_post(semaforoInicializarProceso);
+    sem_post(semaforoInicializarProceso);
 }
 
 void manejarFinDeIO(uint32_t PID,char* nombreDispositivoIO,int fdConexion)

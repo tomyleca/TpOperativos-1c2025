@@ -33,12 +33,9 @@ bool suspender_proceso_memoria(uint32_t pid) {
     op_code respuesta = recibir_operacion(socket_memoria);
     cerrar_conexion_memoria(socket_memoria);
 
-    int valorSemaforo;
-    sem_getvalue(semaforoInicializarProceso,&valorSemaforo);
-    
 
-    if(valorSemaforo<=3) 
-        sem_post(semaforoInicializarProceso);
+
+    sem_post(semaforoInicializarProceso);
 
 
     return respuesta == SWAP_SUSPENDER_PROCESO;
@@ -51,7 +48,7 @@ bool des_suspender_proceso_memoria(uint32_t pid) {
 
     t_paquete* paquete = crear_super_paquete(SWAP_RESTAURAR_PROCESO);
     if (paquete == NULL) {
-        log_error(loggerKernel, "Error al crear paquete para des-suspender proceso");
+        log_debug(loggerKernel, "Error al crear paquete para des-suspender proceso");
         cerrar_conexion_memoria(socket_memoria);
         return false;
     }
@@ -65,7 +62,7 @@ bool des_suspender_proceso_memoria(uint32_t pid) {
 
     if(respuesta == SWAP_ERROR)
     {
-        log_error(loggerKernel,"## (<%u>) No hay suficiente memoria para alojar el proceso",pid);
+        log_debug(loggerKernel,"## (<%u>) No hay suficiente memoria para alojar el proceso",pid);
     }
 
     return respuesta == SWAP_OK;
@@ -135,15 +132,14 @@ void* avisarFinDeProcesoAMemoria(void* PIDPuntero)
     cargar_uint32_t_al_super_paquete(paquete,PID);
     enviar_paquete(paquete,fdMemoria);
     eliminar_paquete(paquete);
+    //log_debug(loggerKernel,"PREGUNTA A MEMORIA");
     recibir_operacion(fdMemoria);
+    //log_debug(loggerKernel,"RESPONDE MEMORIA");
     //if(respuesta!=1)
         //log_error(loggerKernel,"#<%u> Error en la comunicación con memoria al finalizar el proceso",PID);
-    int valorSemaforo;
-    sem_getvalue(semaforoInicializarProceso,&valorSemaforo);
+
     
 
-    if(valorSemaforo<=3) 
-        sem_post(semaforoInicializarProceso);
     
     cerrar_conexion_memoria(fdMemoria);
     return NULL;

@@ -46,12 +46,9 @@ void INIT_PROC(char* archivoPseudocodigo,uint32_t tam){
     log_info(loggerKernel, "## (<%u>) Se crea el proceso - Estado: NEW",nuevoProceso->PID);
     
    
-    int valorSemaforo;
-    sem_getvalue(semaforoInicializarProceso,&valorSemaforo);
-    
 
-    if(valorSemaforo<=3) 
-        sem_post(semaforoInicializarProceso);
+
+    sem_post(semaforoInicializarProceso);
 }
 
 void dump_memory(PCB* proceso) {

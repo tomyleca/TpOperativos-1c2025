@@ -76,7 +76,7 @@ int mandarDatosProcesoAMemoria(PCB* proceso)
     
     if(respuesta == NO_HAY_MEMORIA)
     {
-        log_error(loggerKernel,"## (<%u>) No hay suficiente memoria para alojar el proceso",proceso->PID);
+        log_debug(loggerKernel,"## (<%u>) No hay suficiente memoria para alojar el proceso",proceso->PID);
     }
 
     eliminar_paquete(paquete);

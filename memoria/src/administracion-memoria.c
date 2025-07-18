@@ -39,6 +39,8 @@ void leerConfigMemoria(t_config* config_memoria)
 // Inicializa la memoria simulada y el bitmap de frames libres
 void inicializar_memoria() {
   
+  sem_init(&sem_mutex_memoria,0,1);
+
   CANT_FRAMES = TAM_MEMORIA / TAM_PAGINA;
 
   memoria_principal = malloc(TAM_MEMORIA);
@@ -242,8 +244,10 @@ int *reservar_frames(int cantidad) {
 
 int reservar_memoria(Proceso *p, int bytes) {
 
-  int paginas_necesarias = (bytes + TAM_PAGINA - 1) / TAM_PAGINA;
-  int *frames = reservar_frames(paginas_necesarias);
+  //sem_wait(&sem_mutex_memoria);
+    int paginas_necesarias = (bytes + TAM_PAGINA - 1) / TAM_PAGINA;
+    int *frames = reservar_frames(paginas_necesarias);
+  //sem_post(&sem_mutex_memoria);
   if (!frames) {
     log_debug(logger_memoria, "No hay suficientes frames libres para %d bytes\n", bytes);
     return -1;
@@ -388,10 +392,12 @@ void destruir_proceso(uint32_t pid) {
     p->metricas.lecturas_memoria,
     p->metricas.escrituras_memoria);
 
+  //sem_wait(&sem_mutex_memoria);
   liberar_memoria(p); 
+  //sem_post(&sem_mutex_memoria);
   liberar_entrada_swap(p->pid);
-  
   list_destroy_and_destroy_elements(p->lista_instrucciones, free);
+ 
   free(p->pseudocodigo);
   free(p);
 
@@ -405,6 +411,7 @@ void liberar_entrada_swap(int pid) {
       if (entrada->pid == pid) {
           list_remove_and_destroy_element(tabla_swap, i, free);
           log_debug(logger_memoria, "Entrada de swap liberada para PID: <%u>", pid);
+          usleep(retardo_swap*1000);
           return;
       }
   }
@@ -544,7 +551,7 @@ int guardarProcesoYReservar(uint32_t PID,uint32_t tam, char* pseudocodigo) {
   }
   
   if (reservar_memoria(p, tam) < 0) {
-   log_error(logger_memoria, "No se pudo asignar memoria al proceso\n");
+   log_debug(logger_memoria, "No se pudo asignar memoria al proceso\n");
     free(p);
     free(pseudocodigo);
     mostrar_procesos_activos();

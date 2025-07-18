@@ -6,6 +6,8 @@ char* ip;
 char* puerto;
 char* valor;
 
+sem_t sem_mutex_memoria;
+
 t_log* logger_memoria;
 t_config* config_memoria;
 int fd_escucha_servidor;
